@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -14,11 +14,11 @@ import { AuthService } from '../../core/services/auth.service';
         <form (ngSubmit)="onSubmit()">
           <div class="field">
             <label for="email">Email</label>
-            <input id="email" type="email" [(ngModel)]="email" name="email" required autocomplete="email" />
+            <input id="email" type="email" [(ngModel)]="email" name="email" placeholder="seu@email.com" required autocomplete="email" />
           </div>
           <div class="field">
             <label for="senha">Senha</label>
-            <input id="senha" type="password" [(ngModel)]="senha" name="senha" required />
+            <input id="senha" type="password" [(ngModel)]="senha" name="senha" placeholder="Sua senha" required />
           </div>
           @if (erro) {
             <div class="error">{{ erro }}</div>
