@@ -8,9 +8,14 @@ public static class ConfigureCors
         {
             options.AddPolicy("AllowAngular", policy =>
             {
-                policy.WithOrigins("http://localhost:4200")
-                      .AllowAnyHeader()
-                      .AllowAnyMethod();
+                policy.SetIsOriginAllowed(origin =>
+                    {
+                        if (Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+                            return uri.Host == "localhost";
+                        return false;
+                    })
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
             });
         });
 
