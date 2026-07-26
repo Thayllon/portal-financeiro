@@ -1,7 +1,22 @@
 ﻿using DbUp;
+using Microsoft.Data.SqlClient;
 
 var connectionString = args.FirstOrDefault()
     ?? "Server=(localdb)\\mssqllocaldb;Database=PortalFinanceiro;Trusted_Connection=True;TrustServerCertificate=True";
+
+var builder = new SqlConnectionStringBuilder(connectionString);
+var databaseName = builder.InitialCatalog;
+builder.InitialCatalog = "master";
+
+using var masterConn = new SqlConnection(builder.ConnectionString);
+masterConn.Open();
+
+var checkDbCmd = masterConn.CreateCommand();
+checkDbCmd.CommandText = $"IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = @db) CREATE DATABASE [{databaseName}]";
+checkDbCmd.Parameters.AddWithValue("@db", databaseName);
+checkDbCmd.ExecuteNonQuery();
+
+masterConn.Close();
 
 var scriptsPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "scripts", "sql");
 
