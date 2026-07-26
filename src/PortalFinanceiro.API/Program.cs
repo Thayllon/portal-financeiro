@@ -31,6 +31,8 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 
+app.SeedDatabase();
+
 try
 {
     Log.Information("Iniciando Portal Financeiro API");
@@ -57,5 +59,21 @@ public static partial class ProgramExtensions
             .CreateLogger();
 
         builder.Host.UseSerilog();
+    }
+
+    public static void SeedDatabase(this WebApplication app)
+    {
+        using var scope = app.Services.CreateScope();
+        var usuarioRepository = scope.ServiceProvider.GetRequiredService<PortalFinanceiro.Core.Domain.Interfaces.Repositories.IUsuarioRepository>();
+        var passwordService = scope.ServiceProvider.GetRequiredService<PortalFinanceiro.Core.Domain.Interfaces.Services.IPasswordService>();
+
+        var usuarios = usuarioRepository.ListarAsync().GetAwaiter().GetResult();
+        if (usuarios.Any()) return;
+
+        var senhaHash = passwordService.Hash("123456");
+        var usuarioResult = PortalFinanceiro.Core.Domain.Entities.Usuario.Criar("Admin", "admin@portal.com", senhaHash);
+
+        if (usuarioResult.EhSucesso)
+            usuarioRepository.InserirAsync(usuarioResult.Dado!).GetAwaiter().GetResult();
     }
 }
