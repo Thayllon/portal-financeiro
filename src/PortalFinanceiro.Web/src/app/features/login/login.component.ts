@@ -11,12 +11,6 @@ import { AuthService } from '../../core/services/auth.service';
     <div class="login-wrapper">
       <div class="login-card">
         <div class="login-header">
-          <div class="logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect width="32" height="32" rx="8" fill="#0F766E"/>
-              <path d="M8 16h16M16 8v16M10 10l12 12M22 10L10 22" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </div>
           <h1>Portal Financeiro</h1>
           <p>Acesse sua conta para gerenciar suas finanças</p>
         </div>
@@ -80,12 +74,6 @@ import { AuthService } from '../../core/services/auth.service';
     .login-header {
       text-align: center;
       margin-bottom: 2rem;
-    }
-
-    .logo {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1rem;
     }
 
     .login-header h1 {
