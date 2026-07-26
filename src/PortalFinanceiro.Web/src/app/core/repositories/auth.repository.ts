@@ -1,0 +1,18 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { BaseHttpRepository } from './base-http.repository';
+import { LoginResponse } from '../models/login-response.model';
+
+@Injectable({ providedIn: 'root' })
+export class AuthRepository extends BaseHttpRepository {
+  protected http = inject(HttpClient);
+
+  login(email: string, senha: string): Observable<LoginResponse> {
+    return this.post<LoginResponse>('/auth/login', { email, senha });
+  }
+
+  registrar(nome: string, email: string, senha: string): Observable<any> {
+    return this.post<any>('/auth/registrar', { nome, email, senha });
+  }
+}
