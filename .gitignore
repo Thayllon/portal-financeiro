@@ -39,3 +39,4 @@ appsettings.Production.json
 # Runtime logs
 api*.log
 api*.err
+logs/
