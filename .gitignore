@@ -1,0 +1,41 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+*.userosscache
+*.userprefs
+
+# Node
+node_modules/
+dist/
+.angular/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Config
+appsettings.*.local.json
+appsettings.Development.json
+appsettings.Production.json
+
+# Secrets
+.env
+*.env.local
+
+# QA database snapshot
+*.bak
+*.mdf
+*.ldf
+
+# Runtime logs
+api*.log
+api*.err

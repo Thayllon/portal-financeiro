@@ -1,0 +1,13 @@
+@PortalFinanceiro.API_HostAddress = http://localhost:5178
+
+#if (EnableOpenAPI)
+GET {{PortalFinanceiro.API_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###
+#endif
+
+GET {{PortalFinanceiro.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
