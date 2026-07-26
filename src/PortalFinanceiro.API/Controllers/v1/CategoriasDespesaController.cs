@@ -6,7 +6,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
-[Route("api/v{version:apiVersion}/categorias/despesa")]
+[Route("api/categorias/despesa")]
 [Authorize]
 public class CategoriasDespesaController : BaseController
 {

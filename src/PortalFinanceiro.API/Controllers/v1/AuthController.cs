@@ -6,7 +6,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
-[Route("api/v{version:apiVersion}/[controller]")]
+[Route("api/[controller]")]
 public class AuthController : BaseController
 {
     private readonly IAuthAppService _authAppService;

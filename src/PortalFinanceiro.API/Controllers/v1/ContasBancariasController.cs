@@ -6,7 +6,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
-[Route("api/v{version:apiVersion}/contas-bancarias")]
+[Route("api/contas-bancarias")]
 [Authorize]
 public class ContasBancariasController : BaseController
 {

@@ -5,7 +5,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
-[Route("api/v{version:apiVersion}/dashboard")]
+[Route("api/dashboard")]
 [Authorize]
 public class DashboardController : BaseController
 {

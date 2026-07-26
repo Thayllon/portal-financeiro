@@ -6,7 +6,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
-[Route("api/v{version:apiVersion}/receitas-recorrentes")]
+[Route("api/receitas-recorrentes")]
 [Authorize]
 public class ReceitasRecorrentesController : BaseController
 {
