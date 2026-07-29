@@ -12,17 +12,20 @@ public class DashboardAppService : IDashboardAppService
     private readonly IDespesaMensalRepository _despesaMensalRepository;
     private readonly IReceitaRecorrenteRepository _receitaRecorrenteRepository;
     private readonly IDespesaRecorrenteRepository _despesaRecorrenteRepository;
+    private readonly IContaBancariaRepository _contaBancariaRepository;
 
     public DashboardAppService(
         IReceitaMensalRepository receitaMensalRepository,
         IDespesaMensalRepository despesaMensalRepository,
         IReceitaRecorrenteRepository receitaRecorrenteRepository,
-        IDespesaRecorrenteRepository despesaRecorrenteRepository)
+        IDespesaRecorrenteRepository despesaRecorrenteRepository,
+        IContaBancariaRepository contaBancariaRepository)
     {
         _receitaMensalRepository = receitaMensalRepository;
         _despesaMensalRepository = despesaMensalRepository;
         _receitaRecorrenteRepository = receitaRecorrenteRepository;
         _despesaRecorrenteRepository = despesaRecorrenteRepository;
+        _contaBancariaRepository = contaBancariaRepository;
     }
 
     public async Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano)
@@ -37,22 +40,42 @@ public class DashboardAppService : IDashboardAppService
 
         var recorrentesReceita = await _receitaRecorrenteRepository.ListarPorUsuarioAsync(idUsuario);
         var recorrentesDespesa = await _despesaRecorrenteRepository.ListarPorUsuarioAsync(idUsuario);
+        var contas = (await _contaBancariaRepository.ListarPorUsuarioAsync(idUsuario)).Where(c => c.Ativo).ToList();
+
+        var resumoPorConta = new List<ResumoPorConta>();
+
+        foreach (var conta in contas)
+        {
+            var idsRecorrentesReceitaConta = recorrentesReceita.Where(r => r.IdConta == conta.Id).Select(r => r.Id).ToHashSet();
+            var idsRecorrentesDespesaConta = recorrentesDespesa.Where(d => d.IdConta == conta.Id).Select(d => d.Id).ToHashSet();
+
+            var totalRec = receitas.Where(r => idsRecorrentesReceitaConta.Contains(r.IdReceitaRecorrente)).Sum(r => r.Valor);
+            var totalDesp = despesas.Where(d => idsRecorrentesDespesaConta.Contains(d.IdDespesaRecorrente)).Sum(d => d.Valor);
+
+            if (totalRec != 0 || totalDesp != 0)
+            {
+                resumoPorConta.Add(new ResumoPorConta
+                {
+                    NomeConta = conta.Nome,
+                    Banco = conta.Banco,
+                    Tipo = conta.Tipo.ToString(),
+                    TotalReceitas = totalRec,
+                    TotalDespesas = totalDesp,
+                    Saldo = totalRec - totalDesp
+                });
+            }
+        }
 
         var previsao = new List<PrevisaoMensal>();
         for (int i = 1; i <= 3; i++)
         {
             var proximoMes = mes + i;
             var proximoAno = ano;
-            if (proximoMes > 12)
-            {
-                proximoMes -= 12;
-                proximoAno++;
-            }
+            if (proximoMes > 12) { proximoMes -= 12; proximoAno++; }
 
             var rec = recorrentesReceita
                 .Where(r => r.Ativo && r.DataInicio <= new DateTime(proximoAno, proximoMes, 1))
                 .Sum(r => r.Valor);
-
             var desp = recorrentesDespesa
                 .Where(d => d.Ativo && d.DataInicio <= new DateTime(proximoAno, proximoMes, 1))
                 .Sum(d => d.Valor);
@@ -77,6 +100,7 @@ public class DashboardAppService : IDashboardAppService
             TotalPago = totalPago,
             Saldo = totalReceitas - totalDespesas,
             SaldoRealizado = totalRecebido - totalPago,
+            ResumoPorConta = resumoPorConta,
             PrevisaoProximosMeses = previsao
         };
     }

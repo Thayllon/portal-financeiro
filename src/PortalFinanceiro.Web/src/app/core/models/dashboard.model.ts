@@ -7,7 +7,17 @@ export interface Dashboard {
   totalPago: number;
   saldo: number;
   saldoRealizado: number;
+  resumoPorConta: ResumoPorConta[];
   previsaoProximosMeses: PrevisaoMensal[];
+}
+
+export interface ResumoPorConta {
+  nomeConta: string;
+  banco: string;
+  tipo: string;
+  totalReceitas: number;
+  totalDespesas: number;
+  saldo: number;
 }
 
 export interface PrevisaoMensal {

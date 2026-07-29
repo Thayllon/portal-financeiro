@@ -10,7 +10,18 @@ public class DashboardResponse
     public decimal TotalPago { get; set; }
     public decimal Saldo { get; set; }
     public decimal SaldoRealizado { get; set; }
+    public List<ResumoPorConta> ResumoPorConta { get; set; } = [];
     public List<PrevisaoMensal> PrevisaoProximosMeses { get; set; } = [];
+}
+
+public class ResumoPorConta
+{
+    public string NomeConta { get; set; } = string.Empty;
+    public string Banco { get; set; } = string.Empty;
+    public string Tipo { get; set; } = string.Empty;
+    public decimal TotalReceitas { get; set; }
+    public decimal TotalDespesas { get; set; }
+    public decimal Saldo { get; set; }
 }
 
 public class PrevisaoMensal
