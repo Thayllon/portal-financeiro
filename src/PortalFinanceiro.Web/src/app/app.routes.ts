@@ -13,8 +13,7 @@ export const routes: Routes = [
       { path: 'receitas', loadComponent: () => import('./features/receitas/receitas.component').then(m => m.ReceitasComponent) },
       { path: 'despesas', loadComponent: () => import('./features/despesas/despesas.component').then(m => m.DespesasComponent) },
       { path: 'contas', loadComponent: () => import('./features/contas/contas.component').then(m => m.ContasComponent) },
-      { path: 'categorias/receita', loadComponent: () => import('./features/categorias-receita/categorias-receita.component').then(m => m.CategoriasReceitaComponent) },
-      { path: 'categorias/despesa', loadComponent: () => import('./features/categorias-despesa/categorias-despesa.component').then(m => m.CategoriasDespesaComponent) },
+      { path: 'categorias', loadComponent: () => import('./features/categorias-receita/categorias-receita.component').then(m => m.CategoriasComponent) },
     ]
   },
   { path: '**', redirectTo: '' }
