@@ -1,0 +1,28 @@
+@mixin text-input {
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--text-primary);
+}
+
+@mixin text-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+@mixin heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+@mixin subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+@mixin meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

@@ -1,0 +1,29 @@
+:root {
+  --color-primary: #0f766e;
+  --color-primary-hover: #0d6b64;
+  --color-primary-muted: rgba(15, 118, 110, 0.08);
+  --color-primary-focus-ring: rgba(15, 118, 110, 0.2);
+  --color-primary-tint: #f0fdfa;
+
+  --color-success: #16a34a;
+  --color-success-bg: #f0fdf4;
+  --color-error: #dc2626;
+  --color-error-bg: #fef2f2;
+  --color-warning: #d97706;
+  --color-warning-bg: #fffbeb;
+  --color-info: #2563eb;
+  --color-info-bg: #eff6ff;
+}
+
+@mixin focus-ring {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
+}
+
+@mixin button-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  &:hover:not(:disabled) { background: var(--color-primary-hover); }
+}

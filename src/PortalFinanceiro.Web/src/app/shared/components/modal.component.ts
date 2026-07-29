@@ -1,0 +1,79 @@
+import { Component, input, output } from '@angular/core';
+
+@Component({
+  selector: 'app-modal',
+  standalone: true,
+  template: `
+    @if (visible()) {
+      <div class="overlay" (click)="close()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>{{ title() }}</h3>
+            <button class="close-btn" (click)="close()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ng-content />
+          </div>
+          @if (showFooter()) {
+            <div class="modal-footer">
+              <button class="btn btn--ghost" (click)="close()">Cancelar</button>
+              <button class="btn btn--primary" [disabled]="saving()" (click)="save.emit()">
+                {{ saving() ? 'Salvando...' : 'Salvar' }}
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  `,
+  styles: [`
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+      z-index: 9999; display: flex; align-items: center; justify-content: center;
+      padding: 1rem; animation: fadeIn 0.15s ease;
+    }
+    .modal {
+      background: var(--content-surface); border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-lg); max-width: 520px; width: 100%;
+      max-height: 90vh; overflow-y: auto; animation: scaleIn 0.15s ease;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--surface-border);
+    }
+    .modal-header h3 { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); }
+    .close-btn {
+      background: none; border: none; color: var(--text-muted); padding: 0.25rem;
+      border-radius: var(--radius-sm); display: flex;
+    }
+    .close-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .modal-footer {
+      display: flex; justify-content: flex-end; gap: 0.5rem;
+      padding: 1rem 1.5rem; border-top: 1px solid var(--surface-border);
+    }
+    .btn {
+      padding: 0.5rem 1rem; border-radius: var(--radius-md); font-size: 0.875rem;
+      font-weight: 500; transition: all var(--transition-fast);
+    }
+    .btn--ghost { background: transparent; border: 1px solid var(--surface-border); color: var(--text-secondary); }
+    .btn--ghost:hover { background: var(--surface-hover); }
+    .btn--primary { background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; }
+    .btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  `]
+})
+export class ModalComponent {
+  visible = input(false);
+  title = input('');
+  saving = input(false);
+  showFooter = input(true);
+  visibleChange = output<boolean>();
+  save = output<void>();
+
+  close() { this.visibleChange.emit(false); }
+}
