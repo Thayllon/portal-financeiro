@@ -27,7 +27,6 @@ public class DespesaMensalRepository : SqlBaseRepository, IDespesaMensalReposito
     {
         await ExecuteWithConnectionAsync(async conn =>
         {
-            conn.Open();
             using var tx = conn.BeginTransaction();
             foreach (var entity in entities)
                 await conn.ExecuteAsync(DespesaMensalSql.Inserir, entity, tx);
