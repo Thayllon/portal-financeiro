@@ -9,8 +9,11 @@ public class ReceitaRecorrente
     public string Descricao { get; private set; } = string.Empty;
     public decimal Valor { get; private set; }
     public int Dia { get; private set; }
+    public bool DiaUtil { get; private set; }
     public Guid IdCategoria { get; private set; }
     public Guid IdConta { get; private set; }
+    public string Categoria { get; set; } = string.Empty;
+    public string Conta { get; set; } = string.Empty;
     public DateTime DataInicio { get; private set; }
     public DateTime? DataFim { get; private set; }
     public bool Ativo { get; private set; }
@@ -19,7 +22,7 @@ public class ReceitaRecorrente
 
     public ReceitaRecorrente() { }
 
-    public static Result<ReceitaRecorrente> Criar(Guid idUsuario, string descricao, decimal valor, int dia, Guid idCategoria, Guid idConta, DateTime dataInicio, DateTime? dataFim)
+    public static Result<ReceitaRecorrente> Criar(Guid idUsuario, string descricao, decimal valor, int dia, bool diaUtil, Guid idCategoria, Guid idConta, DateTime dataInicio, DateTime? dataFim)
     {
         if (idUsuario == Guid.Empty)
             return Erro.Validacao("USUARIO_OBRIGATORIO", "Usuário é obrigatório.");
@@ -27,7 +30,9 @@ public class ReceitaRecorrente
             return Erro.Validacao("DESCRICAO_OBRIGATORIA", "Descrição é obrigatória.");
         if (valor <= 0)
             return Erro.Validacao("VALOR_INVALIDO", "Valor deve ser maior que zero.");
-        if (dia < 1 || dia > 31)
+        if (diaUtil && (dia < 1 || dia > 5))
+            return Erro.Validacao("DIA_UTIL_INVALIDO", "Dia útil deve estar entre 1 e 5.");
+        if (!diaUtil && (dia < 1 || dia > 31))
             return Erro.Validacao("DIA_INVALIDO", "Dia deve estar entre 1 e 31.");
         if (idCategoria == Guid.Empty)
             return Erro.Validacao("CATEGORIA_OBRIGATORIA", "Categoria é obrigatória.");
@@ -43,6 +48,7 @@ public class ReceitaRecorrente
             Descricao = descricao,
             Valor = valor,
             Dia = dia,
+            DiaUtil = diaUtil,
             IdCategoria = idCategoria,
             IdConta = idConta,
             DataInicio = dataInicio,
@@ -53,13 +59,15 @@ public class ReceitaRecorrente
         };
     }
 
-    public Result<Unit> Atualizar(string descricao, decimal valor, int dia, Guid idCategoria, Guid idConta, DateTime dataInicio, DateTime? dataFim)
+    public Result<Unit> Atualizar(string descricao, decimal valor, int dia, bool diaUtil, Guid idCategoria, Guid idConta, DateTime dataInicio, DateTime? dataFim)
     {
         if (string.IsNullOrWhiteSpace(descricao))
             return Erro.Validacao("DESCRICAO_OBRIGATORIA", "Descrição é obrigatória.");
         if (valor <= 0)
             return Erro.Validacao("VALOR_INVALIDO", "Valor deve ser maior que zero.");
-        if (dia < 1 || dia > 31)
+        if (diaUtil && (dia < 1 || dia > 5))
+            return Erro.Validacao("DIA_UTIL_INVALIDO", "Dia útil deve estar entre 1 e 5.");
+        if (!diaUtil && (dia < 1 || dia > 31))
             return Erro.Validacao("DIA_INVALIDO", "Dia deve estar entre 1 e 31.");
         if (dataFim.HasValue && dataFim.Value < dataInicio)
             return Erro.Validacao("PERIODO_INVALIDO", "Data fim não pode ser anterior à data início.");
@@ -67,6 +75,7 @@ public class ReceitaRecorrente
         Descricao = descricao;
         Valor = valor;
         Dia = dia;
+        DiaUtil = diaUtil;
         IdCategoria = idCategoria;
         IdConta = idConta;
         DataInicio = dataInicio;

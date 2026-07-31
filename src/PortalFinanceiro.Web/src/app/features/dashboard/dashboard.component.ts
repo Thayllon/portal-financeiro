@@ -7,13 +7,14 @@ import { NotificationService } from '../../core/services/notification.service';
 import { SkeletonComponent } from '../../shared/components/skeleton.component';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [SkeletonComponent, MonthNavComponent, StatusBadgeComponent],
+  imports: [SkeletonComponent, MonthNavComponent, StatusBadgeComponent, CurrencyBRLPipe],
   template: `
     <div class="page">
       <div class="page-header">
@@ -32,29 +33,29 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
         <div class="cards">
           <div class="card">
             <div class="card-label">Receitas</div>
-            <div class="card-value green">R$ {{ data()?.totalReceitas?.toFixed(2) ?? '0,00' }}</div>
+            <div class="card-value green">{{ data()?.totalReceitas | currencyBRL }}</div>
             <div class="card-sub">
-              <span class="pill">{{ data()?.totalRecebido?.toFixed(2) ?? '0,00' }} recebido</span>
+              <span class="pill">{{ data()?.totalRecebido | currencyBRL }} recebido</span>
             </div>
           </div>
           <div class="card">
             <div class="card-label">Despesas</div>
-            <div class="card-value red">R$ {{ data()?.totalDespesas?.toFixed(2) ?? '0,00' }}</div>
+            <div class="card-value red">{{ data()?.totalDespesas | currencyBRL }}</div>
             <div class="card-sub">
-              <span class="pill green">{{ data()?.totalPago?.toFixed(2) ?? '0,00' }} pago</span>
+              <span class="pill green">{{ data()?.totalPago | currencyBRL }} pago</span>
             </div>
           </div>
           <div class="card">
             <div class="card-label">Saldo previsto</div>
             <div class="card-value" [class.green]="(data()?.saldo ?? 0) >= 0" [class.red]="(data()?.saldo ?? 0) < 0">
-              R$ {{ data()?.saldo?.toFixed(2) ?? '0,00' }}
+              {{ data()?.saldo | currencyBRL }}
             </div>
             <div class="card-sub">receitas - despesas</div>
           </div>
           <div class="card">
             <div class="card-label">Saldo realizado</div>
             <div class="card-value" [class.green]="(data()?.saldoRealizado ?? 0) >= 0" [class.red]="(data()?.saldoRealizado ?? 0) < 0">
-              R$ {{ data()?.saldoRealizado?.toFixed(2) ?? '0,00' }}
+              {{ data()?.saldoRealizado | currencyBRL }}
             </div>
             <div class="card-sub">recebido - pago</div>
           </div>
@@ -72,9 +73,9 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
                   <tr>
                     <td class="cell-name">{{ c.nomeConta }} <span class="cell-meta">{{ c.banco }}</span></td>
                     <td><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                    <td class="cell-value green">R$ {{ c.totalReceitas.toFixed(2) }}</td>
-                    <td class="cell-value red">R$ {{ c.totalDespesas.toFixed(2) }}</td>
-                    <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0">R$ {{ c.saldo.toFixed(2) }}</td>
+                    <td class="cell-value green">{{ c.totalReceitas | currencyBRL }}</td>
+                    <td class="cell-value red">{{ c.totalDespesas | currencyBRL }}</td>
+                    <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0">{{ c.saldo | currencyBRL }}</td>
                   </tr>
                 }
               </tbody>
@@ -91,10 +92,10 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
               <div class="card">
                 <div class="card-label">{{ MESES[p.mes - 1] }}/{{ p.ano }}</div>
                 <div class="card-value" [class.green]="p.saldoPrevisto >= 0" [class.red]="p.saldoPrevisto < 0">
-                  R$ {{ p.saldoPrevisto.toFixed(2) }}
+                  {{ p.saldoPrevisto | currencyBRL }}
                 </div>
                 <div class="card-sub">
-                  R$ {{ p.totalReceitas.toFixed(2) }} / R$ {{ p.totalDespesas.toFixed(2) }}
+                  {{ p.totalReceitas | currencyBRL }} / {{ p.totalDespesas | currencyBRL }}
                 </div>
               </div>
             }

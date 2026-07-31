@@ -4,9 +4,13 @@ internal static class DespesaMensalSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}DespesaMensal";
     static string C => "Id, IdDespesaRecorrente, Mes, Ano, Valor, DataPagamento, Status, Ativo, DataCadastro, DataAlteracao";
-    public static string ObterPorId => $"SELECT {C} FROM {T} WHERE Id = @Id";
+    static string CComDescricao => $"d.Id, d.IdDespesaRecorrente, dr.Descricao, d.Mes, d.Ano, d.Valor, d.DataPagamento, d.Status, d.Ativo, d.DataCadastro, d.DataAlteracao";
+    public static string ObterPorId => $@"
+        SELECT {CComDescricao} FROM {T} d
+        INNER JOIN {SqlDialect.Current.SchemaPrefix}DespesaRecorrente dr ON d.IdDespesaRecorrente = dr.Id
+        WHERE d.Id = @Id";
     public static string ListarPorMes => $@"
-        SELECT d.* FROM {T} d
+        SELECT {CComDescricao} FROM {T} d
         INNER JOIN {SqlDialect.Current.SchemaPrefix}DespesaRecorrente dr ON d.IdDespesaRecorrente = dr.Id
         WHERE dr.IdUsuario = @IdUsuario AND d.Mes = @Mes AND d.Ano = @Ano AND d.Ativo = 1
         ORDER BY d.Status, dr.Descricao";

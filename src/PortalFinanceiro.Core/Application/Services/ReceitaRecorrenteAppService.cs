@@ -35,7 +35,7 @@ public class ReceitaRecorrenteAppService : IReceitaRecorrenteAppService
 
     public async Task<Result<ReceitaRecorrenteResponse>> AdicionarAsync(Guid idUsuario, ReceitaRecorrenteRequest request)
     {
-        var result = ReceitaRecorrente.Criar(idUsuario, request.Descricao, request.Valor, request.Dia, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
+        var result = ReceitaRecorrente.Criar(idUsuario, request.Descricao, request.Valor, request.Dia, request.DiaUtil, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -60,7 +60,7 @@ public class ReceitaRecorrenteAppService : IReceitaRecorrenteAppService
         if (receita is null)
             return Erro.NaoEncontrado("Receita recorrente");
 
-        var result = receita.Atualizar(request.Descricao, request.Valor, request.Dia, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
+        var result = receita.Atualizar(request.Descricao, request.Valor, request.Dia, request.DiaUtil, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -101,8 +101,11 @@ public class ReceitaRecorrenteAppService : IReceitaRecorrenteAppService
         Descricao = r.Descricao,
         Valor = r.Valor,
         Dia = r.Dia,
+        DiaUtil = r.DiaUtil,
         IdCategoria = r.IdCategoria,
+        Categoria = r.Categoria,
         IdConta = r.IdConta,
+        Conta = r.Conta,
         DataInicio = r.DataInicio,
         DataFim = r.DataFim,
         Ativo = r.Ativo,

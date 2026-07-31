@@ -7,6 +7,7 @@ public class ReceitaMensal
 {
     public Guid Id { get; private set; }
     public Guid IdReceitaRecorrente { get; private set; }
+    public string Descricao { get; set; } = string.Empty;
     public int Mes { get; private set; }
     public int Ano { get; private set; }
     public decimal Valor { get; private set; }

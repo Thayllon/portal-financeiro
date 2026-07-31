@@ -28,7 +28,13 @@ import { RecorrenteRequest } from '../../core/models/recorrente.model';
         </div>
         <div class="field" style="max-width: 100px">
           <label>Dia</label>
-          <input type="number" min="1" max="31" [(ngModel)]="form.dia" class="input" />
+          <input type="number" [min]="form.diaUtil ? 1 : 1" [max]="form.diaUtil ? 5 : 31" [(ngModel)]="form.dia" class="input" />
+        </div>
+        <div class="field" style="justify-content: flex-end; padding-bottom: 0.375rem;">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="form.diaUtil" class="checkbox" />
+            <span>Dia útil</span>
+          </label>
         </div>
       </div>
       <div class="field">
@@ -73,6 +79,8 @@ import { RecorrenteRequest } from '../../core/models/recorrente.model';
     .input:focus, .select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-focus-ring); }
     .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; cursor: pointer; }
     .preview { padding: 0.625rem 0.75rem; background: var(--color-primary-tint); color: var(--color-primary); border-radius: var(--radius-md); font-size: 0.8125rem; text-align: center; }
+    .checkbox-label { display: flex; align-items: center; gap: 0.375rem; font-size: 0.8125rem; color: var(--text-secondary); cursor: pointer; padding-top: 1.375rem; }
+    .checkbox { width: 1rem; height: 1rem; accent-color: var(--color-primary); }
   `]
 })
 export class RecorrenteModalComponent {
@@ -87,7 +95,7 @@ export class RecorrenteModalComponent {
   saved = output<RecorrenteRequest>();
 
   form: RecorrenteRequest = {
-    descricao: '', valor: 0, dia: 1,
+    descricao: '', valor: 0, dia: 1, diaUtil: false,
     idCategoria: '', idConta: '',
     dataInicio: '', dataFim: ''
   };
@@ -104,6 +112,7 @@ export class RecorrenteModalComponent {
             descricao: ini.descricao,
             valor: ini.valor,
             dia: ini.dia,
+            diaUtil: ini.diaUtil ?? false,
             idCategoria: ini.idCategoria,
             idConta: ini.idConta,
             dataInicio: ini.dataInicio?.split('T')[0] ?? '',
@@ -111,7 +120,7 @@ export class RecorrenteModalComponent {
           };
         } else {
           const hoje = new Date().toISOString().split('T')[0];
-          this.form = { descricao: '', valor: 0, dia: 1, idCategoria: '', idConta: '', dataInicio: hoje, dataFim: '' };
+          this.form = { descricao: '', valor: 0, dia: 1, diaUtil: false, idCategoria: '', idConta: '', dataInicio: hoje, dataFim: '' };
         }
       }
     });

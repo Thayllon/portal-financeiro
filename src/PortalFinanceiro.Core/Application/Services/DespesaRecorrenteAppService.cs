@@ -35,7 +35,7 @@ public class DespesaRecorrenteAppService : IDespesaRecorrenteAppService
 
     public async Task<Result<DespesaRecorrenteResponse>> AdicionarAsync(Guid idUsuario, DespesaRecorrenteRequest request)
     {
-        var result = DespesaRecorrente.Criar(idUsuario, request.Descricao, request.Valor, request.Dia, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
+        var result = DespesaRecorrente.Criar(idUsuario, request.Descricao, request.Valor, request.Dia, request.DiaUtil, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -60,7 +60,7 @@ public class DespesaRecorrenteAppService : IDespesaRecorrenteAppService
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa recorrente");
 
-        var result = despesa.Atualizar(request.Descricao, request.Valor, request.Dia, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
+        var result = despesa.Atualizar(request.Descricao, request.Valor, request.Dia, request.DiaUtil, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -101,8 +101,11 @@ public class DespesaRecorrenteAppService : IDespesaRecorrenteAppService
         Descricao = d.Descricao,
         Valor = d.Valor,
         Dia = d.Dia,
+        DiaUtil = d.DiaUtil,
         IdCategoria = d.IdCategoria,
+        Categoria = d.Categoria,
         IdConta = d.IdConta,
+        Conta = d.Conta,
         DataInicio = d.DataInicio,
         DataFim = d.DataFim,
         Ativo = d.Ativo,

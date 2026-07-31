@@ -3,9 +3,13 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class DespesaRecorrenteSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}DespesaRecorrente";
-    static string C => "Id, IdUsuario, Descricao, Valor, Dia, IdCategoria, IdConta, DataInicio, DataFim, Ativo, DataCadastro, DataAlteracao";
-    public static string ObterPorId => $"SELECT {C} FROM {T} WHERE Id = @Id";
-    public static string ListarPorUsuario => $"SELECT {C} FROM {T} WHERE IdUsuario = @IdUsuario ORDER BY Descricao";
-    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Dia, @IdCategoria, @IdConta, @DataInicio, @DataFim, @Ativo, @DataCadastro, @DataAlteracao)";
-    public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Dia = @Dia, IdCategoria = @IdCategoria, IdConta = @IdConta, DataInicio = @DataInicio, DataFim = @DataFim, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
+    static string C => "Id, IdUsuario, Descricao, Valor, Dia, DiaUtil, IdCategoria, IdConta, DataInicio, DataFim, Ativo, DataCadastro, DataAlteracao";
+    static string CComNomes => $"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Dia, {T}.DiaUtil, {T}.IdCategoria, {T}.IdConta, {T}.DataInicio, {T}.DataFim, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao, cat.Nome AS Categoria, cb.Nome AS Conta";
+    static string Joins => $@"
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa cat ON {T}.IdCategoria = cat.Id
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}ContaBancaria cb ON {T}.IdConta = cb.Id";
+    public static string ObterPorId => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.Id = @Id";
+    public static string ListarPorUsuario => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario ORDER BY {T}.Descricao";
+    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Dia, @DiaUtil, @IdCategoria, @IdConta, @DataInicio, @DataFim, @Ativo, @DataCadastro, @DataAlteracao)";
+    public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Dia = @Dia, DiaUtil = @DiaUtil, IdCategoria = @IdCategoria, IdConta = @IdConta, DataInicio = @DataInicio, DataFim = @DataFim, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
 }

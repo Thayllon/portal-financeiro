@@ -6,6 +6,7 @@ public class ReceitaRecorrenteResponse
     public string Descricao { get; set; } = string.Empty;
     public decimal Valor { get; set; }
     public int Dia { get; set; }
+    public bool DiaUtil { get; set; }
     public Guid IdCategoria { get; set; }
     public string Categoria { get; set; } = string.Empty;
     public Guid IdConta { get; set; }

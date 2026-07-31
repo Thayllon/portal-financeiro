@@ -18,11 +18,12 @@ import { TabsComponent, Tab } from '../../shared/components/tabs.component';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { RecorrenteModalComponent } from '../../shared/components/recorrente-modal.component';
+import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
 
 @Component({
   selector: 'app-receitas',
   standalone: true,
-  imports: [DatePipe, FormsModule, SectionHeaderComponent, SkeletonComponent, EmptyStateComponent, TabsComponent, MonthNavComponent, StatusBadgeComponent, RecorrenteModalComponent],
+  imports: [DatePipe, FormsModule, SectionHeaderComponent, SkeletonComponent, EmptyStateComponent, TabsComponent, MonthNavComponent, StatusBadgeComponent, RecorrenteModalComponent, CurrencyBRLPipe],
   template: `
     <div class="page">
       <app-section-header
@@ -48,7 +49,7 @@ import { RecorrenteModalComponent } from '../../shared/components/recorrente-mod
                 @for (r of recorrentes(); track r.id) {
                   <tr>
                     <td class="cell-name">{{ r.descricao }}</td>
-                    <td class="cell-value">R$ {{ r.valor.toFixed(2) }}</td>
+                    <td class="cell-value">{{ r.valor | currencyBRL }}</td>
                     <td>Dia {{ r.dia }}</td>
                     <td>{{ r.categoria }}</td>
                     <td>{{ r.conta }}</td>
@@ -74,8 +75,8 @@ import { RecorrenteModalComponent } from '../../shared/components/recorrente-mod
         <div class="mensal-header">
           <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
           <div class="totals">
-            <span class="total" style="font-size:1.25rem;font-weight:700">R$ {{ totalReceitas().toFixed(2) }}</span>
-            <span class="realizado" style="color:var(--color-success);font-size:0.875rem">R$ {{ totalRecebido().toFixed(2) }} recebido</span>
+            <span class="total" style="font-size:1.25rem;font-weight:700">{{ totalReceitas() | currencyBRL }}</span>
+            <span class="realizado" style="color:var(--color-success);font-size:0.875rem">{{ totalRecebido() | currencyBRL }} recebido</span>
             <span class="perc" style="font-size:0.875rem;color:var(--text-muted)">{{ percRecebido() }}%</span>
           </div>
         </div>
@@ -92,7 +93,7 @@ import { RecorrenteModalComponent } from '../../shared/components/recorrente-mod
                 @for (l of mensais(); track l.id) {
                   <tr>
                     <td class="cell-name">{{ l.descricao }}</td>
-                    <td class="cell-value">R$ {{ l.valor.toFixed(2) }}</td>
+                    <td class="cell-value">{{ l.valor | currencyBRL }}</td>
                     <td><app-status-badge [type]="l.status === 'Realizado' ? 'realizado' : 'pendente'" [label]="l.status === 'Realizado' ? 'Recebido' : 'Pendente'" /></td>
                     <td class="cell-meta">{{ l.dataRealizacao ? (l.dataRealizacao | date:'dd/MM/yyyy') : '—' }}</td>
                     <td class="cell-actions">

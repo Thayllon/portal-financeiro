@@ -1,7 +1,7 @@
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
-using PortalFinanceiro.Core.Domain.Enums;
+using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
 
@@ -10,36 +10,16 @@ namespace PortalFinanceiro.Core.Application.Services;
 public class DespesaMensalAppService : IDespesaMensalAppService
 {
     private readonly IDespesaMensalRepository _repository;
-    private readonly IDespesaRecorrenteRepository _recorrenteRepository;
 
-    public DespesaMensalAppService(IDespesaMensalRepository repository, IDespesaRecorrenteRepository recorrenteRepository)
+    public DespesaMensalAppService(IDespesaMensalRepository repository)
     {
         _repository = repository;
-        _recorrenteRepository = recorrenteRepository;
     }
 
     public async Task<Result<IEnumerable<DespesaMensalResponse>>> ListarPorMesAsync(Guid idUsuario, int mes, int ano)
     {
         var lancamentos = await _repository.ListarPorMesAsync(idUsuario, mes, ano);
-        var responses = new List<DespesaMensalResponse>();
-
-        foreach (var l in lancamentos)
-        {
-            var recorrente = await _recorrenteRepository.ObterPorIdAsync(l.IdDespesaRecorrente);
-            responses.Add(new DespesaMensalResponse
-            {
-                Id = l.Id,
-                IdDespesaRecorrente = l.IdDespesaRecorrente,
-                Descricao = recorrente?.Descricao ?? string.Empty,
-                Mes = l.Mes,
-                Ano = l.Ano,
-                Valor = l.Valor,
-                DataPagamento = l.DataPagamento,
-                Status = l.Status.ToString()
-            });
-        }
-
-        return responses.OrderBy(r => r.Status == StatusMensal.Pendente.ToString() ? 0 : 1).ToList();
+        return lancamentos.Select(Mapear).ToList();
     }
 
     public async Task<Result<DespesaMensalResponse>> PagarAsync(Guid id, MensalStatusRequest request)
@@ -53,19 +33,7 @@ public class DespesaMensalAppService : IDespesaMensalAppService
             return result.Erro!;
 
         await _repository.AtualizarAsync(lancamento);
-
-        var recorrente = await _recorrenteRepository.ObterPorIdAsync(lancamento.IdDespesaRecorrente);
-        return new DespesaMensalResponse
-        {
-            Id = lancamento.Id,
-            IdDespesaRecorrente = lancamento.IdDespesaRecorrente,
-            Descricao = recorrente?.Descricao ?? string.Empty,
-            Mes = lancamento.Mes,
-            Ano = lancamento.Ano,
-            Valor = lancamento.Valor,
-            DataPagamento = lancamento.DataPagamento,
-            Status = lancamento.Status.ToString()
-        };
+        return Mapear(lancamento);
     }
 
     public async Task<Result<DespesaMensalResponse>> EstornarAsync(Guid id)
@@ -79,18 +47,18 @@ public class DespesaMensalAppService : IDespesaMensalAppService
             return result.Erro!;
 
         await _repository.AtualizarAsync(lancamento);
-
-        var recorrente = await _recorrenteRepository.ObterPorIdAsync(lancamento.IdDespesaRecorrente);
-        return new DespesaMensalResponse
-        {
-            Id = lancamento.Id,
-            IdDespesaRecorrente = lancamento.IdDespesaRecorrente,
-            Descricao = recorrente?.Descricao ?? string.Empty,
-            Mes = lancamento.Mes,
-            Ano = lancamento.Ano,
-            Valor = lancamento.Valor,
-            DataPagamento = lancamento.DataPagamento,
-            Status = lancamento.Status.ToString()
-        };
+        return Mapear(lancamento);
     }
+
+    private static DespesaMensalResponse Mapear(DespesaMensal l) => new()
+    {
+        Id = l.Id,
+        IdDespesaRecorrente = l.IdDespesaRecorrente,
+        Descricao = l.Descricao,
+        Mes = l.Mes,
+        Ano = l.Ano,
+        Valor = l.Valor,
+        DataPagamento = l.DataPagamento,
+        Status = l.Status.ToString()
+    };
 }
