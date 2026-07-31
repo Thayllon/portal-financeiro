@@ -84,6 +84,25 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
         </div>
       }
 
+      @if (data()?.resumoPorCategoria?.length) {
+        <div class="section">
+          <h2>Por categoria</h2>
+          <div class="table-card">
+            <table class="table">
+              <thead><tr><th>Categoria</th><th>Total</th></tr></thead>
+              <tbody>
+                @for (c of data()!.resumoPorCategoria; track c.nome) {
+                  <tr>
+                    <td class="cell-name">{{ c.nome }}</td>
+                    <td class="cell-value red">{{ c.total | currencyBRL }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
       @if (data()?.previsaoProximosMeses?.length) {
         <div class="section">
           <h2>Previsão próximos meses</h2>

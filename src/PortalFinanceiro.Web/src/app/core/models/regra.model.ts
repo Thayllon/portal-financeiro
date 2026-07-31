@@ -1,4 +1,4 @@
-export interface Recorrente {
+export interface Regra {
   id: string;
   descricao: string;
   valor: number;
@@ -9,12 +9,11 @@ export interface Recorrente {
   idConta: string;
   conta: string;
   dataInicio: string;
-  dataFim?: string;
+  dataFim: string;
   ativo: boolean;
-  dataCadastro: string;
 }
 
-export interface RecorrenteRequest {
+export interface RegraRequest {
   descricao: string;
   valor: number;
   dia: number;
@@ -22,5 +21,5 @@ export interface RecorrenteRequest {
   idCategoria: string;
   idConta: string;
   dataInicio: string;
-  dataFim?: string;
+  dataFim: string;
 }

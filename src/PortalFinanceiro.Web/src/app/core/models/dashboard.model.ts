@@ -8,6 +8,7 @@ export interface Dashboard {
   saldo: number;
   saldoRealizado: number;
   resumoPorConta: ResumoPorConta[];
+  resumoPorCategoria: ResumoPorCategoria[];
   previsaoProximosMeses: PrevisaoMensal[];
 }
 
@@ -18,6 +19,11 @@ export interface ResumoPorConta {
   totalReceitas: number;
   totalDespesas: number;
   saldo: number;
+}
+
+export interface ResumoPorCategoria {
+  nome: string;
+  total: number;
 }
 
 export interface PrevisaoMensal {

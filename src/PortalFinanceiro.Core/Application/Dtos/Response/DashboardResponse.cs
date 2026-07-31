@@ -11,7 +11,14 @@ public class DashboardResponse
     public decimal Saldo { get; set; }
     public decimal SaldoRealizado { get; set; }
     public List<ResumoPorConta> ResumoPorConta { get; set; } = [];
+    public List<ResumoPorCategoria> ResumoPorCategoria { get; set; } = [];
     public List<PrevisaoMensal> PrevisaoProximosMeses { get; set; } = [];
+}
+
+public class ResumoPorCategoria
+{
+    public string Nome { get; set; } = string.Empty;
+    public decimal Total { get; set; }
 }
 
 public class ResumoPorConta

@@ -62,6 +62,12 @@ public class DashboardAppService : IDashboardAppService
             }
         }
 
+        var resumoPorCategoria = despesas
+            .GroupBy(d => d.Categoria == string.Empty ? "Sem categoria" : d.Categoria)
+            .Select(g => new ResumoPorCategoria { Nome = g.Key, Total = g.Sum(d => d.Valor) })
+            .OrderByDescending(r => r.Total)
+            .ToList();
+
         var previsao = new List<PrevisaoMensal>();
         for (int i = 1; i <= 3; i++)
         {
@@ -97,6 +103,7 @@ public class DashboardAppService : IDashboardAppService
             Saldo = totalReceitas - totalDespesas,
             SaldoRealizado = totalRecebido - totalPago,
             ResumoPorConta = resumoPorConta,
+            ResumoPorCategoria = resumoPorCategoria,
             PrevisaoProximosMeses = previsao
         };
     }
