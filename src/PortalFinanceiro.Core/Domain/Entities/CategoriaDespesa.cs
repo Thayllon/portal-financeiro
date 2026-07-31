@@ -7,13 +7,14 @@ public class CategoriaDespesa
     public Guid Id { get; private set; }
     public Guid IdUsuario { get; private set; }
     public string Nome { get; private set; } = string.Empty;
+    public Guid? CategoriaPaiId { get; private set; }
     public bool Ativo { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
 
     public CategoriaDespesa() { }
 
-    public static Result<CategoriaDespesa> Criar(Guid idUsuario, string nome)
+    public static Result<CategoriaDespesa> Criar(Guid idUsuario, string nome, Guid? categoriaPaiId = null)
     {
         if (idUsuario == Guid.Empty)
             return Erro.Validacao("USUARIO_OBRIGATORIO", "Usuário é obrigatório.");
@@ -25,18 +26,20 @@ public class CategoriaDespesa
             Id = Guid.NewGuid(),
             IdUsuario = idUsuario,
             Nome = nome,
+            CategoriaPaiId = categoriaPaiId,
             Ativo = true,
             DataCadastro = DateTime.UtcNow,
             DataAlteracao = DateTime.UtcNow
         };
     }
 
-    public Result<Unit> Atualizar(string nome)
+    public Result<Unit> Atualizar(string nome, Guid? categoriaPaiId)
     {
         if (string.IsNullOrWhiteSpace(nome))
             return Erro.Validacao("NOME_OBRIGATORIO", "Nome é obrigatório.");
 
         Nome = nome;
+        CategoriaPaiId = categoriaPaiId;
         DataAlteracao = DateTime.UtcNow;
         return Resultado.Sucesso();
     }

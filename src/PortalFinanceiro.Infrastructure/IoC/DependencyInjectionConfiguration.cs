@@ -22,19 +22,19 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IContaBancariaRepository, ContaBancariaRepository>();
         services.AddScoped<ICategoriaReceitaRepository, CategoriaReceitaRepository>();
         services.AddScoped<ICategoriaDespesaRepository, CategoriaDespesaRepository>();
-        services.AddScoped<IReceitaRecorrenteRepository, ReceitaRecorrenteRepository>();
-        services.AddScoped<IDespesaRecorrenteRepository, DespesaRecorrenteRepository>();
-        services.AddScoped<IReceitaMensalRepository, ReceitaMensalRepository>();
-        services.AddScoped<IDespesaMensalRepository, DespesaMensalRepository>();
+        services.AddScoped<IReceitaRepository, ReceitaRepository>();
+        services.AddScoped<IDespesaRepository, DespesaRepository>();
+        services.AddScoped<IRegraReceitaRepository, RegraReceitaRepository>();
+        services.AddScoped<IRegraDespesaRepository, RegraDespesaRepository>();
 
         services.AddScoped<IAuthAppService, AuthAppService>();
         services.AddScoped<IContaBancariaAppService, ContaBancariaAppService>();
         services.AddScoped<ICategoriaReceitaAppService, CategoriaReceitaAppService>();
         services.AddScoped<ICategoriaDespesaAppService, CategoriaDespesaAppService>();
-        services.AddScoped<IReceitaRecorrenteAppService, ReceitaRecorrenteAppService>();
-        services.AddScoped<IDespesaRecorrenteAppService, DespesaRecorrenteAppService>();
-        services.AddScoped<IReceitaMensalAppService, ReceitaMensalAppService>();
-        services.AddScoped<IDespesaMensalAppService, DespesaMensalAppService>();
+        services.AddScoped<IReceitaAppService, ReceitaAppService>();
+        services.AddScoped<IDespesaAppService, DespesaAppService>();
+        services.AddScoped<IRegraReceitaAppService, RegraReceitaAppService>();
+        services.AddScoped<IRegraDespesaAppService, RegraDespesaAppService>();
         services.AddScoped<IDashboardAppService, DashboardAppService>();
 
         return services;

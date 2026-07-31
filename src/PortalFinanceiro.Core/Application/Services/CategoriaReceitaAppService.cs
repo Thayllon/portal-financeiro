@@ -33,7 +33,7 @@ public class CategoriaReceitaAppService : ICategoriaReceitaAppService
 
     public async Task<Result<CategoriaResponse>> AdicionarAsync(Guid idUsuario, CategoriaRequest request)
     {
-        var result = CategoriaReceita.Criar(idUsuario, request.Nome);
+        var result = CategoriaReceita.Criar(idUsuario, request.Nome, request.CategoriaPaiId);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -47,7 +47,7 @@ public class CategoriaReceitaAppService : ICategoriaReceitaAppService
         if (categoria is null)
             return Erro.NaoEncontrado("Categoria");
 
-        var result = categoria.Atualizar(request.Nome);
+        var result = categoria.Atualizar(request.Nome, request.CategoriaPaiId);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -70,6 +70,7 @@ public class CategoriaReceitaAppService : ICategoriaReceitaAppService
     {
         Id = c.Id,
         Nome = c.Nome,
+        CategoriaPaiId = c.CategoriaPaiId,
         Ativo = c.Ativo,
         DataCadastro = c.DataCadastro
     };

@@ -8,49 +8,45 @@ namespace PortalFinanceiro.Core.Application.Services;
 
 public class DashboardAppService : IDashboardAppService
 {
-    private readonly IReceitaMensalRepository _receitaMensalRepository;
-    private readonly IDespesaMensalRepository _despesaMensalRepository;
-    private readonly IReceitaRecorrenteRepository _receitaRecorrenteRepository;
-    private readonly IDespesaRecorrenteRepository _despesaRecorrenteRepository;
+    private readonly IReceitaRepository _receitaRepository;
+    private readonly IDespesaRepository _despesaRepository;
+    private readonly IRegraReceitaRepository _regraReceitaRepository;
+    private readonly IRegraDespesaRepository _regraDespesaRepository;
     private readonly IContaBancariaRepository _contaBancariaRepository;
 
     public DashboardAppService(
-        IReceitaMensalRepository receitaMensalRepository,
-        IDespesaMensalRepository despesaMensalRepository,
-        IReceitaRecorrenteRepository receitaRecorrenteRepository,
-        IDespesaRecorrenteRepository despesaRecorrenteRepository,
+        IReceitaRepository receitaRepository,
+        IDespesaRepository despesaRepository,
+        IRegraReceitaRepository regraReceitaRepository,
+        IRegraDespesaRepository regraDespesaRepository,
         IContaBancariaRepository contaBancariaRepository)
     {
-        _receitaMensalRepository = receitaMensalRepository;
-        _despesaMensalRepository = despesaMensalRepository;
-        _receitaRecorrenteRepository = receitaRecorrenteRepository;
-        _despesaRecorrenteRepository = despesaRecorrenteRepository;
+        _receitaRepository = receitaRepository;
+        _despesaRepository = despesaRepository;
+        _regraReceitaRepository = regraReceitaRepository;
+        _regraDespesaRepository = regraDespesaRepository;
         _contaBancariaRepository = contaBancariaRepository;
     }
 
     public async Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano)
     {
-        var receitas = await _receitaMensalRepository.ListarPorMesAsync(idUsuario, mes, ano);
-        var despesas = await _despesaMensalRepository.ListarPorMesAsync(idUsuario, mes, ano);
+        var receitas = await _receitaRepository.ListarAsync(idUsuario, mes, ano);
+        var despesas = await _despesaRepository.ListarAsync(idUsuario, mes, ano);
 
         var totalReceitas = receitas.Sum(r => r.Valor);
         var totalRecebido = receitas.Where(r => r.Status == StatusMensal.Realizado).Sum(r => r.Valor);
         var totalDespesas = despesas.Sum(d => d.Valor);
         var totalPago = despesas.Where(d => d.Status == StatusMensal.Realizado).Sum(d => d.Valor);
 
-        var recorrentesReceita = await _receitaRecorrenteRepository.ListarPorUsuarioAsync(idUsuario);
-        var recorrentesDespesa = await _despesaRecorrenteRepository.ListarPorUsuarioAsync(idUsuario);
+        var regrasReceita = await _regraReceitaRepository.ListarPorUsuarioAsync(idUsuario);
+        var regrasDespesa = await _regraDespesaRepository.ListarPorUsuarioAsync(idUsuario);
         var contas = (await _contaBancariaRepository.ListarPorUsuarioAsync(idUsuario)).Where(c => c.Ativo).ToList();
 
         var resumoPorConta = new List<ResumoPorConta>();
-
         foreach (var conta in contas)
         {
-            var idsRecorrentesReceitaConta = recorrentesReceita.Where(r => r.IdConta == conta.Id).Select(r => r.Id).ToHashSet();
-            var idsRecorrentesDespesaConta = recorrentesDespesa.Where(d => d.IdConta == conta.Id).Select(d => d.Id).ToHashSet();
-
-            var totalRec = receitas.Where(r => idsRecorrentesReceitaConta.Contains(r.IdReceitaRecorrente)).Sum(r => r.Valor);
-            var totalDesp = despesas.Where(d => idsRecorrentesDespesaConta.Contains(d.IdDespesaRecorrente)).Sum(d => d.Valor);
+            var totalRec = receitas.Where(r => r.IdConta == conta.Id).Sum(r => r.Valor);
+            var totalDesp = despesas.Where(d => d.IdConta == conta.Id).Sum(d => d.Valor);
 
             if (totalRec != 0 || totalDesp != 0)
             {
@@ -73,10 +69,10 @@ public class DashboardAppService : IDashboardAppService
             var proximoAno = ano;
             if (proximoMes > 12) { proximoMes -= 12; proximoAno++; }
 
-            var rec = recorrentesReceita
+            var rec = regrasReceita
                 .Where(r => r.Ativo && r.DataInicio <= new DateTime(proximoAno, proximoMes, 1))
                 .Sum(r => r.Valor);
-            var desp = recorrentesDespesa
+            var desp = regrasDespesa
                 .Where(d => d.Ativo && d.DataInicio <= new DateTime(proximoAno, proximoMes, 1))
                 .Sum(d => d.Valor);
 
