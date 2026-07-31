@@ -1,59 +1,65 @@
-# PortalFinanceiro
+# PortalFinanceiro Web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.8.
+Frontend Angular 22 do Portal Financeiro.
 
-## Development server
-
-To start a local development server, run:
+## Desenvolvimento
 
 ```bash
+# Instalar dependências
+npm install
+
+# Rodar em desenvolvimento
 ng serve
-```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
+# Build de produção
 ng build
-```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
+# Testes
 ng test
 ```
 
-## Running end-to-end tests
+## Design System
 
-For end-to-end (e2e) testing, run:
+O projeto utiliza um design system centralizado em `src/app/design-system/styles/`:
 
-```bash
-ng e2e
-```
+| Arquivo | Função |
+|---------|--------|
+| `_tokens.scss` | Variáveis CSS: spacing, border-radius, shadows, breakpoints |
+| `_colors.scss` | Cores do tema: primary, success, error, warning, info |
+| `_theme.scss` | Combina tokens e cores |
+| `_responsive.scss` | Mixins: `mobile`, `tablet-up`, `lg-up` |
+| `_transitions.scss` | Animações: fade, slide, scale, shimmer |
+| `_page-layout.scss` | Mixins de layout: page-wrapper, card, toolbar, totals |
+| `_data-table.scss` | Mixins de tabela responsiva |
+| `_form-fields.scss` | Mixins de formulário: field, input, select, checkbox |
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Componentes Compartilhados
 
-## Additional Resources
+| Componente | Caminho | Descrição |
+|------------|---------|-----------|
+| `CustomSelectComponent` | `shared/components/custom-select.component.ts` | Select customizado com ControlValueAccessor |
+| `PageComponent` | `shared/components/page.component.ts` | Wrapper de página com header (ícone + título) |
+| `SectionHeaderComponent` | `shared/components/section-header.component.ts` | Header com ícone Lucide + título + botão de ação |
+| `ListPaginationComponent` | `shared/components/list-pagination.component.ts` | Paginação: "1-10 de 50 \| Anterior \| Próximo" |
+| `ModalComponent` | `shared/components/modal.component.ts` | Modal animado com footer |
+| `TabsComponent` | `shared/components/tabs.component.ts` | Abas com indicador ativo |
+| `StatusBadgeComponent` | `shared/components/status-badge.component.ts` | Badge de status (pendente, realizado, ativo, inativo) |
+| `MonthNavComponent` | `shared/components/month-nav.component.ts` | Navegação mês/ano |
+| `SkeletonComponent` | `shared/components/skeleton.component.ts` | Loading skeleton com shimmer |
+| `ToastComponent` | `shared/components/toast.component.ts` | Toast de notificação |
+| `ConfirmDialogComponent` | `shared/components/confirm-dialog.component.ts` | Diálogo de confirmação |
+| `EmptyStateComponent` | `shared/components/empty-state.component.ts` | Estado vazio |
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Composables
+
+| Composable | Caminho | Descrição |
+|------------|---------|-----------|
+| `useListPagination` | `shared/composables/use-list-pagination.composable.ts` | Paginação client-side com signals |
+
+## Padrões
+
+- **Ícones**: Lucide Angular (`@lucide/angular`) — usar `[lucideIcon]="'nome-do-icone'"`
+- **Forms**: ControlValueAccessor para componentes reutilizáveis
+- **Signals**: Todos os componentes usam Angular signals para estado
+- **Responsividade**: Breakpoints em `_responsive.scss` — mobile (max-width: 767px), tablet (min-width: 768px)
+- **Animações**: Transições suaves com `will-change` para performance GPU

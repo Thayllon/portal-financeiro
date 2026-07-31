@@ -1,60 +1,55 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { ReceitaRepository, ReceitaFiltros } from '../../core/repositories/receita.repository';
-import { RegraReceitaRepository } from '../../core/repositories/regra.repository';
 import { CategoriaReceitaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { Receita, ReceitaRequest } from '../../core/models/receita.model';
-import { Regra, RegraRequest } from '../../core/models/regra.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
-import { SectionHeaderComponent } from '../../shared/components/section-header.component';
-import { SkeletonComponent } from '../../shared/components/skeleton.component';
-import { EmptyStateComponent } from '../../shared/components/empty-state.component';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { LancamentoModalComponent, LancamentoForm } from '../../shared/components/lancamento-modal.component';
 import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
+import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
+import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-receitas',
   standalone: true,
-  imports: [DatePipe, FormsModule, SectionHeaderComponent, SkeletonComponent, EmptyStateComponent, MonthNavComponent, StatusBadgeComponent, LancamentoModalComponent, CurrencyBRLPipe],
+  imports: [DatePipe, FormsModule, MonthNavComponent, StatusBadgeComponent, LancamentoModalComponent, CurrencyBRLPipe, CustomSelectComponent, ListPaginationComponent, LucideDynamicIcon],
   template: `
     <div class="page">
-      <app-section-header
-        title="Receitas"
-        subtitle="Receitas do mês — recorrentes e avulsas"
-        addLabel="Nova receita"
-        (add)="abrirModal()"
-      />
+      <header class="page__header">
+        <div class="page__header-left">
+          <svg lucideIcon="trending-up" class="page__icon" [size]="22" />
+          <div>
+            <h1 class="page__title">Receitas</h1>
+            <p class="page__subtitle">Receitas do mês — recorrentes e avulsas</p>
+          </div>
+        </div>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Nova receita
+        </button>
+      </header>
 
       <div class="toolbar">
         <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
         <div class="filtros">
-          <select [(ngModel)]="filtroConta" (ngModelChange)="carregar()" class="select filtro">
-            <option value="">Todas as contas</option>
-            @for (c of contas(); track c.id) {
-              <option [value]="c.id">{{ c.nome }}</option>
-            }
-          </select>
-          <select [(ngModel)]="filtroStatus" (ngModelChange)="carregar()" class="select filtro">
-            <option value="">Todos os status</option>
-            <option value="Pendente">Pendentes</option>
-            <option value="Realizado">Recebidas</option>
-          </select>
-          <select [(ngModel)]="filtroCategoria" (ngModelChange)="carregar()" class="select filtro">
-            <option value="">Todas as categorias</option>
-            @for (c of categorias(); track c.id) {
-              <option [value]="c.id">{{ c.nome }}</option>
-            }
-          </select>
-          <input [(ngModel)]="busca" (ngModelChange)="onBuscaChange()" placeholder="Buscar..." class="input filtro-busca" />
+          <app-custom-select placeholder="Todas as contas" [options]="contasOptions()" (valueChange)="filtroConta = $event; carregar()" />
+          <app-custom-select placeholder="Todos os status" [options]="statusOptions" (valueChange)="filtroStatus = $event; carregar()" />
+          <app-custom-select placeholder="Todas as categorias" [options]="categoriasOptions()" (valueChange)="filtroCategoria = $event; carregar()" />
+          <div class="search-wrapper">
+            <svg lucideIcon="search" [size]="16" class="search-icon" />
+            <input [(ngModel)]="busca" (ngModelChange)="onBuscaChange()" placeholder="Buscar..." class="search-input" />
+          </div>
         </div>
       </div>
 
@@ -65,43 +60,60 @@ import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
       </div>
 
       @if (loading()) {
-        <app-skeleton type="row" [count]="5" />
+        <div class="table-card">
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="skeleton-row">
+              <div class="skeleton-line" style="width: 40%"></div>
+              <div class="skeleton-line" style="width: 15%"></div>
+              <div class="skeleton-line" style="width: 10%"></div>
+            </div>
+          }
+        </div>
       } @else if (items().length === 0) {
-        <app-empty-state title="Nenhuma receita neste mês" description="Cadastre sua primeira receita — recorrente ou avulsa." actionLabel="Nova receita" (action)="abrirModal()" />
+        <div class="empty-state">
+          <svg lucideIcon="inbox" [size]="48" class="empty-icon" />
+          <h3>Nenhuma receita neste mês</h3>
+          <p>Cadastre sua primeira receita — recorrente ou avulsa.</p>
+          <button class="add-btn" (click)="abrirModal()">
+            <svg lucideIcon="plus" [size]="16" />
+            Nova receita
+          </button>
+        </div>
       } @else {
         <div class="table-card">
           <table class="table">
             <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Conta</th><th>Categoria</th><th>Status</th><th></th></tr></thead>
             <tbody>
-              @for (l of items(); track l.id) {
+              @for (l of pagination.paginatedItems(); track l.id) {
                 <tr>
-                  <td class="cell-name">{{ l.descricao }}</td>
-                  <td class="cell-value">{{ l.valor | currencyBRL }}</td>
-                  <td class="cell-meta">{{ l.data | date:'dd/MM' }}</td>
-                  <td class="cell-meta">{{ l.conta }}</td>
-                  <td class="cell-meta">{{ l.categoria }}{{ l.subcategoria ? ' → ' + l.subcategoria : '' }}</td>
-                  <td><app-status-badge [type]="l.status === 'Realizado' ? 'realizado' : 'pendente'" [label]="l.status === 'Realizado' ? 'Recebido' : 'Pendente'" /></td>
+                  <td class="cell-name" data-label="Descrição">{{ l.descricao }}</td>
+                  <td class="cell-value" data-label="Valor">{{ l.valor | currencyBRL }}</td>
+                  <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
+                  <td class="cell-meta" data-label="Conta">{{ l.conta }}</td>
+                  <td class="cell-meta" data-label="Categoria">{{ l.categoria }}{{ l.subcategoria ? ' → ' + l.subcategoria : '' }}</td>
+                  <td data-label="Status"><app-status-badge [type]="l.status === 'Realizado' ? 'realizado' : 'pendente'" [label]="l.status === 'Realizado' ? 'Recebido' : 'Pendente'" /></td>
                   <td class="cell-actions">
                     @if (l.status !== 'Realizado') {
                       <button class="action-btn action-btn--success" title="Receber" (click)="receber(l)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        <svg lucideIcon="check" [size]="16" />
                       </button>
                     } @else {
                       <button class="action-btn" title="Estornar" (click)="estornar(l)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                        <svg lucideIcon="arrow-left" [size]="16" />
                       </button>
                     }
                     <button class="action-btn" title="Editar" (click)="abrirModal(l)">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      <svg lucideIcon="pencil" [size]="16" />
                     </button>
                     <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(l)">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      <svg lucideIcon="trash-2" [size]="16" />
                     </button>
                   </td>
                 </tr>
               }
             </tbody>
           </table>
+          <app-list-pagination [pagination]="pagination" />
         </div>
       }
     </div>
@@ -118,15 +130,39 @@ import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
     />
   `,
   styles: [`
-    .page { max-width: 1200px; }
-    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .filtros { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .filtro { min-width: 140px; }
-    .filtro-busca { min-width: 160px; }
-    .select, .input { padding: 0.5rem 0.75rem; border: 1px solid var(--surface-border); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--text-primary); background: var(--content-surface); }
-    .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.25rem; cursor: pointer; }
+    .page { max-width: 1200px; padding: 1.5rem; margin: 0 auto; }
+    .page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
+    .page__header-left { display: flex; align-items: center; gap: 0.5rem; }
+    .page__icon { color: var(--color-primary); flex-shrink: 0; }
+    .page__title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; }
+    .page__subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .add-btn {
+      display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem;
+      background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-md);
+      font-size: 0.875rem; font-weight: 500; white-space: nowrap;
+      transition: background var(--transition-fast);
+    }
+    .add-btn:hover { background: var(--color-primary-hover); }
+    .toolbar {
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+      margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .filtros { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end; }
+    .search-wrapper { position: relative; }
+    .search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+    .search-input {
+      padding: 0.625rem 0.75rem 0.625rem 2.25rem;
+      border: 1px solid var(--surface-border); border-radius: var(--radius-md);
+      font-size: 0.875rem; color: var(--text-primary); background: var(--content-surface);
+      min-width: 180px; transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .search-input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-focus-ring); }
+    .search-input::placeholder { color: var(--text-muted); }
     .totals { display: flex; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.875rem; color: var(--text-secondary); flex-wrap: wrap; }
-    .table-card { background: var(--content-surface); border: 1px solid var(--surface-border); border-radius: var(--radius-lg); overflow: hidden; }
+    .table-card {
+      background: var(--content-surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-xl); overflow: hidden;
+    }
     .table { width: 100%; border-collapse: collapse; }
     .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--surface-border); }
     .table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-primary); border-bottom: 1px solid var(--surface-border); }
@@ -136,10 +172,37 @@ import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
     .cell-value { font-variant-numeric: tabular-nums; white-space: nowrap; }
     .cell-meta { color: var(--text-muted); font-size: 0.8125rem; }
     .cell-actions { display: flex; gap: 0.25rem; justify-content: flex-end; }
-    .action-btn { background: none; border: 1px solid var(--surface-border); border-radius: var(--radius-md); padding: 0.375rem; display: flex; color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); }
+    .action-btn {
+      background: none; border: 1px solid var(--surface-border); border-radius: var(--radius-md);
+      padding: 0.375rem; display: flex; color: var(--text-muted); cursor: pointer;
+      transition: all var(--transition-fast);
+    }
     .action-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .action-btn--danger:hover { border-color: var(--color-error); color: var(--color-error); }
     .action-btn--success:hover { border-color: var(--color-success); color: var(--color-success); }
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 3rem 1rem; text-align: center;
+    }
+    .empty-icon { color: var(--text-muted); margin-bottom: 1rem; }
+    .empty-state h3 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .empty-state p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .skeleton-row { display: flex; gap: 1rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--surface-border); }
+    .skeleton-line { height: 1rem; background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @media (max-width: 767px) {
+      .page { padding: 0.75rem; }
+      .page__header { flex-direction: column; align-items: stretch; }
+      .page__title { font-size: 1.25rem; }
+      .toolbar { flex-direction: column; align-items: stretch; }
+      .filtros { flex-direction: column; }
+      .search-input { min-width: 0; width: 100%; }
+      .table th { display: none; }
+      .table td { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; }
+      .table td::before { content: attr(data-label); font-weight: 600; font-size: 0.75rem; color: var(--text-muted); }
+      .table tr { display: block; border: 1px solid var(--surface-border); border-radius: var(--radius-lg); margin-bottom: 0.5rem; }
+      .table tr:hover { background: transparent; }
+    }
   `]
 })
 export class ReceitasComponent implements OnInit {
@@ -147,7 +210,6 @@ export class ReceitasComponent implements OnInit {
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private repo = inject(ReceitaRepository);
-  private regraRepo = inject(RegraReceitaRepository);
   private catRepo = inject(CategoriaReceitaRepository);
   private contaRepo = inject(ContaBancariaRepository);
 
@@ -165,6 +227,16 @@ export class ReceitasComponent implements OnInit {
   filtroStatus = '';
   filtroCategoria = '';
   busca = '';
+
+  statusOptions: SelectOption[] = [
+    { value: 'Pendente', label: 'Pendentes' },
+    { value: 'Realizado', label: 'Recebidas' },
+  ];
+
+  contasOptions = computed(() => this.contas().map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` })));
+  categoriasOptions = computed(() => this.categorias().map(c => ({ value: c.id, label: c.nome })));
+
+  pagination = useListPagination(this.items, { initialPageSize: 10 });
 
   async ngOnInit() {
     await Promise.all([this.carregarCategorias(), this.carregarContas()]);

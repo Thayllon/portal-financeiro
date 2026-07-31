@@ -23,9 +23,13 @@ export interface Tab {
       padding: 0.625rem 1rem; background: none; border: none; border-bottom: 2px solid transparent;
       font-size: 0.875rem; font-weight: 500; color: var(--text-muted);
       transition: all var(--transition-fast); margin-bottom: -1px;
+      position: relative;
     }
     .tab:hover { color: var(--text-secondary); }
-    .tab--active { color: var(--color-primary); border-bottom-color: var(--color-primary); }
+    .tab--active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+    }
   `]
 })
 export class TabsComponent {

@@ -1,0 +1,70 @@
+$transition-fast: 0.15s ease;
+$transition-normal: 0.2s ease;
+$transition-slow: 0.3s ease;
+
+@mixin transition-fast {
+  transition: all $transition-fast;
+}
+
+@mixin transition-normal {
+  transition: all $transition-normal;
+}
+
+@mixin transition-slow {
+  transition: all $transition-slow;
+}
+
+@mixin gpu-accelerate {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+@mixin fade-in {
+  animation: fadeIn var(--transition-normal) ease;
+}
+
+@mixin slide-in-right {
+  animation: slideInRight var(--transition-normal) ease;
+}
+
+@mixin slide-in-up {
+  animation: slideInUp var(--transition-normal) ease;
+}
+
+@mixin slide-in-down {
+  animation: slideInDown var(--transition-normal) ease;
+}
+
+@mixin scale-in {
+  animation: scaleIn var(--transition-normal) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInDown {
+  from { transform: translateY(-8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

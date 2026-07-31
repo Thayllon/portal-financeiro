@@ -1,0 +1,96 @@
+@use 'responsive' as r;
+
+@mixin page-wrapper {
+  max-width: 1200px;
+  padding: 1.5rem;
+  margin: 0 auto;
+
+  @include r.mobile {
+    padding: 0.75rem;
+  }
+}
+
+@mixin page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+
+  @include r.mobile {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@mixin page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+
+  @include r.mobile {
+    font-size: 1.25rem;
+  }
+}
+
+@mixin page-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+@mixin card {
+  background: var(--content-surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+@mixin card-padded {
+  background: var(--content-surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+}
+
+@mixin toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--surface-muted, #f8fafc);
+  flex-wrap: wrap;
+
+  @include r.mobile {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0.75rem;
+  }
+}
+
+@mixin totals-bar {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+@mixin section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+@mixin grid-cards($min: 220px) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax($min, 1fr));
+  gap: 1rem;
+}

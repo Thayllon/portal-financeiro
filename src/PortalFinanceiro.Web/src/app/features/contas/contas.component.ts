@@ -7,33 +7,50 @@ import { ContaBancaria, ContaBancariaRequest } from '../../core/models/conta-ban
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
-import { SectionHeaderComponent } from '../../shared/components/section-header.component';
-import { SkeletonComponent } from '../../shared/components/skeleton.component';
-import { EmptyStateComponent } from '../../shared/components/empty-state.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-contas',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SectionHeaderComponent, SkeletonComponent, EmptyStateComponent, StatusBadgeComponent],
+  imports: [FormsModule, ModalComponent, StatusBadgeComponent, CustomSelectComponent, LucideDynamicIcon],
   template: `
     <div class="page">
-      <app-section-header
-        title="Contas Bancárias"
-        subtitle="Gerencie suas contas PF e PJ"
-        addLabel="Nova conta"
-        (add)="abrirModal()"
-      />
+      <header class="page__header">
+        <div class="page__header-left">
+          <svg lucideIcon="wallet" class="page__icon" [size]="22" />
+          <div>
+            <h1 class="page__title">Contas Bancárias</h1>
+            <p class="page__subtitle">Gerencie suas contas PF e PJ</p>
+          </div>
+        </div>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Nova conta
+        </button>
+      </header>
 
       @if (loading()) {
-        <app-skeleton type="row" [count]="4" />
+        <div class="table-card">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="skeleton-row">
+              <div class="skeleton-line" style="width: 30%"></div>
+              <div class="skeleton-line" style="width: 20%"></div>
+              <div class="skeleton-line" style="width: 10%"></div>
+            </div>
+          }
+        </div>
       } @else if (contas().length === 0) {
-        <app-empty-state
-          title="Nenhuma conta cadastrada"
-          description="Cadastre sua primeira conta bancária para começar."
-          actionLabel="Nova conta"
-          (action)="abrirModal()"
-        />
+        <div class="empty-state">
+          <svg lucideIcon="wallet" [size]="48" class="empty-icon" />
+          <h3>Nenhuma conta cadastrada</h3>
+          <p>Cadastre sua primeira conta bancária para começar.</p>
+          <button class="add-btn" (click)="abrirModal()">
+            <svg lucideIcon="plus" [size]="16" />
+            Nova conta
+          </button>
+        </div>
       } @else {
         <div class="table-card">
           <table class="table">
@@ -48,15 +65,15 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
             <tbody>
               @for (c of contas(); track c.id) {
                 <tr>
-                  <td class="cell-name">{{ c.nome }}</td>
-                  <td>{{ c.banco }}</td>
-                  <td><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
+                  <td class="cell-name" data-label="Nome">{{ c.nome }}</td>
+                  <td data-label="Banco">{{ c.banco }}</td>
+                  <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
                   <td class="cell-actions">
                     <button class="action-btn" title="Editar" (click)="abrirModal(c)">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                      <svg lucideIcon="pencil" [size]="16" />
                     </button>
                     <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      <svg lucideIcon="trash-2" [size]="16" />
                     </button>
                   </td>
                 </tr>
@@ -83,17 +100,28 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
         <input [(ngModel)]="form.banco" placeholder="Ex: Nubank" class="input" />
       </div>
       <div class="field">
-        <label>Tipo</label>
-        <select [(ngModel)]="form.tipo" class="select">
-          <option value="Pf">Pessoa Física</option>
-          <option value="Pj">Pessoa Jurídica</option>
-        </select>
+        <app-custom-select label="Tipo" placeholder="Selecione o tipo" [options]="tipoOptions" [value]="form.tipo" (valueChange)="form.tipo = $event" />
       </div>
     </app-modal>
   `,
   styles: [`
-    .page { max-width: 900px; }
-    .table-card { background: var(--content-surface); border: 1px solid var(--surface-border); border-radius: var(--radius-lg); overflow: hidden; }
+    .page { max-width: 900px; padding: 1.5rem; margin: 0 auto; }
+    .page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
+    .page__header-left { display: flex; align-items: center; gap: 0.5rem; }
+    .page__icon { color: var(--color-primary); flex-shrink: 0; }
+    .page__title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; }
+    .page__subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .add-btn {
+      display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem;
+      background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-md);
+      font-size: 0.875rem; font-weight: 500; white-space: nowrap;
+      transition: background var(--transition-fast);
+    }
+    .add-btn:hover { background: var(--color-primary-hover); }
+    .table-card {
+      background: var(--content-surface); border: 1px solid var(--surface-border);
+      border-radius: var(--radius-xl); overflow: hidden;
+    }
     .table { width: 100%; border-collapse: collapse; }
     .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--surface-border); }
     .table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-primary); border-bottom: 1px solid var(--surface-border); }
@@ -101,14 +129,41 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
     .table tr:hover { background: var(--surface-hover); }
     .cell-name { font-weight: 500; }
     .cell-actions { display: flex; gap: 0.25rem; justify-content: flex-end; }
-    .action-btn { background: none; border: 1px solid var(--surface-border); border-radius: var(--radius-md); padding: 0.375rem; display: flex; color: var(--text-muted); cursor: pointer; transition: all var(--transition-fast); }
+    .action-btn {
+      background: none; border: 1px solid var(--surface-border); border-radius: var(--radius-md);
+      padding: 0.375rem; display: flex; color: var(--text-muted); cursor: pointer;
+      transition: all var(--transition-fast);
+    }
     .action-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .action-btn--danger:hover { border-color: var(--color-error); color: var(--color-error); }
     .field { display: flex; flex-direction: column; gap: 0.375rem; }
     .field label { font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
-    .input, .select { padding: 0.625rem 0.75rem; border: 1px solid var(--surface-border); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--text-primary); background: var(--content-surface); transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
-    .input:focus, .select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-focus-ring); }
-    .select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2.5rem; cursor: pointer; }
+    .input {
+      padding: 0.625rem 0.75rem; border: 1px solid var(--surface-border); border-radius: var(--radius-md);
+      font-size: 0.875rem; color: var(--text-primary); background: var(--content-surface);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .input:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px var(--color-primary-focus-ring); }
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 3rem 1rem; text-align: center;
+    }
+    .empty-icon { color: var(--text-muted); margin-bottom: 1rem; }
+    .empty-state h3 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+    .empty-state p { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .skeleton-row { display: flex; gap: 1rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--surface-border); }
+    .skeleton-line { height: 1rem; background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--radius-sm); }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    @media (max-width: 767px) {
+      .page { padding: 0.75rem; }
+      .page__header { flex-direction: column; align-items: stretch; }
+      .page__title { font-size: 1.25rem; }
+      .table th { display: none; }
+      .table td { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; }
+      .table td::before { content: attr(data-label); font-weight: 600; font-size: 0.75rem; color: var(--text-muted); }
+      .table tr { display: block; border: 1px solid var(--surface-border); border-radius: var(--radius-lg); margin-bottom: 0.5rem; }
+      .table tr:hover { background: transparent; }
+    }
   `]
 })
 export class ContasComponent implements OnInit {
@@ -124,6 +179,11 @@ export class ContasComponent implements OnInit {
   salvando = signal(false);
 
   form: ContaBancariaRequest = { nome: '', banco: '', tipo: 'Pf' };
+
+  tipoOptions: SelectOption[] = [
+    { value: 'Pf', label: 'Pessoa Física' },
+    { value: 'Pj', label: 'Pessoa Jurídica' },
+  ];
 
   ngOnInit() { this.carregar(); }
 

@@ -1,61 +1,79 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ToastComponent } from '../../shared/components/toast.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, ConfirmDialogComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, ToastComponent, ConfirmDialogComponent, LucideDynamicIcon],
   template: `
     <app-toast />
     <app-confirm-dialog />
-    <div class="layout">
+    <div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
       <aside class="sidebar">
         <div class="sidebar-brand">
           <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
             <rect width="32" height="32" rx="8" fill="#0f766e"/>
             <path d="M8 16h16M16 8v16M10 10l12 12M22 10L10 22" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
           </svg>
-          <span>Portal Financeiro</span>
+          @if (!sidebarCollapsed()) {
+            <span>Portal Financeiro</span>
+          }
         </div>
         <nav class="sidebar-nav">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-            Dashboard
+            <svg lucideIcon="layout-dashboard" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Dashboard</span>
+            }
           </a>
           <a routerLink="/receitas" routerLinkActive="active">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Receitas
+            <svg lucideIcon="trending-up" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Receitas</span>
+            }
           </a>
           <a routerLink="/despesas" routerLinkActive="active">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Despesas
+            <svg lucideIcon="trending-down" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Despesas</span>
+            }
           </a>
           <a routerLink="/contas" routerLinkActive="active">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-            Contas
+            <svg lucideIcon="wallet" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Contas</span>
+            }
           </a>
           <a routerLink="/categorias" routerLinkActive="active">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-            Categorias
+            <svg lucideIcon="tag" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Categorias</span>
+            }
           </a>
         </nav>
         <div class="sidebar-footer">
-          <div class="user-info">
-            <div class="avatar">{{ initials() }}</div>
-            <div class="user-details">
-              <span class="user-name">{{ authService.user()?.nome }}</span>
-              <span class="user-email">{{ authService.user()?.email }}</span>
+          @if (!sidebarCollapsed()) {
+            <div class="user-info">
+              <div class="avatar">{{ initials() }}</div>
+              <div class="user-details">
+                <span class="user-name">{{ authService.user()?.nome }}</span>
+                <span class="user-email">{{ authService.user()?.email }}</span>
+              </div>
             </div>
-          </div>
-          <button (click)="authService.logout()" class="logout-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          }
+          <button (click)="authService.logout()" class="logout-btn" [title]="sidebarCollapsed() ? 'Sair' : ''">
+            <svg lucideIcon="log-out" [size]="18" />
           </button>
         </div>
       </aside>
       <main class="content">
+        <button class="sidebar-toggle" (click)="toggleSidebar()">
+          <svg [lucideIcon]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="18" />
+        </button>
         <router-outlet />
       </main>
     </div>
@@ -78,6 +96,12 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       display: flex;
       flex-direction: column;
       flex-shrink: 0;
+      transition: width 0.2s ease;
+      overflow: hidden;
+    }
+
+    .layout--collapsed .sidebar {
+      width: 60px;
     }
 
     .sidebar-brand {
@@ -86,12 +110,14 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       gap: 0.75rem;
       padding: 1.25rem 1rem;
       border-bottom: 1px solid #1e293b;
+      min-height: 60px;
     }
 
     .sidebar-brand span {
       font-size: 0.9375rem;
       font-weight: 600;
       color: #f8fafc;
+      white-space: nowrap;
     }
 
     .sidebar-nav {
@@ -112,6 +138,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
       font-size: 0.875rem;
       font-weight: 400;
       transition: all 0.15s ease;
+      white-space: nowrap;
     }
 
     .sidebar-nav a:hover {
@@ -122,6 +149,11 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
     .sidebar-nav a.active {
       background: #0f766e;
       color: #fff;
+    }
+
+    .layout--collapsed .sidebar-nav a {
+      justify-content: center;
+      padding: 0.625rem;
     }
 
     .sidebar-footer {
@@ -197,13 +229,54 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.c
     .content {
       flex: 1;
       overflow-y: auto;
-      padding: 1.5rem;
       background: #f1f5f9;
+      position: relative;
+    }
+
+    .sidebar-toggle {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 10;
+      background: var(--content-surface);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 0.375rem;
+      display: flex;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .sidebar-toggle:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    @media (max-width: 767px) {
+      .sidebar {
+        position: fixed;
+        z-index: 100;
+        height: 100vh;
+      }
+      .layout--collapsed .sidebar {
+        width: 0;
+        padding: 0;
+      }
+      .content {
+        margin-left: 0 !important;
+      }
     }
   `]
 })
 export class LayoutComponent {
   authService = inject(AuthService);
+  sidebarCollapsed = signal(false);
+
+  toggleSidebar() {
+    this.sidebarCollapsed.update(v => !v);
+  }
 
   initials(): string {
     const nome = this.authService.user()?.nome ?? '';

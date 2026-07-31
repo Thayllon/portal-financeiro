@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-modal',
   standalone: true,
+  imports: [LucideDynamicIcon],
   template: `
     @if (visible()) {
       <div class="overlay" (click)="close()">
@@ -10,7 +12,7 @@ import { Component, input, output } from '@angular/core';
           <div class="modal-header">
             <h3>{{ title() }}</h3>
             <button class="close-btn" (click)="close()">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              <svg lucideIcon="x" [size]="18" />
             </button>
           </div>
           <div class="modal-body">
@@ -38,6 +40,7 @@ import { Component, input, output } from '@angular/core';
       background: var(--content-surface); border-radius: var(--radius-xl);
       box-shadow: var(--shadow-lg); max-width: 520px; width: 100%;
       max-height: 90vh; overflow-y: auto; animation: scaleIn 0.15s ease;
+      will-change: transform, opacity;
     }
     .modal-header {
       display: flex; align-items: center; justify-content: space-between;
@@ -47,6 +50,7 @@ import { Component, input, output } from '@angular/core';
     .close-btn {
       background: none; border: none; color: var(--text-muted); padding: 0.25rem;
       border-radius: var(--radius-sm); display: flex;
+      transition: all var(--transition-fast);
     }
     .close-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
     .modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }

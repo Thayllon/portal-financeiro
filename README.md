@@ -12,6 +12,7 @@ Sistema de controle financeiro pessoal para gerenciar receitas e despesas recorr
 | ORM | Dapper |
 | Auth | JWT Bearer |
 | Migrations | DbUp |
+| Ícones | Lucide Angular |
 
 ## Estrutura
 
