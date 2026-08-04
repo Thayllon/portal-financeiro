@@ -18,6 +18,8 @@ public class TokenService : ITokenService
         _options = options.Value;
     }
 
+    public int ExpirationHours => _options.ExpirationHours;
+
     public string GerarToken(Usuario usuario)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));

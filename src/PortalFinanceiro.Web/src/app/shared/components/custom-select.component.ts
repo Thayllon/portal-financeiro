@@ -149,9 +149,11 @@ export class CustomSelectComponent implements ControlValueAccessor {
   label = input('');
   placeholder = input('Selecione...');
   options = input<SelectOption[]>([]);
-  disabled = input(false);
   value = input('');
   valueChange = output<string>();
+
+  private _disabled = signal(false);
+  disabled = this._disabled.asReadonly();
 
   internalValue = signal('');
   isOpen = signal(false);
@@ -211,6 +213,6 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    // handled by input signal
+    this._disabled.set(isDisabled);
   }
 }

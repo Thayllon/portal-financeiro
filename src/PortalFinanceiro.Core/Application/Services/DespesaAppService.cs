@@ -4,6 +4,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
+using PortalFinanceiro.Core.Domain.Services;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -18,7 +19,7 @@ public class DespesaAppService : IDespesaAppService
         _regraRepository = regraRepository;
     }
 
-    public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, string? status = null, Guid? idCategoria = null, string? busca = null)
+    public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
     {
         var despesas = await _repository.ListarAsync(idUsuario, mes, ano, idConta, status, idCategoria, busca);
         return despesas.Select(Mapear).ToList();
@@ -61,7 +62,9 @@ public class DespesaAppService : IDespesaAppService
         if (despesas.Count != 0)
             await _repository.InserirEmMassaAsync(despesas);
 
-        return Mapear(despesas.First());
+        return despesas.Count != 0
+            ? Mapear(despesas.First())
+            : Erro.Negocio("NENHUMA_DESPESA_GERADA", "Nenhuma despesa foi gerada para o período informado.");
     }
 
     public async Task<Result<DespesaResponse>> AtualizarAsync(Guid id, DespesaRequest request)

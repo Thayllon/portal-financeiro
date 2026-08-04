@@ -8,16 +8,16 @@ import { Categoria, CategoriaRequest } from '../models/categoria.model';
 export class CategoriaReceitaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(idUsuario: string): Observable<Categoria[]> {
-    return this.get<Categoria[]>('/categorias/receita', { idUsuario });
+  listar(): Observable<Categoria[]> {
+    return this.get<Categoria[]>('/categorias/receita');
   }
 
   obter(id: string): Observable<Categoria> {
     return this.get<Categoria>(`/categorias/receita/${id}`);
   }
 
-  criar(idUsuario: string, data: CategoriaRequest): Observable<Categoria> {
-    return this.post<Categoria>('/categorias/receita', data, { idUsuario });
+  criar(data: CategoriaRequest): Observable<Categoria> {
+    return this.post<Categoria>('/categorias/receita', data);
   }
 
   atualizar(id: string, data: CategoriaRequest): Observable<Categoria> {
@@ -33,16 +33,16 @@ export class CategoriaReceitaRepository extends BaseHttpRepository {
 export class CategoriaDespesaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(idUsuario: string): Observable<Categoria[]> {
-    return this.get<Categoria[]>('/categorias/despesa', { idUsuario });
+  listar(): Observable<Categoria[]> {
+    return this.get<Categoria[]>('/categorias/despesa');
   }
 
   obter(id: string): Observable<Categoria> {
     return this.get<Categoria>(`/categorias/despesa/${id}`);
   }
 
-  criar(idUsuario: string, data: CategoriaRequest): Observable<Categoria> {
-    return this.post<Categoria>('/categorias/despesa', data, { idUsuario });
+  criar(data: CategoriaRequest): Observable<Categoria> {
+    return this.post<Categoria>('/categorias/despesa', data);
   }
 
   atualizar(id: string, data: CategoriaRequest): Observable<Categoria> {

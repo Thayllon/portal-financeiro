@@ -1,4 +1,4 @@
-namespace PortalFinanceiro.Core.Application.Services;
+namespace PortalFinanceiro.Core.Domain.Services;
 
 public static class LancamentoHelper
 {

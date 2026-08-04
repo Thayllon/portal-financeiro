@@ -18,9 +18,9 @@ public class DespesasController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar([FromQuery] Guid idUsuario, [FromQuery] int mes, [FromQuery] int ano, [FromQuery] Guid? idConta = null, [FromQuery] string? status = null, [FromQuery] Guid? idCategoria = null, [FromQuery] string? busca = null)
+    public async Task<IActionResult> Listar([FromQuery] int mes, [FromQuery] int ano, [FromQuery] Guid? idConta = null, [FromQuery] int? status = null, [FromQuery] Guid? idCategoria = null, [FromQuery] string? busca = null)
     {
-        var result = await _service.ListarAsync(idUsuario, mes, ano, idConta, status, idCategoria, busca);
+        var result = await _service.ListarAsync(ObterIdUsuario(), mes, ano, idConta, status, idCategoria, busca);
         return ApiResponse(result);
     }
 
@@ -32,9 +32,9 @@ public class DespesasController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Criar([FromBody] DespesaRequest request, [FromQuery] Guid idUsuario)
+    public async Task<IActionResult> Criar([FromBody] DespesaRequest request)
     {
-        var result = await _service.AdicionarAsync(idUsuario, request);
+        var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
         return ApiResponse(result, 201);
     }
 

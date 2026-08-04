@@ -5,6 +5,7 @@ using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Enums;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
+using PortalFinanceiro.Core.Domain.Services;
 
 namespace PortalFinanceiro.Core.Application.Services;
 

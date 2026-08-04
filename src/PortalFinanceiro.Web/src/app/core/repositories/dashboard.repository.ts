@@ -8,7 +8,7 @@ import { Dashboard } from '../models/dashboard.model';
 export class DashboardRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  obter(idUsuario: string, mes: number, ano: number): Observable<Dashboard> {
-    return this.get<Dashboard>('/dashboard', { idUsuario, mes, ano });
+  obter(mes: number, ano: number): Observable<Dashboard> {
+    return this.get<Dashboard>('/dashboard', { mes, ano });
   }
 }

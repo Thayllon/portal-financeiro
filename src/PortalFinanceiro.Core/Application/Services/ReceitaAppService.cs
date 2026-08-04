@@ -4,6 +4,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
+using PortalFinanceiro.Core.Domain.Services;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -18,7 +19,7 @@ public class ReceitaAppService : IReceitaAppService
         _regraRepository = regraRepository;
     }
 
-    public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, string? status = null, Guid? idCategoria = null, string? busca = null)
+    public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
     {
         var receitas = await _repository.ListarAsync(idUsuario, mes, ano, idConta, status, idCategoria, busca);
         return receitas.Select(Mapear).ToList();
@@ -61,7 +62,9 @@ public class ReceitaAppService : IReceitaAppService
         if (receitas.Count != 0)
             await _repository.InserirEmMassaAsync(receitas);
 
-        return Mapear(receitas.First());
+        return receitas.Count != 0
+            ? Mapear(receitas.First())
+            : Erro.Negocio("NENHUMA_RECEITA_GERADA", "Nenhuma receita foi gerada para o período informado.");
     }
 
     public async Task<Result<ReceitaResponse>> AtualizarAsync(Guid id, ReceitaRequest request)

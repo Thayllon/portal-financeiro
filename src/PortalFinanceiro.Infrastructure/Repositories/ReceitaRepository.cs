@@ -14,7 +14,7 @@ public class ReceitaRepository : SqlBaseRepository, IReceitaRepository
     public async Task<Receita?> ObterPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<Receita>(conn, ReceitaSql.ObterPorId, new { Id = id }));
 
-    public async Task<IEnumerable<Receita>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, string? status = null, Guid? idCategoria = null, string? busca = null)
+    public async Task<IEnumerable<Receita>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<Receita>(conn, ReceitaSql.ListarPorMes, new { IdUsuario = idUsuario, Mes = mes, Ano = ano, IdConta = idConta, Status = status, IdCategoria = idCategoria, Busca = busca }));
 
     public async Task InserirAsync(Receita entity)

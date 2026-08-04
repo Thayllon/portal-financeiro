@@ -6,11 +6,10 @@ import { Receita, ReceitaRequest } from '../models/receita.model';
 import { StatusRequest } from '../models/status.model';
 
 export interface ReceitaFiltros {
-  idUsuario: string;
   mes: number;
   ano: number;
   idConta?: string;
-  status?: string;
+  status?: number;
   idCategoria?: string;
   busca?: string;
 }
@@ -27,8 +26,8 @@ export class ReceitaRepository extends BaseHttpRepository {
     return this.get<Receita>(`/receitas/${id}`);
   }
 
-  criar(idUsuario: string, data: ReceitaRequest): Observable<Receita> {
-    return this.post<Receita>('/receitas', data, { idUsuario });
+  criar(data: ReceitaRequest): Observable<Receita> {
+    return this.post<Receita>('/receitas', data);
   }
 
   atualizar(id: string, data: ReceitaRequest): Observable<Receita> {

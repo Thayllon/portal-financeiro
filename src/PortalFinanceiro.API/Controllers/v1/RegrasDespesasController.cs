@@ -18,9 +18,9 @@ public class RegrasDespesasController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar([FromQuery] Guid idUsuario)
+    public async Task<IActionResult> Listar()
     {
-        var result = await _service.ListarAsync(idUsuario);
+        var result = await _service.ListarAsync(ObterIdUsuario());
         return ApiResponse(result);
     }
 

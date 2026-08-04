@@ -14,7 +14,7 @@ public class DespesaRepository : SqlBaseRepository, IDespesaRepository
     public async Task<Despesa?> ObterPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<Despesa>(conn, DespesaSql.ObterPorId, new { Id = id }));
 
-    public async Task<IEnumerable<Despesa>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, string? status = null, Guid? idCategoria = null, string? busca = null)
+    public async Task<IEnumerable<Despesa>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<Despesa>(conn, DespesaSql.ListarPorMes, new { IdUsuario = idUsuario, Mes = mes, Ano = ano, IdConta = idConta, Status = status, IdCategoria = idCategoria, Busca = busca }));
 
     public async Task InserirAsync(Despesa entity)

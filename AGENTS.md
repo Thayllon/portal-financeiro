@@ -51,13 +51,35 @@ cd src/PortalFinanceiro.Web && npm test
 
 ## Padrões de Código
 
-- Usar `signal()` para estado reativo, `computed()` para derivados
-- Componentes standalone com `imports` explícitos
-- Lucide icons: `<svg lucideIcon="nome" [size]="16" />`
-- Forms: ControlValueAccessor para componentes reutilizáveis (CustomSelect)
-- SCSS: mixins do design system (`_responsive.scss`, `_transitions.scss`, etc.)
+### Backend (C#)
+
+- **Entidades**: Usar `private set` em TODAS as propriedades de domínio
+- **Propriedades de navegação** (string display): usar DTO/projeção separada, NÃO `public set` na entidade
+- **Result pattern**: Services retornam `Result<T>` em vez de exceptions
+- **FluentValidation**: Validators complementam entidades, NÃO substituem
+- **Status enum**: Usar `StatusMensal` (1=Pendente, 2=Realizado), NÃO string
+- **Controllers**: Extrair `idUsuario` de `User.FindFirst(ClaimTypes.NameIdentifier)`, NUNCA de query params
+- **Controllers**: Apenas chamar service + ApiResponse, NUNCA conter lógica de negócio
+- **Services**: Orquestrar operações, delegar regras de domínio para entidades
+- **LancamentoHelper**: Fica em `Domain/Services/`, é lógica de domínio
+
+### Frontend (TypeScript)
+
+- **Signals**: Usar `signal()` para estado, `computed()` para derivados
+- **Componentes standalone** com `imports` explícitos
+- **Lucide icons**: `<svg lucideIcon="nome" [size]="16" />`
+- **Forms**: ControlValueAccessor para componentes reutilizáveis (CustomSelect)
+- **SCSS**: Mixins do design system (`_responsive.scss`, `_transitions.scss`, etc.)
+- **Params**: NUNCA enviar `undefined` como query param — usar spread condicional
+- **Status**: Enviar como `number` (1 ou 2), NÃO como string
+- **Repositorios**: NÃO incluir `idUsuario` nos params (vem do JWT)
+
+### Design System
+
 - Nunca hardcodar hex fora do design system
 - Responsividade: breakpoint mobile em 767px
+- Transições: usar `will-change` para GPU acceleration
+- Tokens: `_tokens.scss`, `_colors.scss`, `_responsive.scss`, `_transitions.scss`
 
 ## Estrutura de Pastas
 
@@ -90,3 +112,14 @@ src/app/
 
 - `master` — versão estável
 - `develop` — branch de trabalho ativa
+
+## Checklist de Code Review
+
+- [ ] Status é `int?` (não `string?`) em toda a cadeia
+- [ ] `idUsuario` vem do JWT (não de query param)
+- [ ] Props de entidade são `private set`
+- [ ] Query params não contêm `undefined`
+- [ ] Validators alinhados com regras das entidades
+- [ ] Frontend envia status como number (1 ou 2)
+- [ ] Repositorios frontend não enviam `idUsuario`
+- [ ] Nenhum hex hardcoded fora do design system

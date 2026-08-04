@@ -41,7 +41,7 @@ public class AuthAppService : IAuthAppService
             UsuarioId = usuario.Id,
             Nome = usuario.Nome,
             Email = usuario.Email,
-            DataExpiracao = DateTime.UtcNow.AddHours(8)
+            DataExpiracao = DateTime.UtcNow.AddHours(_tokenService.ExpirationHours)
         };
     }
 

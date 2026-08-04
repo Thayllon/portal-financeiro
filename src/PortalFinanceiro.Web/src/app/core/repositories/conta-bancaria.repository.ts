@@ -8,16 +8,16 @@ import { ContaBancaria, ContaBancariaRequest } from '../models/conta-bancaria.mo
 export class ContaBancariaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(idUsuario: string): Observable<ContaBancaria[]> {
-    return this.get<ContaBancaria[]>('/contas-bancarias', { idUsuario });
+  listar(): Observable<ContaBancaria[]> {
+    return this.get<ContaBancaria[]>('/contas-bancarias');
   }
 
   obter(id: string): Observable<ContaBancaria> {
     return this.get<ContaBancaria>(`/contas-bancarias/${id}`);
   }
 
-  criar(idUsuario: string, data: ContaBancariaRequest): Observable<ContaBancaria> {
-    return this.post<ContaBancaria>('/contas-bancarias', data, { idUsuario });
+  criar(data: ContaBancariaRequest): Observable<ContaBancaria> {
+    return this.post<ContaBancaria>('/contas-bancarias', data);
   }
 
   atualizar(id: string, data: ContaBancariaRequest): Observable<ContaBancaria> {

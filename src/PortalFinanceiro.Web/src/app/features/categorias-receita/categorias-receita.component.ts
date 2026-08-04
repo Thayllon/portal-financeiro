@@ -101,7 +101,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 
     <app-modal
       [visible]="modalVisible()"
-      [title]="'Nova categoria de ' + tabAtiva()"
+      [title]="editando() ? 'Editar categoria de ' + tabAtiva() : 'Nova categoria de ' + tabAtiva()"
       [saving]="salvando()"
       (visibleChange)="fecharModal()"
       (save)="salvar()"
@@ -227,7 +227,7 @@ export class CategoriasComponent implements OnInit {
   async carregar() {
     this.loading.set(true);
     try {
-      this.items.set(await firstValueFrom(this.repo.listar(this.auth.user()!.usuarioId)));
+      this.items.set(await firstValueFrom(this.repo.listar()));
     } catch { this.notify.error('Erro ao carregar categorias'); }
     finally { this.loading.set(false); }
   }
@@ -257,7 +257,7 @@ export class CategoriasComponent implements OnInit {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, this.form));
         this.notify.success('Categoria atualizada');
       } else {
-        await firstValueFrom(this.repo.criar(this.auth.user()!.usuarioId, this.form));
+        await firstValueFrom(this.repo.criar(this.form));
         this.notify.success('Categoria criada');
       }
       this.fecharModal();

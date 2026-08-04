@@ -76,10 +76,10 @@ public class DashboardAppService : IDashboardAppService
             if (proximoMes > 12) { proximoMes -= 12; proximoAno++; }
 
             var rec = regrasReceita
-                .Where(r => r.Ativo && r.DataInicio <= new DateTime(proximoAno, proximoMes, 1))
+                .Where(r => r.Ativo && r.DataInicio <= new DateTime(proximoAno, proximoMes, 1) && r.DataFim >= new DateTime(proximoAno, proximoMes, 1))
                 .Sum(r => r.Valor);
             var desp = regrasDespesa
-                .Where(d => d.Ativo && d.DataInicio <= new DateTime(proximoAno, proximoMes, 1))
+                .Where(d => d.Ativo && d.DataInicio <= new DateTime(proximoAno, proximoMes, 1) && d.DataFim >= new DateTime(proximoAno, proximoMes, 1))
                 .Sum(d => d.Valor);
 
             previsao.Add(new PrevisaoMensal

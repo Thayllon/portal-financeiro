@@ -8,8 +8,8 @@ import { Regra, RegraRequest } from '../models/regra.model';
 export class RegraReceitaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(idUsuario: string): Observable<Regra[]> {
-    return this.get<Regra[]>('/regras-receitas', { idUsuario });
+  listar(): Observable<Regra[]> {
+    return this.get<Regra[]>('/regras-receitas');
   }
 
   obter(id: string): Observable<Regra> {
@@ -29,8 +29,8 @@ export class RegraReceitaRepository extends BaseHttpRepository {
 export class RegraDespesaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(idUsuario: string): Observable<Regra[]> {
-    return this.get<Regra[]>('/regras-despesas', { idUsuario });
+  listar(): Observable<Regra[]> {
+    return this.get<Regra[]>('/regras-despesas');
   }
 
   obter(id: string): Observable<Regra> {

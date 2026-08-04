@@ -6,11 +6,10 @@ import { Despesa, DespesaRequest } from '../models/despesa.model';
 import { StatusRequest } from '../models/status.model';
 
 export interface DespesaFiltros {
-  idUsuario: string;
   mes: number;
   ano: number;
   idConta?: string;
-  status?: string;
+  status?: number;
   idCategoria?: string;
   busca?: string;
 }
@@ -27,8 +26,8 @@ export class DespesaRepository extends BaseHttpRepository {
     return this.get<Despesa>(`/despesas/${id}`);
   }
 
-  criar(idUsuario: string, data: DespesaRequest): Observable<Despesa> {
-    return this.post<Despesa>('/despesas', data, { idUsuario });
+  criar(data: DespesaRequest): Observable<Despesa> {
+    return this.post<Despesa>('/despesas', data);
   }
 
   atualizar(id: string, data: DespesaRequest): Observable<Despesa> {

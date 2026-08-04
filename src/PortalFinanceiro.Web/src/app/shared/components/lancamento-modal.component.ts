@@ -1,8 +1,9 @@
-import { Component, input, output, signal, effect } from '@angular/core';
+import { Component, input, output, signal, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModalComponent } from './modal.component';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
+import { NotificationService } from '../../core/services/notification.service';
 
 export interface LancamentoForm {
   descricao: string;
@@ -15,6 +16,15 @@ export interface LancamentoForm {
   dia?: number;
   diaUtil?: boolean;
   dataFim?: string;
+}
+
+interface LancamentoItem {
+  descricao: string;
+  valor: number;
+  data: string;
+  idConta: string;
+  idCategoria: string;
+  idSubcategoria?: string;
 }
 
 @Component({
@@ -36,11 +46,11 @@ export interface LancamentoForm {
       <div class="field-row">
         <div class="field">
           <label>Valor (R$)</label>
-          <input type="number" step="0.01" [(ngModel)]="form.valor" placeholder="0,00" class="input" />
+          <input type="number" step="0.01" [(ngModel)]="form.valor" (ngModelChange)="calcularPreview()" placeholder="0,00" class="input" />
         </div>
         <div class="field">
           <label>Data</label>
-          <input type="date" [(ngModel)]="form.data" class="input" />
+          <input type="date" [(ngModel)]="form.data" (ngModelChange)="calcularPreview()" class="input" />
         </div>
       </div>
       <div class="field">
@@ -75,7 +85,7 @@ export interface LancamentoForm {
 
       <div class="repete-toggle">
         <label class="checkbox-label">
-          <input type="checkbox" [(ngModel)]="form.repete" class="checkbox" />
+          <input type="checkbox" [(ngModel)]="form.repete" (ngModelChange)="calcularPreview()" class="checkbox" />
           <span>Repete mensalmente?</span>
         </label>
       </div>
@@ -84,7 +94,7 @@ export interface LancamentoForm {
         <div class="field-row">
           <div class="field">
             <label>Dia</label>
-            <input type="number" [min]="1" [max]="form.diaUtil ? 5 : 31" [(ngModel)]="form.dia" class="input" />
+            <input type="number" [min]="1" [max]="form.diaUtil ? 5 : 31" [(ngModel)]="form.dia" (ngModelChange)="calcularPreview()" class="input" />
           </div>
           <div class="field" style="justify-content: flex-end; padding-bottom: 0.375rem;">
             <label class="checkbox-label">
@@ -96,7 +106,7 @@ export interface LancamentoForm {
         <div class="field-row">
           <div class="field">
             <label>Data fim</label>
-            <input type="date" [(ngModel)]="form.dataFim" class="input" />
+            <input type="date" [(ngModel)]="form.dataFim" (ngModelChange)="calcularPreview()" class="input" />
           </div>
         </div>
         @if (previewMeses() > 0) {
@@ -120,8 +130,10 @@ export interface LancamentoForm {
   `]
 })
 export class LancamentoModalComponent {
+  private notify = inject(NotificationService);
+
   visible = input(false);
-  editando = input<any>(null);
+  editando = input<LancamentoItem | null>(null);
   tipoLabel = input('receita');
   categorias = input<Categoria[]>([]);
   contas = input<ContaBancaria[]>([]);
@@ -156,19 +168,7 @@ export class LancamentoModalComponent {
           this.form = this.emptyForm();
           this.form.data = hoje;
         }
-      }
-    });
-
-    effect(() => {
-      const ini = this.form.data;
-      const fim = this.form.dataFim;
-      if (ini && this.form.repete) {
-        const inicio = new Date(ini + 'T00:00:00');
-        const final = fim ? new Date(fim + 'T00:00:00') : inicio;
-        let meses = (final.getFullYear() - inicio.getFullYear()) * 12 + (final.getMonth() - inicio.getMonth());
-        this.previewMeses.set(meses > 0 ? meses : 1);
-      } else {
-        this.previewMeses.set(0);
+        this.calcularPreview();
       }
     });
   }
@@ -185,6 +185,19 @@ export class LancamentoModalComponent {
     this.form.idSubcategoria = undefined;
   }
 
+  calcularPreview() {
+    const ini = this.form.data;
+    const fim = this.form.dataFim;
+    if (ini && this.form.repete) {
+      const inicio = new Date(ini + 'T00:00:00');
+      const final = fim ? new Date(fim + 'T00:00:00') : inicio;
+      let meses = (final.getFullYear() - inicio.getFullYear()) * 12 + (final.getMonth() - inicio.getMonth());
+      this.previewMeses.set(meses > 0 ? meses : 1);
+    } else {
+      this.previewMeses.set(0);
+    }
+  }
+
   title() {
     return this.editando() ? `Editar ${this.tipoLabel()}` : `Nova ${this.tipoLabel()}`;
   }
@@ -192,7 +205,18 @@ export class LancamentoModalComponent {
   fechar() { this.visibleChange.emit(false); }
 
   salvar() {
-    if (!this.form.descricao || !this.form.valor || !this.form.idConta || !this.form.idCategoria || !this.form.data) return;
+    if (!this.form.descricao) { this.notify.error('Descrição é obrigatória'); return; }
+    if (this.form.valor == null || isNaN(this.form.valor) || this.form.valor <= 0) { this.notify.error('Valor deve ser maior que zero'); return; }
+    if (!this.form.idConta) { this.notify.error('Conta é obrigatória'); return; }
+    if (!this.form.idCategoria) { this.notify.error('Categoria é obrigatória'); return; }
+    if (!this.form.data) { this.notify.error('Data é obrigatória'); return; }
+
+    if (this.form.repete) {
+      if (!this.form.dia || this.form.dia < 1 || this.form.dia > 31) { this.notify.error('Dia deve estar entre 1 e 31'); return; }
+      if (this.form.diaUtil && this.form.dia > 5) { this.notify.error('Dia útil deve estar entre 1 e 5'); return; }
+      if (!this.form.dataFim) { this.notify.error('Data fim é obrigatória para recorrência'); return; }
+    }
+
     this.saved.emit({ ...this.form });
   }
 

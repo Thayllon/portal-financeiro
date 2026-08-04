@@ -9,10 +9,20 @@ public class RegraReceitaRequestValidator : AbstractValidator<RegraReceitaReques
     {
         RuleFor(x => x.Descricao).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Valor).GreaterThan(0);
-        RuleFor(x => x.Dia).InclusiveBetween(1, 31);
         RuleFor(x => x.IdCategoria).NotEmpty();
         RuleFor(x => x.IdConta).NotEmpty();
         RuleFor(x => x.DataInicio).NotEmpty();
         RuleFor(x => x.DataFim).NotEmpty();
+        RuleFor(x => x.DataFim).GreaterThanOrEqualTo(x => x.DataInicio);
+
+        When(x => x.DiaUtil, () =>
+        {
+            RuleFor(x => x.Dia).InclusiveBetween(1, 5);
+        });
+
+        When(x => !x.DiaUtil, () =>
+        {
+            RuleFor(x => x.Dia).InclusiveBetween(1, 31);
+        });
     }
 }

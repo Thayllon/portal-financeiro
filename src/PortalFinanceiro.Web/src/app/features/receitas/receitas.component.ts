@@ -227,10 +227,11 @@ export class ReceitasComponent implements OnInit {
   filtroStatus = '';
   filtroCategoria = '';
   busca = '';
+  private _buscaTimer: ReturnType<typeof setTimeout> | null = null;
 
   statusOptions: SelectOption[] = [
-    { value: 'Pendente', label: 'Pendentes' },
-    { value: 'Realizado', label: 'Recebidas' },
+    { value: '1', label: 'Pendentes' },
+    { value: '2', label: 'Recebidas' },
   ];
 
   contasOptions = computed(() => this.contas().map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` })));
@@ -247,13 +248,12 @@ export class ReceitasComponent implements OnInit {
     this.loading.set(true);
     try {
       const filtros: ReceitaFiltros = {
-        idUsuario: this.auth.user()!.usuarioId,
         mes: this.mes(),
         ano: this.ano(),
-        idConta: this.filtroConta || undefined,
-        status: this.filtroStatus || undefined,
-        idCategoria: this.filtroCategoria || undefined,
-        busca: this.busca || undefined
+        ...(this.filtroConta ? { idConta: this.filtroConta } : {}),
+        ...(this.filtroStatus ? { status: Number(this.filtroStatus) } : {}),
+        ...(this.filtroCategoria ? { idCategoria: this.filtroCategoria } : {}),
+        ...(this.busca ? { busca: this.busca } : {})
       };
       this.items.set(await firstValueFrom(this.repo.listar(filtros)));
     } catch { this.notify.error('Erro ao carregar receitas'); }
@@ -261,16 +261,16 @@ export class ReceitasComponent implements OnInit {
   }
 
   async carregarCategorias() {
-    try { this.categorias.set(await firstValueFrom(this.catRepo.listar(this.auth.user()!.usuarioId))); } catch {}
+    try { this.categorias.set(await firstValueFrom(this.catRepo.listar())); } catch {}
   }
 
   async carregarContas() {
-    try { this.contas.set(await firstValueFrom(this.contaRepo.listar(this.auth.user()!.usuarioId))); } catch {}
+    try { this.contas.set(await firstValueFrom(this.contaRepo.listar())); } catch {}
   }
 
   onBuscaChange() {
-    clearTimeout((this as any)._buscaTimer);
-    (this as any)._buscaTimer = setTimeout(() => this.carregar(), 400);
+    if (this._buscaTimer) clearTimeout(this._buscaTimer);
+    this._buscaTimer = setTimeout(() => this.carregar(), 400);
   }
 
   navegarMes(dir: number) {
@@ -303,7 +303,7 @@ export class ReceitasComponent implements OnInit {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, request));
         this.notify.success('Receita atualizada');
       } else {
-        await firstValueFrom(this.repo.criar(this.auth.user()!.usuarioId, request));
+        await firstValueFrom(this.repo.criar(request));
         this.notify.success(data.repete ? 'Receita recorrente criada' : 'Receita criada');
       }
       this.fecharModal();
@@ -338,7 +338,7 @@ export class ReceitasComponent implements OnInit {
     } catch { this.notify.error('Erro ao excluir receita'); }
   }
 
-  total() { return this.items().reduce((s, l) => s + l.valor, 0); }
-  totalRecebido() { return this.items().filter(l => l.status === 'Realizado').reduce((s, l) => s + l.valor, 0); }
-  totalPendente() { return this.total() - this.totalRecebido(); }
+  total = computed(() => this.items().reduce((s, l) => s + l.valor, 0));
+  totalRecebido = computed(() => this.items().filter(l => l.status === 'Realizado').reduce((s, l) => s + l.valor, 0));
+  totalPendente = computed(() => this.total() - this.totalRecebido());
 }

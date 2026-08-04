@@ -224,7 +224,7 @@ export class DashboardComponent implements OnInit {
   async carregar() {
     this.loading.set(true);
     try {
-      this.data.set(await firstValueFrom(this.repo.obter(this.auth.user()!.usuarioId, this.mes(), this.ano())));
+      this.data.set(await firstValueFrom(this.repo.obter(this.mes(), this.ano())));
     } catch { this.notify.error('Erro ao carregar dashboard'); }
     finally { this.loading.set(false); }
   }

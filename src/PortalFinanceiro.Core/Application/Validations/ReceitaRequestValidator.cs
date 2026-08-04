@@ -15,8 +15,13 @@ public class ReceitaRequestValidator : AbstractValidator<ReceitaRequest>
 
         When(x => x.Repete, () =>
         {
-            RuleFor(x => x.Dia).NotNull().InclusiveBetween(1, 31);
             RuleFor(x => x.DataFim).NotNull();
+            RuleFor(x => x.Dia).NotNull().InclusiveBetween(1, 31);
+
+            When(x => x.DiaUtil == true, () =>
+            {
+                RuleFor(x => x.Dia).InclusiveBetween(1, 5);
+            });
         });
     }
 }

@@ -18,9 +18,9 @@ public class ContasBancariasController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar([FromQuery] Guid idUsuario)
+    public async Task<IActionResult> Listar()
     {
-        var result = await _service.ListarAsync(idUsuario);
+        var result = await _service.ListarAsync(ObterIdUsuario());
         return ApiResponse(result);
     }
 
@@ -32,9 +32,9 @@ public class ContasBancariasController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Criar([FromBody] ContaBancariaRequest request, [FromQuery] Guid idUsuario)
+    public async Task<IActionResult> Criar([FromBody] ContaBancariaRequest request)
     {
-        var result = await _service.AdicionarAsync(idUsuario, request);
+        var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
         return ApiResponse(result, 201);
     }
 

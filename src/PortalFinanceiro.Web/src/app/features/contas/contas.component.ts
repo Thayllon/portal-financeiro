@@ -190,7 +190,7 @@ export class ContasComponent implements OnInit {
   async carregar() {
     this.loading.set(true);
     try {
-      const data = await firstValueFrom(this.repo.listar(this.auth.user()!.usuarioId));
+      const data = await firstValueFrom(this.repo.listar());
       this.contas.set(data);
     } catch { this.notify.error('Erro ao carregar contas'); }
     finally { this.loading.set(false); }
@@ -220,7 +220,7 @@ export class ContasComponent implements OnInit {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, this.form));
         this.notify.success('Conta atualizada');
       } else {
-        await firstValueFrom(this.repo.criar(this.auth.user()!.usuarioId, this.form));
+        await firstValueFrom(this.repo.criar(this.form));
         this.notify.success('Conta criada');
       }
       this.fecharModal();
