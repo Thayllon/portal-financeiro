@@ -48,5 +48,5 @@ public class DespesaRepository : SqlBaseRepository, IDespesaRepository
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, DespesaSql.Atualizar, entity));
 
     public async Task ExcluirAsync(Guid id)
-        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, $"UPDATE {SqlDialect.Current.SchemaPrefix}Despesa SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id", new { Id = id }));
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, DespesaSql.Excluir, new { Id = id }));
 }

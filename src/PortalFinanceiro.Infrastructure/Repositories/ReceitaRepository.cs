@@ -48,5 +48,5 @@ public class ReceitaRepository : SqlBaseRepository, IReceitaRepository
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ReceitaSql.Atualizar, entity));
 
     public async Task ExcluirAsync(Guid id)
-        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, $"UPDATE {SqlDialect.Current.SchemaPrefix}Receita SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id", new { Id = id }));
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ReceitaSql.Excluir, new { Id = id }));
 }
