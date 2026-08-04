@@ -87,9 +87,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
       display: flex;
       height: calc(100vh - 24px);
       margin: 12px;
-      overflow: hidden;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      gap: 12px;
     }
 
     .sidebar {
@@ -102,6 +100,8 @@ import { LucideDynamicIcon } from '@lucide/angular';
       transition: width 0.2s ease;
       overflow: visible;
       position: relative;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     }
 
     .layout--collapsed .sidebar {
@@ -116,6 +116,8 @@ import { LucideDynamicIcon } from '@lucide/angular';
       border-bottom: 1px solid #1e293b;
       min-height: 60px;
       overflow: hidden;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
     }
 
     .sidebar-brand span {
@@ -194,6 +196,8 @@ import { LucideDynamicIcon } from '@lucide/angular';
       padding: 0.75rem 1rem;
       border-top: 1px solid #1e293b;
       overflow: hidden;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
     }
 
     .user-info {
@@ -261,8 +265,10 @@ import { LucideDynamicIcon } from '@lucide/angular';
     .content {
       flex: 1;
       overflow-y: auto;
-      background: #f1f5f9;
+      background: #fff;
       position: relative;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     }
 
     @media (max-width: 767px) {
