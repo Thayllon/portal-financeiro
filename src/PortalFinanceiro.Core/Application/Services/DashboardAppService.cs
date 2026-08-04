@@ -30,8 +30,10 @@ public class DashboardAppService : IDashboardAppService
 
     public async Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano)
     {
-        var receitas = await _receitaRepository.ListarAsync(idUsuario, mes, ano);
-        var despesas = await _despesaRepository.ListarAsync(idUsuario, mes, ano);
+        try
+        {
+            var receitas = await _receitaRepository.ListarAsync(idUsuario, mes, ano);
+            var despesas = await _despesaRepository.ListarAsync(idUsuario, mes, ano);
 
         var totalReceitas = receitas.Sum(r => r.Valor);
         var totalRecebido = receitas.Where(r => r.Status == StatusMensal.Realizado).Sum(r => r.Valor);
@@ -106,5 +108,10 @@ public class DashboardAppService : IDashboardAppService
             ResumoPorCategoria = resumoPorCategoria,
             PrevisaoProximosMeses = previsao
         };
+        }
+        catch (Exception ex)
+        {
+            return Erro.Infraestrutura($"Erro ao carregar dashboard: {ex.Message}");
+        }
     }
 }

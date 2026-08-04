@@ -16,6 +16,12 @@ public class ContaBancariaRepository : SqlBaseRepository, IContaBancariaReposito
     public async Task<IEnumerable<ContaBancaria>> ListarPorUsuarioAsync(Guid idUsuario)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<ContaBancaria>(conn, ContaBancariaSql.ListarPorUsuario, new { IdUsuario = idUsuario }));
 
+    public async Task<int> ContarReceitasAsync(Guid idConta)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ContaBancariaSql.ContarReceitas, new { IdConta = idConta }));
+
+    public async Task<int> ContarDespesasAsync(Guid idConta)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ContaBancariaSql.ContarDespesas, new { IdConta = idConta }));
+
     public async Task InserirAsync(ContaBancaria entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ContaBancariaSql.Inserir, entity));
 

@@ -17,6 +17,18 @@ public class DespesaRepository : SqlBaseRepository, IDespesaRepository
     public async Task<IEnumerable<Despesa>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<Despesa>(conn, DespesaSql.ListarPorMes, new { IdUsuario = idUsuario, Mes = mes, Ano = ano, IdConta = idConta, Status = status, IdCategoria = idCategoria, Busca = busca }));
 
+    public async Task<int> ContarPorCategoriaAsync(Guid idCategoria)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, DespesaSql.ContarPorCategoria, new { IdCategoria = idCategoria }));
+
+    public async Task<int> ContarPorSubcategoriaAsync(Guid idSubcategoria)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, DespesaSql.ContarPorSubcategoria, new { IdSubcategoria = idSubcategoria }));
+
+    public async Task<int> ContarPorRegraAsync(Guid idRegra)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, DespesaSql.ContarPorRegra, new { IdRegra = idRegra }));
+
+    public async Task<IEnumerable<Despesa>> ListarPorRegraAsync(Guid idRegra)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<Despesa>(conn, DespesaSql.ListarPorRegra, new { IdRegra = idRegra }));
+
     public async Task InserirAsync(Despesa entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, DespesaSql.Inserir, entity));
 

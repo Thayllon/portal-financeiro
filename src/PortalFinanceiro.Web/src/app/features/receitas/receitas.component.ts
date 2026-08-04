@@ -83,7 +83,7 @@ export class ReceitasComponent implements OnInit {
   }
 
   async carregarCategorias() {
-    try { this.categorias.set(await firstValueFrom(this.catRepo.listar())); } catch {}
+    try { this.categorias.set(await firstValueFrom(this.catRepo.listar(this.auth.user()!.usuarioId))); } catch {}
   }
 
   async carregarContas() {

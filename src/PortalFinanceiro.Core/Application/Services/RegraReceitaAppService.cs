@@ -48,10 +48,9 @@ public class RegraReceitaAppService : IRegraReceitaAppService
         await _regraRepository.AtualizarAsync(regra);
 
         var agora = DateTime.UtcNow;
-        var parcelas = await _receitaRepository.ListarAsync(regra.IdUsuario, DateTime.UtcNow.Month, DateTime.UtcNow.Year);
+        var parcelas = await _receitaRepository.ListarPorRegraAsync(regra.Id);
 
-        // Atualiza parcelas futuras pendentes da regra
-        foreach (var parcela in parcelas.Where(p => p.IdRegra == regra.Id && p.Status == StatusMensal.Pendente && p.Data >= agora))
+        foreach (var parcela in parcelas.Where(p => p.Status == StatusMensal.Pendente && p.Data >= agora))
         {
             var dataVencimento = LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, parcela.Data.Month, parcela.Data.Year);
             var atualizar = parcela.Atualizar(regra.Descricao, regra.Valor, dataVencimento, regra.IdConta, regra.IdCategoria, parcela.IdSubcategoria);
@@ -72,8 +71,8 @@ public class RegraReceitaAppService : IRegraReceitaAppService
         await _regraRepository.AtualizarAsync(regra);
 
         var agora = DateTime.UtcNow;
-        var parcelas = await _receitaRepository.ListarAsync(regra.IdUsuario, DateTime.UtcNow.Month, DateTime.UtcNow.Year);
-        foreach (var parcela in parcelas.Where(p => p.IdRegra == regra.Id && p.Status == StatusMensal.Pendente && p.Data >= agora))
+        var parcelas = await _receitaRepository.ListarPorRegraAsync(regra.Id);
+        foreach (var parcela in parcelas.Where(p => p.Status == StatusMensal.Pendente && p.Data >= agora))
         {
             parcela.Desativar();
             await _receitaRepository.AtualizarAsync(parcela);

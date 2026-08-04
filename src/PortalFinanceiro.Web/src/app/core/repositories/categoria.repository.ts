@@ -8,8 +8,8 @@ import { Categoria, CategoriaRequest } from '../models/categoria.model';
 export class CategoriaReceitaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(): Observable<Categoria[]> {
-    return this.get<Categoria[]>('/categorias/receita');
+  listar(idUsuario: string): Observable<Categoria[]> {
+    return this.get<Categoria[]>('/categorias/receita', { idUsuario });
   }
 
   obter(id: string): Observable<Categoria> {
@@ -33,8 +33,8 @@ export class CategoriaReceitaRepository extends BaseHttpRepository {
 export class CategoriaDespesaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(): Observable<Categoria[]> {
-    return this.get<Categoria[]>('/categorias/despesa');
+  listar(idUsuario: string): Observable<Categoria[]> {
+    return this.get<Categoria[]>('/categorias/despesa', { idUsuario });
   }
 
   obter(id: string): Observable<Categoria> {

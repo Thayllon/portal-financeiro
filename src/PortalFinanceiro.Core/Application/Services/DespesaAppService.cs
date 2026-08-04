@@ -115,7 +115,11 @@ public class DespesaAppService : IDespesaAppService
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
 
-        await _repository.ExcluirAsync(id);
+        if (despesa.Status == Domain.Enums.StatusMensal.Realizado)
+            return Erro.Negocio("DESPESA_JA_PAGA", "Não é possível excluir uma despesa já paga. Estorne primeiro.");
+
+        despesa.Desativar();
+        await _repository.AtualizarAsync(despesa);
         return Resultado.Sucesso();
     }
 

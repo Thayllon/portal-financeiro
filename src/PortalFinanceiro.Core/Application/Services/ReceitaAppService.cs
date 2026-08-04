@@ -115,7 +115,11 @@ public class ReceitaAppService : IReceitaAppService
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
 
-        await _repository.ExcluirAsync(id);
+        if (receita.Status == Domain.Enums.StatusMensal.Realizado)
+            return Erro.Negocio("RECEITA_JA_RECEBIDA", "Não é possível excluir uma receita já recebida. Estorne primeiro.");
+
+        receita.Desativar();
+        await _repository.AtualizarAsync(receita);
         return Resultado.Sucesso();
     }
 

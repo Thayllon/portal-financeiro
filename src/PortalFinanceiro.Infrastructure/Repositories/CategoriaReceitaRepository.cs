@@ -16,9 +16,15 @@ public class CategoriaReceitaRepository : SqlBaseRepository, ICategoriaReceitaRe
     public async Task<IEnumerable<CategoriaReceita>> ListarPorUsuarioAsync(Guid idUsuario)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ListarPorUsuario, new { IdUsuario = idUsuario }));
 
+    public async Task<IEnumerable<CategoriaReceita>> ListarPorPaiAsync(Guid? categoriaPaiId)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ListarPorPai, new { CategoriaPaiId = categoriaPaiId }));
+
     public async Task InserirAsync(CategoriaReceita entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, CategoriaReceitaSql.Inserir, entity));
 
     public async Task AtualizarAsync(CategoriaReceita entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, CategoriaReceitaSql.Atualizar, entity));
+
+    public async Task ExcluirAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, CategoriaReceitaSql.Excluir, new { Id = id }));
 }

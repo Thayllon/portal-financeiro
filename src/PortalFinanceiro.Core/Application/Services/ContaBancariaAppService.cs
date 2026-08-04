@@ -61,6 +61,17 @@ public class ContaBancariaAppService : IContaBancariaAppService
         if (conta is null)
             return Erro.NaoEncontrado("Conta bancária");
 
+        var receitas = await _repository.ContarReceitasAsync(id);
+        var despesas = await _repository.ContarDespesasAsync(id);
+
+        if (receitas > 0 || despesas > 0)
+        {
+            var detalhes = new List<string>();
+            if (receitas > 0) detalhes.Add($"{receitas} receita(s)");
+            if (despesas > 0) detalhes.Add($"{despesas} despesa(s)");
+            return Erro.Negocio("CONTA_COM_VINCULOS", $"Não é possível excluir. Existem {string.Join(" e ", detalhes)} vinculadas a esta conta.");
+        }
+
         conta.Desativar();
         await _repository.AtualizarAsync(conta);
         return Resultado.Sucesso();

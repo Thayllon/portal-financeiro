@@ -10,10 +10,12 @@ namespace PortalFinanceiro.Core.Application.Services;
 public class CategoriaDespesaAppService : ICategoriaDespesaAppService
 {
     private readonly ICategoriaDespesaRepository _repository;
+    private readonly IDespesaRepository _despesaRepository;
 
-    public CategoriaDespesaAppService(ICategoriaDespesaRepository repository)
+    public CategoriaDespesaAppService(ICategoriaDespesaRepository repository, IDespesaRepository despesaRepository)
     {
         _repository = repository;
+        _despesaRepository = despesaRepository;
     }
 
     public async Task<Result<IEnumerable<CategoriaResponse>>> ListarAsync(Guid idUsuario)
@@ -61,8 +63,28 @@ public class CategoriaDespesaAppService : ICategoriaDespesaAppService
         if (categoria is null)
             return Erro.NaoEncontrado("Categoria");
 
+        var vinculadas = await _despesaRepository.ContarPorCategoriaAsync(id);
+        if (vinculadas > 0)
+            return Erro.Negocio("CATEGORIA_COM_VINCULOS", $"Não é possível excluir. Existem {vinculadas} despesa(s) vinculada(s) a esta categoria.");
+
+        var subVinculadas = await _despesaRepository.ContarPorSubcategoriaAsync(id);
+        if (subVinculadas > 0)
+            return Erro.Negocio("CATEGORIA_COM_SUB_VINCULOS", $"Não é possível excluir. Existem {subVinculadas} despesa(s) vinculada(s) a subcategorias desta categoria.");
+
+        var subcategorias = await _repository.ListarPorPaiAsync(id);
+        foreach (var sub in subcategorias)
+        {
+            var subVinculos = await _despesaRepository.ContarPorCategoriaAsync(sub.Id);
+            if (subVinculos > 0)
+                return Erro.Negocio("SUBCATEGORIA_COM_VINCULOS", $"Não é possível excluir. A subcategoria \"{sub.Nome}\" possui {subVinculos} despesa(s) vinculada(s).");
+        }
+
         categoria.Desativar();
-        await _repository.AtualizarAsync(categoria);
+        await _repository.ExcluirAsync(categoria.Id);
+
+        foreach (var sub in subcategorias)
+            await _repository.ExcluirAsync(sub.Id);
+
         return Resultado.Sucesso();
     }
 
