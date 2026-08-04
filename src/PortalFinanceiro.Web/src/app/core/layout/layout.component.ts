@@ -172,14 +172,14 @@ import { LucideDynamicIcon } from '@lucide/angular';
       height: 28px;
       border-radius: 50%;
       background: #0f766e;
-      border: 2px solid #1e293b;
+      border: none;
       color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
     }
 
     .sidebar-toggle:hover {
