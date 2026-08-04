@@ -44,7 +44,7 @@
           </a>
         </nav>
         <button class="sidebar-toggle" (click)="toggleSidebar()">
-          <svg [lucideIcon]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="16" />
+          <svg [lucideIcon]="sidebarCollapsed() ? 'chevrons-right' : 'chevrons-left'" [size]="16" />
         </button>
         <div class="sidebar-footer">
           @if (!sidebarCollapsed()) {
@@ -57,7 +57,7 @@
             </div>
           }
           <button (click)="authService.logout()" class="logout-btn" [title]="sidebarCollapsed() ? 'Sair' : ''">
-            <svg lucideIcon="log-out" [size]="18" />
+            <svg lucideIcon="door-open" [size]="18" />
           </button>
         </div>
       </aside>

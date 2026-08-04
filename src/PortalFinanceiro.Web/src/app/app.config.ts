@@ -10,7 +10,7 @@ import {
   LucideCalendar, LucideDollarSign, LucideLogOut,
   LucideChevronDown, LucideArrowLeft, LucideArrowRight,
   LucideLoader, LucideInbox, LucideAlertCircle, LucideCheckCircle,
-  LucideInfo,
+  LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
 } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
       LucideCalendar, LucideDollarSign, LucideLogOut,
       LucideChevronDown, LucideArrowLeft, LucideArrowRight,
       LucideLoader, LucideInbox, LucideAlertCircle, LucideCheckCircle,
-      LucideInfo,
+      LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
     ),
   ],
 };
