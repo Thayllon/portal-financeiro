@@ -85,8 +85,11 @@ import { LucideDynamicIcon } from '@lucide/angular';
 
     .layout {
       display: flex;
-      height: 100vh;
+      height: calc(100vh - 24px);
+      margin: 12px;
       overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
     }
 
     .sidebar {
@@ -263,6 +266,11 @@ import { LucideDynamicIcon } from '@lucide/angular';
     }
 
     @media (max-width: 767px) {
+      .layout {
+        margin: 0;
+        height: 100vh;
+        border-radius: 0;
+      }
       .sidebar {
         position: fixed;
         z-index: 100;
