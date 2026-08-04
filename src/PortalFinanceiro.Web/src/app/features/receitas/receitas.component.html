@@ -1,0 +1,103 @@
+    <div class="page">
+      <header class="page__header">
+        <div class="page__header-left">
+          <svg lucideIcon="trending-up" class="page__icon" [size]="22" />
+          <div>
+            <h1 class="page__title">Receitas</h1>
+            <p class="page__subtitle">Receitas do mês — recorrentes e avulsas</p>
+          </div>
+        </div>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Nova receita
+        </button>
+      </header>
+
+      <div class="toolbar">
+        <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
+        <div class="filtros">
+          <app-custom-select placeholder="Todas as contas" [options]="contasOptions()" (valueChange)="filtroConta = $event; carregar()" />
+          <app-custom-select placeholder="Todos os status" [options]="statusOptions" (valueChange)="filtroStatus = $event; carregar()" />
+          <app-custom-select placeholder="Todas as categorias" [options]="categoriasOptions()" (valueChange)="filtroCategoria = $event; carregar()" />
+          <div class="search-wrapper">
+            <svg lucideIcon="search" [size]="16" class="search-icon" />
+            <input [(ngModel)]="busca" (ngModelChange)="onBuscaChange()" placeholder="Buscar..." class="search-input" />
+          </div>
+        </div>
+      </div>
+
+      <div class="totals">
+        <span>Total: <strong>{{ total() | currencyBRL }}</strong></span>
+        <span>Recebido: <strong style="color: var(--color-success)">{{ totalRecebido() | currencyBRL }}</strong></span>
+        <span>Pendente: <strong style="color: var(--color-warning)">{{ totalPendente() | currencyBRL }}</strong></span>
+      </div>
+
+      @if (loading()) {
+        <div class="table-card">
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="skeleton-row">
+              <div class="skeleton-line" style="width: 40%"></div>
+              <div class="skeleton-line" style="width: 15%"></div>
+              <div class="skeleton-line" style="width: 10%"></div>
+            </div>
+          }
+        </div>
+      } @else if (items().length === 0) {
+        <div class="empty-state">
+          <svg lucideIcon="inbox" [size]="48" class="empty-icon" />
+          <h3>Nenhuma receita neste mês</h3>
+          <p>Cadastre sua primeira receita — recorrente ou avulsa.</p>
+          <button class="add-btn" (click)="abrirModal()">
+            <svg lucideIcon="plus" [size]="16" />
+            Nova receita
+          </button>
+        </div>
+      } @else {
+        <div class="table-card">
+          <table class="table">
+            <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Conta</th><th>Categoria</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              @for (l of pagination.paginatedItems(); track l.id) {
+                <tr>
+                  <td class="cell-name" data-label="Descrição">{{ l.descricao }}</td>
+                  <td class="cell-value" data-label="Valor">{{ l.valor | currencyBRL }}</td>
+                  <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
+                  <td class="cell-meta" data-label="Conta">{{ l.conta }}</td>
+                  <td class="cell-meta" data-label="Categoria">{{ l.categoria }}{{ l.subcategoria ? ' → ' + l.subcategoria : '' }}</td>
+                  <td data-label="Status"><app-status-badge [type]="l.status === 'Realizado' ? 'realizado' : 'pendente'" [label]="l.status === 'Realizado' ? 'Recebido' : 'Pendente'" /></td>
+                  <td class="cell-actions">
+                    @if (l.status !== 'Realizado') {
+                      <button class="action-btn action-btn--success" title="Receber" (click)="receber(l)">
+                        <svg lucideIcon="check" [size]="16" />
+                      </button>
+                    } @else {
+                      <button class="action-btn" title="Estornar" (click)="estornar(l)">
+                        <svg lucideIcon="arrow-left" [size]="16" />
+                      </button>
+                    }
+                    <button class="action-btn" title="Editar" (click)="abrirModal(l)">
+                      <svg lucideIcon="pencil" [size]="16" />
+                    </button>
+                    <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(l)">
+                      <svg lucideIcon="trash-2" [size]="16" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <app-list-pagination [pagination]="pagination" />
+        </div>
+      }
+    </div>
+
+    <app-lancamento-modal
+      [visible]="modalVisible()"
+      [editando]="editando()"
+      tipoLabel="receita"
+      [categorias]="categorias()"
+      [contas]="contas()"
+      [salvando]="salvando()"
+      (visibleChange)="fecharModal()"
+      (saved)="salvar($event)"
+    />

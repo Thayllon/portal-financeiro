@@ -1,0 +1,19 @@
+<div class="section-header">
+  <div class="section-header__left">
+    @if (icon()) {
+      <svg lucideIcon [lucideIcon]="icon()!" class="section-header__icon" [size]="20" />
+    }
+    <div>
+      <h1>{{ title() }}</h1>
+      @if (subtitle()) {
+        <p class="subtitle">{{ subtitle() }}</p>
+      }
+    </div>
+  </div>
+  @if (showAdd()) {
+    <button class="add-btn" (click)="add.emit()">
+      <svg lucideIcon="plus" [size]="16" />
+      {{ addLabel() }}
+    </button>
+  }
+</div>

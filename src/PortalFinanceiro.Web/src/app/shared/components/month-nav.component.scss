@@ -1,0 +1,8 @@
+.month-nav { display: flex; align-items: center; gap: 0.75rem; }
+.nav-btn {
+  background: var(--content-surface); border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md); padding: 0.375rem; display: flex;
+  color: var(--text-secondary); transition: all var(--transition-fast);
+}
+.nav-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.month-label { font-size: 1rem; font-weight: 600; color: var(--text-primary); min-width: 7rem; text-align: center; }

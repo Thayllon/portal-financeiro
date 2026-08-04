@@ -1,0 +1,17 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      @if (icon()) {
+        <svg lucideIcon [lucideIcon]="icon()!" class="page__icon" [size]="22" />
+      }
+      <div>
+        <h1 class="page__title">{{ title() }}</h1>
+        @if (subtitle()) {
+          <p class="page__subtitle">{{ subtitle() }}</p>
+        }
+      </div>
+    </div>
+    <ng-content select="[page-actions]" />
+  </header>
+  <ng-content />
+</div>

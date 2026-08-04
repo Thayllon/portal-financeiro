@@ -1,0 +1,36 @@
+<div class="cs" [class.cs--open]="isOpen()" [class.cs--disabled]="disabled()">
+  @if (label()) {
+    <label class="cs__label">{{ label() }}</label>
+  }
+  <button
+    type="button"
+    class="cs__trigger"
+    [class.cs__trigger--placeholder]="!selectedLabel()"
+    (click)="toggle()"
+    [attr.aria-expanded]="isOpen()"
+    [attr.aria-haspopup]="'listbox'"
+    [disabled]="disabled()"
+  >
+    <span class="cs__trigger-text">{{ selectedLabel() || placeholder() }}</span>
+    <svg lucideIcon="chevron-down" class="cs__chevron" [size]="16" [class.cs__chevron--open]="isOpen()" />
+  </button>
+  @if (isOpen()) {
+    <div class="cs__dropdown" role="listbox">
+      @for (opt of options(); track opt.value) {
+        <button
+          type="button"
+          class="cs__option"
+          [class.cs__option--selected]="opt.value === internalValue()"
+          (click)="select(opt)"
+          [attr.role]="'option'"
+          [attr.aria-selected]="opt.value === internalValue()"
+        >
+          {{ opt.label }}
+        </button>
+      }
+      @if (options().length === 0) {
+        <div class="cs__empty">Nenhuma opção</div>
+      }
+    </div>
+  }
+</div>

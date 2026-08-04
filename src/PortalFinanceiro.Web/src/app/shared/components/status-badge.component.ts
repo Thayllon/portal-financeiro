@@ -3,21 +3,8 @@ import { Component, input } from '@angular/core';
 @Component({
   selector: 'app-status-badge',
   standalone: true,
-  template: `
-    <span class="badge badge--{{ type() }}">
-      {{ label() }}
-    </span>
-  `,
-  styles: [`
-    .badge {
-      display: inline-flex; align-items: center; padding: 0.1875rem 0.5rem;
-      border-radius: 999px; font-size: 0.75rem; font-weight: 500;
-    }
-    .badge--pendente { background: var(--color-warning-bg); color: var(--color-warning); }
-    .badge--realizado { background: var(--color-success-bg); color: var(--color-success); }
-    .badge--ativo { background: var(--color-primary-tint); color: var(--color-primary); }
-    .badge--inativo { background: var(--color-error-bg); color: var(--color-error); }
-  `]
+  templateUrl: './status-badge.component.html',
+  styleUrl: './status-badge.component.scss'
 })
 export class StatusBadgeComponent {
   type = input<'pendente' | 'realizado' | 'ativo' | 'inativo'>('pendente');

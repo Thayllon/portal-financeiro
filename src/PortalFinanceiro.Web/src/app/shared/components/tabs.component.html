@@ -1,0 +1,7 @@
+<div class="tabs">
+  @for (tab of tabs(); track tab.id) {
+    <button class="tab" [class.tab--active]="active() === tab.id" (click)="change.emit(tab.id)">
+      {{ tab.label }}
+    </button>
+  }
+</div>

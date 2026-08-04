@@ -1,0 +1,67 @@
+    <app-toast />
+    <app-confirm-dialog />
+    <div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#0f766e"/>
+            <path d="M8 16h16M16 8v16M10 10l12 12M22 10L10 22" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          @if (!sidebarCollapsed()) {
+            <span>Portal Financeiro</span>
+          }
+        </div>
+        <nav class="sidebar-nav">
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <svg lucideIcon="layout-dashboard" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Dashboard</span>
+            }
+          </a>
+          <a routerLink="/receitas" routerLinkActive="active">
+            <svg lucideIcon="trending-up" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Receitas</span>
+            }
+          </a>
+          <a routerLink="/despesas" routerLinkActive="active">
+            <svg lucideIcon="trending-down" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Despesas</span>
+            }
+          </a>
+          <a routerLink="/contas" routerLinkActive="active">
+            <svg lucideIcon="wallet" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Contas</span>
+            }
+          </a>
+          <a routerLink="/categorias" routerLinkActive="active">
+            <svg lucideIcon="tag" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Categorias</span>
+            }
+          </a>
+        </nav>
+        <button class="sidebar-toggle" (click)="toggleSidebar()">
+          <svg [lucideIcon]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="16" />
+        </button>
+        <div class="sidebar-footer">
+          @if (!sidebarCollapsed()) {
+            <div class="user-info">
+              <div class="avatar">{{ initials() }}</div>
+              <div class="user-details">
+                <span class="user-name">{{ authService.user()?.nome }}</span>
+                <span class="user-email">{{ authService.user()?.email }}</span>
+              </div>
+            </div>
+          }
+          <button (click)="authService.logout()" class="logout-btn" [title]="sidebarCollapsed() ? 'Sair' : ''">
+            <svg lucideIcon="log-out" [size]="18" />
+          </button>
+        </div>
+      </aside>
+      <main class="content">
+        <router-outlet />
+      </main>
+    </div>

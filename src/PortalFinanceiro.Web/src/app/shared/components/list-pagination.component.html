@@ -1,0 +1,21 @@
+@if (pagination().totalItems() > 0) {
+  <div class="lp">
+    <div class="lp__left">
+      <span class="lp__info">{{ pagination().rangeStart() }}-{{ pagination().rangeEnd() }} de {{ pagination().totalItems() }}</span>
+      <select class="lp__size" (change)="onSizeChange($event)">
+        @for (size of pageSizes; track size) {
+          <option [value]="size" [selected]="size === pagination().pageSize()">{{ size }}</option>
+        }
+      </select>
+    </div>
+    <div class="lp__controls">
+      <button class="lp__btn" [disabled]="pagination().currentPage() <= 1" (click)="pagination().goToPreviousPage()">
+        <svg lucideIcon="chevron-left" [size]="14" /> Anterior
+      </button>
+      <span class="lp__page">Página {{ pagination().currentPage() }} de {{ pagination().totalPages() }}</span>
+      <button class="lp__btn" [disabled]="pagination().currentPage() >= pagination().totalPages()" (click)="pagination().goToNextPage()">
+        Próximo <svg lucideIcon="chevron-right" [size]="14" />
+      </button>
+    </div>
+  </div>
+}

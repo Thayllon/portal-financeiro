@@ -1,0 +1,87 @@
+    <div class="page">
+      <header class="page__header">
+        <div class="page__header-left">
+          <svg lucideIcon="wallet" class="page__icon" [size]="22" />
+          <div>
+            <h1 class="page__title">Contas Bancárias</h1>
+            <p class="page__subtitle">Gerencie suas contas PF e PJ</p>
+          </div>
+        </div>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Nova conta
+        </button>
+      </header>
+
+      @if (loading()) {
+        <div class="table-card">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="skeleton-row">
+              <div class="skeleton-line" style="width: 30%"></div>
+              <div class="skeleton-line" style="width: 20%"></div>
+              <div class="skeleton-line" style="width: 10%"></div>
+            </div>
+          }
+        </div>
+      } @else if (contas().length === 0) {
+        <div class="empty-state">
+          <svg lucideIcon="wallet" [size]="48" class="empty-icon" />
+          <h3>Nenhuma conta cadastrada</h3>
+          <p>Cadastre sua primeira conta bancária para começar.</p>
+          <button class="add-btn" (click)="abrirModal()">
+            <svg lucideIcon="plus" [size]="16" />
+            Nova conta
+          </button>
+        </div>
+      } @else {
+        <div class="table-card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Banco</th>
+                <th>Tipo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of contas(); track c.id) {
+                <tr>
+                  <td class="cell-name" data-label="Nome">{{ c.nome }}</td>
+                  <td data-label="Banco">{{ c.banco }}</td>
+                  <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
+                  <td class="cell-actions">
+                    <button class="action-btn" title="Editar" (click)="abrirModal(c)">
+                      <svg lucideIcon="pencil" [size]="16" />
+                    </button>
+                    <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
+                      <svg lucideIcon="trash-2" [size]="16" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <app-modal
+      [visible]="modalVisible()"
+      [title]="editando() ? 'Editar conta' : 'Nova conta'"
+      [saving]="salvando()"
+      (visibleChange)="fecharModal()"
+      (save)="salvar()"
+    >
+      <div class="field">
+        <label>Nome</label>
+        <input [(ngModel)]="form.nome" placeholder="Ex: Nubank PF" class="input" />
+      </div>
+      <div class="field">
+        <label>Banco</label>
+        <input [(ngModel)]="form.banco" placeholder="Ex: Nubank" class="input" />
+      </div>
+      <div class="field">
+        <app-custom-select label="Tipo" placeholder="Selecione o tipo" [options]="tipoOptions" [value]="form.tipo" (valueChange)="form.tipo = $event" />
+      </div>
+    </app-modal>

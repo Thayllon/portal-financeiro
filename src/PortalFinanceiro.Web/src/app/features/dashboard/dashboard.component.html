@@ -1,0 +1,129 @@
+    <div class="page">
+      <header class="page__header">
+        <div class="page__header-left">
+          <svg lucideIcon="layout-dashboard" class="page__icon" [size]="22" />
+          <h1 class="page__title">Dashboard</h1>
+        </div>
+      </header>
+
+      <div class="month-area">
+        <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
+      </div>
+
+      @if (loading()) {
+        <div class="cards">
+          <app-skeleton type="card" [count]="4" />
+        </div>
+      } @else {
+        <div class="cards">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon card-icon--green">
+                <svg lucideIcon="trending-up" [size]="20" />
+              </div>
+              <span class="card-label">Receitas</span>
+            </div>
+            <div class="card-value green">{{ data()?.totalReceitas | currencyBRL }}</div>
+            <div class="card-sub">
+              <span class="pill pill--green">{{ data()?.totalRecebido | currencyBRL }} recebido</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon card-icon--red">
+                <svg lucideIcon="trending-down" [size]="20" />
+              </div>
+              <span class="card-label">Despesas</span>
+            </div>
+            <div class="card-value red">{{ data()?.totalDespesas | currencyBRL }}</div>
+            <div class="card-sub">
+              <span class="pill pill--green">{{ data()?.totalPago | currencyBRL }} pago</span>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon card-icon--primary">
+                <svg lucideIcon="wallet" [size]="20" />
+              </div>
+              <span class="card-label">Saldo previsto</span>
+            </div>
+            <div class="card-value" [class.green]="(data()?.saldo ?? 0) >= 0" [class.red]="(data()?.saldo ?? 0) < 0">
+              {{ data()?.saldo | currencyBRL }}
+            </div>
+            <div class="card-sub">receitas - despesas</div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-icon card-icon--warning">
+                <svg lucideIcon="dollar-sign" [size]="20" />
+              </div>
+              <span class="card-label">Saldo realizado</span>
+            </div>
+            <div class="card-value" [class.green]="(data()?.saldoRealizado ?? 0) >= 0" [class.red]="(data()?.saldoRealizado ?? 0) < 0">
+              {{ data()?.saldoRealizado | currencyBRL }}
+            </div>
+            <div class="card-sub">recebido - pago</div>
+          </div>
+        </div>
+      }
+
+      @if (data()?.resumoPorConta?.length) {
+        <div class="section">
+          <h2>Por conta</h2>
+          <div class="table-card">
+            <table class="table">
+              <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
+              <tbody>
+                @for (c of data()!.resumoPorConta; track c.nomeConta) {
+                  <tr>
+                    <td class="cell-name" data-label="Conta">{{ c.nomeConta }} <span class="cell-meta">{{ c.banco }}</span></td>
+                    <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
+                    <td class="cell-value green" data-label="Receitas">{{ c.totalReceitas | currencyBRL }}</td>
+                    <td class="cell-value red" data-label="Despesas">{{ c.totalDespesas | currencyBRL }}</td>
+                    <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo">{{ c.saldo | currencyBRL }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (data()?.resumoPorCategoria?.length) {
+        <div class="section">
+          <h2>Por categoria</h2>
+          <div class="table-card">
+            <table class="table">
+              <thead><tr><th>Categoria</th><th>Total</th></tr></thead>
+              <tbody>
+                @for (c of data()!.resumoPorCategoria; track c.nome) {
+                  <tr>
+                    <td class="cell-name" data-label="Categoria">{{ c.nome }}</td>
+                    <td class="cell-value red" data-label="Total">{{ c.total | currencyBRL }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      @if (data()?.previsaoProximosMeses?.length) {
+        <div class="section">
+          <h2>Previsão próximos meses</h2>
+          <div class="previsao-cards">
+            @for (p of data()!.previsaoProximosMeses; track p.mes + '' + p.ano) {
+              <div class="card card--compact">
+                <div class="card-label">{{ MESES[p.mes - 1] }}/{{ p.ano }}</div>
+                <div class="card-value" [class.green]="p.saldoPrevisto >= 0" [class.red]="p.saldoPrevisto < 0">
+                  {{ p.saldoPrevisto | currencyBRL }}
+                </div>
+                <div class="card-sub">
+                  {{ p.totalReceitas | currencyBRL }} / {{ p.totalDespesas | currencyBRL }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>

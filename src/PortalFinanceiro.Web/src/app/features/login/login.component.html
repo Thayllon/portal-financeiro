@@ -1,0 +1,50 @@
+    <div class="login-wrapper">
+      <div class="login-card">
+        <div class="login-header">
+          <h1>Portal Financeiro</h1>
+          <p>Acesse sua conta para gerenciar suas finanças</p>
+        </div>
+        <form (ngSubmit)="onSubmit()" class="login-form">
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              [(ngModel)]="email"
+              name="email"
+              placeholder="seu&#64;email.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+          <div class="field">
+            <label for="senha">Senha</label>
+            <div class="password-wrapper">
+              <input
+                id="senha"
+                [type]="showPassword() ? 'text' : 'password'"
+                [(ngModel)]="senha"
+                name="senha"
+                placeholder="Sua senha"
+                required
+                autocomplete="current-password"
+              />
+              <button type="button" class="toggle-password" (click)="showPassword.set(!showPassword())">
+                @if (showPassword()) {
+                  <svg lucideIcon="eye-off" [size]="16" />
+                } @else {
+                  <svg lucideIcon="eye" [size]="16" />
+                }
+              </button>
+            </div>
+            <span class="field-hint">Mínimo 6 caracteres</span>
+          </div>
+          @if (erro) {
+            <div class="error">{{ erro }}</div>
+          }
+          <button type="submit" [disabled]="loading">
+            {{ loading ? 'Entrando...' : 'Entrar' }}
+          </button>
+        </form>
+      </div>
+    </div>

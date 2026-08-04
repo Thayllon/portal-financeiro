@@ -1,0 +1,23 @@
+@if (visible()) {
+  <div class="overlay" (click)="close()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>{{ title() }}</h3>
+        <button class="close-btn" (click)="close()">
+          <svg lucideIcon="x" [size]="18" />
+        </button>
+      </div>
+      <div class="modal-body">
+        <ng-content />
+      </div>
+      @if (showFooter()) {
+        <div class="modal-footer">
+          <button class="btn btn--ghost" (click)="close()">Cancelar</button>
+          <button class="btn btn--primary" [disabled]="saving()" (click)="save.emit()">
+            {{ saving() ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

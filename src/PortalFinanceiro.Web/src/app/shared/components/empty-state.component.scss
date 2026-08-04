@@ -1,0 +1,6 @@
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 1rem; text-align: center; }
+.empty-icon { color: var(--text-muted); margin-bottom: 1rem; }
+h3 { font-size: 1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; }
+p { font-size: 0.875rem; color: var(--text-muted); max-width: 320px; line-height: 1.5; margin-bottom: 1.25rem; }
+.action-btn { padding: 0.5rem 1rem; background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-md); font-size: 0.875rem; font-weight: 500; transition: background var(--transition-fast); }
+.action-btn:hover { background: var(--color-primary-hover); }

@@ -1,0 +1,12 @@
+<div class="toast-container">
+  @for (t of notification.toasts(); track t.id) {
+    <div class="toast toast--{{ t.type }}" (click)="notification.dismiss(t.id)">
+      @switch (t.type) {
+        @case ('success') { <svg lucideIcon="check-circle" [size]="16" class="toast__icon" /> }
+        @case ('error') { <svg lucideIcon="alert-circle" [size]="16" class="toast__icon" /> }
+        @case ('info') { <svg lucideIcon="info" [size]="16" class="toast__icon" /> }
+      }
+      <span>{{ t.message }}</span>
+    </div>
+  }
+</div>

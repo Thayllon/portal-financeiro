@@ -1,0 +1,17 @@
+@if (confirm.visible()) {
+  <div class="overlay" (click)="confirm.cancel()">
+    <div class="dialog" (click)="$event.stopPropagation()">
+      <div class="dialog-header">
+        <svg lucideIcon="alert-circle" [size]="20" class="dialog-icon" />
+        <h3>{{ confirm.title() }}</h3>
+      </div>
+      <div class="dialog-body">
+        <p>{{ confirm.message() }}</p>
+      </div>
+      <div class="dialog-footer">
+        <button class="btn btn--ghost" (click)="confirm.cancel()">Cancelar</button>
+        <button class="btn btn--danger" (click)="confirm.accept()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+}

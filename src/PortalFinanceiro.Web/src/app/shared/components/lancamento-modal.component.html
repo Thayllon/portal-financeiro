@@ -1,0 +1,175 @@
+    <app-modal
+      [visible]="visible()"
+      [title]="title()"
+      [saving]="salvando()"
+      (visibleChange)="fechar()"
+      (save)="salvar()"
+    >
+      <!-- DADOS GERAIS -->
+      <div class="section">
+        <div class="section-header">
+          <svg lucideIcon="receipt" [size]="16" />
+          <span>Dados Gerais</span>
+        </div>
+        <div class="field">
+          <label>Descrição</label>
+          <input
+            [(ngModel)]="form.descricao"
+            placeholder="Ex: Salário / Pizza"
+            class="input"
+            [class.input-error]="fieldErrors()['descricao']"
+            (ngModelChange)="clearError('descricao')"
+          />
+          @if (fieldErrors()['descricao']) {
+            <span class="field-error">{{ fieldErrors()['descricao'] }}</span>
+          }
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Valor (R$)</label>
+            <input
+              type="text"
+              currencyInput
+              [(ngModel)]="form.valor"
+              (ngModelChange)="calcularPreview(); clearError('valor')"
+              placeholder="0,00"
+              class="input"
+              [class.input-error]="fieldErrors()['valor']"
+              inputmode="decimal"
+            />
+            @if (fieldErrors()['valor']) {
+              <span class="field-error">{{ fieldErrors()['valor'] }}</span>
+            }
+          </div>
+          <div class="field">
+            <label>Data</label>
+            <input
+              type="date"
+              lang="pt-BR"
+              [(ngModel)]="form.data"
+              (ngModelChange)="calcularPreview(); clearError('data')"
+              class="input"
+              [class.input-error]="fieldErrors()['data']"
+            />
+            <span class="field-hint">DD/MM/AAAA</span>
+            @if (fieldErrors()['data']) {
+              <span class="field-error">{{ fieldErrors()['data'] }}</span>
+            }
+          </div>
+        </div>
+        <div class="field">
+          <label>Conta</label>
+          <app-custom-select
+            placeholder="Selecione a conta"
+            [options]="contasOptions()"
+            [value]="form.idConta"
+            (valueChange)="form.idConta = $event; clearError('idConta')"
+          />
+          @if (fieldErrors()['idConta']) {
+            <span class="field-error">{{ fieldErrors()['idConta'] }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- CATEGORIZAÇÃO -->
+      <div class="section">
+        <div class="section-header">
+          <svg lucideIcon="tag" [size]="16" />
+          <span>Categorização</span>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>Categoria</label>
+            <app-custom-select
+              placeholder="Selecione"
+              [options]="categoriasOptions()"
+              [value]="form.idCategoria"
+              (valueChange)="form.idCategoria = $event; onCategoriaChange(); clearError('idCategoria')"
+            />
+            @if (fieldErrors()['idCategoria']) {
+              <span class="field-error">{{ fieldErrors()['idCategoria'] }}</span>
+            }
+          </div>
+          @if (subcategoriasOptions().length > 0) {
+            <div class="field">
+              <label>Subcategoria</label>
+              <app-custom-select
+                placeholder="Nenhuma"
+                [options]="subcategoriasOptions()"
+                [value]="form.idSubcategoria ?? ''"
+                (valueChange)="form.idSubcategoria = $event || undefined"
+              />
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- RECORRÊNCIA -->
+      <div class="repete-toggle">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="form.repete" (ngModelChange)="calcularPreview()" class="checkbox" />
+          <svg lucideIcon="repeat" [size]="14" />
+          <span>Repete mensalmente?</span>
+        </label>
+      </div>
+
+      @if (form.repete) {
+        <div class="section section--recorrencia">
+          <div class="section-header">
+            <svg lucideIcon="calendar-clock" [size]="16" />
+            <span>Recorrência</span>
+          </div>
+          <div class="grid-3">
+            <div class="field">
+              <label>Dia do mês</label>
+              <input
+                type="number"
+                [min]="1"
+                [max]="form.diaUtil ? 5 : 31"
+                [(ngModel)]="form.dia"
+                (ngModelChange)="calcularPreview(); clearError('dia')"
+                placeholder="1-31"
+                class="input"
+                [class.input-error]="fieldErrors()['dia']"
+              />
+              @if (fieldErrors()['dia']) {
+                <span class="field-error">{{ fieldErrors()['dia'] }}</span>
+              }
+            </div>
+            <div class="field field--checkbox">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="form.diaUtil"
+                  (ngModelChange)="onDiaUtilChange()"
+                  class="checkbox"
+                />
+                <span>Dia útil</span>
+              </label>
+              <span class="field-hint">Limita ao 1º dia útil</span>
+            </div>
+            <div class="field">
+              <label>Data fim</label>
+              <input
+                type="date"
+                lang="pt-BR"
+                [(ngModel)]="form.dataFim"
+                (ngModelChange)="calcularPreview(); clearError('dataFim')"
+                class="input"
+                [class.input-error]="fieldErrors()['dataFim']"
+              />
+              <span class="field-hint">DD/MM/AAAA</span>
+              @if (fieldErrors()['dataFim']) {
+                <span class="field-error">{{ fieldErrors()['dataFim'] }}</span>
+              }
+            </div>
+          </div>
+          @if (previewMeses() > 0) {
+            <div class="preview">
+              <svg lucideIcon="info" [size]="14" />
+              Serão gerados <strong>{{ previewMeses() }}</strong> lançamentos mensais
+            </div>
+          }
+        </div>
+      }
+    </app-modal>
