@@ -55,6 +55,9 @@ import { LucideDynamicIcon } from '@lucide/angular';
             }
           </a>
         </nav>
+        <button class="sidebar-toggle" (click)="toggleSidebar()">
+          <svg [lucideIcon]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="16" />
+        </button>
         <div class="sidebar-footer">
           @if (!sidebarCollapsed()) {
             <div class="user-info">
@@ -71,9 +74,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
         </div>
       </aside>
       <main class="content">
-        <button class="sidebar-toggle" (click)="toggleSidebar()">
-          <svg [lucideIcon]="sidebarCollapsed() ? 'chevron-right' : 'chevron-left'" [size]="18" />
-        </button>
         <router-outlet />
       </main>
     </div>
@@ -98,6 +98,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
       flex-shrink: 0;
       transition: width 0.2s ease;
       overflow: hidden;
+      position: relative;
     }
 
     .layout--collapsed .sidebar {
@@ -154,6 +155,31 @@ import { LucideDynamicIcon } from '@lucide/angular';
     .layout--collapsed .sidebar-nav a {
       justify-content: center;
       padding: 0.625rem;
+    }
+
+    .sidebar-toggle {
+      position: absolute;
+      top: 50%;
+      right: -14px;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #0f766e;
+      border: 2px solid #1e293b;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .sidebar-toggle:hover {
+      background: #0d6b64;
+      transform: translateY(-50%) scale(1.1);
     }
 
     .sidebar-footer {
@@ -233,27 +259,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
       position: relative;
     }
 
-    .sidebar-toggle {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      z-index: 10;
-      background: var(--content-surface);
-      border: 1px solid var(--surface-border);
-      border-radius: var(--radius-md);
-      padding: 0.375rem;
-      display: flex;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all var(--transition-fast);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .sidebar-toggle:hover {
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
-
     @media (max-width: 767px) {
       .sidebar {
         position: fixed;
@@ -263,6 +268,9 @@ import { LucideDynamicIcon } from '@lucide/angular';
       .layout--collapsed .sidebar {
         width: 0;
         padding: 0;
+      }
+      .layout--collapsed .sidebar-toggle {
+        right: 14px;
       }
       .content {
         margin-left: 0 !important;
