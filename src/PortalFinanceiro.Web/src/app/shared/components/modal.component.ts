@@ -38,7 +38,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
     }
     .modal {
       background: var(--content-surface); border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-lg); max-width: 520px; width: 100%;
+      box-shadow: var(--shadow-lg); max-width: 580px; width: 100%;
       max-height: 90vh; overflow-y: auto; animation: scaleIn 0.15s ease;
       will-change: transform, opacity;
     }

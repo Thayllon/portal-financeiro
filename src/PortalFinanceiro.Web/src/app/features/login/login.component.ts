@@ -1,12 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LucideDynamicIcon } from '@lucide/angular';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, LucideDynamicIcon],
   template: `
     <div class="login-wrapper">
       <div class="login-card">
@@ -29,14 +30,25 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
           <div class="field">
             <label for="senha">Senha</label>
-            <input
-              id="senha"
-              type="password"
-              [(ngModel)]="senha"
-              name="senha"
-              placeholder="Sua senha"
-              required
-            />
+            <div class="password-wrapper">
+              <input
+                id="senha"
+                [type]="showPassword() ? 'text' : 'password'"
+                [(ngModel)]="senha"
+                name="senha"
+                placeholder="Sua senha"
+                required
+                autocomplete="current-password"
+              />
+              <button type="button" class="toggle-password" (click)="showPassword.set(!showPassword())">
+                @if (showPassword()) {
+                  <svg lucideIcon="eye-off" [size]="16" />
+                } @else {
+                  <svg lucideIcon="eye" [size]="16" />
+                }
+              </button>
+            </div>
+            <span class="field-hint">Mínimo 6 caracteres</span>
           </div>
           @if (erro) {
             <div class="error">{{ erro }}</div>
@@ -128,7 +140,39 @@ import { AuthService } from '../../core/services/auth.service';
       background: #fff;
     }
 
-    button {
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 2.5rem;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      padding: 0.25rem;
+      display: flex;
+      transition: color 0.15s ease;
+    }
+
+    .toggle-password:hover {
+      color: #64748b;
+    }
+
+    .field-hint {
+      font-size: 0.6875rem;
+      color: #94a3b8;
+    }
+
+    button[type="submit"] {
       width: 100%;
       padding: 0.75rem;
       background: #0f766e;
@@ -142,11 +186,11 @@ import { AuthService } from '../../core/services/auth.service';
       margin-top: 0.5rem;
     }
 
-    button:hover:not(:disabled) {
+    button[type="submit"]:hover:not(:disabled) {
       background: #0d6b64;
     }
 
-    button:disabled {
+    button[type="submit"]:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
@@ -169,6 +213,7 @@ export class LoginComponent {
   senha = '';
   loading = false;
   erro = '';
+  showPassword = signal(false);
 
   onSubmit() {
     this.loading = true;
