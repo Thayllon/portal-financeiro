@@ -40,15 +40,18 @@
             <thead>
               <tr>
                 <th>Nome</th>
-                <th>Tipo</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               @for (c of categoriasPai(); track c.id) {
                 <tr class="categoria-pai">
-                  <td class="cell-name" data-label="Nome"><strong>{{ c.nome }}</strong></td>
-                  <td data-label="Tipo"><span class="badge-cat">Categoria</span></td>
+                  <td class="cell-name" data-label="Nome">
+                    <span class="cat-icon">
+                      <svg lucideIcon="folder" [size]="16" />
+                    </span>
+                    {{ c.nome }}
+                  </td>
                   <td class="cell-actions">
                     <button class="action-btn" title="Nova subcategoria" (click)="abrirModal(undefined, c.id)">
                       <svg lucideIcon="plus" [size]="16" />
@@ -63,8 +66,12 @@
                 </tr>
                 @for (sub of subcategoriasDe(c.id); track sub.id) {
                   <tr class="subcategoria">
-                    <td class="cell-name cell-sub" data-label="Nome">↳ {{ sub.nome }}</td>
-                    <td data-label="Tipo"><span class="badge-sub">Subcategoria</span></td>
+                    <td class="cell-name cell-sub" data-label="Nome">
+                      <span class="sub-icon">
+                        <svg lucideIcon="file" [size]="14" />
+                      </span>
+                      {{ sub.nome }}
+                    </td>
                     <td class="cell-actions">
                       <button class="action-btn" title="Editar" (click)="abrirModal(sub)">
                         <svg lucideIcon="pencil" [size]="16" />

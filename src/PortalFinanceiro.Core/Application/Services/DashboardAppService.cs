@@ -114,4 +114,99 @@ public class DashboardAppService : IDashboardAppService
             return Erro.Infraestrutura($"Erro ao carregar dashboard: {ex.Message}");
         }
     }
+
+    public async Task<Result<DashboardAnualResponse>> ObterDashboardAnualAsync(Guid idUsuario, int ano, Guid? idConta = null)
+    {
+        try
+        {
+            var receitasPorMes = (await _receitaRepository.ResumoAnualPorMesAsync(idUsuario, ano, idConta)).ToList();
+            var despesasPorMes = (await _despesaRepository.ResumoAnualPorMesAsync(idUsuario, ano, idConta)).ToList();
+
+            var receitasPorConta = (await _receitaRepository.ResumoAnualPorContaAsync(idUsuario, ano)).ToList();
+            var despesasPorConta = (await _despesaRepository.ResumoAnualPorContaAsync(idUsuario, ano)).ToList();
+
+            var resumoPorMes = new List<MensalResumoAnual>();
+            for (int m = 1; m <= 12; m++)
+            {
+                var rec = receitasPorMes.FirstOrDefault(r => r.Mes == m);
+                var desp = despesasPorMes.FirstOrDefault(d => d.Mes == m);
+
+                var totalRec = rec?.Total ?? 0;
+                var totalRecebido = rec?.TotalRealizado ?? 0;
+                var totalDesp = desp?.Total ?? 0;
+                var totalPago = desp?.TotalRealizado ?? 0;
+
+                resumoPorMes.Add(new MensalResumoAnual
+                {
+                    Mes = m,
+                    TotalReceitas = totalRec,
+                    TotalRecebido = totalRecebido,
+                    TotalDespesas = totalDesp,
+                    TotalPago = totalPago,
+                    Saldo = totalRec - totalDesp,
+                    SaldoRealizado = totalRecebido - totalPago
+                });
+            }
+
+            var todasContas = new Dictionary<string, ResumoPorContaAnual>();
+            foreach (var rec in receitasPorConta)
+            {
+                var key = rec.NomeConta;
+                if (!todasContas.ContainsKey(key))
+                {
+                    todasContas[key] = new ResumoPorContaAnual
+                    {
+                        NomeConta = rec.NomeConta,
+                        Banco = rec.Banco,
+                        Tipo = rec.Tipo
+                    };
+                }
+                todasContas[key].TotalReceitas = rec.Total;
+                todasContas[key].TotalRecebido = rec.TotalRealizado;
+            }
+            foreach (var desp in despesasPorConta)
+            {
+                var key = desp.NomeConta;
+                if (!todasContas.ContainsKey(key))
+                {
+                    todasContas[key] = new ResumoPorContaAnual
+                    {
+                        NomeConta = desp.NomeConta,
+                        Banco = desp.Banco,
+                        Tipo = desp.Tipo
+                    };
+                }
+                todasContas[key].TotalDespesas = desp.Total;
+                todasContas[key].TotalPago = desp.TotalRealizado;
+            }
+
+            foreach (var conta in todasContas.Values)
+            {
+                conta.Saldo = conta.TotalReceitas - conta.TotalDespesas;
+                conta.SaldoRealizado = conta.TotalRecebido - conta.TotalPago;
+            }
+
+            var totalReceitasAno = resumoPorMes.Sum(m => m.TotalReceitas);
+            var totalRecebidoAno = resumoPorMes.Sum(m => m.TotalRecebido);
+            var totalDespesasAno = resumoPorMes.Sum(m => m.TotalDespesas);
+            var totalPagoAno = resumoPorMes.Sum(m => m.TotalPago);
+
+            return new DashboardAnualResponse
+            {
+                Ano = ano,
+                TotalReceitas = totalReceitasAno,
+                TotalRecebido = totalRecebidoAno,
+                TotalDespesas = totalDespesasAno,
+                TotalPago = totalPagoAno,
+                Saldo = totalReceitasAno - totalDespesasAno,
+                SaldoRealizado = totalRecebidoAno - totalPagoAno,
+                ResumoPorMes = resumoPorMes,
+                ResumoPorConta = todasContas.Values.ToList()
+            };
+        }
+        catch (Exception ex)
+        {
+            return Erro.Infraestrutura($"Erro ao carregar dashboard anual: {ex.Message}");
+        }
+    }
 }

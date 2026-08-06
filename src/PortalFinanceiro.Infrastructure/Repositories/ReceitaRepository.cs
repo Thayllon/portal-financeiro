@@ -49,4 +49,10 @@ public class ReceitaRepository : SqlBaseRepository, IReceitaRepository
 
     public async Task ExcluirAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ReceitaSql.Excluir, new { Id = id }));
+
+    public async Task<IEnumerable<Core.Domain.Entities.ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<Core.Domain.Entities.ResumoAnualItem>(conn, ReceitaSql.ResumoAnualPorMes, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
+
+    public async Task<IEnumerable<Core.Domain.Entities.ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<Core.Domain.Entities.ResumoAnualContaItem>(conn, ReceitaSql.ResumoAnualPorConta, new { IdUsuario = idUsuario, Ano = ano }));
 }

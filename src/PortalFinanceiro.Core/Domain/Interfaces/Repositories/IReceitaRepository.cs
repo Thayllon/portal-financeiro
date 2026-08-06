@@ -14,4 +14,6 @@ public interface IReceitaRepository
     Task InserirEmMassaAsync(IEnumerable<Receita> entities);
     Task AtualizarAsync(Receita entity);
     Task ExcluirAsync(Guid id);
+    Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null);
+    Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano);
 }

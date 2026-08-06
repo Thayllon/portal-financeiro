@@ -1,4 +1,4 @@
-    .page { max-width: 900px; padding: 1.5rem; margin: 0 auto; }
+    .page { max-width: 1200px; padding: 1.5rem; margin: 0 auto; overflow-y: auto; }
     .page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
     .page__header-left { display: flex; align-items: center; gap: 0.5rem; }
     .page__icon { color: var(--color-primary); flex-shrink: 0; }
@@ -20,8 +20,12 @@
     .table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-primary); border-bottom: 1px solid var(--surface-border); }
     .table tr:last-child td { border-bottom: none; }
     .table tr:hover { background: var(--surface-hover); }
-    .categoria-pai td { background: var(--color-primary-tint); }
-    .cell-sub { padding-left: 2.5rem; color: var(--text-secondary); }
+    .categoria-pai td { border-left: 3px solid var(--color-primary); }
+    .subcategoria td { border-left: 3px solid transparent; }
+    .cell-name { font-weight: 500; }
+    .cell-sub { padding-left: 2.5rem; color: var(--text-secondary); font-weight: 400; }
+    .cat-icon { color: var(--color-primary); margin-right: 0.5rem; }
+    .sub-icon { color: var(--text-muted); margin-right: 0.5rem; }
     .cell-actions { display: flex; gap: 0.25rem; justify-content: flex-end; }
     .action-btn {
       background: none; border: 1px solid var(--surface-border); border-radius: var(--radius-md);
@@ -30,9 +34,6 @@
     }
     .action-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
     .action-btn--danger:hover { border-color: var(--color-error); color: var(--color-error); }
-    .badge-cat, .badge-sub { display: inline-flex; padding: 0.125rem 0.5rem; border-radius: 999px; font-size: 0.6875rem; font-weight: 500; }
-    .badge-cat { background: var(--color-primary-tint); color: var(--color-primary); }
-    .badge-sub { background: var(--surface-hover); color: var(--text-muted); }
     .field { display: flex; flex-direction: column; gap: 0.375rem; }
     .field label { font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
     .input, .select {

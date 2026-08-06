@@ -183,7 +183,7 @@
 
     .content {
       flex: 1;
-      overflow-y: auto;
+      overflow: hidden;
       background: #fff;
       position: relative;
       border-radius: 16px;

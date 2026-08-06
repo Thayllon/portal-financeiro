@@ -1,4 +1,4 @@
-    .page { max-width: 900px; padding: 1.5rem; margin: 0 auto; }
+    .page { max-width: 1200px; padding: 1.5rem; margin: 0 auto; overflow-y: auto; }
     .page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
     .page__header-left { display: flex; align-items: center; gap: 0.5rem; }
     .page__icon { color: var(--color-primary); flex-shrink: 0; }

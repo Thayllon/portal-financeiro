@@ -22,4 +22,11 @@ public class DashboardController : BaseController
         var result = await _service.ObterDashboardAsync(ObterIdUsuario(), mes, ano);
         return ApiResponse(result);
     }
+
+    [HttpGet("anual")]
+    public async Task<IActionResult> ObterAnual([FromQuery] int ano, [FromQuery] Guid? idConta = null)
+    {
+        var result = await _service.ObterDashboardAnualAsync(ObterIdUsuario(), ano, idConta);
+        return ApiResponse(result);
+    }
 }

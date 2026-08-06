@@ -14,4 +14,6 @@ public interface IDespesaRepository
     Task InserirEmMassaAsync(IEnumerable<Despesa> entities);
     Task AtualizarAsync(Despesa entity);
     Task ExcluirAsync(Guid id);
+    Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null);
+    Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano);
 }

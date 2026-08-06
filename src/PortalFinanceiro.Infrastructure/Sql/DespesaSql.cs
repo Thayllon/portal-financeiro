@@ -29,4 +29,21 @@ internal static class DespesaSql
     public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @Status, @DataRealizacao, @IdRegra, @Ativo, @DataCadastro, @DataAlteracao)";
     public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
     public static string Excluir => $"UPDATE {T} SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id";
+    public static string ResumoAnualPorMes => $@"
+        SELECT MONTH({T}.Data) AS Mes,
+               SUM({T}.Valor) AS Total,
+               SUM(CASE WHEN {T}.Status = 2 THEN {T}.Valor ELSE 0 END) AS TotalRealizado
+        FROM {T}
+        WHERE {T}.IdUsuario = @IdUsuario AND {T}.Ativo = 1 AND YEAR({T}.Data) = @Ano
+          AND (@IdConta IS NULL OR {T}.IdConta = @IdConta)
+        GROUP BY MONTH({T}.Data)";
+    public static string ResumoAnualPorConta => $@"
+        SELECT cb.Nome AS NomeConta, cb.Banco, cb.Tipo,
+               SUM({T}.Valor) AS Total,
+               SUM(CASE WHEN {T}.Status = 2 THEN {T}.Valor ELSE 0 END) AS TotalRealizado
+        FROM {T}
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}ContaBancaria cb ON {T}.IdConta = cb.Id
+        WHERE {T}.IdUsuario = @IdUsuario AND {T}.Ativo = 1 AND YEAR({T}.Data) = @Ano
+        GROUP BY cb.Nome, cb.Banco, cb.Tipo
+        HAVING SUM({T}.Valor) > 0";
 }

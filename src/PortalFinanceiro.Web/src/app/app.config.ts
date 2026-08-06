@@ -11,6 +11,7 @@ import {
   LucideChevronDown, LucideArrowLeft, LucideArrowRight,
   LucideLoader, LucideInbox, LucideAlertCircle, LucideCheckCircle,
   LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
+  LucideHandCoins, LucideCalendar1, LucideCalendarDays,
 } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -29,6 +30,7 @@ export const appConfig: ApplicationConfig = {
       LucideChevronDown, LucideArrowLeft, LucideArrowRight,
       LucideLoader, LucideInbox, LucideAlertCircle, LucideCheckCircle,
       LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
+      LucideHandCoins, LucideCalendar1, LucideCalendarDays,
     ),
   ],
 };
