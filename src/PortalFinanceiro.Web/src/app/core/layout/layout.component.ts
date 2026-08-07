@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ToastComponent } from '../../shared/components/toast.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog.component';
+import { ConfirmService } from '../../shared/services/confirm.service';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
@@ -14,10 +15,21 @@ import { LucideDynamicIcon } from '@lucide/angular';
 })
 export class LayoutComponent {
   authService = inject(AuthService);
+  private confirmService = inject(ConfirmService);
   sidebarCollapsed = signal(false);
 
   toggleSidebar() {
     this.sidebarCollapsed.update(v => !v);
+  }
+
+  async logout() {
+    const confirmed = await this.confirmService.confirm(
+      'Sair do sistema',
+      'Tem certeza que deseja sair?'
+    );
+    if (confirmed) {
+      this.authService.logout();
+    }
   }
 
   initials(): string {

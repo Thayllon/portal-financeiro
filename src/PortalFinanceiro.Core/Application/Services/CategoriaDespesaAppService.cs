@@ -35,6 +35,9 @@ public class CategoriaDespesaAppService : ICategoriaDespesaAppService
 
     public async Task<Result<CategoriaResponse>> AdicionarAsync(Guid idUsuario, CategoriaRequest request)
     {
+        if (request is null)
+            return Erro.Validacao("REQUISICAO_INVALIDA", "Corpo da requisição é obrigatório.");
+
         var result = CategoriaDespesa.Criar(idUsuario, request.Nome, request.CategoriaPaiId);
         if (!result.EhSucesso)
             return result.Erro!;
@@ -48,6 +51,9 @@ public class CategoriaDespesaAppService : ICategoriaDespesaAppService
         var categoria = await _repository.ObterPorIdAsync(id);
         if (categoria is null)
             return Erro.NaoEncontrado("Categoria");
+
+        if (request is null)
+            return Erro.Validacao("REQUISICAO_INVALIDA", "Corpo da requisição é obrigatório.");
 
         var result = categoria.Atualizar(request.Nome, request.CategoriaPaiId);
         if (!result.EhSucesso)

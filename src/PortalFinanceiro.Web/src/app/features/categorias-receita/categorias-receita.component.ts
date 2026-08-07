@@ -8,6 +8,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { TabsComponent, Tab } from '../../shared/components/tabs.component';
+import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
@@ -76,16 +77,20 @@ export class CategoriasComponent implements OnInit {
     if (!this.form.nome) { this.notify.error('Informe o nome da categoria'); return; }
     this.salvando.set(true);
     try {
+      const payload: CategoriaRequest = {
+        nome: this.form.nome.trim(),
+        ...(this.form.categoriaPaiId ? { categoriaPaiId: this.form.categoriaPaiId } : {})
+      };
       if (this.editando()) {
-        await firstValueFrom(this.repo.atualizar(this.editando()!.id, this.form));
+        await firstValueFrom(this.repo.atualizar(this.editando()!.id, payload));
         this.notify.success('Categoria atualizada');
       } else {
-        await firstValueFrom(this.repo.criar(this.form));
+        await firstValueFrom(this.repo.criar(payload));
         this.notify.success('Categoria criada');
       }
       this.fecharModal();
       await this.carregar();
-    } catch { this.notify.error('Erro ao salvar categoria'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar categoria')); }
     finally { this.salvando.set(false); }
   }
 
@@ -101,6 +106,6 @@ export class CategoriasComponent implements OnInit {
       await firstValueFrom(this.repo.excluir(item.id));
       this.notify.success('Categoria excluída');
       await this.carregar();
-    } catch { this.notify.error('Erro ao excluir categoria'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir categoria')); }
   }
 }

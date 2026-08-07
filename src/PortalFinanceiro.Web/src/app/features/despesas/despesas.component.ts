@@ -17,6 +17,7 @@ import { LancamentoModalComponent, LancamentoForm } from '../../shared/component
 import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { mensagemErro } from '../../shared/utils/api-error.util';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { LucideDynamicIcon } from '@lucide/angular';
 
@@ -130,7 +131,7 @@ export class DespesasComponent implements OnInit {
       }
       this.fecharModal();
       await this.carregar();
-    } catch { this.notify.error('Erro ao salvar despesa'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar despesa')); }
     finally { this.salvando.set(false); }
   }
 
@@ -139,7 +140,7 @@ export class DespesasComponent implements OnInit {
       await firstValueFrom(this.repo.pagar(item.id, { data: new Date().toISOString().split('T')[0] }));
       this.notify.success('Despesa paga');
       await this.carregar();
-    } catch { this.notify.error('Erro ao pagar'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao pagar')); }
   }
 
   async estornar(item: Despesa) {
@@ -147,7 +148,7 @@ export class DespesasComponent implements OnInit {
       await firstValueFrom(this.repo.estornar(item.id));
       this.notify.success('Despesa estornada');
       await this.carregar();
-    } catch { this.notify.error('Erro ao estornar'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao estornar')); }
   }
 
   async excluir(item: Despesa) {
@@ -157,7 +158,7 @@ export class DespesasComponent implements OnInit {
       await firstValueFrom(this.repo.excluir(item.id));
       this.notify.success('Despesa excluída');
       await this.carregar();
-    } catch { this.notify.error('Erro ao excluir despesa'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir despesa')); }
   }
 
   total = computed(() => this.items().reduce((s, l) => s + l.valor, 0));

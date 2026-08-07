@@ -18,6 +18,7 @@ import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
+import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
@@ -130,7 +131,7 @@ export class ReceitasComponent implements OnInit {
       }
       this.fecharModal();
       await this.carregar();
-    } catch { this.notify.error('Erro ao salvar receita'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar receita')); }
     finally { this.salvando.set(false); }
   }
 
@@ -139,7 +140,7 @@ export class ReceitasComponent implements OnInit {
       await firstValueFrom(this.repo.receber(item.id, { data: new Date().toISOString().split('T')[0] }));
       this.notify.success('Receita recebida');
       await this.carregar();
-    } catch { this.notify.error('Erro ao receber'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao receber')); }
   }
 
   async estornar(item: Receita) {
@@ -147,7 +148,7 @@ export class ReceitasComponent implements OnInit {
       await firstValueFrom(this.repo.estornar(item.id));
       this.notify.success('Receita estornada');
       await this.carregar();
-    } catch { this.notify.error('Erro ao estornar'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao estornar')); }
   }
 
   async excluir(item: Receita) {
@@ -157,7 +158,7 @@ export class ReceitasComponent implements OnInit {
       await firstValueFrom(this.repo.excluir(item.id));
       this.notify.success('Receita excluída');
       await this.carregar();
-    } catch { this.notify.error('Erro ao excluir receita'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir receita')); }
   }
 
   total = computed(() => this.items().reduce((s, l) => s + l.valor, 0));

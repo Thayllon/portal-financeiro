@@ -83,40 +83,60 @@
       padding: 0.625rem;
     }
 
-    .sidebar-toggle {
-      position: absolute;
-      top: 50%;
-      right: -14px;
-      transform: translateY(-50%);
-      z-index: 11;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #0f766e;
-      border: none;
-      color: #fff;
+    .layout--collapsed .sidebar-footer {
+      justify-content: center;
+    }
+
+    .layout--collapsed .sidebar-actions {
+      margin-left: 0;
+    }
+
+    .sidebar-toggle-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid #334155;
+      color: #94a3b8;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      transition: all 0.15s ease;
+      flex-shrink: 0;
     }
 
-    .sidebar-toggle:hover {
-      background: #0d6b64;
-      transform: translateY(-50%) scale(1.1);
+    .sidebar-toggle-btn:hover {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+
+    .sidebar-toggle-btn:active {
+      transform: scale(0.95);
+    }
+
+    .sidebar-toggle-btn:focus-visible {
+      outline: 2px solid #5eead4;
+      outline-offset: 2px;
     }
 
     .sidebar-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0.75rem 1rem;
+      padding: 0.75rem 0.75rem;
       border-top: 1px solid #1e293b;
       overflow: hidden;
       border-bottom-left-radius: 16px;
       border-bottom-right-radius: 16px;
+    }
+
+    .sidebar-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-left: auto;
     }
 
     .user-info {
@@ -183,11 +203,28 @@
 
     .content {
       flex: 1;
-      overflow: hidden;
-      background: #fff;
+      overflow-y: auto;
+      background: var(--content-bg, #f1f5f9);
       position: relative;
       border-radius: 16px;
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .content::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+
+    .content::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
 
     @media (max-width: 767px) {
@@ -204,9 +241,6 @@
       .layout--collapsed .sidebar {
         width: 0;
         padding: 0;
-      }
-      .layout--collapsed .sidebar-toggle {
-        right: 14px;
       }
       .content {
         margin-left: 0 !important;

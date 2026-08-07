@@ -9,6 +9,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
+import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
@@ -77,7 +78,7 @@ export class ContasComponent implements OnInit {
       }
       this.fecharModal();
       await this.carregar();
-    } catch { this.notify.error('Erro ao salvar conta'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar conta')); }
     finally { this.salvando.set(false); }
   }
 
@@ -88,6 +89,6 @@ export class ContasComponent implements OnInit {
       await firstValueFrom(this.repo.excluir(conta.id));
       this.notify.success('Conta excluída');
       await this.carregar();
-    } catch { this.notify.error('Erro ao excluir conta'); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir conta')); }
   }
 }
