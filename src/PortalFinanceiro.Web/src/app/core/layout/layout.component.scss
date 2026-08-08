@@ -24,7 +24,7 @@
     }
 
     .layout--collapsed .sidebar {
-      width: 60px;
+      width: 84px;
     }
 
     .sidebar-brand {
@@ -89,6 +89,25 @@
 
     .layout--collapsed .sidebar-actions {
       margin-left: 0;
+    }
+
+    .layout--collapsed .sidebar-toggle-btn {
+      width: 28px;
+      height: 28px;
+    }
+
+    .layout--collapsed .sidebar-toggle-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .layout--collapsed .logout-btn {
+      padding: 0.25rem;
+    }
+
+    .layout--collapsed .logout-btn svg {
+      width: 16px;
+      height: 16px;
     }
 
     .sidebar-toggle-btn {

@@ -77,6 +77,7 @@ export class DashboardComponent implements OnInit {
   private requestSeq = 0;
   chartVersion = signal(0);
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+  private graficoMensal = signal<{ label: string; d: Dashboard }[]>([]);
 
   ngOnInit() { this.carregar(); }
 
@@ -85,9 +86,19 @@ export class DashboardComponent implements OnInit {
     this.loading.set(true);
     try {
       if (this.visualizacao() === 'mensal') {
-        const d = await firstValueFrom(this.repo.obter(this.mes(), this.ano()));
+        const mesAtual = this.mes();
+        const anoAtual = this.ano();
+        const meses = [
+          this.mesAdjacente(mesAtual, anoAtual, -1),
+          { mes: mesAtual, ano: anoAtual },
+          this.mesAdjacente(mesAtual, anoAtual, 1),
+        ];
+        const dashboards = await Promise.all(
+          meses.map(m => firstValueFrom(this.repo.obter(m.mes, m.ano)))
+        );
 if (seq !== this.requestSeq) return;
-            this.data.set(d);
+            this.data.set(dashboards[1]);
+            this.graficoMensal.set(meses.map((m, i) => ({ label: MESES[m.mes - 1], d: dashboards[i] })));
             this.atualizarGraficoMensal();
             this.chartVersion.update(v => v + 1);
             setTimeout(() => this.chart?.update(), 50);
@@ -121,6 +132,7 @@ if (seq !== this.requestSeq) return;
     this.visualizacao.set(tipo);
     this.data.set(null);
     this.dataAnual.set(null);
+    this.graficoMensal.set([]);
     this.barChartData = { labels: [], datasets: [] };
     this.carregar();
   }
@@ -133,21 +145,21 @@ if (seq !== this.requestSeq) return;
   }
 
   private atualizarGraficoMensal() {
-    const d = this.data();
-    if (!d) return;
+    const itens = this.graficoMensal();
+    if (!itens.length) return;
 
     this.barChartData = {
-      labels: [MESES[this.mes() - 1]],
+      labels: itens.map(i => i.label),
       datasets: [
         {
-          data: [d.totalReceitas],
+          data: itens.map(i => i.d.totalReceitas),
           label: 'Receitas',
           backgroundColor: 'rgba(22, 163, 74, 0.8)',
           borderColor: 'rgb(22, 163, 74)',
           borderWidth: 1
         },
         {
-          data: [d.totalDespesas],
+          data: itens.map(i => i.d.totalDespesas),
           label: 'Despesas',
           backgroundColor: 'rgba(220, 38, 38, 0.8)',
           borderColor: 'rgb(220, 38, 38)',
@@ -155,6 +167,14 @@ if (seq !== this.requestSeq) return;
         }
       ]
     };
+  }
+
+  private mesAdjacente(mes: number, ano: number, delta: number): { mes: number; ano: number } {
+    let m = mes + delta;
+    let a = ano;
+    while (m > 12) { m -= 12; a++; }
+    while (m < 1) { m += 12; a--; }
+    return { mes: m, ano: a };
   }
 
   private atualizarGraficoAnual() {

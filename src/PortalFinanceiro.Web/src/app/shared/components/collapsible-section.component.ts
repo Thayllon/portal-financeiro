@@ -14,7 +14,7 @@ export class CollapsibleSectionComponent {
   iconVariant = input<'default' | 'green' | 'red' | 'primary' | 'info'>('default');
   badge = input<string>('');
 
-  collapsed = signal(false);
+  collapsed = signal(true);
 
   toggle() {
     this.collapsed.update(v => !v);

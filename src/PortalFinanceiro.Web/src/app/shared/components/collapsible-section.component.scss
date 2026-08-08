@@ -96,3 +96,7 @@
   min-height: 0;
   padding: 1.25rem;
 }
+
+.collapsible--collapsed .collapsible__content {
+  padding: 0;
+}

@@ -4,7 +4,7 @@
     .page__icon { color: var(--color-primary); flex-shrink: 0; }
     .page__title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; }
     .month-area { margin-bottom: 1.5rem; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
     .card {
       background: var(--content-surface); border: 1px solid var(--surface-border);
       border-radius: var(--radius-xl); padding: 1.25rem;
