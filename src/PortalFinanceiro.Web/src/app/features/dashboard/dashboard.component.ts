@@ -9,6 +9,7 @@ import { MonthNavComponent } from '../../shared/components/month-nav.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
 import { CustomSelectComponent } from '../../shared/components/custom-select.component';
+import { CollapsibleSectionComponent } from '../../shared/components/collapsible-section.component';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, Chart, registerables } from 'chart.js';
@@ -20,7 +21,7 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Ag
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [SkeletonComponent, MonthNavComponent, StatusBadgeComponent, CurrencyBRLPipe, CustomSelectComponent, LucideDynamicIcon, BaseChartDirective],
+  imports: [SkeletonComponent, MonthNavComponent, StatusBadgeComponent, CurrencyBRLPipe, CustomSelectComponent, CollapsibleSectionComponent, LucideDynamicIcon, BaseChartDirective],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

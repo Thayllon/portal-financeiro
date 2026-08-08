@@ -65,8 +65,7 @@
             </div>
           </div>
 
-          <div class="section">
-            <h2>Receitas x Despesas</h2>
+          <app-collapsible-section title="Receitas x Despesas" icon="bar-chart-3" iconVariant="primary">
             <div class="chart-container">
               <canvas baseChart
                 [data]="barChartData"
@@ -74,12 +73,11 @@
                 type="bar">
               </canvas>
             </div>
-          </div>
+          </app-collapsible-section>
         }
 
         @if (data()?.resumoPorConta?.length) {
-          <div class="section">
-            <h2>Por conta</h2>
+          <app-collapsible-section title="Por conta" icon="wallet" iconVariant="info" [badge]="data()!.resumoPorConta.length + ''">
             <div class="table-card">
               <table class="table">
                 <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
@@ -96,12 +94,11 @@
                 </tbody>
               </table>
             </div>
-          </div>
+          </app-collapsible-section>
         }
 
         @if (data()?.resumoPorCategoria?.length) {
-          <div class="section">
-            <h2>Por categoria</h2>
+          <app-collapsible-section title="Por categoria" icon="tag" iconVariant="info" [badge]="data()!.resumoPorCategoria.length + ''">
             <div class="table-card">
               <table class="table">
                 <thead><tr><th>Categoria</th><th>Total</th></tr></thead>
@@ -115,12 +112,11 @@
                 </tbody>
               </table>
             </div>
-          </div>
+          </app-collapsible-section>
         }
 
         @if (data()?.previsaoProximosMeses?.length) {
-          <div class="section">
-            <h2>Previsão próximos meses</h2>
+          <app-collapsible-section title="Previsão próximos meses" icon="calendar-days" iconVariant="primary" [badge]="data()!.previsaoProximosMeses.length + ''">
             <div class="previsao-cards">
               @for (p of data()!.previsaoProximosMeses; track p.mes + '' + p.ano) {
                 <div class="card card--compact">
@@ -134,7 +130,7 @@
                 </div>
               }
             </div>
-          </div>
+          </app-collapsible-section>
         }
       } @else {
         <div class="year-nav">
@@ -199,8 +195,7 @@
             </div>
           </div>
 
-          <div class="section">
-            <h2>Receitas x Despesas por mês</h2>
+          <app-collapsible-section title="Receitas x Despesas por mês" icon="bar-chart-3" iconVariant="primary">
             <div class="chart-container">
               <canvas baseChart
                 [data]="barChartData"
@@ -208,11 +203,10 @@
                 type="bar">
               </canvas>
             </div>
-          </div>
+          </app-collapsible-section>
 
           @if (dataAnual()?.resumoPorMes?.length) {
-            <div class="section">
-              <h2>Resumo mês a mês</h2>
+            <app-collapsible-section title="Resumo mês a mês" icon="calendar-range" iconVariant="info" [badge]="dataAnual()!.resumoPorMes.length + ''">
               <div class="table-card">
                 <table class="table">
                   <thead><tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
@@ -228,12 +222,11 @@
                   </tbody>
                 </table>
               </div>
-            </div>
+            </app-collapsible-section>
           }
 
           @if (dataAnual()?.resumoPorConta?.length) {
-            <div class="section">
-              <h2>Por conta</h2>
+            <app-collapsible-section title="Por conta" icon="wallet" iconVariant="info" [badge]="dataAnual()!.resumoPorConta.length + ''">
               <div class="table-card">
                 <table class="table">
                   <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
@@ -250,7 +243,7 @@
                   </tbody>
                 </table>
               </div>
-            </div>
+            </app-collapsible-section>
           }
         }
       }

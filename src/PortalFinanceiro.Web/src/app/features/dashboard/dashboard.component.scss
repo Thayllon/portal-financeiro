@@ -8,9 +8,17 @@
     .card {
       background: var(--content-surface); border: 1px solid var(--surface-border);
       border-radius: var(--radius-xl); padding: 1.25rem;
-      transition: box-shadow var(--transition-fast);
+      position: relative; overflow: hidden;
+      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
     }
-    .card:hover { box-shadow: var(--shadow-md); }
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+      background: var(--text-muted);
+    }
+    .card:has(.card-icon--green)::before { background: var(--color-success); }
+    .card:has(.card-icon--red)::before { background: var(--color-error); }
+    .card:has(.card-icon--primary)::before { background: var(--color-primary); }
     .card--compact { padding: 1rem; }
     .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
     .card-icon {
@@ -27,18 +35,16 @@
       display: block; fill: none; stroke: currentColor; stroke-width: 2;
     }
     .card-label { font-size: 0.8125rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 500; }
-    .card-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+    .card-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; letter-spacing: -0.02em; }
     .card-value.green { color: var(--color-success); }
     .card-value.red { color: var(--color-error); }
     .card-sub { font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 0.5rem; align-items: center; }
     .pill { display: inline-flex; padding: 0.125rem 0.5rem; border-radius: 999px; font-weight: 500; }
     .pill--green { background: var(--color-success-bg); color: var(--color-success); }
-    .section { margin-top: 2rem; }
-    h2 { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; }
     .previsao-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-    .table-card { background: var(--content-surface); border: 1px solid var(--surface-border); border-radius: var(--radius-xl); overflow: hidden; }
+    .table-card { background: transparent; border: none; border-radius: var(--radius-lg); overflow: hidden; }
     .table { width: 100%; border-collapse: collapse; }
-    .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--surface-border); }
+    .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--surface-border); background: var(--surface-muted); }
     .table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-primary); border-bottom: 1px solid var(--surface-border); }
     .table tr:last-child td { border-bottom: none; }
     .table tr:hover { background: var(--surface-hover); }
@@ -80,8 +86,8 @@
 
     .chart-container {
       position: relative;
-      background: var(--content-surface); border: 1px solid var(--surface-border);
-      border-radius: var(--radius-xl); padding: 1.5rem; height: 350px;
+      background: var(--surface-muted);
+      border-radius: var(--radius-lg); padding: 1rem; height: 350px;
     }
 
     @media (max-width: 767px) {

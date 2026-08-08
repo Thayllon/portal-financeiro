@@ -12,8 +12,9 @@ import {
   LucideLoader, LucideInbox, LucideAlertCircle, LucideCheckCircle,
   LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
   LucideHandCoins, LucideCalendar1, LucideCalendarDays,
-LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
+  LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
+    LucideBarChart3, LucideCalendarRange,
 } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -35,6 +36,7 @@ export const appConfig: ApplicationConfig = {
       LucideHandCoins, LucideCalendar1, LucideCalendarDays,
       LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
+      LucideBarChart3, LucideCalendarRange,
     ),
   ],
 };

@@ -1,0 +1,24 @@
+<section class="collapsible" [class.collapsible--collapsed]="collapsed()">
+  <button
+    type="button"
+    class="collapsible__header"
+    (click)="toggle()"
+    [attr.aria-expanded]="!collapsed()"
+  >
+    <span class="collapsible__icon collapsible__icon--{{ iconVariant() }}">
+      <svg [lucideIcon]="icon()" [size]="18"></svg>
+    </span>
+    <span class="collapsible__title">{{ title() }}</span>
+    @if (badge()) {
+      <span class="collapsible__badge">{{ badge() }}</span>
+    }
+    <span class="collapsible__chevron">
+      <svg lucideIcon="chevron-down" [size]="18"></svg>
+    </span>
+  </button>
+  <div class="collapsible__body">
+    <div class="collapsible__content">
+      <ng-content />
+    </div>
+  </div>
+</section>
