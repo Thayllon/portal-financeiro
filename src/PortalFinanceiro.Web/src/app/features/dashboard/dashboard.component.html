@@ -29,9 +29,9 @@
           <div class="cards">
             <div class="card">
               <div class="card-header">
-                <div class="card-icon card-icon--green">
-                  <svg lucideIcon="trending-up" [size]="20" />
-                </div>
+                <span class="card-icon card-icon--green">
+                  <svg lucideIcon="trending-up" [size]="22"></svg>
+                </span>
                 <span class="card-label">Receitas</span>
               </div>
               <div class="card-value green">{{ data()?.totalReceitas | currencyBRL }}</div>
@@ -41,9 +41,9 @@
             </div>
             <div class="card">
               <div class="card-header">
-                <div class="card-icon card-icon--red">
-                  <svg lucideIcon="trending-down" [size]="20" />
-                </div>
+                <span class="card-icon card-icon--red">
+                  <svg lucideIcon="trending-down" [size]="22"></svg>
+                </span>
                 <span class="card-label">Despesas</span>
               </div>
               <div class="card-value red">{{ data()?.totalDespesas | currencyBRL }}</div>
@@ -53,27 +53,15 @@
             </div>
             <div class="card">
               <div class="card-header">
-                <div class="card-icon card-icon--primary">
-                  <svg lucideIcon="wallet" [size]="20" />
-                </div>
+                <span class="card-icon card-icon--primary">
+                  <svg lucideIcon="wallet" [size]="22"></svg>
+                </span>
                 <span class="card-label">Saldo previsto</span>
               </div>
               <div class="card-value" [class.green]="(data()?.saldo ?? 0) >= 0" [class.red]="(data()?.saldo ?? 0) < 0">
                 {{ data()?.saldo | currencyBRL }}
               </div>
               <div class="card-sub">receitas - despesas</div>
-            </div>
-            <div class="card">
-              <div class="card-header">
-                <div class="card-icon card-icon--warning">
-                  <svg lucideIcon="dollar-sign" [size]="20" />
-                </div>
-                <span class="card-label">Saldo realizado</span>
-              </div>
-              <div class="card-value" [class.green]="(data()?.saldoRealizado ?? 0) >= 0" [class.red]="(data()?.saldoRealizado ?? 0) < 0">
-                {{ data()?.saldoRealizado | currencyBRL }}
-              </div>
-              <div class="card-sub">recebido - pago</div>
             </div>
           </div>
 
@@ -175,9 +163,9 @@
           <div class="cards">
             <div class="card">
               <div class="card-header">
-                <div class="card-icon card-icon--green">
-                  <svg lucideIcon="trending-up" [size]="20" />
-                </div>
+                <span class="card-icon card-icon--green">
+                  <svg lucideIcon="trending-up" [size]="22"></svg>
+                </span>
                 <span class="card-label">Receitas</span>
               </div>
               <div class="card-value green">{{ dataAnual()?.totalReceitas | currencyBRL }}</div>
@@ -187,9 +175,9 @@
             </div>
             <div class="card">
               <div class="card-header">
-                <div class="card-icon card-icon--red">
-                  <svg lucideIcon="trending-down" [size]="20" />
-                </div>
+                <span class="card-icon card-icon--red">
+                  <svg lucideIcon="trending-down" [size]="22"></svg>
+                </span>
                 <span class="card-label">Despesas</span>
               </div>
               <div class="card-value red">{{ dataAnual()?.totalDespesas | currencyBRL }}</div>
@@ -199,27 +187,15 @@
             </div>
             <div class="card">
               <div class="card-header">
-                <div class="card-icon card-icon--primary">
-                  <svg lucideIcon="wallet" [size]="20" />
-                </div>
+                <span class="card-icon card-icon--primary">
+                  <svg lucideIcon="wallet" [size]="22"></svg>
+                </span>
                 <span class="card-label">Saldo previsto</span>
               </div>
               <div class="card-value" [class.green]="(dataAnual()?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.saldo ?? 0) < 0">
                 {{ dataAnual()?.saldo | currencyBRL }}
               </div>
               <div class="card-sub">receitas - despesas</div>
-            </div>
-            <div class="card">
-              <div class="card-header">
-                <div class="card-icon card-icon--warning">
-                  <svg lucideIcon="dollar-sign" [size]="20" />
-                </div>
-                <span class="card-label">Saldo realizado</span>
-              </div>
-              <div class="card-value" [class.green]="(dataAnual()?.saldoRealizado ?? 0) >= 0" [class.red]="(dataAnual()?.saldoRealizado ?? 0) < 0">
-                {{ dataAnual()?.saldoRealizado | currencyBRL }}
-              </div>
-              <div class="card-sub">recebido - pago</div>
             </div>
           </div>
 

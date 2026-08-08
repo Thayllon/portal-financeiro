@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, ViewChild } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardRepository } from '../../core/repositories/dashboard.repository';
@@ -11,7 +11,9 @@ import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
 import { CustomSelectComponent } from '../../shared/components/custom-select.component';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration } from 'chart.js';
+import { ChartConfiguration, Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
@@ -66,26 +68,39 @@ export class DashboardComponent implements OnInit {
     }
   };
 
-  contasOptions = computed(() => {
+    contasOptions = computed(() => {
     const contas = this.dataAnual()?.resumoPorConta ?? [];
     return contas.map(c => ({ value: c.nomeConta, label: `${c.nomeConta} (${c.banco})` }));
   });
 
+  private requestSeq = 0;
+  chartVersion = signal(0);
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
+
   ngOnInit() { this.carregar(); }
 
   async carregar() {
+    const seq = ++this.requestSeq;
     this.loading.set(true);
     try {
       if (this.visualizacao() === 'mensal') {
-        this.data.set(await firstValueFrom(this.repo.obter(this.mes(), this.ano())));
-        this.atualizarGraficoMensal();
+        const d = await firstValueFrom(this.repo.obter(this.mes(), this.ano()));
+if (seq !== this.requestSeq) return;
+            this.data.set(d);
+            this.atualizarGraficoMensal();
+            this.chartVersion.update(v => v + 1);
+            setTimeout(() => this.chart?.update(), 50);
       } else {
         const idConta = this.filtroConta() || undefined;
-        this.dataAnual.set(await firstValueFrom(this.repo.obterAnual(this.ano(), idConta)));
-        this.atualizarGraficoAnual();
+        const anual = await firstValueFrom(this.repo.obterAnual(this.ano(), idConta));
+if (seq !== this.requestSeq) return;
+            this.dataAnual.set(anual);
+            this.atualizarGraficoAnual();
+            this.chartVersion.update(v => v + 1);
+            setTimeout(() => this.chart?.update(), 50);
       }
     } catch { this.notify.error('Erro ao carregar dashboard'); }
-    finally { this.loading.set(false); }
+    finally { if (seq === this.requestSeq) this.loading.set(false); }
   }
 
   navegarMes(dir: number) {
@@ -103,6 +118,9 @@ export class DashboardComponent implements OnInit {
 
   trocarVisualizacao(tipo: 'mensal' | 'anual') {
     this.visualizacao.set(tipo);
+    this.data.set(null);
+    this.dataAnual.set(null);
+    this.barChartData = { labels: [], datasets: [] };
     this.carregar();
   }
 

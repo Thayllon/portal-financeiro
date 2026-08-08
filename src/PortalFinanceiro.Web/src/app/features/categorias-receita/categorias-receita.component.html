@@ -1,7 +1,9 @@
-    <div class="page">
+<div class="page">
       <header class="page__header">
         <div class="page__header-left">
-          <svg lucideIcon="tag" class="page__icon" [size]="22" />
+          <span class="page__badge">
+            <svg lucideIcon="tag" class="page__icon" [size]="22" />
+          </span>
           <div>
             <h1 class="page__title">Categorias</h1>
             <p class="page__subtitle">Gerencie categorias e subcategorias de receitas e despesas</p>
@@ -16,17 +18,20 @@
       <app-tabs [tabs]="tabs" [active]="tabAtiva()" (change)="trocarAba($event)" />
 
       @if (loading()) {
-        <div class="table-card">
+        <div class="grid">
           @for (i of [1,2,3,4]; track i) {
-            <div class="skeleton-row">
-              <div class="skeleton-line" style="width: 40%"></div>
-              <div class="skeleton-line" style="width: 15%"></div>
+            <div class="skeleton-card">
+              <div class="skeleton-line" style="width: 60%"></div>
+              <div class="skeleton-line" style="width: 90%"></div>
+              <div class="skeleton-line" style="width: 70%"></div>
             </div>
           }
         </div>
       } @else if (items().length === 0) {
         <div class="empty-state">
-          <svg lucideIcon="tag" [size]="48" class="empty-icon" />
+          <span class="empty-icon">
+            <svg lucideIcon="folder" [size]="40" />
+          </span>
           <h3>Nenhuma categoria</h3>
           <p>Cadastre sua primeira categoria {{ tabAtiva() }}.</p>
           <button class="add-btn" (click)="abrirModal()">
@@ -35,57 +40,52 @@
           </button>
         </div>
       } @else {
-        <div class="table-card">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (c of categoriasPai(); track c.id) {
-                <tr class="categoria-pai">
-                  <td class="cell-name" data-label="Nome">
-                    <span class="cat-icon">
-                      <svg lucideIcon="folder" [size]="16" />
-                    </span>
-                    {{ c.nome }}
-                  </td>
-                  <td class="cell-actions">
-                    <button class="action-btn" title="Nova subcategoria" (click)="abrirModal(undefined, c.id)">
-                      <svg lucideIcon="plus" [size]="16" />
-                    </button>
-                    <button class="action-btn" title="Editar" (click)="abrirModal(c)">
-                      <svg lucideIcon="pencil" [size]="16" />
-                    </button>
-                    <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
-                      <svg lucideIcon="trash-2" [size]="16" />
-                    </button>
-                  </td>
-                </tr>
-                @for (sub of subcategoriasDe(c.id); track sub.id) {
-                  <tr class="subcategoria">
-                    <td class="cell-name cell-sub" data-label="Nome">
-                      <span class="sub-icon">
-                        <svg lucideIcon="file" [size]="14" />
-                      </span>
-                      {{ sub.nome }}
-                    </td>
-                    <td class="cell-actions">
-                      <button class="action-btn" title="Editar" (click)="abrirModal(sub)">
-                        <svg lucideIcon="pencil" [size]="16" />
+        <div class="cat-grid">
+          @for (c of paginatedPais(); track c.id) {
+            <article class="cat-card">
+              <header class="cat-card__header">
+                <span class="cat-card__icon">
+                  <svg lucideIcon="folder" [size]="18" />
+                </span>
+                <div class="cat-card__meta">
+                  <h3 class="cat-card__name">{{ c.nome }}</h3>
+                  <span class="cat-card__count">{{ subcategoriasDe(c.id).length }} subcategoria{{ subcategoriasDe(c.id).length === 1 ? '' : 's' }}</span>
+                </div>
+                <div class="cat-card__actions">
+                  <button class="action-btn" title="Nova subcategoria" (click)="abrirModal(undefined, c.id)">
+                    <svg lucideIcon="plus" [size]="16" />
+                  </button>
+                  <button class="action-btn" title="Editar" (click)="abrirModal(c)">
+                    <svg lucideIcon="pencil" [size]="16" />
+                  </button>
+                  <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
+                    <svg lucideIcon="trash-2" [size]="16" />
+                  </button>
+                </div>
+              </header>
+
+              @if (subcategoriasDe(c.id).length > 0) {
+                <div class="cat-card__subs">
+                  @for (sub of subcategoriasDe(c.id); track sub.id) {
+                    <div class="sub-chip">
+                      <svg lucideIcon="file" [size]="13" />
+                      <span class="sub-chip__name">{{ sub.nome }}</span>
+                      <button class="action-btn action-btn--tiny" title="Editar" (click)="abrirModal(sub)">
+                        <svg lucideIcon="pencil" [size]="13" />
                       </button>
-                      <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(sub)">
-                        <svg lucideIcon="trash-2" [size]="16" />
+                      <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
+                        <svg lucideIcon="trash-2" [size]="13" />
                       </button>
-                    </td>
-                  </tr>
-                }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="cat-card__empty">Sem subcategorias — clique em <svg lucideIcon="plus" [size]="12" /> para adicionar.</p>
               }
-            </tbody>
-          </table>
+            </article>
+          }
         </div>
+        <app-list-pagination [pagination]="pagination" />
       }
     </div>
 

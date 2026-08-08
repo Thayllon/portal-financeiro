@@ -34,6 +34,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   internalValue = signal('');
   isOpen = signal(false);
+  openUp = signal(false);
   selectedLabel = signal('');
 
   private onChange: (value: string) => void = () => {};
@@ -64,8 +65,25 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   toggle() {
     if (!this.disabled()) {
-      this.isOpen.update(v => !v);
+      const willOpen = !this.isOpen();
+      if (willOpen) this.calcularAbertura();
+      this.isOpen.set(willOpen);
     }
+  }
+
+  private calcularAbertura() {
+    const trigger = this.el.nativeElement.querySelector('.cs__trigger') as HTMLElement;
+    const dropdown = this.el.nativeElement.querySelector('.cs__dropdown') as HTMLElement | null;
+    if (!trigger) return;
+    const alturaDropdown = (dropdown?.offsetHeight ?? 0) || 260;
+    const triggerRect = trigger.getBoundingClientRect();
+    const container = this.el.nativeElement.closest('.modal, .table-card, .page') as HTMLElement | null;
+    const containerRect = container?.getBoundingClientRect();
+    const limiteInferior = containerRect ? containerRect.bottom : window.innerHeight;
+    const limiteSuperior = containerRect ? containerRect.top : 0;
+    const espacoAbaixo = limiteInferior - triggerRect.bottom;
+    const espacoAcima = triggerRect.top - limiteSuperior;
+    this.openUp.set(espacoAbaixo < alturaDropdown && espacoAcima > espacoAbaixo);
   }
 
   select(option: SelectOption) {

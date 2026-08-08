@@ -107,6 +107,27 @@ export class DespesasComponent implements OnInit {
   abrirModal(item?: Despesa) { this.editando.set(item ?? null); this.modalVisible.set(true); }
   fecharModal() { this.modalVisible.set(false); this.editando.set(null); }
 
+  copiar(item: Despesa) {
+    const copia: Despesa = {
+      id: '',
+      descricao: item.descricao,
+      valor: item.valor,
+      data: item.data,
+      idConta: item.idConta,
+      conta: item.conta,
+      idCategoria: item.idCategoria,
+      categoria: item.categoria,
+      idSubcategoria: item.idSubcategoria,
+      subcategoria: item.subcategoria,
+      status: 'Pendente',
+      ehRecorrente: false,
+      ativo: true,
+      dataCadastro: new Date().toISOString(),
+    };
+    this.editando.set(copia);
+    this.modalVisible.set(true);
+  }
+
   async salvar(data: LancamentoForm) {
     this.salvando.set(true);
     try {

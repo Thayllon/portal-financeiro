@@ -55,7 +55,7 @@
       } @else {
         <div class="table-card">
           <table class="table">
-            <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Conta</th><th>Categoria</th><th>Status</th><th></th></tr></thead>
+            <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Conta</th><th>Categoria</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody>
               @for (l of pagination.paginatedItems(); track l.id) {
                 <tr>
@@ -75,6 +75,9 @@
                         <svg lucideIcon="arrow-left" [size]="16" />
                       </button>
                     }
+                    <button class="action-btn" title="Copiar" (click)="copiar(l)">
+                      <svg lucideIcon="copy" [size]="16" />
+                    </button>
                     <button class="action-btn" title="Editar" (click)="abrirModal(l)">
                       <svg lucideIcon="pencil" [size]="16" />
                     </button>

@@ -24,6 +24,19 @@ public class AuthController : BaseController
         return ApiResponse(result);
     }
 
+    /// <summary>Obtém um token do usuário administrador padrão de desenvolvimento (admin@portal.com / 123456).</summary>
+    [HttpGet("token")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ObterTokenDev()
+    {
+        var result = await _authAppService.LoginAsync(new LoginRequest
+        {
+            Email = "admin@portal.com",
+            Senha = "123456"
+        });
+        return ApiResponse(result);
+    }
+
     [HttpPost("registrar")]
     [AllowAnonymous]
     public async Task<IActionResult> Registrar([FromBody] UsuarioRequest request)

@@ -36,10 +36,13 @@ export class CurrencyInputDirective implements ControlValueAccessor {
   @HostListener('input', ['$event'])
   onInput(_event: Event): void {
     const raw = this.el.nativeElement.value;
-    const numeric = this.parseCurrency(raw);
+    const caret = this.el.nativeElement.selectionStart ?? raw.length;
+    const digitsBefore = (raw.slice(0, caret).match(/\d/g) ?? []).length;
 
-    this.el.nativeElement.value = this.formatCurrency(numeric);
-    this.onChange(numeric);
+    const cleaned = this.sanitize(raw);
+    this.el.nativeElement.value = cleaned;
+    this.setCaret(digitsBefore, cleaned);
+    this.onChange(this.parseCurrency(cleaned));
   }
 
   @HostListener('focus')
@@ -49,6 +52,8 @@ export class CurrencyInputDirective implements ControlValueAccessor {
 
   @HostListener('blur')
   onBlur(): void {
+    const value = this.parseCurrency(this.el.nativeElement.value);
+    this.el.nativeElement.value = this.formatCurrency(value);
     this.onTouched();
   }
 
@@ -65,17 +70,44 @@ export class CurrencyInputDirective implements ControlValueAccessor {
     }
 
     if (event.key === ',' || event.key === '.') {
-      const input = this.el.nativeElement;
-      const hasDecimal = input.value.includes(',');
-      if (hasDecimal) {
-        event.preventDefault();
-      }
       return;
     }
 
     if (!/^\d$/.test(event.key)) {
       event.preventDefault();
     }
+  }
+
+  private sanitize(text: string): string {
+    const normalized = text.includes(',') ? text : text.replace(/\./g, ',');
+    let out = '';
+    let seenComma = false;
+    let decimals = 0;
+    for (const ch of normalized) {
+      if (ch === ',') {
+        if (!seenComma) {
+          out += ch;
+          seenComma = true;
+        }
+        continue;
+      }
+      if (ch >= '0' && ch <= '9') {
+        if (seenComma && decimals >= 2) continue;
+        out += ch;
+        if (seenComma) decimals++;
+      }
+    }
+    return out;
+  }
+
+  private setCaret(digitsBefore: number, text: string) {
+    let index = 0;
+    let seen = 0;
+    while (index < text.length && seen < digitsBefore) {
+      if (/\d/.test(text[index])) seen++;
+      index++;
+    }
+    this.el.nativeElement.setSelectionRange(index, index);
   }
 
   private formatCurrency(value: number): string {
@@ -87,20 +119,11 @@ export class CurrencyInputDirective implements ControlValueAccessor {
   }
 
   private parseCurrency(value: string): number {
-    if (!value) return 0;
+    const t = (value || '').trim();
+    if (!t) return 0;
 
-    let cleaned = value.replace(/[^\d,.-]/g, '');
-
-    const lastComma = cleaned.lastIndexOf(',');
-    const lastDot = cleaned.lastIndexOf('.');
-
-    if (lastComma > lastDot) {
-      cleaned = cleaned.replace(/\./g, '').replace(',', '.');
-    } else {
-      cleaned = cleaned.replace(/,/g, '');
-    }
-
-    const num = parseFloat(cleaned);
+    const normalized = t.replace(/\./g, '').replace(/,/g, '.');
+    const num = parseFloat(normalized);
     return isNaN(num) ? 0 : Math.round(num * 100) / 100;
   }
 }

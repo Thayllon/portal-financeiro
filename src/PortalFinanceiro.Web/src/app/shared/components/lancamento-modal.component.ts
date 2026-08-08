@@ -53,6 +53,7 @@ export class LancamentoModalComponent {
   form: LancamentoForm = this.emptyForm();
   previewMeses = signal(0);
   fieldErrors = signal<Record<string, string>>({});
+  passoAtual = signal(0);
 
   contasOptions = signal<SelectOption[]>([]);
   categoriasOptions = signal<SelectOption[]>([]);
@@ -65,14 +66,7 @@ export class LancamentoModalComponent {
     });
 
     effect(() => {
-      const cats = this.categorias();
-      const paiId = this.form.idCategoria;
-      this.categoriasOptions.set(
-        cats.filter(c => !c.categoriaPaiId).map(c => ({ value: c.id, label: c.nome }))
-      );
-      this.subcategoriasOptions.set(
-        cats.filter(c => c.categoriaPaiId === paiId).map(c => ({ value: c.id, label: c.nome }))
-      );
+      this.atualizarCategorizacao();
     });
 
     effect(() => {
@@ -80,6 +74,7 @@ export class LancamentoModalComponent {
       const visible = this.visible();
       if (visible) {
         this.fieldErrors.set({});
+        this.passoAtual.set(0);
         if (ini) {
           this.form = {
             descricao: ini.descricao,
@@ -98,13 +93,105 @@ export class LancamentoModalComponent {
           this.form = this.emptyForm();
           this.form.data = hoje;
         }
+        this.atualizarCategorizacao();
         this.calcularPreview();
       }
     });
   }
 
+  private atualizarCategorizacao() {
+    const cats = this.categorias();
+    const paiId = this.form.idCategoria;
+    this.categoriasOptions.set(
+      cats.filter(c => !c.categoriaPaiId).map(c => ({ value: c.id, label: c.nome }))
+    );
+    this.subcategoriasOptions.set(
+      cats.filter(c => c.categoriaPaiId === paiId).map(c => ({ value: c.id, label: c.nome }))
+    );
+  }
+
   onCategoriaChange() {
     this.form.idSubcategoria = undefined;
+    this.atualizarCategorizacao();
+  }
+
+  irPara(indice: number) {
+    if (indice < this.passoAtual()) {
+      this.fieldErrors.set({});
+      this.passoAtual.set(indice);
+      return;
+    }
+    while (this.passoAtual() < indice) {
+      if (!this.avancar()) break;
+    }
+  }
+
+  avancar(): boolean {
+    if (!this.validarPassoAtual()) {
+      this.notify.error('Preencha os campos destacados para avançar');
+      return false;
+    }
+    if (this.passoAtual() < 2) {
+      this.fieldErrors.set({});
+      this.passoAtual.update(v => v + 1);
+    }
+    return true;
+  }
+
+  private validarPassoAtual(): boolean {
+    const errors: Record<string, string> = {};
+    switch (this.passoAtual()) {
+      case 0:
+        if (!this.form.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
+        break;
+      case 1:
+        if (!this.form.descricao) errors['descricao'] = 'Descrição é obrigatória';
+        if (this.form.valor == null || isNaN(this.form.valor) || this.form.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
+        if (!this.form.data) errors['data'] = 'Data é obrigatória';
+        break;
+      case 2:
+        if (!this.form.idConta) errors['idConta'] = 'Conta é obrigatória';
+        if (this.form.repete) {
+          if (!this.form.dia || this.form.dia < 1 || this.form.dia > 31) {
+            errors['dia'] = 'Dia deve estar entre 1 e 31';
+          } else if (this.form.diaUtil && this.form.dia > 5) {
+            errors['dia'] = 'Dia útil deve estar entre 1 e 5';
+          }
+          if (!this.form.dataFim) {
+            errors['dataFim'] = 'Data fim é obrigatória';
+          } else if (this.form.data && this.form.dataFim <= this.form.data) {
+            errors['dataFim'] = 'Data fim deve ser posterior à data início';
+          }
+        }
+        break;
+    }
+    if (Object.keys(errors).length > 0) {
+      this.fieldErrors.set(errors);
+      return false;
+    }
+    return true;
+  }
+
+  passoConcluido(indice: number): boolean {
+    if (indice === 0) return !!this.form.idCategoria;
+    if (indice === 1) return !!(this.form.descricao?.trim() && this.form.data && this.form.valor > 0);
+    return !!this.form.idConta;
+  }
+
+  voltar() {
+    if (this.passoAtual() > 0) {
+      this.fieldErrors.set({});
+      this.passoAtual.set(this.passoAtual() - 1);
+    }
+  }
+
+  selecionarSubcategoria(value: string) {
+    this.form.idSubcategoria = value || undefined;
+    const label = this.subcategoriasOptions().find(o => o.value === value)?.label;
+    if (label && !this.form.descricao?.trim()) {
+      this.form.descricao = label;
+      this.clearError('descricao');
+    }
   }
 
   onDiaUtilChange() {

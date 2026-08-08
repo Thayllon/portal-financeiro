@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -8,13 +8,15 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { TabsComponent, Tab } from '../../shared/components/tabs.component';
+import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-categorias',
   standalone: true,
-  imports: [FormsModule, ModalComponent, TabsComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, TabsComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './categorias-receita.component.html',
   styleUrl: './categorias-receita.component.scss'
 })
@@ -58,6 +60,10 @@ export class CategoriasComponent implements OnInit {
 
   categoriasPai() { return this.items().filter(c => !c.categoriaPaiId); }
   subcategoriasDe(paiId: string) { return this.items().filter(c => c.categoriaPaiId === paiId); }
+
+  paisSignal = computed(() => this.categoriasPai());
+  pagination = useListPagination(this.paisSignal, { initialPageSize: 10 });
+  paginatedPais = computed(() => this.pagination.paginatedItems());
 
   abrirModal(item?: Categoria, paiId?: string) {
     this.form = {

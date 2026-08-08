@@ -18,6 +18,7 @@ var app = builder.Build();
 
 SqlDialect.Configure(new PortalFinanceiro.Infrastructure.Sql.Dialects.SqlServerDialect());
 
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("AllowAngular");
 app.UseAuthentication();
@@ -35,7 +36,10 @@ app.SeedDatabase();
 
 try
 {
-    Log.Information("Iniciando Portal Financeiro API");
+    var conexao = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+    Log.Information("=== Portal Financeiro API iniciando ===");
+    Log.Information("Ambiente: {Ambiente} | Conexao: {Conexao}", app.Environment.EnvironmentName, conexao);
+    Log.Information("Swagger: {Url}", "http://localhost:5178/swagger");
     app.Run();
 }
 catch (Exception ex)

@@ -55,6 +55,13 @@
   overflow-y: auto;
   animation: csSlideDown 0.15s ease;
 }
+.cs--up .cs__dropdown {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+  animation: csSlideUp 0.15s ease;
+}
 .cs__option {
   display: block;
   width: 100%;
@@ -81,5 +88,9 @@
 }
 @keyframes csSlideDown {
   from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes csSlideUp {
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
