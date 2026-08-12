@@ -16,6 +16,8 @@ public class ReceitaResponse
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }
     public bool EhRecorrente { get; set; }
+    public bool GeraDas { get; set; }
+    public decimal? PercentualDas { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
 }

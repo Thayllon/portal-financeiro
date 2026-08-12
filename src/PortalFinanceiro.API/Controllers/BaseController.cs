@@ -38,6 +38,7 @@ public abstract class BaseController : ControllerBase
             ETipoErro.Negocio => HttpStatusCode.UnprocessableEntity,
             ETipoErro.NaoEncontrado => HttpStatusCode.NotFound,
             ETipoErro.Conflito => HttpStatusCode.Conflict,
+            ETipoErro.Permissao => HttpStatusCode.Forbidden,
             ETipoErro.Timeout => HttpStatusCode.GatewayTimeout,
             ETipoErro.Externo => HttpStatusCode.BadGateway,
             _ => HttpStatusCode.InternalServerError

@@ -25,6 +25,9 @@ public sealed class Erro
     public static Erro Conflito(string codigo, string mensagem)
         => new(codigo, mensagem, ETipoErro.Conflito);
 
+    public static Erro Permissao(string codigo, string mensagem)
+        => new(codigo, mensagem, ETipoErro.Permissao);
+
     public static Erro Externo(string codigo, string mensagem)
         => new(codigo, mensagem, ETipoErro.Externo);
 

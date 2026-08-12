@@ -6,9 +6,9 @@ namespace PortalFinanceiro.Core.Application.Interfaces;
 
 public interface ICategoriaReceitaAppService
 {
-    Task<Result<IEnumerable<CategoriaResponse>>> ListarAsync(Guid idUsuario);
-    Task<Result<CategoriaResponse>> ObterPorIdAsync(Guid id);
+    Task<Result<IEnumerable<CategoriaResponse>>> ListarAsync(Guid idUsuario, bool isAdmin);
+    Task<Result<CategoriaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario, bool isAdmin);
     Task<Result<CategoriaResponse>> AdicionarAsync(Guid idUsuario, CategoriaRequest request);
-    Task<Result<CategoriaResponse>> AtualizarAsync(Guid id, CategoriaRequest request);
-    Task<Result<Unit>> ExcluirAsync(Guid id);
+    Task<Result<CategoriaResponse>> AtualizarAsync(Guid id, Guid idUsuario, bool isAdmin, CategoriaRequest request);
+    Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario, bool isAdmin);
 }

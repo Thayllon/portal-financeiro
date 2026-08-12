@@ -74,7 +74,7 @@ public static partial class ProgramExtensions
         var usuarios = usuarioRepository.ListarAsync().GetAwaiter().GetResult();
         if (usuarios.Any()) return;
 
-        var senhaHash = passwordService.Hash("123456");
+        var senhaHash = passwordService.Hash("senhasenha");
         var usuarioResult = PortalFinanceiro.Core.Domain.Entities.Usuario.Criar("Admin", "admin@portal.com", senhaHash, isAdmin: true);
 
         if (usuarioResult.EhSucesso)

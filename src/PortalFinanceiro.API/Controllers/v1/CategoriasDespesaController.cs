@@ -20,14 +20,14 @@ public class CategoriasDespesaController : BaseController
     [HttpGet]
     public async Task<IActionResult> Listar()
     {
-        var result = await _service.ListarAsync(ObterIdUsuario());
+        var result = await _service.ListarAsync(ObterIdUsuario(), User.IsInRole("Admin"));
         return ApiResponse(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Obter(Guid id)
     {
-        var result = await _service.ObterPorIdAsync(id);
+        var result = await _service.ObterPorIdAsync(id, ObterIdUsuario(), User.IsInRole("Admin"));
         return ApiResponse(result);
     }
 
@@ -41,14 +41,14 @@ public class CategoriasDespesaController : BaseController
     [HttpPut("{id}")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] CategoriaRequest request)
     {
-        var result = await _service.AtualizarAsync(id, request);
+        var result = await _service.AtualizarAsync(id, ObterIdUsuario(), User.IsInRole("Admin"), request);
         return ApiResponse(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Excluir(Guid id)
     {
-        var result = await _service.ExcluirAsync(id);
+        var result = await _service.ExcluirAsync(id, ObterIdUsuario(), User.IsInRole("Admin"));
         return ApiResponse(result);
     }
 }

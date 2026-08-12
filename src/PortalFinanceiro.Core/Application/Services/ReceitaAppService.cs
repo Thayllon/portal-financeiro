@@ -12,11 +12,13 @@ public class ReceitaAppService : IReceitaAppService
 {
     private readonly IReceitaRepository _repository;
     private readonly IRegraReceitaRepository _regraRepository;
+    private readonly IEncargoFiscalService _encargoFiscalService;
 
-    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository)
+    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IEncargoFiscalService encargoFiscalService)
     {
         _repository = repository;
         _regraRepository = regraRepository;
+        _encargoFiscalService = encargoFiscalService;
     }
 
     public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
@@ -42,8 +44,24 @@ public class ReceitaAppService : IReceitaAppService
             if (!result.EhSucesso)
                 return result.Erro!;
 
-            await _repository.InserirAsync(result.Dado!);
-            return Mapear(result.Dado!);
+            var receita = result.Dado!;
+            await _repository.InserirAsync(receita);
+
+            if (request.GeraDas)
+            {
+                var das = await _encargoFiscalService.GerarDasAsync(idUsuario, receita, request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao);
+                if (!das.EhSucesso)
+                {
+                    receita.Desativar();
+                    await _repository.AtualizarAsync(receita);
+                    return das.Erro!;
+                }
+
+                receita.GeraDas = true;
+                receita.PercentualDas = request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao;
+            }
+
+            return Mapear(receita);
         }
 
         var regraResult = RegraReceita.Criar(idUsuario, request.Descricao, request.Valor, request.Dia ?? 1, request.DiaUtil ?? false, request.IdCategoria, request.IdConta, request.Data, request.DataFim ?? request.Data);
@@ -62,6 +80,23 @@ public class ReceitaAppService : IReceitaAppService
         if (receitas.Count != 0)
             await _repository.InserirEmMassaAsync(receitas);
 
+        if (request.GeraDas && receitas.Count != 0)
+        {
+            foreach (var receitaParcela in receitas)
+            {
+                var das = await _encargoFiscalService.GerarDasAsync(idUsuario, receitaParcela, request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao);
+                if (!das.EhSucesso)
+                {
+                    receitaParcela.Desativar();
+                    await _repository.AtualizarAsync(receitaParcela);
+                    return das.Erro!;
+                }
+
+                receitaParcela.GeraDas = true;
+                receitaParcela.PercentualDas = request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao;
+            }
+        }
+
         return receitas.Count != 0
             ? Mapear(receitas.First())
             : Erro.Negocio("NENHUMA_RECEITA_GERADA", "Nenhuma receita foi gerada para o período informado.");
@@ -78,6 +113,11 @@ public class ReceitaAppService : IReceitaAppService
             return result.Erro!;
 
         await _repository.AtualizarAsync(receita);
+
+        var sincronizarDas = await _encargoFiscalService.SincronizarDasAsync(receita.IdUsuario, receita, request.GeraDas, request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao);
+        if (!sincronizarDas.EhSucesso)
+            return sincronizarDas.Erro!;
+
         return Mapear(receita);
     }
 
@@ -120,6 +160,7 @@ public class ReceitaAppService : IReceitaAppService
 
         receita.Desativar();
         await _repository.AtualizarAsync(receita);
+        await _encargoFiscalService.RemoverDasAsync(receita.IdUsuario, receita);
         return Resultado.Sucesso();
     }
 
@@ -139,6 +180,8 @@ public class ReceitaAppService : IReceitaAppService
         DataRealizacao = r.DataRealizacao,
         IdRegra = r.IdRegra,
         EhRecorrente = r.EhRecorrente,
+        GeraDas = r.GeraDas,
+        PercentualDas = r.PercentualDas,
         Ativo = r.Ativo,
         DataCadastro = r.DataCadastro
     };

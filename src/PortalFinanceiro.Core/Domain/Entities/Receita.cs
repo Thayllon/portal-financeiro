@@ -23,6 +23,8 @@ public class Receita
     public string Categoria { get; set; } = string.Empty;
     public string Subcategoria { get; set; } = string.Empty;
     public string Conta { get; set; } = string.Empty;
+    public bool GeraDas { get; set; }
+    public decimal? PercentualDas { get; set; }
     public bool EhRecorrente => IdRegra.HasValue;
 
     public Receita() { }

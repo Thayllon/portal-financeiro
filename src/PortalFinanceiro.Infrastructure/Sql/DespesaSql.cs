@@ -3,8 +3,8 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class DespesaSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}Despesa";
-    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, Ativo, DataCadastro, DataAlteracao";
-    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria, {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
+    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, IdReceitaOrigem, IdProLaboreOrigem, Ativo, DataCadastro, DataAlteracao";
+    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria, {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.IdReceitaOrigem, {T}.IdProLaboreOrigem, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
         cb.Nome AS Conta,
         cat.Nome AS Categoria,
         sub.Nome AS Subcategoria";
@@ -26,7 +26,9 @@ internal static class DespesaSql
     public static string ContarPorSubcategoria => $"SELECT COUNT(*) FROM {T} WHERE IdSubcategoria = @IdSubcategoria AND Ativo = 1";
     public static string ContarPorRegra => $"SELECT COUNT(*) FROM {T} WHERE IdRegra = @IdRegra AND Ativo = 1";
     public static string ListarPorRegra => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdRegra = @IdRegra AND {T}.Ativo = 1 ORDER BY {T}.Data";
-    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @Status, @DataRealizacao, @IdRegra, @Ativo, @DataCadastro, @DataAlteracao)";
+    public static string ListarPorReceitaOrigem => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdReceitaOrigem = @IdReceitaOrigem AND {T}.Ativo = 1";
+    public static string ListarPorProLaboreOrigem => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdProLaboreOrigem = @IdProLaboreOrigem AND {T}.Ativo = 1";
+    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @Status, @DataRealizacao, @IdRegra, @IdReceitaOrigem, @IdProLaboreOrigem, @Ativo, @DataCadastro, @DataAlteracao)";
     public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
     public static string Excluir => $"UPDATE {T} SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id";
     public static string ResumoAnualPorMes => $@"

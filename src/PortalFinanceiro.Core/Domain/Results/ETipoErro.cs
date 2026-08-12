@@ -6,6 +6,7 @@ public enum ETipoErro
     Negocio,
     NaoEncontrado,
     Conflito,
+    Permissao,
     Timeout,
     Externo,
     Infraestrutura

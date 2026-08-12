@@ -13,8 +13,8 @@ public class CategoriaDespesaRepository : SqlBaseRepository, ICategoriaDespesaRe
     public async Task<CategoriaDespesa?> ObterPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<CategoriaDespesa>(conn, CategoriaDespesaSql.ObterPorId, new { Id = id }));
 
-    public async Task<IEnumerable<CategoriaDespesa>> ListarPorUsuarioAsync(Guid idUsuario)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaDespesa>(conn, CategoriaDespesaSql.ListarPorUsuario, new { IdUsuario = idUsuario }));
+    public async Task<IEnumerable<CategoriaDespesa>> ListarAsync()
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaDespesa>(conn, CategoriaDespesaSql.ListarAtivas));
 
     public async Task<IEnumerable<CategoriaDespesa>> ListarPorPaiAsync(Guid? categoriaPaiId)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaDespesa>(conn, CategoriaDespesaSql.ListarPorPai, new { CategoriaPaiId = categoriaPaiId }));

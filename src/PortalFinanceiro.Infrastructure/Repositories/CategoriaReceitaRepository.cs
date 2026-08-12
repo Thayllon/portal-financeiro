@@ -13,8 +13,8 @@ public class CategoriaReceitaRepository : SqlBaseRepository, ICategoriaReceitaRe
     public async Task<CategoriaReceita?> ObterPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ObterPorId, new { Id = id }));
 
-    public async Task<IEnumerable<CategoriaReceita>> ListarPorUsuarioAsync(Guid idUsuario)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ListarPorUsuario, new { IdUsuario = idUsuario }));
+    public async Task<IEnumerable<CategoriaReceita>> ListarAsync()
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ListarAtivas));
 
     public async Task<IEnumerable<CategoriaReceita>> ListarPorPaiAsync(Guid? categoriaPaiId)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ListarPorPai, new { CategoriaPaiId = categoriaPaiId }));
