@@ -1,2 +1,0 @@
-ALTER TABLE ReceitaRecorrente ADD DiaUtil BIT NOT NULL DEFAULT 0;
-ALTER TABLE DespesaRecorrente ADD DiaUtil BIT NOT NULL DEFAULT 0;

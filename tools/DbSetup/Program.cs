@@ -1,8 +1,14 @@
 ﻿using DbUp;
 using Microsoft.Data.SqlClient;
 
-var connectionString = args.FirstOrDefault()
+var connectionString = args.FirstOrDefault(a => !a.StartsWith("--"))
     ?? "Server=(localdb)\\mssqllocaldb;Database=PortalFinanceiro;Trusted_Connection=True;TrustServerCertificate=True";
+
+var scriptsPath = args.FirstOrDefault(a => a.StartsWith("--scripts=")) switch
+{
+    null => Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "scripts", "sqlserver"),
+    string s => s["--scripts=".Length..]
+};
 
 var builder = new SqlConnectionStringBuilder(connectionString);
 var databaseName = builder.InitialCatalog;
@@ -18,7 +24,7 @@ checkDbCmd.ExecuteNonQuery();
 
 masterConn.Close();
 
-var scriptsPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "scripts", "sql");
+Console.WriteLine($"Scripts: {scriptsPath}");
 
 var result = DeployChanges.To
     .SqlDatabase(connectionString)
