@@ -111,6 +111,7 @@
                     placeholder="Ex: Salário / Pizza"
                     class="input"
                     [class.input-error]="fieldErrors()['descricao']"
+                    [readonly]="!!encargoTipo()"
                     (ngModelChange)="clearError('descricao')"
                   />
                   @if (fieldErrors()['descricao']) {
@@ -129,9 +130,13 @@
                       class="input"
                       [class.input-error]="fieldErrors()['valor']"
                       inputmode="decimal"
+                      [readonly]="!!encargoTipo()"
                     />
                     @if (fieldErrors()['valor']) {
                       <span class="field-error">{{ fieldErrors()['valor'] }}</span>
+                    }
+                    @if (encargoTipo()) {
+                      <span class="field-hint">Valor calculado automaticamente a partir da origem</span>
                     }
                   </div>
                   <div class="field">
@@ -151,7 +156,39 @@
                   </div>
                 </div>
 
-                @if (tipoLabel() === 'receita') {
+                @if (encargoTipo()) {
+                  <div class="encargo-block">
+                    <div class="encargo-block__badge">
+                      <svg [lucideIcon]="encargoTipo() === 'das' ? 'receipt-text' : 'shield-check'" [size]="18" />
+                      <div>
+                        <strong>{{ encargoTipo() === 'das' ? 'Despesa de DAS gerada automaticamente' : 'Despesa de INSS gerada automaticamente' }}</strong>
+                        <span>{{ origemLabel() }}</span>
+                      </div>
+                    </div>
+                    <div class="encargo-block__formula">
+                      <span>{{ encargoTipo() === 'das' ? 'Regra: percentual do DAS sobre o valor da receita' : 'Regra: percentual do INSS sobre o pró-labore' }}</span>
+                      <div class="field">
+                        <label>Percentual ({{ encargoTipo() === 'das' ? 'DAS' : 'INSS' }}) (%)</label>
+                        <input
+                          type="number"
+                          min="0.1"
+                          max="99.9"
+                          step="0.1"
+                          [ngModel]="encargoTipo() === 'das' ? form.percentualDas : form.percentualInss"
+                          (ngModelChange)="setEncargoPercentual($event)"
+                          placeholder="{{ encargoTipo() === 'das' ? '6' : '11' }}"
+                          class="input"
+                          [class.input-error]="fieldErrors()['percentualDas'] || fieldErrors()['percentualInss']"
+                        />
+                        @if (fieldErrors()['percentualDas'] || fieldErrors()['percentualInss']) {
+                          <span class="field-error">Percentual deve estar entre 0 e 100</span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                }
+
+                @if (!encargoTipo() && tipoLabel() === 'receita') {
                   <div class="das-block">
                     <label class="checkbox-label">
                       <input type="checkbox" [(ngModel)]="form.geraDas" class="checkbox" />

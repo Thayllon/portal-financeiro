@@ -14,8 +14,8 @@ import {
   LucideHandCoins, LucideCalendar1, LucideCalendarDays,
   LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
-    LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck,
-} from '@lucide/angular';
+LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
+  } from '@lucide/angular';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
@@ -36,7 +36,7 @@ export const appConfig: ApplicationConfig = {
       LucideHandCoins, LucideCalendar1, LucideCalendarDays,
       LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
-      LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck,
+      LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
     ),
   ],
 };
