@@ -27,7 +27,7 @@ cd src/PortalFinanceiro.Web && npm test
 | Campo  | Valor               |
 |--------|---------------------|
 | E-mail | `admin@portal.com`  |
-| Senha  | `123456`            |
+| Senha  | `senhasenha`        |
 
 ## Arquitetura
 
@@ -47,7 +47,12 @@ cd src/PortalFinanceiro.Web && npm test
 - **Design system** em `src/app/design-system/styles/`
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes compartilhados** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias)
+- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias, pro-labore)
+
+### Scripts e Documentação
+
+- **Scripts de banco**: `scripts/sqlserver/` (SQL Server, from scratch) e `scripts/postgres/`
+- **Documentação**: em `doc/` — `README.md` é o índice; arquivos por área (`back.md`, `front.md`, `banco.md`, `infra.md`, `primeiros-passos.md`). Manter sempre atualizada.
 
 ## Padrões de Código
 
@@ -62,6 +67,10 @@ cd src/PortalFinanceiro.Web && npm test
 - **Controllers**: Apenas chamar service + ApiResponse, NUNCA conter lógica de negócio
 - **Services**: Orquestrar operações, delegar regras de domínio para entidades
 - **LancamentoHelper**: Fica em `Domain/Services/`, é lógica de domínio
+- **Categorias compartilhadas**: editar/excluir só dono (`IdUsuario`) ou admin — senão `Erro.Permissao` (HTTP 403)
+- **Auditoria de categorias**: toda mutação (criar/editar/excluir, incl. subcategorias) grava `CategoriaHistorico` via `ICategoriaHistoricoRepository`
+- **Encargos (DAS/INSS)**: gerar/sincronizar/remover via `IEncargoFiscalService`; vínculo por `Despesa.IdReceitaOrigem` / `IdProLaboreOrigem`
+- **Constantes fiscais** (salário mínimo, % DAS/INSS, nomes CNPJ/DAS/INSS): em `EncargoFiscal` (`Domain/Services/`)
 
 ### Frontend (TypeScript)
 
@@ -99,6 +108,7 @@ src/app/
 │   ├── despesas/
 │   ├── contas/
 │   ├── categorias-receita/
+│   ├── pro-labore/
 │   └── login/
 └── shared/
     ├── components/      # Componentes reutilizáveis
@@ -123,3 +133,6 @@ src/app/
 - [ ] Frontend envia status como number (1 ou 2)
 - [ ] Repositorios frontend não enviam `idUsuario`
 - [ ] Nenhum hex hardcoded fora do design system
+- [ ] Mutação de categoria grava auditoria (`CategoriaHistorico`)
+- [ ] Editar/excluir categoria valida dono/admin (`Erro.Permissao` → 403)
+- [ ] Encargos DAS/INSS usam `IEncargoFiscalService` com vínculo correto (`IdReceitaOrigem`/`IdProLaboreOrigem`)
