@@ -13,6 +13,7 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 | Auth | JWT Bearer |
 | Migrations | DbUp |
 | Ícones | Lucide Angular |
+| Deploy | Docker Compose — local (SQL Server) e produção Oracle Cloud (PostgreSQL) |
 
 ## Índice da documentação
 
@@ -21,8 +22,9 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 | [back.md](back.md) | Backend: arquitetura, projetos, rotas da API, como rodar/buildar, padrões | Mexer na API/Core/Infra; descobrir endpoint |
 | [front.md](front.md) | Frontend: estrutura, features, como rodar/buildar/testar, padrões de UI | Mexer no Angular; criar tela/componente |
 | [banco.md](banco.md) | Banco: scripts por provider, DbSetup, modelo de dados, encargos, seed | Mexer em migração/schema; entender tabelas |
-| [infra.md](infra.md) | Infraestrutura (placeholder — ainda vamos montar) | Subir em produção/conteinerizar |
-| [primeiros-passos.md](primeiros-passos.md) | Como rodar do zero na primeira vez (banco → API → front) | Ambiente novo; perder tudo e recomeçar |
+| [deploy-local.md](deploy-local.md) | **Subir TUDO local com Docker em um link** (`http://localhost:8080`) — SQL Server + API + Front | Validar o sistema de ponta a ponta sem instalar nada |
+| [infra.md](infra.md) | Deploy **Oracle Cloud Always Free** (R$ 0) — PostgreSQL + API + Front numa VM só | Subir em produção / nuvem |
+| [primeiros-passos.md](primeiros-passos.md) | Como rodar do zero na primeira vez (banco → API → front), sem Docker | Ambiente novo; perder tudo e recomeçar |
 
 ## Estrutura do repositório
 
@@ -32,15 +34,21 @@ portal-financeiro/
 │   ├── PortalFinanceiro.API/          # Controllers, middleware, Program.cs
 │   ├── PortalFinanceiro.Core/         # Domain + Application (Clean Architecture)
 │   ├── PortalFinanceiro.Infrastructure# Dapper repositories, IoC
-│   └── PortalFinanceiro.Web/          # Angular 22
+│   └── PortalFinanceiro.Web/          # Angular 22 (+ Dockerfile e nginx.conf)
 ├── scripts/
 │   ├── sqlserver/                     # Migrations DbUp (SQL Server) — from scratch
 │   │   ├── 001_CriarTabelas.sql       #   schema unificado completo
 │   │   └── 099_SeedBase.sql           #   admin + categorias CNPJ → DAS/INSS
 │   └── postgres/                      # Mesmo conjunto para PostgreSQL
+├── tools/
+│   └── DbSetup/                       # Ferramenta para rodar migrations (+ Dockerfile)
 ├── doc/                               # Documentação (este índice + arquivos por área)
-├── tools/DbSetup/                     # Ferramenta para rodar migrations
-└── test/
+├── test/
+├── Dockerfile                         # Backend .NET 11 (multi-stage, porta 8080)
+├── docker-compose.yml                 # Produção: PostgreSQL + API + Web (Oracle Cloud)
+├── docker-compose.local.yml           # Local: SQL Server + API + Web (link único)
+├── .env.example                       # Modelo de variáveis (sem segredos reais)
+└── .github/workflows/ci.yml           # CI: build + teste (backend e frontend)
 ```
 
 ## Conceitos gerais

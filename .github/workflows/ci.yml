@@ -1,0 +1,42 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend:
+    name: Backend (.NET 11)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '11.0.x'
+          dotnet-quality: 'preview'
+      - name: Restore
+        run: dotnet restore PortalFinanceiro.API.slnx
+      - name: Build
+        run: dotnet build PortalFinanceiro.API.slnx --no-restore -c Release
+      - name: Test
+        run: dotnet test PortalFinanceiro.API.slnx --no-build -c Release
+
+  frontend:
+    name: Frontend (Angular 22)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/PortalFinanceiro.Web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: src/PortalFinanceiro.Web/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Build
+        run: npm run build
