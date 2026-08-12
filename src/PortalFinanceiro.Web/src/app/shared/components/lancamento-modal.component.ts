@@ -19,6 +19,8 @@ export interface LancamentoForm {
   dia?: number;
   diaUtil?: boolean;
   dataFim?: string;
+  geraDas?: boolean;
+  percentualDas?: number;
 }
 
 interface LancamentoItem {
@@ -28,6 +30,8 @@ interface LancamentoItem {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
+  geraDas?: boolean;
+  percentualDas?: number;
 }
 
 @Component({
@@ -86,7 +90,9 @@ export class LancamentoModalComponent {
             repete: false,
             dia: 1,
             diaUtil: false,
-            dataFim: ''
+            dataFim: '',
+            geraDas: ini.geraDas ?? false,
+            percentualDas: ini.percentualDas ?? undefined
           };
         } else {
           const hoje = new Date().toISOString().split('T')[0];
@@ -252,6 +258,12 @@ export class LancamentoModalComponent {
       }
     }
 
+    if (this.form.geraDas) {
+      if (this.form.percentualDas == null || isNaN(this.form.percentualDas) || this.form.percentualDas <= 0 || this.form.percentualDas >= 100) {
+        errors['percentualDas'] = 'Percentual deve estar entre 0 e 100';
+      }
+    }
+
     if (Object.keys(errors).length > 0) {
       this.fieldErrors.set(errors);
       this.notify.error('Corrija os campos destacados');
@@ -265,7 +277,8 @@ export class LancamentoModalComponent {
   private emptyForm(): LancamentoForm {
     return {
       descricao: '', valor: 0, data: '', idConta: '', idCategoria: '',
-      repete: false, dia: 1, diaUtil: false, dataFim: ''
+      repete: false, dia: 1, diaUtil: false, dataFim: '',
+      geraDas: false, percentualDas: 6
     };
   }
 }

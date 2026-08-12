@@ -1,0 +1,119 @@
+    <div class="page">
+      <header class="page__header">
+        <div class="page__header-left">
+          <svg lucideIcon="briefcase-business" class="page__icon" [size]="22" />
+          <div>
+            <h1 class="page__title">Pró-labore</h1>
+            <p class="page__subtitle">Retirada mensal que gera despesa de INSS automática</p>
+          </div>
+        </div>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Novo pró-labore
+        </button>
+      </header>
+
+      @if (loading()) {
+        <div class="table-card">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="skeleton-row">
+              <div class="skeleton-line" style="width: 30%"></div>
+              <div class="skeleton-line" style="width: 20%"></div>
+              <div class="skeleton-line" style="width: 10%"></div>
+            </div>
+          }
+        </div>
+      } @else if (registros().length === 0) {
+        <div class="empty-state">
+          <svg lucideIcon="briefcase-business" [size]="48" class="empty-icon" />
+          <h3>Nenhum pró-labore cadastrado</h3>
+          <p>Cadastre sua retirada mensal para gerar o INSS automaticamente.</p>
+          <button class="add-btn" (click)="abrirModal()">
+            <svg lucideIcon="plus" [size]="16" />
+            Novo pró-labore
+          </button>
+        </div>
+      } @else {
+        <div class="table-card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Mês</th>
+                <th>Valor bruto</th>
+                <th>INSS</th>
+                <th>Conta</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of registros(); track r.id) {
+                <tr>
+                  <td class="cell-name" data-label="Mês">{{ labelMes(r.mes) }} / {{ r.ano }}</td>
+                  <td data-label="Valor bruto">{{ r.valor | currencyBRL }}</td>
+                  <td data-label="INSS">
+                    <span class="inss">{{ valorInss(r) | currencyBRL }}</span>
+                    <span class="inss-percent">({{ r.percentualInss }}%)</span>
+                  </td>
+                  <td data-label="Conta">{{ r.conta }}</td>
+                  <td class="cell-actions">
+                    <button class="action-btn" title="Editar" (click)="abrirModal(r)">
+                      <svg lucideIcon="pencil" [size]="16" />
+                    </button>
+                    <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(r)">
+                      <svg lucideIcon="trash-2" [size]="16" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="table-footer">
+                <td>Total</td>
+                <td>{{ totalBruto() | currencyBRL }}</td>
+                <td>{{ inssCalculado() | currencyBRL }}</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      }
+    </div>
+
+    <app-modal
+      [visible]="modalVisible()"
+      [title]="editando() ? 'Editar pró-labore' : 'Novo pró-labore'"
+      [saving]="salvando()"
+      (visibleChange)="fecharModal()"
+      (save)="salvar()"
+    >
+      <div class="grid-2">
+        <div class="field">
+          <app-custom-select label="Mês" placeholder="Selecione o mês" [options]="mesOptions" [value]="mesString(form.mes)" (valueChange)="setMes($event)" />
+        </div>
+        <div class="field">
+          <label>Ano</label>
+          <input type="number" min="2000" max="2100" [(ngModel)]="form.ano" class="input" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Valor (R$)</label>
+        <input
+          type="text"
+          currencyInput
+          [(ngModel)]="form.valor"
+          placeholder="0,00"
+          class="input"
+          inputmode="decimal"
+        />
+        <span class="field-hint">Mínimo de R$ 1.621,00 (salário mínimo vigente)</span>
+      </div>
+      <div class="field">
+        <label>Percentual de INSS (%)</label>
+        <input type="number" min="0.1" max="99.9" step="0.1" [(ngModel)]="form.percentualInss" class="input" />
+        <span class="field-hint">Padrão: 11%</span>
+      </div>
+      <div class="field">
+        <app-custom-select label="Conta" placeholder="Selecione a conta" [options]="contasOptions" [value]="form.idConta" (valueChange)="form.idConta = $event" />
+        <span class="field-hint">A despesa de INSS será criada nesta mesma conta</span>
+      </div>
+    </app-modal>

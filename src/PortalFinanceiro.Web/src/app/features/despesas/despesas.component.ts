@@ -2,7 +2,6 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
 import { DespesaRepository, DespesaFiltros } from '../../core/repositories/despesa.repository';
 import { CategoriaDespesaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
@@ -29,7 +28,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
   styleUrl: './despesas.component.scss'
 })
 export class DespesasComponent implements OnInit {
-  private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private repo = inject(DespesaRepository);
@@ -84,7 +82,7 @@ export class DespesasComponent implements OnInit {
   }
 
   async carregarCategorias() {
-    try { this.categorias.set(await firstValueFrom(this.catRepo.listar(this.auth.user()!.usuarioId))); } catch {}
+    try { this.categorias.set(await firstValueFrom(this.catRepo.listar())); } catch {}
   }
 
   async carregarContas() {

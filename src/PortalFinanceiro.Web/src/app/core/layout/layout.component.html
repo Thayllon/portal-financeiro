@@ -39,6 +39,12 @@
               <span>Categorias</span>
             }
           </a>
+          <a routerLink="/pro-labore" routerLinkActive="active">
+            <svg lucideIcon="briefcase-business" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Pró-labore</span>
+            }
+          </a>
           @if (authService.isAdmin()) {
             <a routerLink="/usuarios" routerLinkActive="active">
               <svg lucideIcon="users" [size]="18" />

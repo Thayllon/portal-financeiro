@@ -2,7 +2,6 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
 import { ReceitaRepository, ReceitaFiltros } from '../../core/repositories/receita.repository';
 import { CategoriaReceitaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
@@ -29,7 +28,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
   styleUrl: './receitas.component.scss'
 })
 export class ReceitasComponent implements OnInit {
-  private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private repo = inject(ReceitaRepository);
@@ -84,7 +82,7 @@ export class ReceitasComponent implements OnInit {
   }
 
   async carregarCategorias() {
-    try { this.categorias.set(await firstValueFrom(this.catRepo.listar(this.auth.user()!.usuarioId))); } catch {}
+    try { this.categorias.set(await firstValueFrom(this.catRepo.listar())); } catch {}
   }
 
   async carregarContas() {
@@ -121,6 +119,8 @@ export class ReceitasComponent implements OnInit {
       subcategoria: item.subcategoria,
       status: 'Pendente',
       ehRecorrente: false,
+      geraDas: item.geraDas,
+      percentualDas: item.percentualDas,
       ativo: true,
       dataCadastro: new Date().toISOString(),
     };
@@ -141,7 +141,9 @@ export class ReceitasComponent implements OnInit {
         repete: data.repete,
         dia: data.repete ? data.dia : undefined,
         diaUtil: data.repete ? data.diaUtil : undefined,
-        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined
+        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined,
+        geraDas: data.geraDas ?? false,
+        percentualDas: data.geraDas ? (data.percentualDas ?? 6) : undefined
       };
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, request));

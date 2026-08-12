@@ -13,6 +13,8 @@ export interface Receita {
   dataRealizacao?: string;
   idRegra?: string;
   ehRecorrente: boolean;
+  geraDas?: boolean;
+  percentualDas?: number;
   ativo: boolean;
   dataCadastro: string;
 }
@@ -28,4 +30,6 @@ export interface ReceitaRequest {
   dia?: number;
   diaUtil?: boolean;
   dataFim?: string;
+  geraDas?: boolean;
+  percentualDas?: number;
 }

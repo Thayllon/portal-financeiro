@@ -1,7 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
 import { CategoriaReceitaRepository, CategoriaDespesaRepository } from '../../core/repositories/categoria.repository';
 import { Categoria, CategoriaRequest } from '../../core/models/categoria.model';
 import { NotificationService } from '../../core/services/notification.service';
@@ -21,7 +20,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
   styleUrl: './categorias-receita.component.scss'
 })
 export class CategoriasComponent implements OnInit {
-  private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private repoReceita = inject(CategoriaReceitaRepository);
@@ -53,7 +51,7 @@ export class CategoriasComponent implements OnInit {
   async carregar() {
     this.loading.set(true);
     try {
-      this.items.set(await firstValueFrom(this.repo.listar(this.auth.user()!.usuarioId)));
+      this.items.set(await firstValueFrom(this.repo.listar()));
     } catch { this.notify.error('Erro ao carregar categorias'); }
     finally { this.loading.set(false); }
   }
