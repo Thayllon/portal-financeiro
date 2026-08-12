@@ -11,6 +11,7 @@ export class AuthService {
 
   user = this.userSignal.asReadonly();
   isAuthenticated = computed(() => this.userSignal() !== null);
+  isAdmin = computed(() => this.userSignal()?.isAdmin === true);
 
   constructor(
     private authRepository: AuthRepository,
@@ -24,6 +25,7 @@ export class AuthService {
           usuarioId: response.usuarioId,
           nome: response.nome,
           email: response.email,
+          isAdmin: response.isAdmin,
           token: response.token
         };
         this.saveUser(user);

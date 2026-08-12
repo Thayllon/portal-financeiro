@@ -3,5 +3,6 @@ export interface LoginResponse {
   usuarioId: string;
   nome: string;
   email: string;
+  isAdmin: boolean;
   dataExpiracao: string;
 }

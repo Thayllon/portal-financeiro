@@ -106,9 +106,10 @@ ng serve
 | `/api/contas-bancarias` | GET/POST/PUT/DELETE | Contas bancárias |
 | `/api/categorias/receita` | GET/POST/PUT/DELETE | Categorias de receita |
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa |
+| `/api/usuarios` | GET/POST/PUT · PATCH /{id}/ativo | Gerenciamento de usuários (somente admin) |
 | `/api/dashboard` | GET | Dashboard com resumo |
 
 ## Fluxo de desenvolvimento
 
-- `master` — versão estável, atualizada apenas sob autorização
+- `main` — versão estável, atualizada apenas sob autorização
 - `develop` — branch de trabalho ativa

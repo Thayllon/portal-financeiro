@@ -110,7 +110,7 @@ src/app/
 
 ## Fluxo de Desenvolvimento
 
-- `master` — versão estável
+- `main` — versão estável
 - `develop` — branch de trabalho ativa
 
 ## Checklist de Code Review

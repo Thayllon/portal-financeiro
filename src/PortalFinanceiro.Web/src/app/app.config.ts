@@ -14,7 +14,7 @@ import {
   LucideHandCoins, LucideCalendar1, LucideCalendarDays,
   LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
-    LucideBarChart3, LucideCalendarRange,
+    LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck,
 } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -36,7 +36,7 @@ export const appConfig: ApplicationConfig = {
       LucideHandCoins, LucideCalendar1, LucideCalendarDays,
       LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
-      LucideBarChart3, LucideCalendarRange,
+      LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck,
     ),
   ],
 };

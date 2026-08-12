@@ -36,12 +36,4 @@ public class AuthController : BaseController
         });
         return ApiResponse(result);
     }
-
-    [HttpPost("registrar")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Registrar([FromBody] UsuarioRequest request)
-    {
-        var result = await _authAppService.RegistrarAsync(request);
-        return ApiResponse(result, 201);
-    }
 }

@@ -39,6 +39,14 @@
               <span>Categorias</span>
             }
           </a>
+          @if (authService.isAdmin()) {
+            <a routerLink="/usuarios" routerLinkActive="active">
+              <svg lucideIcon="users" [size]="18" />
+              @if (!sidebarCollapsed()) {
+                <span>Usuários</span>
+              }
+            </a>
+          }
         </nav>
         <div class="sidebar-footer">
           @if (!sidebarCollapsed()) {

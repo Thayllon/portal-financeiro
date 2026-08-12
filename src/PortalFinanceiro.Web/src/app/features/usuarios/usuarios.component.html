@@ -1,0 +1,113 @@
+    <div class="page">
+      <header class="page__header">
+        <div class="page__header-left">
+          <svg lucideIcon="users" class="page__icon" [size]="22" />
+          <div>
+            <h1 class="page__title">Usuários</h1>
+            <p class="page__subtitle">Gerencie os acessos ao portal</p>
+          </div>
+        </div>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Novo usuário
+        </button>
+      </header>
+
+      @if (loading()) {
+        <div class="table-card">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="skeleton-row">
+              <div class="skeleton-line" style="width: 30%"></div>
+              <div class="skeleton-line" style="width: 20%"></div>
+              <div class="skeleton-line" style="width: 10%"></div>
+            </div>
+          }
+        </div>
+      } @else if (usuarios().length === 0) {
+        <div class="empty-state">
+          <svg lucideIcon="users" [size]="48" class="empty-icon" />
+          <h3>Nenhum usuário cadastrado</h3>
+          <p>Cadastre o primeiro usuário para começar.</p>
+          <button class="add-btn" (click)="abrirModal()">
+            <svg lucideIcon="plus" [size]="16" />
+            Novo usuário
+          </button>
+        </div>
+      } @else {
+        <div class="table-card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>E-mail</th>
+                <th>Perfil</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of usuarios(); track u.id) {
+                <tr>
+                  <td class="cell-name" data-label="Nome">
+                    {{ u.nome }}
+                    @if (ehUsuarioAtual(u)) {
+                      <span class="you-tag">você</span>
+                    }
+                  </td>
+                  <td data-label="E-mail">{{ u.email }}</td>
+                  <td data-label="Perfil">
+                    <app-status-badge [type]="u.isAdmin ? 'realizado' : 'pendente'" [label]="u.isAdmin ? 'Admin' : 'Usuário'" />
+                  </td>
+                  <td data-label="Status">
+                    <app-status-badge [type]="u.ativo ? 'ativo' : 'inativo'" [label]="u.ativo ? 'Ativo' : 'Inativo'" />
+                  </td>
+                  <td class="cell-actions">
+                    <button class="action-btn" title="Editar" (click)="abrirModal(u)">
+                      <svg lucideIcon="pencil" [size]="16" />
+                    </button>
+                    <button class="action-btn" [class.action-btn--danger]="u.ativo" [title]="u.ativo ? 'Desativar' : 'Ativar'" (click)="alterarAtivo(u)">
+                      <svg [lucideIcon]="u.ativo ? 'user-x' : 'user-check'" [size]="16" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <app-modal
+      [visible]="modalVisible()"
+      [title]="editando() ? 'Editar usuário' : 'Novo usuário'"
+      [saving]="salvando()"
+      (visibleChange)="fecharModal()"
+      (save)="salvar()"
+    >
+      <div class="field">
+        <label>Nome</label>
+        <input [(ngModel)]="form.nome" placeholder="Ex: Maria Silva" class="input" />
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input [(ngModel)]="form.email" type="email" placeholder="Ex: maria@exemplo.com" class="input" />
+      </div>
+      <div class="field">
+        <label>{{ editando() ? 'Nova senha (opcional)' : 'Senha' }}</label>
+        <input [(ngModel)]="form.senha" type="password" placeholder="{{ editando() ? 'Deixe em branco para manter' : 'Defina uma senha' }}" class="input" />
+      </div>
+      <div class="field">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="form.isAdmin" />
+          Administrador (acesso total ao portal)
+        </label>
+      </div>
+      @if (editando()) {
+        <div class="field">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="form.ativo" [disabled]="ehUsuarioAtual(editando()!)" />
+            Usuário ativo
+          </label>
+        </div>
+      }
+    </app-modal>

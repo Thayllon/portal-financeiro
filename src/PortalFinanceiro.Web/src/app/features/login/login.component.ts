@@ -16,7 +16,7 @@ export class LoginComponent {
   private router = inject(Router);
 
   email = 'admin@portal.com';
-  senha = '123456';
+  senha = '';
   loading = false;
   erro = '';
   showPassword = signal(false);

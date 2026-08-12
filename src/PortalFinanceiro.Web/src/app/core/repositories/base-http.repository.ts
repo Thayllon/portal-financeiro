@@ -39,6 +39,13 @@ export abstract class BaseHttpRepository {
     );
   }
 
+  protected patch<T>(path: string, body?: any, params?: Record<string, any>): Observable<T> {
+    return this.http.patch<T>(`${this.baseUrl}${path}`, body, { params: this.sanitizeParams(params) }).pipe(
+      timeout(30000),
+      catchError(err => throwError(() => err))
+    );
+  }
+
   protected delete<T>(path: string, params?: Record<string, any>): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${path}`, { params: this.sanitizeParams(params) }).pipe(
       timeout(30000),

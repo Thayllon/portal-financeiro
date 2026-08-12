@@ -29,7 +29,8 @@ public class TokenService : ITokenService
         {
             new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new Claim(ClaimTypes.Name, usuario.Nome),
-            new Claim(ClaimTypes.Email, usuario.Email)
+            new Claim(ClaimTypes.Email, usuario.Email),
+            new Claim(ClaimTypes.Role, usuario.IsAdmin ? "Admin" : "Usuario")
         };
 
         var token = new JwtSecurityToken(

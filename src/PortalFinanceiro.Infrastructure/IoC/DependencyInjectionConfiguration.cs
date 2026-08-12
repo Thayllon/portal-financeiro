@@ -28,6 +28,7 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IRegraDespesaRepository, RegraDespesaRepository>();
 
         services.AddScoped<IAuthAppService, AuthAppService>();
+        services.AddScoped<IUsuarioAppService, UsuarioAppService>();
         services.AddScoped<IContaBancariaAppService, ContaBancariaAppService>();
         services.AddScoped<ICategoriaReceitaAppService, CategoriaReceitaAppService>();
         services.AddScoped<ICategoriaDespesaAppService, CategoriaDespesaAppService>();

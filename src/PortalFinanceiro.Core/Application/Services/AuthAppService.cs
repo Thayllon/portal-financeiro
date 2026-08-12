@@ -41,31 +41,8 @@ public class AuthAppService : IAuthAppService
             UsuarioId = usuario.Id,
             Nome = usuario.Nome,
             Email = usuario.Email,
+            IsAdmin = usuario.IsAdmin,
             DataExpiracao = DateTime.UtcNow.AddHours(_tokenService.ExpirationHours)
-        };
-    }
-
-    public async Task<Result<UsuarioResponse>> RegistrarAsync(UsuarioRequest request)
-    {
-        var existente = await _usuarioRepository.ObterPorEmailAsync(request.Email);
-        if (existente is not null)
-            return Erro.Conflito("EMAIL_EXISTENTE", "Este email já está cadastrado.");
-
-        var senhaHash = _passwordService.Hash(request.Senha);
-
-        var usuarioResult = Usuario.Criar(request.Nome, request.Email, senhaHash);
-        if (!usuarioResult.EhSucesso)
-            return usuarioResult.Erro!;
-
-        await _usuarioRepository.InserirAsync(usuarioResult.Dado!);
-
-        return new UsuarioResponse
-        {
-            Id = usuarioResult.Dado!.Id,
-            Nome = usuarioResult.Dado.Nome,
-            Email = usuarioResult.Dado.Email,
-            Ativo = usuarioResult.Dado.Ativo,
-            DataCadastro = usuarioResult.Dado.DataCadastro
         };
     }
 }
