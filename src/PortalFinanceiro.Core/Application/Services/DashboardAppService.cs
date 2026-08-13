@@ -3,6 +3,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Enums;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
+using Microsoft.Extensions.Logging;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -13,19 +14,22 @@ public class DashboardAppService : IDashboardAppService
     private readonly IRegraReceitaRepository _regraReceitaRepository;
     private readonly IRegraDespesaRepository _regraDespesaRepository;
     private readonly IContaBancariaRepository _contaBancariaRepository;
+    private readonly ILogger<DashboardAppService> _logger;
 
     public DashboardAppService(
         IReceitaRepository receitaRepository,
         IDespesaRepository despesaRepository,
         IRegraReceitaRepository regraReceitaRepository,
         IRegraDespesaRepository regraDespesaRepository,
-        IContaBancariaRepository contaBancariaRepository)
+        IContaBancariaRepository contaBancariaRepository,
+        ILogger<DashboardAppService> logger)
     {
         _receitaRepository = receitaRepository;
         _despesaRepository = despesaRepository;
         _regraReceitaRepository = regraReceitaRepository;
         _regraDespesaRepository = regraDespesaRepository;
         _contaBancariaRepository = contaBancariaRepository;
+        _logger = logger;
     }
 
     public async Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano)
@@ -111,7 +115,8 @@ public class DashboardAppService : IDashboardAppService
         }
         catch (Exception ex)
         {
-            return Erro.Infraestrutura($"Erro ao carregar dashboard: {ex.Message}");
+            _logger.LogError(ex, "Erro ao carregar dashboard");
+            return Erro.Infraestrutura("Erro ao carregar o dashboard.");
         }
     }
 
@@ -206,7 +211,8 @@ public class DashboardAppService : IDashboardAppService
         }
         catch (Exception ex)
         {
-            return Erro.Infraestrutura($"Erro ao carregar dashboard anual: {ex.Message}");
+            _logger.LogError(ex, "Erro ao carregar dashboard anual");
+            return Erro.Infraestrutura("Erro ao carregar o dashboard anual.");
         }
     }
 }

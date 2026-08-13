@@ -9,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.ConfigureSerilog();
 builder.Services.AddAppCors();
 builder.Services.AddAppAuth(builder.Configuration);
-builder.Services.AddAppVersioning();
 builder.Services.AddAppSwagger();
 builder.Services.AddAppControllers();
 builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection")!);

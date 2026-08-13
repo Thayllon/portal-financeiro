@@ -14,8 +14,6 @@ public interface IEncargoFiscalService
 
 public class EncargoFiscalService : IEncargoFiscalService
 {
-    private const string DescricaoDas = "DAS";
-
     private readonly IDespesaRepository _despesaRepository;
     private readonly ICategoriaDespesaRepository _categoriaDespesaRepository;
 
@@ -35,7 +33,7 @@ public class EncargoFiscalService : IEncargoFiscalService
         if (valor <= 0)
             return Erro.Validacao("DAS_VALOR_INVALIDO", "O percentual informado não gera um valor válido para o DAS.");
 
-        var result = Despesa.Criar(idUsuario, $"{DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, categoria.Id, null, idReceitaOrigem: receita.Id);
+        var result = Despesa.Criar(idUsuario, $"{EncargoFiscal.DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, categoria.Id, null, idReceitaOrigem: receita.Id);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -68,7 +66,7 @@ public class EncargoFiscalService : IEncargoFiscalService
         var dasExistente = existentes.FirstOrDefault();
         if (dasExistente is null)
         {
-            var result = Despesa.Criar(idUsuario, $"{DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, categoria.Id, null, idReceitaOrigem: receita.Id);
+            var result = Despesa.Criar(idUsuario, $"{EncargoFiscal.DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, categoria.Id, null, idReceitaOrigem: receita.Id);
             if (!result.EhSucesso)
                 return result.Erro!;
 
@@ -76,7 +74,7 @@ public class EncargoFiscalService : IEncargoFiscalService
             return Resultado.Sucesso();
         }
 
-        var update = dasExistente.Atualizar($"{DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, categoria.Id, null);
+        var update = dasExistente.Atualizar($"{EncargoFiscal.DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, categoria.Id, null);
         if (!update.EhSucesso)
             return update.Erro!;
 

@@ -21,6 +21,6 @@ export class UsuarioRepository extends BaseHttpRepository {
   }
 
   alterarAtivo(id: string, ativo: boolean): Observable<any> {
-    return this.patch<any>(`/usuarios/${id}/ativo`, ativo);
+    return this.patch<any>(`/usuarios/${id}/ativo`, { ativo });
   }
 }

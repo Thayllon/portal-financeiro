@@ -39,9 +39,9 @@ public class UsuariosController : BaseController
     }
 
     [HttpPatch("{id}/ativo")]
-    public async Task<IActionResult> AlterarAtivo(Guid id, [FromBody] bool ativo)
+    public async Task<IActionResult> AlterarAtivo(Guid id, [FromBody] AtivoRequest request)
     {
-        var result = await _service.AlterarAtivoAsync(id, ativo);
+        var result = await _service.AlterarAtivoAsync(id, request.Ativo);
         return ApiResponse(result);
     }
 }
