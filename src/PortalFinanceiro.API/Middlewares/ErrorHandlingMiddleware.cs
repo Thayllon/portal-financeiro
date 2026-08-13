@@ -1,6 +1,5 @@
-using System.Net;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using PortalFinanceiro.API.Common;
 using PortalFinanceiro.Core.Domain.Results;
 
 namespace PortalFinanceiro.API.Middlewares;
@@ -9,12 +8,6 @@ public class ErrorHandlingMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ErrorHandlingMiddleware> _logger;
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-    };
 
     public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
     {
@@ -33,9 +26,9 @@ public class ErrorHandlingMiddleware
             _logger.LogError(ex, "Erro não tratado: {Message}", ex.Message);
 
             var erro = Erro.Infraestrutura("Ocorreu um erro interno no servidor.");
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int)ErroHttp.ObterStatus(erro.Tipo);
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(JsonSerializer.Serialize(erro, JsonOptions));
+            await context.Response.WriteAsync(JsonSerializer.Serialize(erro, JsonDefaults.Api));
         }
     }
 }

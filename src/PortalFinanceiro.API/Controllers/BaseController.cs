@@ -1,6 +1,6 @@
-using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Common;
 using PortalFinanceiro.Core.Domain.Results;
 
 namespace PortalFinanceiro.API.Controllers;
@@ -32,18 +32,7 @@ public abstract class BaseController : ControllerBase
 
     private IActionResult ErrorResponse(Erro erro)
     {
-        var httpCode = erro.Tipo switch
-        {
-            ETipoErro.Validacao => HttpStatusCode.BadRequest,
-            ETipoErro.Negocio => HttpStatusCode.UnprocessableEntity,
-            ETipoErro.NaoEncontrado => HttpStatusCode.NotFound,
-            ETipoErro.Conflito => HttpStatusCode.Conflict,
-            ETipoErro.Permissao => HttpStatusCode.Forbidden,
-            ETipoErro.Timeout => HttpStatusCode.GatewayTimeout,
-            ETipoErro.Externo => HttpStatusCode.BadGateway,
-            _ => HttpStatusCode.InternalServerError
-        };
-
+        var httpCode = ErroHttp.ObterStatus(erro.Tipo);
         return StatusCode((int)httpCode, erro);
     }
 }
