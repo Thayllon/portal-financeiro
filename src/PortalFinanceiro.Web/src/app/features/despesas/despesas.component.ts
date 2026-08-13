@@ -139,7 +139,9 @@ export class DespesasComponent implements OnInit {
         repete: data.repete,
         dia: data.repete ? data.dia : undefined,
         diaUtil: data.repete ? data.diaUtil : undefined,
-        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined
+        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined,
+        percentualDas: data.percentualDas,
+        percentualInss: data.percentualInss
       };
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, request));

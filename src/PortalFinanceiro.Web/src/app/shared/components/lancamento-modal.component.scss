@@ -48,6 +48,12 @@
       outline: none; border-color: var(--color-primary);
       box-shadow: 0 0 0 3px var(--color-primary-focus-ring);
     }
+    .input[readonly] {
+      background: var(--surface-hover);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      border-style: dashed;
+    }
     .preview {
       display: flex; align-items: center; gap: 0.5rem;
       padding: 0.625rem 0.75rem; background: var(--color-primary-tint);
@@ -60,6 +66,29 @@
     }
     .checkbox { width: 1rem; height: 1rem; accent-color: var(--color-primary); }
     .repete-toggle { padding: 1rem 0; margin-top: 0.25rem; border-top: 1px solid var(--surface-border); }
+
+    .encargo-block {
+      margin-top: 1rem;
+      padding: 0.875rem;
+      border: 1px solid var(--color-primary);
+      border-left-width: 4px;
+      border-radius: var(--radius-lg);
+      background: var(--color-primary-tint);
+    }
+    .encargo-block__badge {
+      display: flex; align-items: center; gap: 0.625rem;
+      color: var(--color-primary);
+    }
+    .encargo-block__badge svg { flex-shrink: 0; }
+    .encargo-block__badge strong { display: block; font-size: 0.8125rem; color: var(--text-primary); }
+    .encargo-block__badge span { display: block; font-size: 0.6875rem; color: var(--text-muted); }
+    .encargo-block__formula {
+      margin-top: 0.75rem;
+      display: flex; flex-direction: column; gap: 0.625rem;
+      font-size: 0.75rem; color: var(--text-muted);
+    }
+    .encargo-block__formula label { font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
+    .encargo-block__formula .input { background: var(--content-surface); }
 
     /* ---------- WIZARD / STEPPER ---------- */
     .wizard {
