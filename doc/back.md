@@ -62,6 +62,19 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Constantes fiscais (% DAS, nomes CNPJ/DAS) em `EncargoFiscal` (`Domain/Services/`)
 - Status é `int?` (1=Pendente, 2=Realizado), nunca string
 
+## Contrato de erro (resposta)
+
+Toda falha de negócio/validação retorna `Erro` serializado em **camelCase**:
+
+```json
+{ "codigo": "RECEITA_JA_RECEBIDA", "mensagem": "Não é possível excluir uma receita já recebida. Estorne primeiro.", "tipo": "Negocio" }
+```
+
+- `tipo` (enum `ETipoErro`): `Validacao`, `Negocio`, `NaoEncontrado`, `Conflito`, `Permissao`, `Timeout`, `Externo`, `Infraestrutura` → mapeia para o HTTP status (ex.: `Negocio`=422, `NaoEncontrado`=404, `Permissao`=403).
+- `codigo`: código de negócio legível por máquina (ver `Erro.cs`).
+- `mensagem`: texto amigável exibido ao usuário (frontend lê `mensagem`/`codigo` em `api-error.util.ts:mensagemErro`).
+- Dois caminhos geram esse envelope: `BaseController.ApiResponse` (erros de `Result<T>`) e `ErrorHandlingMiddleware` (exceções não tratadas). Ambos usam camelCase — manter consistente.
+
 ## Encargos automáticos
 
 | Encargo | Origem | % padrão | Categoria | Vínculo |
