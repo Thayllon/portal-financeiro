@@ -17,7 +17,7 @@ dotnet run --project tools/DbSetup
 ```
 
 Cria o banco `PortalFinanceiro` no LocalDB e aplica `scripts/sqlserver` (schema + seed).
-O seed cria o admin e as categorias fiscais `CNPJ → DAS`.
+O seed cria o admin e as categorias base.
 
 > Os scripts são "from scratch" — para banco novo apenas. Não rodar sobre banco já migrado.
 

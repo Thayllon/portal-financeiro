@@ -14,7 +14,7 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 | Script | Conteúdo |
 |--------|----------|
 | `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs) |
-| `099_SeedBase.sql` | Admin + categorias fiscais `CNPJ → DAS` |
+| `099_SeedBase.sql` | Admin + categorias base |
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
 > migrado **não** deve recebê-los novamente (DbUp rastreia por nome).
@@ -49,8 +49,8 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `ContaBancaria` | Contas PF/PJ |
 | `CategoriaReceita` / `CategoriaDespesa` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
-| `Receita` | Receitas (avulsas e recorrentes) — vínculo DAS em `Despesa.IdReceitaOrigem` |
-| `Despesa` | Despesas — com `IdReceitaOrigem` para encargo DAS |
+| `Receita` | Receitas (avulsas e recorrentes) |
+| `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` disponível para vínculo manual |
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
 
 ### Categorias compartilhadas
@@ -60,12 +60,3 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 - Toda mutação (criar/editar/excluir, incluindo subcategorias) grava `CategoriaHistorico`
   - `Acao`: 1=Criado, 2=Editado, 3=Excluído
   - `TipoCategoria`: 1=Receita, 2=Despesa
-
-### Encargos (constantes em `EncargoFiscal`)
-
-| Encargo | Origem | % padrão | Categoria | Vínculo |
-|---------|--------|----------|-----------|---------|
-| **DAS** | Receita com flag "nota fiscal" (avulsa ou parcela recorrente) | 6% (editável) | CNPJ → DAS | `Despesa.IdReceitaOrigem` |
-
-- A despesa gerada usa a **mesma conta** da origem
-- Criar/editar/excluir a receita ou pró-labore **sincroniza** a despesa de encargo

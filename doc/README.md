@@ -1,6 +1,6 @@
 # Portal Financeiro — Documentação
 
-Sistema de controle financeiro pessoal que **reflete o extrato real de todas as contas** (PF/PJ). Uma tela por tipo, com lançamentos recorrentes e avulsos, categorias compartilhadas com auditoria e encargos automáticos (DAS).
+Sistema de controle financeiro pessoal que **reflete o extrato real de todas as contas** (PF/PJ). Uma tela por tipo, com lançamentos recorrentes e avulsos e categorias compartilhadas com auditoria.
 
 ## Stack
 
@@ -21,7 +21,7 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 |-----------|--------------|------------------|
 | [back.md](back.md) | Backend: arquitetura, projetos, rotas da API, como rodar/buildar, padrões | Mexer na API/Core/Infra; descobrir endpoint |
 | [front.md](front.md) | Frontend: estrutura, features, como rodar/buildar/testar, padrões de UI | Mexer no Angular; criar tela/componente |
-| [banco.md](banco.md) | Banco: scripts por provider, DbSetup, modelo de dados, encargos, seed | Mexer em migração/schema; entender tabelas |
+| [banco.md](banco.md) | Banco: scripts por provider, DbSetup, modelo de dados, seed | Mexer em migração/schema; entender tabelas |
 | [deploy-local.md](deploy-local.md) | **Subir TUDO local com Docker em um link** (`http://localhost:8080`) — SQL Server + API + Front | Validar o sistema de ponta a ponta sem instalar nada |
 | [infra.md](infra.md) | Deploy **Oracle Cloud Always Free** (R$ 0) — PostgreSQL + API + Front numa VM só | Subir em produção / nuvem |
 | [primeiros-passos.md](primeiros-passos.md) | Como rodar do zero na primeira vez (banco → API → front), sem Docker | Ambiente novo; perder tudo e recomeçar |
@@ -38,7 +38,7 @@ portal-financeiro/
 ├── scripts/
 │   ├── sqlserver/                     # Migrations DbUp (SQL Server) — from scratch
 │   │   ├── 001_CriarTabelas.sql       #   schema unificado completo
-│   │   └── 099_SeedBase.sql           #   admin + categorias CNPJ → DAS
+│   │   └── 099_SeedBase.sql           #   admin + categorias base
 │   └── postgres/                      # Mesmo conjunto para PostgreSQL
 ├── tools/
 │   └── DbSetup/                       # Ferramenta para rodar migrations (+ Dockerfile)
@@ -56,11 +56,10 @@ portal-financeiro/
 | Conceito | Descrição |
 |----------|-----------|
 | **Conta** | Nubank PF, Itaú PJ — onde o dinheiro entra/sai |
-| **Categoria + Subcategoria** | Classificação (ex: CNPJ → DAS). **Compartilhadas entre todos os usuários**; editar/excluir só o dono ou admin |
+| **Categoria + Subcategoria** | Classificação (ex: CNPJ → DAS, Lazer → Pizza). **Compartilhadas entre todos os usuários**; editar/excluir só o dono ou admin |
 | **Receita/Despesa** | Lançamento único no mês (data real do gasto) |
 | **Regra recorrente** | Comportamento "repete" — gera parcelas mensais automáticas |
 | **Avulsa** | Lançamento manual, sem recorrência |
-| **DAS** | Encargo sobre receita com "nota fiscal" (avulsa ou parcela recorrente) — gera despesa DAS automática |
 | **Auditoria de categorias** | `CategoriaHistorico` registra criado/editado/excluído de categorias |
 
 ### Fluxo
@@ -68,9 +67,8 @@ portal-financeiro/
 1. Cadastra contas (PF/PJ) e categorias (+subcategorias)
 2. Cadastra receitas/despesas com "Repete?" → gera parcelas automáticas
 3. Lança avulsas no dia do gasto (pizza, corte de cabelo)
-4. Receitas com nota fiscal podem gerar **DAS** automático (avulsa ou parcela)
-5. Marca recebido/pago conforme vai pagando
-6. Dashboard mostra resumo por conta e categoria
+4. Marca recebido/pago conforme vai pagando
+5. Dashboard mostra resumo por conta e categoria
 
 ## Login padrão (ambiente dev)
 
@@ -79,7 +77,7 @@ portal-financeiro/
 | Email | `admin@portal.com` |
 | Senha | `senhasenha` |
 
-> O usuário admin e as categorias fiscais são criados pelo seed (`099_SeedBase.sql`).
+> O usuário admin e as categorias base são criados pelo seed (`099_SeedBase.sql`).
 > Em banco já existente sem o seed, a API cria o admin automaticamente na primeira
 > inicialização.
 

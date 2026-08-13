@@ -1,11 +1,11 @@
 # Portal Financeiro
 
-Sistema de controle financeiro pessoal (PF/PJ) com lançamentos recorrentes e avulsos, categorias compartilhadas com auditoria e encargos automáticos (DAS).
+Sistema de controle financeiro pessoal (PF/PJ) com lançamentos recorrentes e avulsos e categorias compartilhadas com auditoria.
 
 ## Rápido
 
 ```bash
-# Banco novo (SQL Server LocalDB) — cria DB + schema + admin + categorias fiscais
+# Banco novo (SQL Server LocalDB) — cria DB + schema + admin + categorias base
 dotnet run --project tools/DbSetup
 
 # API (http://localhost:5178)
