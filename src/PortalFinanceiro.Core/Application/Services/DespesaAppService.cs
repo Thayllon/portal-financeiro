@@ -159,7 +159,7 @@ public class DespesaAppService : IDespesaAppService
         Categoria = d.Categoria,
         IdSubcategoria = d.IdSubcategoria,
         Subcategoria = d.Subcategoria,
-        Status = d.Status.ToString(),
+        Status = (int)d.Status,
         DataRealizacao = d.DataRealizacao,
         IdRegra = d.IdRegra,
         EhRecorrente = d.EhRecorrente,

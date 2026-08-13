@@ -6,6 +6,7 @@ import { DespesaRepository, DespesaFiltros } from '../../core/repositories/despe
 import { CategoriaDespesaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { Despesa, DespesaRequest } from '../../core/models/despesa.model';
+import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { NotificationService } from '../../core/services/notification.service';
@@ -54,6 +55,8 @@ export class DespesasComponent implements OnInit {
     { value: '1', label: 'Pendentes' },
     { value: '2', label: 'Pagas' },
   ];
+
+  readonly statusRealizado = STATUS_REALIZADO;
 
   contasOptions = computed(() => this.contas().map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` })));
   categoriasOptions = computed(() => this.categorias().map(c => ({ value: c.id, label: c.nome })));
@@ -117,7 +120,7 @@ export class DespesasComponent implements OnInit {
       categoria: item.categoria,
       idSubcategoria: item.idSubcategoria,
       subcategoria: item.subcategoria,
-      status: 'Pendente',
+      status: STATUS_PENDENTE,
       ehRecorrente: false,
       ativo: true,
       dataCadastro: new Date().toISOString(),
@@ -182,6 +185,6 @@ export class DespesasComponent implements OnInit {
   }
 
   total = computed(() => this.items().reduce((s, l) => s + l.valor, 0));
-  totalPago = computed(() => this.items().filter(l => l.status === 'Realizado').reduce((s, l) => s + l.valor, 0));
+  totalPago = computed(() => this.items().filter(l => l.status === STATUS_REALIZADO).reduce((s, l) => s + l.valor, 0));
   totalPendente = computed(() => this.total() - this.totalPago());
 }

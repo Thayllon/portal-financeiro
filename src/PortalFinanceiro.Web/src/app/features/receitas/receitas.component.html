@@ -64,9 +64,9 @@
                   <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
                   <td class="cell-meta" data-label="Conta">{{ l.conta }}</td>
                   <td class="cell-meta" data-label="Categoria">{{ l.categoria }}{{ l.subcategoria ? ' → ' + l.subcategoria : '' }}</td>
-                  <td data-label="Status"><app-status-badge [type]="l.status === 'Realizado' ? 'realizado' : 'pendente'" [label]="l.status === 'Realizado' ? 'Recebido' : 'Pendente'" /></td>
+                  <td data-label="Status"><app-status-badge [type]="l.status === statusRealizado ? 'realizado' : 'pendente'" [label]="l.status === statusRealizado ? 'Recebido' : 'Pendente'" /></td>
                   <td class="cell-actions">
-                    @if (l.status !== 'Realizado') {
+                    @if (l.status !== statusRealizado) {
                       <button class="action-btn action-btn--success" title="Receber" (click)="receber(l)">
                         <svg lucideIcon="check" [size]="16" />
                       </button>

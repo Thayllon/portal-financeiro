@@ -176,7 +176,7 @@ public class ReceitaAppService : IReceitaAppService
         Categoria = r.Categoria,
         IdSubcategoria = r.IdSubcategoria,
         Subcategoria = r.Subcategoria,
-        Status = r.Status.ToString(),
+        Status = (int)r.Status,
         DataRealizacao = r.DataRealizacao,
         IdRegra = r.IdRegra,
         EhRecorrente = r.EhRecorrente,

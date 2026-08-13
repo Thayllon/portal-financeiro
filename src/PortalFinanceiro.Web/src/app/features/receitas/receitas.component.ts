@@ -6,6 +6,7 @@ import { ReceitaRepository, ReceitaFiltros } from '../../core/repositories/recei
 import { CategoriaReceitaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { Receita, ReceitaRequest } from '../../core/models/receita.model';
+import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { NotificationService } from '../../core/services/notification.service';
@@ -54,6 +55,8 @@ export class ReceitasComponent implements OnInit {
     { value: '1', label: 'Pendentes' },
     { value: '2', label: 'Recebidas' },
   ];
+
+  readonly statusRealizado = STATUS_REALIZADO;
 
   contasOptions = computed(() => this.contas().map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` })));
   categoriasOptions = computed(() => this.categorias().map(c => ({ value: c.id, label: c.nome })));
@@ -117,7 +120,7 @@ export class ReceitasComponent implements OnInit {
       categoria: item.categoria,
       idSubcategoria: item.idSubcategoria,
       subcategoria: item.subcategoria,
-      status: 'Pendente',
+      status: STATUS_PENDENTE,
       ehRecorrente: false,
       geraDas: item.geraDas,
       percentualDas: item.percentualDas,
@@ -185,6 +188,6 @@ export class ReceitasComponent implements OnInit {
   }
 
   total = computed(() => this.items().reduce((s, l) => s + l.valor, 0));
-  totalRecebido = computed(() => this.items().filter(l => l.status === 'Realizado').reduce((s, l) => s + l.valor, 0));
+  totalRecebido = computed(() => this.items().filter(l => l.status === STATUS_REALIZADO).reduce((s, l) => s + l.valor, 0));
   totalPendente = computed(() => this.total() - this.totalRecebido());
 }

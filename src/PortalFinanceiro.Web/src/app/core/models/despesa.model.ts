@@ -9,7 +9,7 @@ export interface Despesa {
   categoria: string;
   idSubcategoria?: string;
   subcategoria: string;
-  status: string;
+  status: number;
   dataRealizacao?: string;
   idRegra?: string;
   ehRecorrente: boolean;
