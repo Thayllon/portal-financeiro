@@ -27,6 +27,11 @@
       width: 84px;
     }
 
+    .layout--collapsed .sidebar-brand {
+      justify-content: center;
+      padding: 1.25rem 0;
+    }
+
     .sidebar-brand {
       display: flex;
       align-items: center;
