@@ -12,8 +12,6 @@ public class RegraReceita
     public bool DiaUtil { get; private set; }
     public Guid IdCategoria { get; private set; }
     public Guid IdConta { get; private set; }
-    public string Categoria { get; set; } = string.Empty;
-    public string Conta { get; set; } = string.Empty;
     public DateTime DataInicio { get; private set; }
     public DateTime DataFim { get; private set; }
     public bool Ativo { get; private set; }

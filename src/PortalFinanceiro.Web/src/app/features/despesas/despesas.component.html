@@ -62,12 +62,6 @@
                   <td class="cell-name" data-label="Descrição">
                     <div class="cell-name__wrap">
                       <span>{{ l.descricao }}</span>
-                      @if (l.idReceitaOrigem) {
-                        <span class="badge-encargo">
-                          DAS
-                          ({{ l.percentualDas != null ? l.percentualDas + '%' : '' }})
-                        </span>
-                      }
                     </div>
                   </td>
                   <td class="cell-value" data-label="Valor">{{ l.valor | currencyBRL }}</td>

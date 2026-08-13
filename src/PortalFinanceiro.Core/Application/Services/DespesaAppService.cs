@@ -1,8 +1,10 @@
+using System.Transactions;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
+using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
 
@@ -12,13 +14,11 @@ public class DespesaAppService : IDespesaAppService
 {
     private readonly IDespesaRepository _repository;
     private readonly IRegraDespesaRepository _regraRepository;
-    private readonly IReceitaRepository _receitaRepository;
 
-    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IReceitaRepository receitaRepository)
+    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository)
     {
         _repository = repository;
         _regraRepository = regraRepository;
-        _receitaRepository = receitaRepository;
     }
 
     public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
@@ -29,7 +29,7 @@ public class DespesaAppService : IDespesaAppService
 
     public async Task<Result<DespesaResponse>> ObterPorIdAsync(Guid id)
     {
-        var despesa = await _repository.ObterPorIdAsync(id);
+        var despesa = await _repository.ObterProjecaoPorIdAsync(id);
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
 
@@ -45,7 +45,9 @@ public class DespesaAppService : IDespesaAppService
                 return result.Erro!;
 
             await _repository.InserirAsync(result.Dado!);
-            return Mapear(result.Dado!);
+
+            var projecao = await _repository.ObterProjecaoPorIdAsync(result.Dado!.Id);
+            return Mapear(projecao!);
         }
 
         var regraResult = RegraDespesa.Criar(idUsuario, request.Descricao, request.Valor, request.Dia ?? 1, request.DiaUtil ?? false, request.IdCategoria, request.IdConta, request.Data, request.DataFim ?? request.Data);
@@ -53,7 +55,6 @@ public class DespesaAppService : IDespesaAppService
             return regraResult.Erro!;
 
         var regra = regraResult.Dado!;
-        await _regraRepository.InserirAsync(regra);
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
         var despesas = meses.Select(m => Despesa.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id))
@@ -61,12 +62,16 @@ public class DespesaAppService : IDespesaAppService
                             .Select(d => d.Dado!)
                             .ToList();
 
-        if (despesas.Count != 0)
-            await _repository.InserirEmMassaAsync(despesas);
+        if (despesas.Count == 0)
+            return Erro.Negocio("NENHUMA_DESPESA_GERADA", "Nenhuma despesa foi gerada para o período informado.");
 
-        return despesas.Count != 0
-            ? Mapear(despesas.First())
-            : Erro.Negocio("NENHUMA_DESPESA_GERADA", "Nenhuma despesa foi gerada para o período informado.");
+        using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        await _regraRepository.InserirAsync(regra);
+        await _repository.InserirEmMassaAsync(despesas);
+        scope.Complete();
+
+        var primeiraProjecao = await _repository.ObterProjecaoPorIdAsync(despesas.First().Id);
+        return Mapear(primeiraProjecao!);
     }
 
     public async Task<Result<DespesaResponse>> AtualizarAsync(Guid id, DespesaRequest request)
@@ -75,34 +80,14 @@ public class DespesaAppService : IDespesaAppService
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
 
-        if (despesa.IdReceitaOrigem is { } idReceita)
-            return await AtualizarDasAsync(despesa, idReceita, request);
-
         var result = despesa.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria);
         if (!result.EhSucesso)
             return result.Erro!;
 
         await _repository.AtualizarAsync(despesa);
-        return Mapear(despesa);
-    }
 
-    private async Task<Result<DespesaResponse>> AtualizarDasAsync(Despesa despesa, Guid idReceita, DespesaRequest request)
-    {
-        var receita = await _receitaRepository.ObterPorIdAsync(idReceita);
-        if (receita is null || !receita.Ativo)
-            return Erro.NaoEncontrado("Receita de origem do DAS");
-
-        var percentual = request.PercentualDas ?? despesa.PercentualDas ?? EncargoFiscal.PercentualDasPadrao;
-        var valor = EncargoFiscal.Calcular(receita.Valor, percentual);
-        if (valor <= 0)
-            return Erro.Validacao("DAS_VALOR_INVALIDO", "O percentual informado não gera um valor válido para o DAS.");
-
-        var result = despesa.Atualizar($"{EncargoFiscal.DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, despesa.IdCategoria, despesa.IdSubcategoria);
-        if (!result.EhSucesso)
-            return result.Erro!;
-
-        await _repository.AtualizarAsync(despesa);
-        return Mapear(despesa);
+        var projecao = await _repository.ObterProjecaoPorIdAsync(id);
+        return Mapear(projecao!);
     }
 
     public async Task<Result<DespesaResponse>> PagarAsync(Guid id, MensalStatusRequest request)
@@ -116,7 +101,9 @@ public class DespesaAppService : IDespesaAppService
             return result.Erro!;
 
         await _repository.AtualizarAsync(despesa);
-        return Mapear(despesa);
+
+        var projecao = await _repository.ObterProjecaoPorIdAsync(id);
+        return Mapear(projecao!);
     }
 
     public async Task<Result<DespesaResponse>> EstornarAsync(Guid id)
@@ -130,7 +117,9 @@ public class DespesaAppService : IDespesaAppService
             return result.Erro!;
 
         await _repository.AtualizarAsync(despesa);
-        return Mapear(despesa);
+
+        var projecao = await _repository.ObterProjecaoPorIdAsync(id);
+        return Mapear(projecao!);
     }
 
     public async Task<Result<Unit>> ExcluirAsync(Guid id)
@@ -147,26 +136,24 @@ public class DespesaAppService : IDespesaAppService
         return Resultado.Sucesso();
     }
 
-    private static DespesaResponse Mapear(Despesa d) => new()
+    private static DespesaResponse Mapear(DespesaProjecao p) => new()
     {
-        Id = d.Id,
-        Descricao = d.Descricao,
-        Valor = d.Valor,
-        Data = d.Data,
-        IdConta = d.IdConta,
-        Conta = d.Conta,
-        IdCategoria = d.IdCategoria,
-        Categoria = d.Categoria,
-        IdSubcategoria = d.IdSubcategoria,
-        Subcategoria = d.Subcategoria,
-        Status = (int)d.Status,
-        DataRealizacao = d.DataRealizacao,
-        IdRegra = d.IdRegra,
-        EhRecorrente = d.EhRecorrente,
-        IdReceitaOrigem = d.IdReceitaOrigem,
-        GeraDas = d.GeraDas,
-        PercentualDas = d.PercentualDas,
-        Ativo = d.Ativo,
-        DataCadastro = d.DataCadastro
+        Id = p.Id,
+        Descricao = p.Descricao,
+        Valor = p.Valor,
+        Data = p.Data,
+        IdConta = p.IdConta,
+        Conta = p.Conta,
+        IdCategoria = p.IdCategoria,
+        Categoria = p.Categoria,
+        IdSubcategoria = p.IdSubcategoria,
+        Subcategoria = p.Subcategoria,
+        Status = (int)p.Status,
+        DataRealizacao = p.DataRealizacao,
+        IdRegra = p.IdRegra,
+        EhRecorrente = p.EhRecorrente,
+        IdReceitaOrigem = p.IdReceitaOrigem,
+        Ativo = p.Ativo,
+        DataCadastro = p.DataCadastro
     };
 }

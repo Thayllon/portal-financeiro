@@ -4,44 +4,34 @@ import { Observable } from 'rxjs';
 import { BaseHttpRepository } from './base-http.repository';
 import { Regra, RegraRequest } from '../models/regra.model';
 
-@Injectable({ providedIn: 'root' })
-export class RegraReceitaRepository extends BaseHttpRepository {
+class RegraBaseRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
+  constructor(private rota: string) { super(); }
+
   listar(): Observable<Regra[]> {
-    return this.get<Regra[]>('/regras-receitas');
+    return this.get<Regra[]>(`/regras-${this.rota}`);
   }
 
   obter(id: string): Observable<Regra> {
-    return this.get<Regra>(`/regras-receitas/${id}`);
+    return this.get<Regra>(`/regras-${this.rota}/${id}`);
   }
 
   atualizar(id: string, data: RegraRequest): Observable<Regra> {
-    return this.put<Regra>(`/regras-receitas/${id}`, data);
+    return this.put<Regra>(`/regras-${this.rota}/${id}`, data);
   }
 
   excluir(id: string): Observable<any> {
-    return this.delete<any>(`/regras-receitas/${id}`);
+    return this.delete<any>(`/regras-${this.rota}/${id}`);
   }
 }
 
 @Injectable({ providedIn: 'root' })
-export class RegraDespesaRepository extends BaseHttpRepository {
-  protected http = inject(HttpClient);
+export class RegraReceitaRepository extends RegraBaseRepository {
+  constructor() { super('receitas'); }
+}
 
-  listar(): Observable<Regra[]> {
-    return this.get<Regra[]>('/regras-despesas');
-  }
-
-  obter(id: string): Observable<Regra> {
-    return this.get<Regra>(`/regras-despesas/${id}`);
-  }
-
-  atualizar(id: string, data: RegraRequest): Observable<Regra> {
-    return this.put<Regra>(`/regras-despesas/${id}`, data);
-  }
-
-  excluir(id: string): Observable<any> {
-    return this.delete<any>(`/regras-despesas/${id}`);
-  }
+@Injectable({ providedIn: 'root' })
+export class RegraDespesaRepository extends RegraBaseRepository {
+  constructor() { super('despesas'); }
 }

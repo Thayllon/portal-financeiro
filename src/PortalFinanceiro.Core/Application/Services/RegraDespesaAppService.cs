@@ -4,6 +4,7 @@ using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Enums;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
+using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
 
@@ -28,7 +29,7 @@ public class RegraDespesaAppService : IRegraDespesaAppService
 
     public async Task<Result<RegraDespesaResponse>> ObterPorIdAsync(Guid id)
     {
-        var regra = await _regraRepository.ObterPorIdAsync(id);
+        var regra = await _regraRepository.ObterProjecaoPorIdAsync(id);
         if (regra is null)
             return Erro.NaoEncontrado("Regra de despesa");
 
@@ -58,7 +59,8 @@ public class RegraDespesaAppService : IRegraDespesaAppService
                 await _despesaRepository.AtualizarAsync(parcela);
         }
 
-        return Mapear(regra);
+        var projecao = await _regraRepository.ObterProjecaoPorIdAsync(id);
+        return Mapear(projecao!);
     }
 
     public async Task<Result<Unit>> ExcluirAsync(Guid id)
@@ -81,19 +83,19 @@ public class RegraDespesaAppService : IRegraDespesaAppService
         return Resultado.Sucesso();
     }
 
-    private static RegraDespesaResponse Mapear(RegraDespesa d) => new()
+    private static RegraDespesaResponse Mapear(RegraDespesaProjecao p) => new()
     {
-        Id = d.Id,
-        Descricao = d.Descricao,
-        Valor = d.Valor,
-        Dia = d.Dia,
-        DiaUtil = d.DiaUtil,
-        IdCategoria = d.IdCategoria,
-        Categoria = d.Categoria,
-        IdConta = d.IdConta,
-        Conta = d.Conta,
-        DataInicio = d.DataInicio,
-        DataFim = d.DataFim,
-        Ativo = d.Ativo
+        Id = p.Id,
+        Descricao = p.Descricao,
+        Valor = p.Valor,
+        Dia = p.Dia,
+        DiaUtil = p.DiaUtil,
+        IdCategoria = p.IdCategoria,
+        Categoria = p.Categoria,
+        IdConta = p.IdConta,
+        Conta = p.Conta,
+        DataInicio = p.DataInicio,
+        DataFim = p.DataFim,
+        Ativo = p.Ativo
     };
 }

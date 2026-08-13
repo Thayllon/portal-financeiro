@@ -69,8 +69,9 @@ cd src/PortalFinanceiro.Web && npm test
 - **LancamentoHelper**: Fica em `Domain/Services/`, é lógica de domínio
 - **Categorias compartilhadas**: editar/excluir só dono (`IdUsuario`) ou admin — senão `Erro.Permissao` (HTTP 403)
 - **Auditoria de categorias**: toda mutação (criar/editar/excluir, incl. subcategorias) grava `CategoriaHistorico` via `ICategoriaHistoricoRepository`
-- **Encargos (DAS)**: gerar/sincronizar/remover via `IEncargoFiscalService`; vínculo por `Despesa.IdReceitaOrigem`
-- **Constantes fiscais** (% DAS, nomes CNPJ/DAS): em `EncargoFiscal` (`Domain/Services/`)
+- **Leitura com projeção**: usar `*Projecao` (ex.: `ReceitaProjecao`, `DespesaProjecao`) em `Domain/Projections/` para nomes display; entidades com `private set`
+- **Mutações**: re-buscar projeção via `ObterProjecaoPorIdAsync` após persistir entidade
+- **Fluxo recorrente**: usar `TransactionScope` para atomicidade entre regra + parcelas
 
 ### Frontend (TypeScript)
 
@@ -82,6 +83,8 @@ cd src/PortalFinanceiro.Web && npm test
 - **Params**: NUNCA enviar `undefined` como query param — usar spread condicional
 - **Status**: Enviar como `number` (1 ou 2), NÃO como string
 - **Repositorios**: NÃO incluir `idUsuario` nos params (vem do JWT)
+- **Categoria/Regra repositories**: usar classe base com parâmetro `rota` para evitar duplicação
+- **LancamentoRepository**: usar `LancamentoFiltros` compartilhado (alias `ReceitaFiltros`/`DespesaFiltros`)
 
 ### Design System
 
@@ -134,4 +137,6 @@ src/app/
 - [ ] Nenhum hex hardcoded fora do design system
 - [ ] Mutação de categoria grava auditoria (`CategoriaHistorico`)
 - [ ] Editar/excluir categoria valida dono/admin (`Erro.Permissao` → 403)
-- [ ] Encargos DAS usam `IEncargoFiscalService` com vínculo correto (`IdReceitaOrigem`)
+- [ ] DAS removido (não há mais auto-cálculo nem auto-geração)
+- [ ] Leitura usa projeção (nomes display via `*Projecao`, não na entidade)
+- [ ] Mutação re-busca projeção antes de mapear resposta

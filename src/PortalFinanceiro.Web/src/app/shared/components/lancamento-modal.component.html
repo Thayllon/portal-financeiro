@@ -111,7 +111,6 @@
                     placeholder="Ex: Salário / Pizza"
                     class="input"
                     [class.input-error]="fieldErrors()['descricao']"
-                    [readonly]="!!encargoTipo()"
                     (ngModelChange)="clearError('descricao')"
                   />
                   @if (fieldErrors()['descricao']) {
@@ -128,15 +127,11 @@
                       (ngModelChange)="calcularPreview(); clearError('valor')"
                       placeholder="0,00"
                       class="input"
-                      [class.input-error]="fieldErrors()['valor']"
-                      inputmode="decimal"
-                      [readonly]="!!encargoTipo()"
-                    />
+                    [class.input-error]="fieldErrors()['valor']"
+                    inputmode="decimal"
+                  />                  
                     @if (fieldErrors()['valor']) {
                       <span class="field-error">{{ fieldErrors()['valor'] }}</span>
-                    }
-                    @if (encargoTipo()) {
-                      <span class="field-hint">Valor calculado automaticamente a partir da origem</span>
                     }
                   </div>
                   <div class="field">
@@ -155,69 +150,6 @@
                     }
                   </div>
                 </div>
-
-                @if (encargoTipo()) {
-                  <div class="encargo-block">
-                    <div class="encargo-block__badge">
-                      <svg [lucideIcon]="encargoTipo() === 'das' ? 'receipt-text' : 'shield-check'" [size]="18" />
-                      <div>
-                        <strong>Despesa de DAS gerada automaticamente</strong>
-                        <span>{{ origemLabel() }}</span>
-                      </div>
-                    </div>
-                    <div class="encargo-block__formula">
-                      <span>Regra: percentual do DAS sobre o valor da receita</span>
-                      <div class="field">
-                        <label>Percentual (DAS) (%)</label>
-                        <input
-                          type="number"
-                          min="0.1"
-                          max="99.9"
-                          step="0.1"
-                          [ngModel]="form.percentualDas"
-                          (ngModelChange)="setEncargoPercentual($event)"
-                          placeholder="6"
-                          class="input"
-                          [class.input-error]="fieldErrors()['percentualDas']"
-                        />
-                        @if (fieldErrors()['percentualDas']) {
-                          <span class="field-error">Percentual deve estar entre 0 e 100</span>
-                        }
-                      </div>
-                    </div>
-                  </div>
-                }
-
-                @if (!encargoTipo() && tipoLabel() === 'receita') {
-                  <div class="das-block">
-                    <label class="checkbox-label">
-                      <input type="checkbox" [(ngModel)]="form.geraDas" class="checkbox" />
-                      <svg lucideIcon="receipt-text" [size]="14" />
-                      <span>Gerar DAS (nota fiscal)?</span>
-                    </label>
-                    <span class="field-hint">Cria automaticamente a despesa de DAS sobre o valor desta receita</span>
-                    @if (form.geraDas) {
-                      <div class="das-block__percent">
-                        <div class="field">
-                          <label>Percentual DAS (%)</label>
-                          <input
-                            type="number"
-                            min="0.1"
-                            max="99.9"
-                            step="0.1"
-                            [(ngModel)]="form.percentualDas"
-                            placeholder="6"
-                            class="input"
-                            [class.input-error]="fieldErrors()['percentualDas']"
-                          />
-                          @if (fieldErrors()['percentualDas']) {
-                            <span class="field-error">{{ fieldErrors()['percentualDas'] }}</span>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-                }
               </div>
             </div>
           } @else {

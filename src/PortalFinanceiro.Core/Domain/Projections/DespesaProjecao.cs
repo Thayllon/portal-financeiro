@@ -1,8 +1,11 @@
-namespace PortalFinanceiro.Core.Application.Dtos.Response;
+using PortalFinanceiro.Core.Domain.Enums;
 
-public class DespesaResponse
+namespace PortalFinanceiro.Core.Domain.Projections;
+
+public class DespesaProjecao
 {
     public Guid Id { get; set; }
+    public Guid IdUsuario { get; set; }
     public string Descricao { get; set; } = string.Empty;
     public decimal Valor { get; set; }
     public DateTime Data { get; set; }
@@ -12,11 +15,11 @@ public class DespesaResponse
     public string Categoria { get; set; } = string.Empty;
     public Guid? IdSubcategoria { get; set; }
     public string Subcategoria { get; set; } = string.Empty;
-    public int Status { get; set; }
+    public StatusMensal Status { get; set; }
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }
-    public bool EhRecorrente { get; set; }
     public Guid? IdReceitaOrigem { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public bool EhRecorrente => IdRegra.HasValue;
 }

@@ -12,6 +12,4 @@ public class ReceitaRequest
     public int? Dia { get; set; }
     public bool? DiaUtil { get; set; }
     public DateTime? DataFim { get; set; }
-    public bool GeraDas { get; set; }
-    public decimal? PercentualDas { get; set; }
 }

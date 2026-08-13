@@ -1,8 +1,10 @@
+using System.Transactions;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
+using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
 
@@ -12,13 +14,11 @@ public class ReceitaAppService : IReceitaAppService
 {
     private readonly IReceitaRepository _repository;
     private readonly IRegraReceitaRepository _regraRepository;
-    private readonly IEncargoFiscalService _encargoFiscalService;
 
-    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IEncargoFiscalService encargoFiscalService)
+    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository)
     {
         _repository = repository;
         _regraRepository = regraRepository;
-        _encargoFiscalService = encargoFiscalService;
     }
 
     public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
@@ -29,7 +29,7 @@ public class ReceitaAppService : IReceitaAppService
 
     public async Task<Result<ReceitaResponse>> ObterPorIdAsync(Guid id)
     {
-        var receita = await _repository.ObterPorIdAsync(id);
+        var receita = await _repository.ObterProjecaoPorIdAsync(id);
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
 
@@ -47,21 +47,8 @@ public class ReceitaAppService : IReceitaAppService
             var receita = result.Dado!;
             await _repository.InserirAsync(receita);
 
-            if (request.GeraDas)
-            {
-                var das = await _encargoFiscalService.GerarDasAsync(idUsuario, receita, request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao);
-                if (!das.EhSucesso)
-                {
-                    receita.Desativar();
-                    await _repository.AtualizarAsync(receita);
-                    return das.Erro!;
-                }
-
-                receita.GeraDas = true;
-                receita.PercentualDas = request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao;
-            }
-
-            return Mapear(receita);
+            var projecao = await _repository.ObterProjecaoPorIdAsync(receita.Id);
+            return Mapear(projecao!);
         }
 
         var regraResult = RegraReceita.Criar(idUsuario, request.Descricao, request.Valor, request.Dia ?? 1, request.DiaUtil ?? false, request.IdCategoria, request.IdConta, request.Data, request.DataFim ?? request.Data);
@@ -69,7 +56,6 @@ public class ReceitaAppService : IReceitaAppService
             return regraResult.Erro!;
 
         var regra = regraResult.Dado!;
-        await _regraRepository.InserirAsync(regra);
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
         var receitas = meses.Select(m => Receita.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id))
@@ -77,29 +63,16 @@ public class ReceitaAppService : IReceitaAppService
                             .Select(r => r.Dado!)
                             .ToList();
 
-        if (receitas.Count != 0)
-            await _repository.InserirEmMassaAsync(receitas);
+        if (receitas.Count == 0)
+            return Erro.Negocio("NENHUMA_RECEITA_GERADA", "Nenhuma receita foi gerada para o período informado.");
 
-        if (request.GeraDas && receitas.Count != 0)
-        {
-            foreach (var receitaParcela in receitas)
-            {
-                var das = await _encargoFiscalService.GerarDasAsync(idUsuario, receitaParcela, request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao);
-                if (!das.EhSucesso)
-                {
-                    receitaParcela.Desativar();
-                    await _repository.AtualizarAsync(receitaParcela);
-                    return das.Erro!;
-                }
+        using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        await _regraRepository.InserirAsync(regra);
+        await _repository.InserirEmMassaAsync(receitas);
+        scope.Complete();
 
-                receitaParcela.GeraDas = true;
-                receitaParcela.PercentualDas = request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao;
-            }
-        }
-
-        return receitas.Count != 0
-            ? Mapear(receitas.First())
-            : Erro.Negocio("NENHUMA_RECEITA_GERADA", "Nenhuma receita foi gerada para o período informado.");
+        var primeiraProjecao = await _repository.ObterProjecaoPorIdAsync(receitas.First().Id);
+        return Mapear(primeiraProjecao!);
     }
 
     public async Task<Result<ReceitaResponse>> AtualizarAsync(Guid id, ReceitaRequest request)
@@ -114,11 +87,8 @@ public class ReceitaAppService : IReceitaAppService
 
         await _repository.AtualizarAsync(receita);
 
-        var sincronizarDas = await _encargoFiscalService.SincronizarDasAsync(receita.IdUsuario, receita, request.GeraDas, request.PercentualDas ?? EncargoFiscal.PercentualDasPadrao);
-        if (!sincronizarDas.EhSucesso)
-            return sincronizarDas.Erro!;
-
-        return Mapear(receita);
+        var projecao = await _repository.ObterProjecaoPorIdAsync(id);
+        return Mapear(projecao!);
     }
 
     public async Task<Result<ReceitaResponse>> ReceberAsync(Guid id, MensalStatusRequest request)
@@ -132,7 +102,9 @@ public class ReceitaAppService : IReceitaAppService
             return result.Erro!;
 
         await _repository.AtualizarAsync(receita);
-        return Mapear(receita);
+
+        var projecao = await _repository.ObterProjecaoPorIdAsync(id);
+        return Mapear(projecao!);
     }
 
     public async Task<Result<ReceitaResponse>> EstornarAsync(Guid id)
@@ -146,7 +118,9 @@ public class ReceitaAppService : IReceitaAppService
             return result.Erro!;
 
         await _repository.AtualizarAsync(receita);
-        return Mapear(receita);
+
+        var projecao = await _repository.ObterProjecaoPorIdAsync(id);
+        return Mapear(projecao!);
     }
 
     public async Task<Result<Unit>> ExcluirAsync(Guid id)
@@ -160,29 +134,26 @@ public class ReceitaAppService : IReceitaAppService
 
         receita.Desativar();
         await _repository.AtualizarAsync(receita);
-        await _encargoFiscalService.RemoverDasAsync(receita.IdUsuario, receita);
         return Resultado.Sucesso();
     }
 
-    private static ReceitaResponse Mapear(Receita r) => new()
+    private static ReceitaResponse Mapear(ReceitaProjecao p) => new()
     {
-        Id = r.Id,
-        Descricao = r.Descricao,
-        Valor = r.Valor,
-        Data = r.Data,
-        IdConta = r.IdConta,
-        Conta = r.Conta,
-        IdCategoria = r.IdCategoria,
-        Categoria = r.Categoria,
-        IdSubcategoria = r.IdSubcategoria,
-        Subcategoria = r.Subcategoria,
-        Status = (int)r.Status,
-        DataRealizacao = r.DataRealizacao,
-        IdRegra = r.IdRegra,
-        EhRecorrente = r.EhRecorrente,
-        GeraDas = r.GeraDas,
-        PercentualDas = r.PercentualDas,
-        Ativo = r.Ativo,
-        DataCadastro = r.DataCadastro
+        Id = p.Id,
+        Descricao = p.Descricao,
+        Valor = p.Valor,
+        Data = p.Data,
+        IdConta = p.IdConta,
+        Conta = p.Conta,
+        IdCategoria = p.IdCategoria,
+        Categoria = p.Categoria,
+        IdSubcategoria = p.IdSubcategoria,
+        Subcategoria = p.Subcategoria,
+        Status = (int)p.Status,
+        DataRealizacao = p.DataRealizacao,
+        IdRegra = p.IdRegra,
+        EhRecorrente = p.EhRecorrente,
+        Ativo = p.Ativo,
+        DataCadastro = p.DataCadastro
     };
 }

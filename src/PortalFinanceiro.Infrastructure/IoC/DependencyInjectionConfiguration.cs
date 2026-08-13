@@ -37,7 +37,6 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IDespesaAppService, DespesaAppService>();
         services.AddScoped<IRegraReceitaAppService, RegraReceitaAppService>();
         services.AddScoped<IRegraDespesaAppService, RegraDespesaAppService>();
-        services.AddScoped<IEncargoFiscalService, EncargoFiscalService>();
         services.AddScoped<IDashboardAppService, DashboardAppService>();
 
         return services;

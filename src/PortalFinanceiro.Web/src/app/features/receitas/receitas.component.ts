@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { ReceitaRepository, ReceitaFiltros } from '../../core/repositories/receita.repository';
+import { ReceitaRepository, LancamentoFiltros as ReceitaFiltros } from '../../core/repositories/lancamento.repository';
 import { CategoriaReceitaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { Receita, ReceitaRequest } from '../../core/models/receita.model';
@@ -122,8 +122,6 @@ export class ReceitasComponent implements OnInit {
       subcategoria: item.subcategoria,
       status: STATUS_PENDENTE,
       ehRecorrente: false,
-      geraDas: item.geraDas,
-      percentualDas: item.percentualDas,
       ativo: true,
       dataCadastro: new Date().toISOString(),
     };
@@ -144,9 +142,7 @@ export class ReceitasComponent implements OnInit {
         repete: data.repete,
         dia: data.repete ? data.dia : undefined,
         diaUtil: data.repete ? data.diaUtil : undefined,
-        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined,
-        geraDas: data.geraDas ?? false,
-        percentualDas: data.geraDas ? (data.percentualDas ?? 6) : undefined
+        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined
       };
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, request));

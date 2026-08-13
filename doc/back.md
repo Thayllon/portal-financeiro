@@ -58,8 +58,9 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Controllers só chamam service + `ApiResponse`; sem lógica de negócio
 - Categorias compartilhadas: editar/excluir só dono ou admin → senão `Erro.Permissao` (HTTP 403)
 - Auditoria de categorias grava `CategoriaHistorico` em toda mutação
-- Encargos DAS via `IEncargoFiscalService`, vinculados por `Despesa.IdReceitaOrigem`
-- Constantes fiscais (% DAS, nomes CNPJ/DAS) em `EncargoFiscal` (`Domain/Services/`)
+- Leitura com projeção (`Domain/Projections/`) para nomes display; entidades têm `private set`
+- Após mutação, re-buscar projeção via `ObterProjecaoPorIdAsync` para mapear resposta
+- Fluxo recorrente usa `TransactionScope` para atomicidade regra + parcelas
 - Status é `int?` (1=Pendente, 2=Realizado), nunca string
 
 ## Contrato de erro (resposta)
@@ -74,13 +75,3 @@ Toda falha de negócio/validação retorna `Erro` serializado em **camelCase**:
 - `codigo`: código de negócio legível por máquina (ver `Erro.cs`).
 - `mensagem`: texto amigável exibido ao usuário (frontend lê `mensagem`/`codigo` em `api-error.util.ts:mensagemErro`).
 - Dois caminhos geram esse envelope: `BaseController.ApiResponse` (erros de `Result<T>`) e `ErrorHandlingMiddleware` (exceções não tratadas). Ambos usam camelCase — manter consistente.
-
-## Encargos automáticos
-
-| Encargo | Origem | % padrão | Categoria | Vínculo |
-|---------|--------|----------|-----------|---------|
-| **DAS** | Receita com flag "nota fiscal" (avulsa ou parcela recorrente) | 6% (editável) | CNPJ → DAS | `Despesa.IdReceitaOrigem` |
-
-- A despesa gerada usa a **mesma conta** da origem e entra na lista de despesas como lançamento normal (pode pagar/estornar)
-- Criar/editar/excluir a receita **sincroniza** a despesa de encargo
-- Falha ao gerar encargo desfaz a criação da receita (transação)

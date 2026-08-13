@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { DespesaRepository, DespesaFiltros } from '../../core/repositories/despesa.repository';
+import { DespesaRepository, LancamentoFiltros as DespesaFiltros } from '../../core/repositories/lancamento.repository';
 import { CategoriaDespesaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { Despesa, DespesaRequest } from '../../core/models/despesa.model';
@@ -142,8 +142,7 @@ export class DespesasComponent implements OnInit {
         repete: data.repete,
         dia: data.repete ? data.dia : undefined,
         diaUtil: data.repete ? data.diaUtil : undefined,
-        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined,
-        percentualDas: data.percentualDas
+        dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined
       };
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, request));

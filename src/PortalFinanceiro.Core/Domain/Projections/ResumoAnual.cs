@@ -1,4 +1,4 @@
-namespace PortalFinanceiro.Core.Domain.Entities;
+namespace PortalFinanceiro.Core.Domain.Projections;
 
 public class ResumoAnualItem
 {

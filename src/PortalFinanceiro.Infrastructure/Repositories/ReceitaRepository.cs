@@ -1,6 +1,7 @@
 using Dapper;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
+using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Infrastructure.Data;
 using PortalFinanceiro.Infrastructure.Sql;
 using PortalFinanceiro.Infrastructure.Sql.Base;
@@ -14,8 +15,11 @@ public class ReceitaRepository : SqlBaseRepository, IReceitaRepository
     public async Task<Receita?> ObterPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<Receita>(conn, ReceitaSql.ObterPorId, new { Id = id }));
 
-    public async Task<IEnumerable<Receita>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<Receita>(conn, ReceitaSql.ListarPorMes, new { IdUsuario = idUsuario, Mes = mes, Ano = ano, IdConta = idConta, Status = status, IdCategoria = idCategoria, Busca = busca }));
+    public async Task<ReceitaProjecao?> ObterProjecaoPorIdAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<ReceitaProjecao>(conn, ReceitaSql.ObterPorId, new { Id = id }));
+
+    public async Task<IEnumerable<ReceitaProjecao>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ReceitaProjecao>(conn, ReceitaSql.ListarPorMes, new { IdUsuario = idUsuario, Mes = mes, Ano = ano, IdConta = idConta, Status = status, IdCategoria = idCategoria, Busca = busca }));
 
     public async Task<int> ContarPorCategoriaAsync(Guid idCategoria)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ReceitaSql.ContarPorCategoria, new { IdCategoria = idCategoria }));
@@ -50,9 +54,9 @@ public class ReceitaRepository : SqlBaseRepository, IReceitaRepository
     public async Task ExcluirAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ReceitaSql.Excluir, new { Id = id }));
 
-    public async Task<IEnumerable<Core.Domain.Entities.ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<Core.Domain.Entities.ResumoAnualItem>(conn, ReceitaSql.ResumoAnualPorMes, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
+    public async Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualItem>(conn, ReceitaSql.ResumoAnualPorMes, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
 
-    public async Task<IEnumerable<Core.Domain.Entities.ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<Core.Domain.Entities.ResumoAnualContaItem>(conn, ReceitaSql.ResumoAnualPorConta, new { IdUsuario = idUsuario, Ano = ano }));
+    public async Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualContaItem>(conn, ReceitaSql.ResumoAnualPorConta, new { IdUsuario = idUsuario, Ano = ano }));
 }

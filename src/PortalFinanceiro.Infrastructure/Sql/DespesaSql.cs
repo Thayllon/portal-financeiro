@@ -7,14 +7,11 @@ internal static class DespesaSql
     static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria, {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.IdReceitaOrigem, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
         cb.Nome AS Conta,
         cat.Nome AS Categoria,
-        sub.Nome AS Subcategoria,
-        CASE WHEN {T}.IdReceitaOrigem IS NOT NULL THEN 1 ELSE 0 END AS GeraDas,
-        CASE WHEN rec.Valor > 0 AND {T}.Valor > 0 THEN ROUND({T}.Valor / rec.Valor * 100, 2) ELSE NULL END AS PercentualDas";
+        sub.Nome AS Subcategoria";
     static string Joins => $@"
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}ContaBancaria cb ON {T}.IdConta = cb.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa cat ON {T}.IdCategoria = cat.Id
-        LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa sub ON {T}.IdSubcategoria = sub.Id
-        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Receita rec ON rec.Id = {T}.IdReceitaOrigem";
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa sub ON {T}.IdSubcategoria = sub.Id";
     public static string ObterPorId => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.Id = @Id";
     public static string ListarPorMes => $@"
         SELECT {CComNomes} FROM {T} {Joins}

@@ -1,11 +1,13 @@
 using PortalFinanceiro.Core.Domain.Entities;
+using PortalFinanceiro.Core.Domain.Projections;
 
 namespace PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 
 public interface IReceitaRepository
 {
     Task<Receita?> ObterPorIdAsync(Guid id);
-    Task<IEnumerable<Receita>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null);
+    Task<ReceitaProjecao?> ObterProjecaoPorIdAsync(Guid id);
+    Task<IEnumerable<ReceitaProjecao>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null);
     Task<int> ContarPorCategoriaAsync(Guid idCategoria);
     Task<int> ContarPorSubcategoriaAsync(Guid idSubcategoria);
     Task<int> ContarPorRegraAsync(Guid idRegra);

@@ -1,5 +1,6 @@
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
+using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Infrastructure.Data;
 using PortalFinanceiro.Infrastructure.Sql;
 using PortalFinanceiro.Infrastructure.Sql.Base;
@@ -13,8 +14,11 @@ public class RegraReceitaRepository : SqlBaseRepository, IRegraReceitaRepository
     public async Task<RegraReceita?> ObterPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<RegraReceita>(conn, RegraReceitaSql.ObterPorId, new { Id = id }));
 
-    public async Task<IEnumerable<RegraReceita>> ListarPorUsuarioAsync(Guid idUsuario)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<RegraReceita>(conn, RegraReceitaSql.ListarPorUsuario, new { IdUsuario = idUsuario }));
+    public async Task<RegraReceitaProjecao?> ObterProjecaoPorIdAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<RegraReceitaProjecao>(conn, RegraReceitaSql.ObterPorId, new { Id = id }));
+
+    public async Task<IEnumerable<RegraReceitaProjecao>> ListarPorUsuarioAsync(Guid idUsuario)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<RegraReceitaProjecao>(conn, RegraReceitaSql.ListarPorUsuario, new { IdUsuario = idUsuario }));
 
     public async Task InserirAsync(RegraReceita entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, RegraReceitaSql.Inserir, entity));

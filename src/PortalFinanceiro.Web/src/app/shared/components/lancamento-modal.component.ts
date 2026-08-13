@@ -19,8 +19,6 @@ export interface LancamentoForm {
   dia?: number;
   diaUtil?: boolean;
   dataFim?: string;
-  geraDas?: boolean;
-  percentualDas?: number;
 }
 
 interface LancamentoItem {
@@ -30,9 +28,6 @@ interface LancamentoItem {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
-  geraDas?: boolean;
-  percentualDas?: number;
-  idReceitaOrigem?: string;
 }
 
 @Component({
@@ -64,18 +59,6 @@ export class LancamentoModalComponent {
   categoriasOptions = signal<SelectOption[]>([]);
   subcategoriasOptions = signal<SelectOption[]>([]);
 
-  encargoTipo = computed<'das' | null>(() => {
-    const ini = this.editando();
-    if (ini?.idReceitaOrigem) return 'das';
-    return null;
-  });
-
-  origemLabel = computed(() => {
-    const ini = this.editando();
-    if (ini?.idReceitaOrigem) return 'Receita de origem';
-    return '';
-  });
-
   constructor() {
     effect(() => {
       const contas = this.contas();
@@ -103,9 +86,7 @@ export class LancamentoModalComponent {
             repete: false,
             dia: 1,
             diaUtil: false,
-            dataFim: '',
-            geraDas: ini.geraDas ?? (!!ini.idReceitaOrigem),
-            percentualDas: ini.percentualDas ?? undefined
+            dataFim: ''
           };
         } else {
           const hoje = new Date().toISOString().split('T')[0];
@@ -213,13 +194,6 @@ export class LancamentoModalComponent {
     }
   }
 
-  setEncargoPercentual(value: number) {
-    if (this.encargoTipo() === 'das') {
-      this.form.percentualDas = value;
-    }
-    this.clearError('percentualDas');
-  }
-
   onDiaUtilChange() {
     if (this.form.diaUtil && this.form.dia && this.form.dia > 5) {
       this.form.dia = 5;
@@ -278,12 +252,6 @@ export class LancamentoModalComponent {
       }
     }
 
-    if (this.form.geraDas) {
-      if (this.form.percentualDas == null || isNaN(this.form.percentualDas) || this.form.percentualDas <= 0 || this.form.percentualDas >= 100) {
-        errors['percentualDas'] = 'Percentual deve estar entre 0 e 100';
-      }
-    }
-
     if (Object.keys(errors).length > 0) {
       this.fieldErrors.set(errors);
       this.notify.error('Corrija os campos destacados');
@@ -297,8 +265,7 @@ export class LancamentoModalComponent {
   private emptyForm(): LancamentoForm {
     return {
       descricao: '', valor: 0, data: '', idConta: '', idCategoria: '',
-      repete: false, dia: 1, diaUtil: false, dataFim: '',
-      geraDas: false, percentualDas: 6
+      repete: false, dia: 1, diaUtil: false, dataFim: ''
     };
   }
 }
