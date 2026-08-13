@@ -47,7 +47,7 @@ cd src/PortalFinanceiro.Web && npm test
 - **Design system** em `src/app/design-system/styles/`
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes compartilhados** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias, pro-labore)
+- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias)
 
 ### Scripts e Documentação
 
@@ -69,8 +69,8 @@ cd src/PortalFinanceiro.Web && npm test
 - **LancamentoHelper**: Fica em `Domain/Services/`, é lógica de domínio
 - **Categorias compartilhadas**: editar/excluir só dono (`IdUsuario`) ou admin — senão `Erro.Permissao` (HTTP 403)
 - **Auditoria de categorias**: toda mutação (criar/editar/excluir, incl. subcategorias) grava `CategoriaHistorico` via `ICategoriaHistoricoRepository`
-- **Encargos (DAS/INSS)**: gerar/sincronizar/remover via `IEncargoFiscalService`; vínculo por `Despesa.IdReceitaOrigem` / `IdProLaboreOrigem`
-- **Constantes fiscais** (salário mínimo, % DAS/INSS, nomes CNPJ/DAS/INSS): em `EncargoFiscal` (`Domain/Services/`)
+- **Encargos (DAS)**: gerar/sincronizar/remover via `IEncargoFiscalService`; vínculo por `Despesa.IdReceitaOrigem`
+- **Constantes fiscais** (% DAS, nomes CNPJ/DAS): em `EncargoFiscal` (`Domain/Services/`)
 
 ### Frontend (TypeScript)
 
@@ -108,7 +108,6 @@ src/app/
 │   ├── despesas/
 │   ├── contas/
 │   ├── categorias-receita/
-│   ├── pro-labore/
 │   └── login/
 └── shared/
     ├── components/      # Componentes reutilizáveis
@@ -135,4 +134,4 @@ src/app/
 - [ ] Nenhum hex hardcoded fora do design system
 - [ ] Mutação de categoria grava auditoria (`CategoriaHistorico`)
 - [ ] Editar/excluir categoria valida dono/admin (`Erro.Permissao` → 403)
-- [ ] Encargos DAS/INSS usam `IEncargoFiscalService` com vínculo correto (`IdReceitaOrigem`/`IdProLaboreOrigem`)
+- [ ] Encargos DAS usam `IEncargoFiscalService` com vínculo correto (`IdReceitaOrigem`)

@@ -1,6 +1,6 @@
 # Portal Financeiro
 
-Sistema de controle financeiro pessoal (PF/PJ) com lançamentos recorrentes e avulsos, categorias compartilhadas com auditoria e encargos automáticos (DAS e INSS).
+Sistema de controle financeiro pessoal (PF/PJ) com lançamentos recorrentes e avulsos, categorias compartilhadas com auditoria e encargos automáticos (DAS).
 
 ## Rápido
 

@@ -17,10 +17,8 @@ public class DespesaResponse
     public Guid? IdRegra { get; set; }
     public bool EhRecorrente { get; set; }
     public Guid? IdReceitaOrigem { get; set; }
-    public Guid? IdProLaboreOrigem { get; set; }
     public bool GeraDas { get; set; }
     public decimal? PercentualDas { get; set; }
-    public decimal? PercentualInss { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
 }

@@ -15,7 +15,6 @@ export const routes: Routes = [
       { path: 'despesas', loadComponent: () => import('./features/despesas/despesas.component').then(m => m.DespesasComponent) },
       { path: 'contas', loadComponent: () => import('./features/contas/contas.component').then(m => m.ContasComponent) },
       { path: 'categorias', loadComponent: () => import('./features/categorias-receita/categorias-receita.component').then(m => m.CategoriasComponent) },
-      { path: 'pro-labore', loadComponent: () => import('./features/pro-labore/pro-labore.component').then(m => m.ProLaboreComponent) },
       { path: 'usuarios', loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent), canActivate: [adminGuard] },
     ]
   },

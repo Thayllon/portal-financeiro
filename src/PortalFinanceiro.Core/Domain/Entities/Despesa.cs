@@ -17,7 +17,6 @@ public class Despesa
     public DateTime? DataRealizacao { get; private set; }
     public Guid? IdRegra { get; private set; }
     public Guid? IdReceitaOrigem { get; private set; }
-    public Guid? IdProLaboreOrigem { get; private set; }
     public bool Ativo { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
@@ -27,12 +26,11 @@ public class Despesa
     public string Conta { get; set; } = string.Empty;
     public bool GeraDas { get; set; }
     public decimal? PercentualDas { get; set; }
-    public decimal? PercentualInss { get; set; }
     public bool EhRecorrente => IdRegra.HasValue;
 
     public Despesa() { }
 
-    public static Result<Despesa> Criar(Guid idUsuario, string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria, Guid? idRegra = null, Guid? idReceitaOrigem = null, Guid? idProLaboreOrigem = null)
+    public static Result<Despesa> Criar(Guid idUsuario, string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria, Guid? idRegra = null, Guid? idReceitaOrigem = null)
     {
         if (idUsuario == Guid.Empty)
             return Erro.Validacao("USUARIO_OBRIGATORIO", "Usuário é obrigatório.");
@@ -58,7 +56,6 @@ public class Despesa
             Status = StatusMensal.Pendente,
             IdRegra = idRegra,
             IdReceitaOrigem = idReceitaOrigem,
-            IdProLaboreOrigem = idProLaboreOrigem,
             Ativo = true,
             DataCadastro = DateTime.UtcNow,
             DataAlteracao = DateTime.UtcNow

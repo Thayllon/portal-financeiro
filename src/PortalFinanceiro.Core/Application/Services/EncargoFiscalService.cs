@@ -10,14 +10,11 @@ public interface IEncargoFiscalService
     Task<Result<Unit>> GerarDasAsync(Guid idUsuario, Receita receita, decimal percentual);
     Task<Result<Unit>> SincronizarDasAsync(Guid idUsuario, Receita receita, bool geraDas, decimal percentual);
     Task<Result<Unit>> RemoverDasAsync(Guid idUsuario, Receita receita);
-    Task<Result<Unit>> GerarInssAsync(Guid idUsuario, ProLabore proLabore, decimal percentual);
-    Task<Result<Unit>> RemoverInssAsync(Guid idUsuario, ProLabore proLabore);
 }
 
 public class EncargoFiscalService : IEncargoFiscalService
 {
     private const string DescricaoDas = "DAS";
-    private const string DescricaoInss = "INSS";
 
     private readonly IDespesaRepository _despesaRepository;
     private readonly ICategoriaDespesaRepository _categoriaDespesaRepository;
@@ -94,36 +91,6 @@ public class EncargoFiscalService : IEncargoFiscalService
         {
             das.Desativar();
             await _despesaRepository.AtualizarAsync(das);
-        }
-        return Resultado.Sucesso();
-    }
-
-    public async Task<Result<Unit>> GerarInssAsync(Guid idUsuario, ProLabore proLabore, decimal percentual)
-    {
-        var categoria = await ResolverCategoriaFiscalAsync(EncargoFiscal.CategoriaInss);
-        if (categoria is null)
-            return Erro.Negocio("CATEGORIA_INSS_NAO_CONFIGURADA", $"A subcategoria \"{EncargoFiscal.CategoriaInss}\" (em \"{EncargoFiscal.CategoriaCnpj}\") não foi encontrada. Cadastre-a para gerar o INSS.");
-
-        var valor = EncargoFiscal.Calcular(proLabore.Valor, percentual);
-        if (valor <= 0)
-            return Erro.Validacao("INSS_VALOR_INVALIDO", "O percentual informado não gera um valor válido para o INSS.");
-
-        var data = new DateTime(proLabore.Ano, proLabore.Mes, DateTime.DaysInMonth(proLabore.Ano, proLabore.Mes));
-        var result = Despesa.Criar(idUsuario, $"{DescricaoInss} - {proLabore.Mes:D2}/{proLabore.Ano}", valor, data, proLabore.IdConta, categoria.Id, null, idProLaboreOrigem: proLabore.Id);
-        if (!result.EhSucesso)
-            return result.Erro!;
-
-        await _despesaRepository.InserirAsync(result.Dado!);
-        return Resultado.Sucesso();
-    }
-
-    public async Task<Result<Unit>> RemoverInssAsync(Guid idUsuario, ProLabore proLabore)
-    {
-        var existentes = await _despesaRepository.ListarPorProLaboreOrigemAsync(proLabore.Id);
-        foreach (var inss in existentes)
-        {
-            inss.Desativar();
-            await _despesaRepository.AtualizarAsync(inss);
         }
         return Resultado.Sucesso();
     }

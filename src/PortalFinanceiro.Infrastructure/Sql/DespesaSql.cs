@@ -3,20 +3,18 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class DespesaSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}Despesa";
-    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, IdReceitaOrigem, IdProLaboreOrigem, Ativo, DataCadastro, DataAlteracao";
-    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria, {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.IdReceitaOrigem, {T}.IdProLaboreOrigem, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
+    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, IdReceitaOrigem, Ativo, DataCadastro, DataAlteracao";
+    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria, {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.IdReceitaOrigem, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
         cb.Nome AS Conta,
         cat.Nome AS Categoria,
         sub.Nome AS Subcategoria,
         CASE WHEN {T}.IdReceitaOrigem IS NOT NULL THEN 1 ELSE 0 END AS GeraDas,
-        CASE WHEN rec.Valor > 0 AND {T}.Valor > 0 THEN ROUND({T}.Valor / rec.Valor * 100, 2) ELSE NULL END AS PercentualDas,
-        pl.PercentualInss AS PercentualInss";
+        CASE WHEN rec.Valor > 0 AND {T}.Valor > 0 THEN ROUND({T}.Valor / rec.Valor * 100, 2) ELSE NULL END AS PercentualDas";
     static string Joins => $@"
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}ContaBancaria cb ON {T}.IdConta = cb.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa cat ON {T}.IdCategoria = cat.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa sub ON {T}.IdSubcategoria = sub.Id
-        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Receita rec ON rec.Id = {T}.IdReceitaOrigem
-        LEFT JOIN {SqlDialect.Current.SchemaPrefix}ProLabore pl ON pl.Id = {T}.IdProLaboreOrigem";
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Receita rec ON rec.Id = {T}.IdReceitaOrigem";
     public static string ObterPorId => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.Id = @Id";
     public static string ListarPorMes => $@"
         SELECT {CComNomes} FROM {T} {Joins}
@@ -32,8 +30,7 @@ internal static class DespesaSql
     public static string ContarPorRegra => $"SELECT COUNT(*) FROM {T} WHERE IdRegra = @IdRegra AND Ativo = 1";
     public static string ListarPorRegra => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdRegra = @IdRegra AND {T}.Ativo = 1 ORDER BY {T}.Data";
     public static string ListarPorReceitaOrigem => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdReceitaOrigem = @IdReceitaOrigem AND {T}.Ativo = 1";
-    public static string ListarPorProLaboreOrigem => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdProLaboreOrigem = @IdProLaboreOrigem AND {T}.Ativo = 1";
-    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @Status, @DataRealizacao, @IdRegra, @IdReceitaOrigem, @IdProLaboreOrigem, @Ativo, @DataCadastro, @DataAlteracao)";
+    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @Status, @DataRealizacao, @IdRegra, @IdReceitaOrigem, @Ativo, @DataCadastro, @DataAlteracao)";
     public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
     public static string Excluir => $"UPDATE {T} SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id";
     public static string ResumoAnualPorMes => $@"

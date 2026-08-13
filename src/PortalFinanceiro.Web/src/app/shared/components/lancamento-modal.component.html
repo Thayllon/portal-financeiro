@@ -161,26 +161,26 @@
                     <div class="encargo-block__badge">
                       <svg [lucideIcon]="encargoTipo() === 'das' ? 'receipt-text' : 'shield-check'" [size]="18" />
                       <div>
-                        <strong>{{ encargoTipo() === 'das' ? 'Despesa de DAS gerada automaticamente' : 'Despesa de INSS gerada automaticamente' }}</strong>
+                        <strong>Despesa de DAS gerada automaticamente</strong>
                         <span>{{ origemLabel() }}</span>
                       </div>
                     </div>
                     <div class="encargo-block__formula">
-                      <span>{{ encargoTipo() === 'das' ? 'Regra: percentual do DAS sobre o valor da receita' : 'Regra: percentual do INSS sobre o pró-labore' }}</span>
+                      <span>Regra: percentual do DAS sobre o valor da receita</span>
                       <div class="field">
-                        <label>Percentual ({{ encargoTipo() === 'das' ? 'DAS' : 'INSS' }}) (%)</label>
+                        <label>Percentual (DAS) (%)</label>
                         <input
                           type="number"
                           min="0.1"
                           max="99.9"
                           step="0.1"
-                          [ngModel]="encargoTipo() === 'das' ? form.percentualDas : form.percentualInss"
+                          [ngModel]="form.percentualDas"
                           (ngModelChange)="setEncargoPercentual($event)"
-                          placeholder="{{ encargoTipo() === 'das' ? '6' : '11' }}"
+                          placeholder="6"
                           class="input"
-                          [class.input-error]="fieldErrors()['percentualDas'] || fieldErrors()['percentualInss']"
+                          [class.input-error]="fieldErrors()['percentualDas']"
                         />
-                        @if (fieldErrors()['percentualDas'] || fieldErrors()['percentualInss']) {
+                        @if (fieldErrors()['percentualDas']) {
                           <span class="field-error">Percentual deve estar entre 0 e 100</span>
                         }
                       </div>

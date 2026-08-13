@@ -13,14 +13,12 @@ public class DespesaAppService : IDespesaAppService
     private readonly IDespesaRepository _repository;
     private readonly IRegraDespesaRepository _regraRepository;
     private readonly IReceitaRepository _receitaRepository;
-    private readonly IProLaboreRepository _proLaboreRepository;
 
-    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IReceitaRepository receitaRepository, IProLaboreRepository proLaboreRepository)
+    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IReceitaRepository receitaRepository)
     {
         _repository = repository;
         _regraRepository = regraRepository;
         _receitaRepository = receitaRepository;
-        _proLaboreRepository = proLaboreRepository;
     }
 
     public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
@@ -80,9 +78,6 @@ public class DespesaAppService : IDespesaAppService
         if (despesa.IdReceitaOrigem is { } idReceita)
             return await AtualizarDasAsync(despesa, idReceita, request);
 
-        if (despesa.IdProLaboreOrigem is { } idProLabore)
-            return await AtualizarInssAsync(despesa, idProLabore, request);
-
         var result = despesa.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria);
         if (!result.EhSucesso)
             return result.Erro!;
@@ -103,26 +98,6 @@ public class DespesaAppService : IDespesaAppService
             return Erro.Validacao("DAS_VALOR_INVALIDO", "O percentual informado não gera um valor válido para o DAS.");
 
         var result = despesa.Atualizar($"{EncargoFiscal.DescricaoDas} - {receita.Descricao}", valor, receita.Data, receita.IdConta, despesa.IdCategoria, despesa.IdSubcategoria);
-        if (!result.EhSucesso)
-            return result.Erro!;
-
-        await _repository.AtualizarAsync(despesa);
-        return Mapear(despesa);
-    }
-
-    private async Task<Result<DespesaResponse>> AtualizarInssAsync(Despesa despesa, Guid idProLabore, DespesaRequest request)
-    {
-        var proLabore = await _proLaboreRepository.ObterPorIdAsync(idProLabore);
-        if (proLabore is null || !proLabore.Ativo)
-            return Erro.NaoEncontrado("Pró-labore de origem do INSS");
-
-        var percentual = request.PercentualInss ?? proLabore.PercentualInss;
-        var valor = EncargoFiscal.Calcular(proLabore.Valor, percentual);
-        if (valor <= 0)
-            return Erro.Validacao("INSS_VALOR_INVALIDO", "O percentual informado não gera um valor válido para o INSS.");
-
-        var data = new DateTime(proLabore.Ano, proLabore.Mes, DateTime.DaysInMonth(proLabore.Ano, proLabore.Mes));
-        var result = despesa.Atualizar($"{EncargoFiscal.DescricaoInss} - {proLabore.Mes:D2}/{proLabore.Ano}", valor, data, proLabore.IdConta, despesa.IdCategoria, despesa.IdSubcategoria);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -189,10 +164,8 @@ public class DespesaAppService : IDespesaAppService
         IdRegra = d.IdRegra,
         EhRecorrente = d.EhRecorrente,
         IdReceitaOrigem = d.IdReceitaOrigem,
-        IdProLaboreOrigem = d.IdProLaboreOrigem,
         GeraDas = d.GeraDas,
         PercentualDas = d.PercentualDas,
-        PercentualInss = d.PercentualInss,
         Ativo = d.Ativo,
         DataCadastro = d.DataCadastro
     };

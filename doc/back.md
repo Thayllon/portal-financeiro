@@ -45,7 +45,6 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/contas-bancarias` | GET/POST/PUT/DELETE | Contas bancárias |
 | `/api/categorias/receita` | GET/POST/PUT/DELETE | Categorias de receita (compartilhadas) |
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa (compartilhadas) |
-| `/api/pro-labores` | GET/POST/PUT/DELETE | Pró-labore mensal (gera INSS) |
 | `/api/usuarios` | GET/POST/PUT · PATCH /{id}/ativo | Gerenciamento de usuários (somente admin) |
 | `/api/dashboard` | GET | Dashboard com resumo |
 
@@ -59,8 +58,8 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Controllers só chamam service + `ApiResponse`; sem lógica de negócio
 - Categorias compartilhadas: editar/excluir só dono ou admin → senão `Erro.Permissao` (HTTP 403)
 - Auditoria de categorias grava `CategoriaHistorico` em toda mutação
-- Encargos DAS/INSS via `IEncargoFiscalService`, vinculados por `Despesa.IdReceitaOrigem` / `IdProLaboreOrigem`
-- Constantes fiscais (salário mínimo, % DAS/INSS, nomes CNPJ/DAS/INSS) em `EncargoFiscal` (`Domain/Services/`)
+- Encargos DAS via `IEncargoFiscalService`, vinculados por `Despesa.IdReceitaOrigem`
+- Constantes fiscais (% DAS, nomes CNPJ/DAS) em `EncargoFiscal` (`Domain/Services/`)
 - Status é `int?` (1=Pendente, 2=Realizado), nunca string
 
 ## Encargos automáticos
@@ -68,8 +67,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | Encargo | Origem | % padrão | Categoria | Vínculo |
 |---------|--------|----------|-----------|---------|
 | **DAS** | Receita com flag "nota fiscal" (avulsa ou parcela recorrente) | 6% (editável) | CNPJ → DAS | `Despesa.IdReceitaOrigem` |
-| **INSS** | Pró-labore mensal (valor ≥ salário mínimo **R$ 1.621**) | 11% (editável) | CNPJ → INSS | `Despesa.IdProLaboreOrigem` |
 
 - A despesa gerada usa a **mesma conta** da origem e entra na lista de despesas como lançamento normal (pode pagar/estornar)
-- Criar/editar/excluir a receita ou o pró-labore **sincroniza** a despesa de encargo
+- Criar/editar/excluir a receita **sincroniza** a despesa de encargo
 - Falha ao gerar encargo desfaz a criação da receita (transação)

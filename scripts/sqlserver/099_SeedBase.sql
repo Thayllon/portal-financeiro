@@ -1,5 +1,5 @@
 -- Seed base (executado por último): usuário administrador padrão (admin@portal.com / senhasenha)
--- e categorias fiscais compartilhadas CNPJ -> DAS e INSS.
+-- e categorias fiscais compartilhadas CNPJ -> DAS.
 -- Idempotente: executa somente o que ainda não existe.
 IF NOT EXISTS (SELECT 1 FROM Usuario WHERE Email = 'admin@portal.com')
 BEGIN
@@ -23,10 +23,4 @@ IF @CnpjId2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM CategoriaDespesa WHERE Nom
 BEGIN
     INSERT INTO CategoriaDespesa (Id, IdUsuario, Nome, CategoriaPaiId, Ativo, DataCadastro, DataAlteracao)
     VALUES (NEWID(), @AdminId, 'DAS', @CnpjId2, 1, SYSUTCDATETIME(), SYSUTCDATETIME());
-END;
-
-IF @CnpjId2 IS NOT NULL AND NOT EXISTS (SELECT 1 FROM CategoriaDespesa WHERE Nome = 'INSS' AND IdUsuario = @AdminId AND CategoriaPaiId = @CnpjId2)
-BEGIN
-    INSERT INTO CategoriaDespesa (Id, IdUsuario, Nome, CategoriaPaiId, Ativo, DataCadastro, DataAlteracao)
-    VALUES (NEWID(), @AdminId, 'INSS', @CnpjId2, 1, SYSUTCDATETIME(), SYSUTCDATETIME());
 END;

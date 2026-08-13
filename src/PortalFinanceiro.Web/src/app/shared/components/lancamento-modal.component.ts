@@ -21,7 +21,6 @@ export interface LancamentoForm {
   dataFim?: string;
   geraDas?: boolean;
   percentualDas?: number;
-  percentualInss?: number;
 }
 
 interface LancamentoItem {
@@ -33,9 +32,7 @@ interface LancamentoItem {
   idSubcategoria?: string;
   geraDas?: boolean;
   percentualDas?: number;
-  percentualInss?: number;
   idReceitaOrigem?: string;
-  idProLaboreOrigem?: string;
 }
 
 @Component({
@@ -67,17 +64,15 @@ export class LancamentoModalComponent {
   categoriasOptions = signal<SelectOption[]>([]);
   subcategoriasOptions = signal<SelectOption[]>([]);
 
-  encargoTipo = computed<'das' | 'inss' | null>(() => {
+  encargoTipo = computed<'das' | null>(() => {
     const ini = this.editando();
     if (ini?.idReceitaOrigem) return 'das';
-    if (ini?.idProLaboreOrigem) return 'inss';
     return null;
   });
 
   origemLabel = computed(() => {
     const ini = this.editando();
     if (ini?.idReceitaOrigem) return 'Receita de origem';
-    if (ini?.idProLaboreOrigem) return 'Pró-labore de origem';
     return '';
   });
 
@@ -110,8 +105,7 @@ export class LancamentoModalComponent {
             diaUtil: false,
             dataFim: '',
             geraDas: ini.geraDas ?? (!!ini.idReceitaOrigem),
-            percentualDas: ini.percentualDas ?? undefined,
-            percentualInss: ini.percentualInss ?? undefined
+            percentualDas: ini.percentualDas ?? undefined
           };
         } else {
           const hoje = new Date().toISOString().split('T')[0];
@@ -222,11 +216,8 @@ export class LancamentoModalComponent {
   setEncargoPercentual(value: number) {
     if (this.encargoTipo() === 'das') {
       this.form.percentualDas = value;
-    } else if (this.encargoTipo() === 'inss') {
-      this.form.percentualInss = value;
     }
     this.clearError('percentualDas');
-    this.clearError('percentualInss');
   }
 
   onDiaUtilChange() {
@@ -290,12 +281,6 @@ export class LancamentoModalComponent {
     if (this.form.geraDas) {
       if (this.form.percentualDas == null || isNaN(this.form.percentualDas) || this.form.percentualDas <= 0 || this.form.percentualDas >= 100) {
         errors['percentualDas'] = 'Percentual deve estar entre 0 e 100';
-      }
-    }
-
-    if (this.encargoTipo() === 'inss') {
-      if (this.form.percentualInss == null || isNaN(this.form.percentualInss) || this.form.percentualInss <= 0 || this.form.percentualInss >= 100) {
-        errors['percentualInss'] = 'Percentual deve estar entre 0 e 100';
       }
     }
 

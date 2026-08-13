@@ -32,9 +32,6 @@ public class DespesaRepository : SqlBaseRepository, IDespesaRepository
     public async Task<IEnumerable<Despesa>> ListarPorReceitaOrigemAsync(Guid idReceitaOrigem)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<Despesa>(conn, DespesaSql.ListarPorReceitaOrigem, new { IdReceitaOrigem = idReceitaOrigem }));
 
-    public async Task<IEnumerable<Despesa>> ListarPorProLaboreOrigemAsync(Guid idProLaboreOrigem)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<Despesa>(conn, DespesaSql.ListarPorProLaboreOrigem, new { IdProLaboreOrigem = idProLaboreOrigem }));
-
     public async Task InserirAsync(Despesa entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, DespesaSql.Inserir, entity));
 

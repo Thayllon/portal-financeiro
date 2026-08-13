@@ -14,10 +14,8 @@ export interface Despesa {
   idRegra?: string;
   ehRecorrente: boolean;
   idReceitaOrigem?: string;
-  idProLaboreOrigem?: string;
   geraDas?: boolean;
   percentualDas?: number;
-  percentualInss?: number;
   ativo: boolean;
   dataCadastro: string;
 }
@@ -34,5 +32,4 @@ export interface DespesaRequest {
   diaUtil?: boolean;
   dataFim?: string;
   percentualDas?: number;
-  percentualInss?: number;
 }

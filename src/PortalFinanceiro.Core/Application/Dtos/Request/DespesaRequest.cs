@@ -13,5 +13,4 @@ public class DespesaRequest
     public bool? DiaUtil { get; set; }
     public DateTime? DataFim { get; set; }
     public decimal? PercentualDas { get; set; }
-    public decimal? PercentualInss { get; set; }
 }

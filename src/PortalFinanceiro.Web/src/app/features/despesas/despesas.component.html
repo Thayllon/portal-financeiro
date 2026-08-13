@@ -62,14 +62,10 @@
                   <td class="cell-name" data-label="Descrição">
                     <div class="cell-name__wrap">
                       <span>{{ l.descricao }}</span>
-                      @if (l.idReceitaOrigem || l.idProLaboreOrigem) {
-                        <span class="badge-encargo" [class.badge-encargo--inss]="!!l.idProLaboreOrigem">
-                          {{ l.idProLaboreOrigem ? 'INSS' : 'DAS' }}
-                          @if (l.idProLaboreOrigem) {
-                            ({{ l.percentualInss != null ? l.percentualInss + '%' : '' }})
-                          } @else {
-                            ({{ l.percentualDas != null ? l.percentualDas + '%' : '' }})
-                          }
+                      @if (l.idReceitaOrigem) {
+                        <span class="badge-encargo">
+                          DAS
+                          ({{ l.percentualDas != null ? l.percentualDas + '%' : '' }})
                         </span>
                       }
                     </div>

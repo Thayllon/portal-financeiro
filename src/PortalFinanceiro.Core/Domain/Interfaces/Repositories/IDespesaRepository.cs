@@ -11,7 +11,6 @@ public interface IDespesaRepository
     Task<int> ContarPorRegraAsync(Guid idRegra);
     Task<IEnumerable<Despesa>> ListarPorRegraAsync(Guid idRegra);
     Task<IEnumerable<Despesa>> ListarPorReceitaOrigemAsync(Guid idReceitaOrigem);
-    Task<IEnumerable<Despesa>> ListarPorProLaboreOrigemAsync(Guid idProLaboreOrigem);
     Task InserirAsync(Despesa entity);
     Task InserirEmMassaAsync(IEnumerable<Despesa> entities);
     Task AtualizarAsync(Despesa entity);

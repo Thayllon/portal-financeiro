@@ -1,6 +1,6 @@
 # Portal Financeiro — Documentação
 
-Sistema de controle financeiro pessoal que **reflete o extrato real de todas as contas** (PF/PJ). Uma tela por tipo, com lançamentos recorrentes e avulsos, categorias compartilhadas com auditoria e encargos automáticos (DAS e INSS).
+Sistema de controle financeiro pessoal que **reflete o extrato real de todas as contas** (PF/PJ). Uma tela por tipo, com lançamentos recorrentes e avulsos, categorias compartilhadas com auditoria e encargos automáticos (DAS).
 
 ## Stack
 
@@ -38,7 +38,7 @@ portal-financeiro/
 ├── scripts/
 │   ├── sqlserver/                     # Migrations DbUp (SQL Server) — from scratch
 │   │   ├── 001_CriarTabelas.sql       #   schema unificado completo
-│   │   └── 099_SeedBase.sql           #   admin + categorias CNPJ → DAS/INSS
+│   │   └── 099_SeedBase.sql           #   admin + categorias CNPJ → DAS
 │   └── postgres/                      # Mesmo conjunto para PostgreSQL
 ├── tools/
 │   └── DbSetup/                       # Ferramenta para rodar migrations (+ Dockerfile)
@@ -56,12 +56,11 @@ portal-financeiro/
 | Conceito | Descrição |
 |----------|-----------|
 | **Conta** | Nubank PF, Itaú PJ — onde o dinheiro entra/sai |
-| **Categoria + Subcategoria** | Classificação (ex: CNPJ → DAS, INSS). **Compartilhadas entre todos os usuários**; editar/excluir só o dono ou admin |
+| **Categoria + Subcategoria** | Classificação (ex: CNPJ → DAS). **Compartilhadas entre todos os usuários**; editar/excluir só o dono ou admin |
 | **Receita/Despesa** | Lançamento único no mês (data real do gasto) |
 | **Regra recorrente** | Comportamento "repete" — gera parcelas mensais automáticas |
 | **Avulsa** | Lançamento manual, sem recorrência |
 | **DAS** | Encargo sobre receita com "nota fiscal" (avulsa ou parcela recorrente) — gera despesa DAS automática |
-| **Pró-labore + INSS** | Cadastro mensal de pró-labore que gera despesa INSS automática |
 | **Auditoria de categorias** | `CategoriaHistorico` registra criado/editado/excluído de categorias |
 
 ### Fluxo
@@ -70,9 +69,8 @@ portal-financeiro/
 2. Cadastra receitas/despesas com "Repete?" → gera parcelas automáticas
 3. Lança avulsas no dia do gasto (pizza, corte de cabelo)
 4. Receitas com nota fiscal podem gerar **DAS** automático (avulsa ou parcela)
-5. Cadastra **pró-labore** mensal → gera **INSS** automático
-6. Marca recebido/pago conforme vai pagando
-7. Dashboard mostra resumo por conta e categoria
+5. Marca recebido/pago conforme vai pagando
+6. Dashboard mostra resumo por conta e categoria
 
 ## Login padrão (ambiente dev)
 

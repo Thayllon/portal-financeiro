@@ -14,7 +14,7 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 | Script | Conteúdo |
 |--------|----------|
 | `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs) |
-| `099_SeedBase.sql` | Admin + categorias fiscais `CNPJ → DAS/INSS` |
+| `099_SeedBase.sql` | Admin + categorias fiscais `CNPJ → DAS` |
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
 > migrado **não** deve recebê-los novamente (DbUp rastreia por nome).
@@ -50,9 +50,8 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `CategoriaReceita` / `CategoriaDespesa` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) — vínculo DAS em `Despesa.IdReceitaOrigem` |
-| `Despesa` | Despesas — com `IdReceitaOrigem`/`IdProLaboreOrigem` para encargos |
+| `Despesa` | Despesas — com `IdReceitaOrigem` para encargo DAS |
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
-| `ProLabore` | Pró-labore mensal (`IdConta`, índice único usuário+mês+ano) — gera INSS |
 
 ### Categorias compartilhadas
 
@@ -67,7 +66,6 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | Encargo | Origem | % padrão | Categoria | Vínculo |
 |---------|--------|----------|-----------|---------|
 | **DAS** | Receita com flag "nota fiscal" (avulsa ou parcela recorrente) | 6% (editável) | CNPJ → DAS | `Despesa.IdReceitaOrigem` |
-| **INSS** | Pró-labore mensal (valor ≥ salário mínimo **R$ 1.621**) | 11% (editável) | CNPJ → INSS | `Despesa.IdProLaboreOrigem` |
 
 - A despesa gerada usa a **mesma conta** da origem
 - Criar/editar/excluir a receita ou pró-labore **sincroniza** a despesa de encargo

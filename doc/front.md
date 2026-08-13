@@ -6,7 +6,7 @@
 - **Design system** próprio em `src/app/design-system/styles/` (tokens, mixins, variáveis)
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes reutilizáveis** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias, pro-labore)
+- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias)
 
 ## Como rodar / buildar / testar
 
@@ -45,7 +45,6 @@ src/app/
 │   ├── despesas/
 │   ├── contas/
 │   ├── categorias-receita/
-│   ├── pro-labore/
 │   └── login/
 └── shared/
     ├── components/      # Componentes reutilizáveis (LancamentoModal, CustomSelect...)
@@ -85,4 +84,3 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/despesas` | despesas | Lançamentos de despesa |
 | `/contas` | contas | Contas bancárias |
 | `/categorias` | categorias-receita | Categorias compartilhadas (com subcategorias) |
-| `/pro-labore` | pro-labore | Pró-labore mensal (gera INSS) |

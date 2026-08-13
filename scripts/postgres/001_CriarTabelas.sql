@@ -111,23 +111,6 @@ CREATE TABLE Receita (
     CONSTRAINT FK_Receita_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id)
 );
 
-CREATE TABLE ProLabore (
-    Id UUID PRIMARY KEY,
-    IdUsuario UUID NOT NULL,
-    Ano INT NOT NULL,
-    Mes INT NOT NULL,
-    Valor NUMERIC(18,2) NOT NULL,
-    PercentualInss NUMERIC(5,2) NOT NULL DEFAULT 11,
-    IdConta UUID NOT NULL,
-    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    DataCadastro TIMESTAMP NOT NULL,
-    DataAlteracao TIMESTAMP NOT NULL,
-    CONSTRAINT FK_ProLabore_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
-    CONSTRAINT FK_ProLabore_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id)
-);
-
-CREATE UNIQUE INDEX IX_ProLabore_Usuario_Ano_Mes ON ProLabore(IdUsuario, Ano, Mes) WHERE Ativo = TRUE;
-
 CREATE TABLE Despesa (
     Id UUID PRIMARY KEY,
     IdUsuario UUID NOT NULL,
@@ -141,7 +124,6 @@ CREATE TABLE Despesa (
     DataRealizacao TIMESTAMP NULL,
     IdRegra UUID NULL,
     IdReceitaOrigem UUID NULL,
-    IdProLaboreOrigem UUID NULL,
     Ativo BOOLEAN NOT NULL DEFAULT TRUE,
     DataCadastro TIMESTAMP NOT NULL,
     DataAlteracao TIMESTAMP NOT NULL,
@@ -150,8 +132,7 @@ CREATE TABLE Despesa (
     CONSTRAINT FK_Despesa_Subcategoria FOREIGN KEY (IdSubcategoria) REFERENCES CategoriaDespesa(Id),
     CONSTRAINT FK_Despesa_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id),
     CONSTRAINT FK_Despesa_Regra FOREIGN KEY (IdRegra) REFERENCES RegraDespesa(Id),
-    CONSTRAINT FK_Despesa_ReceitaOrigem FOREIGN KEY (IdReceitaOrigem) REFERENCES Receita(Id),
-    CONSTRAINT FK_Despesa_ProLaboreOrigem FOREIGN KEY (IdProLaboreOrigem) REFERENCES ProLabore(Id)
+    CONSTRAINT FK_Despesa_ReceitaOrigem FOREIGN KEY (IdReceitaOrigem) REFERENCES Receita(Id)
 );
 
 CREATE TABLE CategoriaHistorico (
