@@ -44,3 +44,8 @@ input, select, textarea { font-family: inherit; }
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+.required {
+  color: var(--color-danger);
+  margin-left: 2px;
+}

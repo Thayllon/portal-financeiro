@@ -85,15 +85,15 @@
       (save)="salvar()"
     >
       <div class="field">
-        <label>Nome</label>
+        <label>Nome<span class="required">*</span></label>
         <input [(ngModel)]="form.nome" placeholder="Ex: Maria Silva" class="input" />
       </div>
       <div class="field">
-        <label>E-mail</label>
+        <label>E-mail<span class="required">*</span></label>
         <input [(ngModel)]="form.email" type="email" placeholder="Ex: maria@exemplo.com" class="input" />
       </div>
       <div class="field">
-        <label>{{ editando() ? 'Nova senha (opcional)' : 'Senha' }}</label>
+        <label>{{ editando() ? 'Nova senha (opcional)' : 'Senha' }}<span class="required">*</span></label>
         <input [(ngModel)]="form.senha" type="password" placeholder="{{ editando() ? 'Deixe em branco para manter' : 'Defina uma senha' }}" class="input" />
       </div>
       <div class="field">

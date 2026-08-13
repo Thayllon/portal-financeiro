@@ -107,7 +107,7 @@
       (save)="salvar()"
     >
       <div class="field">
-        <label>Nome</label>
+        <label>Nome<span class="required">*</span></label>
         <input [(ngModel)]="form.nome" placeholder="Ex: Lazer" class="input" />
       </div>
       @if (!form.categoriaPaiId) {
