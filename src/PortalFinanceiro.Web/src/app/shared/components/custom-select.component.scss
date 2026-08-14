@@ -46,7 +46,7 @@
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  z-index: 10000;
+  z-index: 99999;
   max-height: 240px;
   overflow-y: auto;
   animation: csSlideDown 0.15s ease;
