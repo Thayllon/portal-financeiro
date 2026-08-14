@@ -35,13 +35,10 @@ export class CurrencyInputDirective implements ControlValueAccessor {
   @HostListener('input')
   onInput(): void {
     const raw = this.el.nativeElement.value;
-    const caret = this.el.nativeElement.selectionStart ?? raw.length;
-    const digitsBefore = (raw.slice(0, caret).match(/\d/g) ?? []).length;
-
-    const { digits, decs } = this.parseParts(raw);
-    const cleaned = this.toRaw(digits, decs);
+    const { digits, decs, hasSep } = this.parseParts(raw);
+    const cleaned = this.toRaw(digits, decs, hasSep);
     this.el.nativeElement.value = cleaned;
-    this.setCaret(digitsBefore, cleaned);
+    this.el.nativeElement.setSelectionRange(cleaned.length, cleaned.length);
 
     this.onChange(this.toValue(digits, decs));
   }
@@ -73,25 +70,25 @@ export class CurrencyInputDirective implements ControlValueAccessor {
   }
 
   /** Extrai dígitos e quantos deles são decimais (0-2), usando o ÚLTIMO separador (`,` ou `.`) como vírgula decimal. */
-  private parseParts(text: string): { digits: string; decs: number } {
+  private parseParts(text: string): { digits: string; decs: number; hasSep: boolean } {
     const t = (text || '').replace(/\s+/g, '');
-    if (!t) return { digits: '', decs: 0 };
+    if (!t) return { digits: '', decs: 0, hasSep: false };
 
     const lastSep = Math.max(t.lastIndexOf(','), t.lastIndexOf('.'));
     if (lastSep < 0) {
-      return { digits: t.replace(/\D/g, ''), decs: 0 };
+      return { digits: t.replace(/\D/g, ''), decs: 0, hasSep: false };
     }
 
     const intDigits = t.slice(0, lastSep).replace(/\D/g, '');
     const decRaw = t.slice(lastSep + 1).replace(/\D/g, '');
     const decs = Math.min(decRaw.length, 2);
-    return { digits: intDigits + decRaw, decs };
+    return { digits: intDigits + decRaw, decs, hasSep: true };
   }
 
-  private toRaw(digits: string, decs: number): string {
-    if (!digits) return '';
+  private toRaw(digits: string, decs: number, hasSep: boolean): string {
+    if (!digits) return hasSep ? ',' : '';
     const int = digits.slice(0, digits.length - decs) || '0';
-    const dec = decs > 0 ? ',' + digits.slice(digits.length - decs) : '';
+    const dec = (decs > 0 || hasSep) ? ',' + digits.slice(digits.length - decs) : '';
     return int + dec;
   }
 
@@ -100,16 +97,6 @@ export class CurrencyInputDirective implements ControlValueAccessor {
     const int = digits.slice(0, digits.length - decs) || '0';
     const dec = decs > 0 ? digits.slice(digits.length - decs) : '';
     return parseFloat(int + '.' + dec);
-  }
-
-  private setCaret(digitsBefore: number, text: string): void {
-    let index = 0;
-    let seen = 0;
-    while (index < text.length && seen < digitsBefore) {
-      if (/\d/.test(text[index])) seen++;
-      index++;
-    }
-    this.el.nativeElement.setSelectionRange(index, index);
   }
 
   private toDisplay(value: number): string {

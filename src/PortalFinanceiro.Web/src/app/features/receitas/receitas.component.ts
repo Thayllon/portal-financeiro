@@ -144,7 +144,7 @@ export class ReceitasComponent implements OnInit {
         diaUtil: data.repete ? data.diaUtil : undefined,
         dataFim: data.repete ? data.dataFim + 'T00:00:00' : undefined
       };
-      if (this.editando()) {
+      if (this.editando()?.id) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, request));
         this.notify.success('Receita atualizada');
       } else {
