@@ -1,4 +1,4 @@
-import { Component, input, output, signal, effect, ElementRef, HostListener, forwardRef } from '@angular/core';
+import { Component, input, output, signal, effect, ElementRef, HostListener, forwardRef, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { LucideDynamicIcon } from '@lucide/angular';
 
@@ -22,7 +22,7 @@ export interface SelectOption {
   templateUrl: './custom-select.component.html',
   styleUrl: './custom-select.component.scss',
 })
-export class CustomSelectComponent implements ControlValueAccessor {
+export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   label = input('');
   placeholder = input('Selecione...');
   options = input<SelectOption[]>([]);
@@ -59,31 +59,61 @@ export class CustomSelectComponent implements ControlValueAccessor {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     if (!this.el.nativeElement.contains(event.target)) {
-      this.isOpen.set(false);
+      this.fechar();
     }
   }
+
+  @HostListener('window:resize')
+  onResize() {
+    if (this.isOpen()) this.posicionarDropdown();
+  }
+
+  private scrollHandler = () => {
+    if (this.isOpen()) this.posicionarDropdown();
+  };
 
   toggle() {
     if (!this.disabled()) {
       const willOpen = !this.isOpen();
-      if (willOpen) this.calcularAbertura();
       this.isOpen.set(willOpen);
+      if (willOpen) {
+        setTimeout(() => {
+          this.posicionarDropdown();
+          document.addEventListener('scroll', this.scrollHandler, true);
+        });
+      } else {
+        this.fechar();
+      }
     }
   }
 
-  private calcularAbertura() {
+  private fechar() {
+    this.isOpen.set(false);
+    document.removeEventListener('scroll', this.scrollHandler, true);
+  }
+
+  ngOnDestroy() {
+    document.removeEventListener('scroll', this.scrollHandler, true);
+  }
+
+  private posicionarDropdown() {
     const trigger = this.el.nativeElement.querySelector('.cs__trigger') as HTMLElement;
     const dropdown = this.el.nativeElement.querySelector('.cs__dropdown') as HTMLElement | null;
-    if (!trigger) return;
-    const alturaDropdown = (dropdown?.offsetHeight ?? 0) || 260;
-    const triggerRect = trigger.getBoundingClientRect();
-    const container = this.el.nativeElement.closest('.modal, .table-card, .page') as HTMLElement | null;
-    const containerRect = container?.getBoundingClientRect();
-    const limiteInferior = containerRect ? containerRect.bottom : window.innerHeight;
-    const limiteSuperior = containerRect ? containerRect.top : 0;
-    const espacoAbaixo = limiteInferior - triggerRect.bottom;
-    const espacoAcima = triggerRect.top - limiteSuperior;
-    this.openUp.set(espacoAbaixo < alturaDropdown && espacoAcima > espacoAbaixo);
+    if (!trigger || !dropdown) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const alturaDropdown = dropdown.offsetHeight || 240;
+    const espacoAbaixo = window.innerHeight - rect.bottom;
+    const espacoAcima = rect.top;
+    const abrirParaCima = espacoAbaixo < alturaDropdown && espacoAcima > espacoAbaixo;
+    this.openUp.set(abrirParaCima);
+
+    dropdown.style.position = 'fixed';
+    dropdown.style.left = `${rect.left}px`;
+    dropdown.style.width = `${rect.width}px`;
+    dropdown.style.zIndex = '10000';
+    dropdown.style.top = abrirParaCima ? `${rect.top - alturaDropdown - 4}px` : `${rect.bottom + 4}px`;
+    dropdown.style.bottom = 'auto';
   }
 
   select(option: SelectOption) {

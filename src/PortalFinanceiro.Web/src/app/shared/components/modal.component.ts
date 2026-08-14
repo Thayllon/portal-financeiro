@@ -16,5 +16,18 @@ export class ModalComponent {
   visibleChange = output<boolean>();
   save = output<void>();
 
+  private iniciouNoOverlay = false;
+
   close() { this.visibleChange.emit(false); }
+
+  aoMouseDownNoOverlay(event: MouseEvent) {
+    this.iniciouNoOverlay = event.target === event.currentTarget;
+  }
+
+  aoMouseUpNoOverlay() {
+    if (this.iniciouNoOverlay) {
+      this.close();
+    }
+    this.iniciouNoOverlay = false;
+  }
 }
