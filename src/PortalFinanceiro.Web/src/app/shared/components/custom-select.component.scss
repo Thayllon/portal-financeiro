@@ -41,17 +41,25 @@
 }
 .cs__chevron--open { transform: rotate(180deg); }
 .cs__dropdown {
-  position: fixed;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
   background: var(--content-surface);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  z-index: 10000;
+  z-index: 1000;
   max-height: 240px;
   overflow-y: auto;
   animation: csSlideDown 0.15s ease;
 }
 .cs--up .cs__dropdown {
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 0.25rem;
   animation: csSlideUp 0.15s ease;
 }
 .cs__option {
