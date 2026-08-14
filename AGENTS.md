@@ -1,5 +1,17 @@
 # Portal Financeiro — Guia para Agentes
 
+## Fluxo de Trabalho (obrigatório)
+
+Para CADA interação/alteração no projeto:
+
+1. **Criar branch a partir de `develop`** antes de qualquer mudança:
+   `git checkout -b <nome-da-branch> develop` (ex.: `feature/`, `fix/`, `docs/`).
+2. Fazer o trabalho inteiramente na branch.
+3. **Ao final, perguntar ao usuário**:
+   - se deve **commitar** as mudanças; e
+   - se deve **fazer merge da branch na `develop`**.
+4. Nunca commitar nem fazer merge sem confirmação explícita do usuário.
+
 ## Comandos
 
 ```bash
