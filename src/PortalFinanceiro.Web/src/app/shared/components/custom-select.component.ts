@@ -68,8 +68,11 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
     if (this.isOpen()) this.posicionarDropdown();
   }
 
-  private scrollHandler = () => {
-    if (this.isOpen()) this.fechar();
+  private scrollHandler = (event: Event) => {
+    if (!this.isOpen()) return;
+    const target = event.target as HTMLElement | null;
+    if (target && this.el.nativeElement.contains(target)) return;
+    this.fechar();
   };
 
   toggle() {
