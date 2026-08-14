@@ -69,7 +69,7 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   }
 
   private scrollHandler = () => {
-    if (this.isOpen()) this.posicionarDropdown();
+    if (this.isOpen()) this.fechar();
   };
 
   toggle() {
