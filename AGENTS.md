@@ -21,6 +21,9 @@ dotnet run --project tools/DbSetup
 # Build backend
 dotnet build PortalFinanceiro.API.slnx
 
+# Testes backend (xUnit + FluentAssertions)
+dotnet test PortalFinanceiro.API.slnx
+
 # Rodar API (http://localhost:5178)
 dotnet run --project src/PortalFinanceiro.API
 
@@ -67,6 +70,23 @@ cd src/PortalFinanceiro.Web && npm test
 - **Documentação**: em `doc/` — `README.md` é o índice; arquivos por área (`back.md`, `front.md`, `banco.md`, `infra.md`, `primeiros-passos.md`). Manter sempre atualizada.
 
 ## Padrões de Código
+
+> **Antes de criar qualquer componente, utilitário, estilo, serviço ou primitivo**: procure implementações equivalentes em `design-system/`, `shared/components/`, `shared/services/`, `core/` e nas páginas existentes. Reutilize ou estenda o que já existe; só crie algo novo se não houver equivalente — e confirme com o usuário. Não duplique código.
+
+### Mapeamento de Erro → HTTP
+
+Services retornam `Result<T>` / `Erro.*` (`ETipoErro`). O mapeamento para HTTP é centralizado em `ErroHttp`:
+
+| Tipo           | HTTP |
+|----------------|------|
+| Validacao      | 400  |
+| Negocio        | 422  |
+| NaoEncontrado  | 404  |
+| Conflito       | 409  |
+| Permissao      | 403  |
+| Timeout        | 504  |
+| Externo        | 502  |
+| Infraestrutura| 500  |
 
 ### Backend (C#)
 
@@ -152,3 +172,4 @@ src/app/
 - [ ] DAS removido (não há mais auto-cálculo nem auto-geração)
 - [ ] Leitura usa projeção (nomes display via `*Projecao`, não na entidade)
 - [ ] Mutação re-busca projeção antes de mapear resposta
+- [ ] `dotnet test` passando (backend)
