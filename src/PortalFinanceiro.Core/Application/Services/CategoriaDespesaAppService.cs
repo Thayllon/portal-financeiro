@@ -87,22 +87,22 @@ public class CategoriaDespesaAppService : ICategoriaDespesaAppService
             return Erro.NaoEncontrado("Categoria");
 
         if (!PodeGerenciar(categoria, idUsuario, isAdmin))
-            return Erro.Permissao("SEM_PERMISSAO", "Você não tem permissão para excluir esta categoria.");
+            return Erro.Permissao("SEM_PERMISSAO", "Apenas o proprietário da categoria ou um administrador pode excluí-la.");
 
         var vinculadas = await _despesaRepository.ContarPorCategoriaAsync(id);
         if (vinculadas > 0)
-            return Erro.Negocio("CATEGORIA_COM_VINCULOS", $"Não é possível excluir. Existem {vinculadas} despesa(s) vinculada(s) a esta categoria.");
+            return Erro.Negocio("CATEGORIA_COM_VINCULOS", $"Não é possível excluir a categoria \"{categoria.Nome}\": há {vinculadas} despesa(s) vinculada(s) diretamente a ela. Remova ou reatribua essas despesas antes de excluir.");
 
         var subVinculadas = await _despesaRepository.ContarPorSubcategoriaAsync(id);
         if (subVinculadas > 0)
-            return Erro.Negocio("CATEGORIA_COM_SUB_VINCULOS", $"Não é possível excluir. Existem {subVinculadas} despesa(s) vinculada(s) a subcategorias desta categoria.");
+            return Erro.Negocio("CATEGORIA_COM_SUB_VINCULOS", $"Não é possível excluir a categoria \"{categoria.Nome}\": há {subVinculadas} despesa(s) vinculada(s) às subcategorias dela. Remova ou reatribua antes de excluir.");
 
         var subcategorias = await _repository.ListarPorPaiAsync(id);
         foreach (var sub in subcategorias)
         {
             var subVinculos = await _despesaRepository.ContarPorCategoriaAsync(sub.Id);
             if (subVinculos > 0)
-                return Erro.Negocio("SUBCATEGORIA_COM_VINCULOS", $"Não é possível excluir. A subcategoria \"{sub.Nome}\" possui {subVinculos} despesa(s) vinculada(s).");
+                return Erro.Negocio("SUBCATEGORIA_COM_VINCULOS", $"Não é possível excluir: a subcategoria \"{sub.Nome}\" possui {subVinculos} despesa(s) vinculada(s). Remova ou reatribua antes de excluir.");
         }
 
         categoria.Desativar();

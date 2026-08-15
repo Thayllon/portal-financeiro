@@ -22,6 +22,7 @@ export interface LancamentoForm {
 }
 
 interface LancamentoItem {
+  id?: string;
   descricao: string;
   valor: number;
   data: string;
@@ -225,7 +226,7 @@ export class LancamentoModalComponent {
   }
 
   title() {
-    return this.editando() ? `Editar ${this.tipoLabel()}` : `Nova ${this.tipoLabel()}`;
+    return this.editando()?.id ? `Editar ${this.tipoLabel()}` : `Nova ${this.tipoLabel()}`;
   }
 
   fechar() { this.visibleChange.emit(false); }

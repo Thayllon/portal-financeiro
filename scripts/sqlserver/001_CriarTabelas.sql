@@ -1,7 +1,7 @@
 -- Portal Financeiro - Schema unificado (SQL Server).
 -- ATENÇÃO: executar somente em banco NOVO (from scratch). O banco de desenvolvimento
 -- já existente foi migrado incrementalmente e NÃO deve receber este script.
--- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 002_SeedBase.sql.
+-- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 099_SeedBase.sql.
 
 CREATE TABLE Usuario (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
