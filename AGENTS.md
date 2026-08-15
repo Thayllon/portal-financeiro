@@ -88,6 +88,16 @@ Services retornam `Result<T>` / `Erro.*` (`ETipoErro`). O mapeamento para HTTP �
 | Externo        | 502  |
 | Infraestrutura| 500  |
 
+### Contrato de erro (proibido 400 genérico)
+
+Toda resposta de erro da API deve seguir o contrato único tipado `{ codigo, mensagem, tipo }` (objeto `Erro`). O frontend espera esse shape (consumido via `ApiResponse`/interceptor).
+
+- **Nunca** retorne `BadRequest(new { mensagem = "..." })` nem qualquer objeto anônimo/genérico. Isso produz um "400 genérico" sem `codigo`/`tipo` e quebra o contrato de erro consumido pelo frontend.
+- Em controllers, **sempre** devolva o `Result<T>` via `ApiResponse(result)` (método do `BaseController`), que mapeia `Erro.Tipo` → HTTP status (via `ErroHttp`) e serializa o `Erro` completo.
+- Para guardas/cláusulas de entrada sem `Result`, retorne o `Erro` tipado: `return BadRequest(Erro.Validacao("CODIGO", "mensagem"))` (consistência com `Unauthorized(Erro.Permissao(...))`).
+- Status corretos vêm do `ETipoErro` (`Validacao=400`, `Negocio=422`, `NaoEncontrado=404`, `Conflito=409`, `Permissao=403`, ...). Não invente status "na mão".
+- FluentValidation e `InvalidModelStateResponseFactory` já devolvem `Erro.Validacao(...)` — reutilize, não contorne.
+
 ### Backend (C#)
 
 - **Entidades**: Usar `private set` em TODAS as propriedades de domínio
@@ -167,6 +177,7 @@ src/app/
 - [ ] Frontend envia status como number (1 ou 2)
 - [ ] Repositorios frontend não enviam `idUsuario`
 - [ ] Nenhum hex hardcoded fora do design system
+- [ ] Nenhum `BadRequest(new { mensagem = ... })` ou objeto anônimo (400 genérico proibido); usar `ApiResponse(result)` ou `Erro.*` tipado
 - [ ] Mutação de categoria grava auditoria (`CategoriaHistorico`)
 - [ ] Editar/excluir categoria valida dono/admin (`Erro.Permissao` → 403)
 - [ ] DAS removido (não há mais auto-cálculo nem auto-geração)
