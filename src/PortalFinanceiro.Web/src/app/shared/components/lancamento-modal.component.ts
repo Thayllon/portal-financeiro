@@ -51,7 +51,7 @@ export class LancamentoModalComponent {
   visibleChange = output<boolean>();
   saved = output<LancamentoForm>();
 
-  form: LancamentoForm = this.emptyForm();
+  form = signal<LancamentoForm>(this.emptyForm());
   previewMeses = signal(0);
   fieldErrors = signal<Record<string, string>>({});
   passoAtual = signal(0);
@@ -77,7 +77,7 @@ export class LancamentoModalComponent {
         this.fieldErrors.set({});
         this.passoAtual.set(0);
         if (ini) {
-          this.form = {
+          this.form.set({
             descricao: ini.descricao,
             valor: ini.valor,
             data: ini.data?.split('T')[0] ?? '',
@@ -88,11 +88,10 @@ export class LancamentoModalComponent {
             dia: 1,
             diaUtil: false,
             dataFim: ''
-          };
+          });
         } else {
           const hoje = new Date().toISOString().split('T')[0];
-          this.form = this.emptyForm();
-          this.form.data = hoje;
+          this.form.set({ ...this.emptyForm(), data: hoje });
         }
         this.atualizarCategorizacao();
         this.calcularPreview();
@@ -102,7 +101,7 @@ export class LancamentoModalComponent {
 
   private atualizarCategorizacao() {
     const cats = this.categorias();
-    const paiId = this.form.idCategoria;
+    const paiId = this.form().idCategoria;
     this.categoriasOptions.set(
       cats.filter(c => !c.categoriaPaiId).map(c => ({ value: c.id, label: c.nome }))
     );
@@ -111,8 +110,8 @@ export class LancamentoModalComponent {
     );
   }
 
-  onCategoriaChange() {
-    this.form.idSubcategoria = undefined;
+  onCategoriaChange(value: string) {
+    this.form.update(f => ({ ...f, idCategoria: value, idSubcategoria: undefined }));
     this.atualizarCategorizacao();
   }
 
@@ -141,26 +140,27 @@ export class LancamentoModalComponent {
 
   private validarPassoAtual(): boolean {
     const errors: Record<string, string> = {};
+    const f = this.form();
     switch (this.passoAtual()) {
       case 0:
-        if (!this.form.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
+        if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
         break;
       case 1:
-        if (!this.form.descricao) errors['descricao'] = 'Descrição é obrigatória';
-        if (this.form.valor == null || isNaN(this.form.valor) || this.form.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
-        if (!this.form.data) errors['data'] = 'Data é obrigatória';
+        if (!f.descricao) errors['descricao'] = 'Descrição é obrigatória';
+        if (f.valor == null || isNaN(f.valor) || f.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
+        if (!f.data) errors['data'] = 'Data é obrigatória';
         break;
       case 2:
-        if (!this.form.idConta) errors['idConta'] = 'Conta é obrigatória';
-        if (this.form.repete) {
-          if (!this.form.dia || this.form.dia < 1 || this.form.dia > 31) {
+        if (!f.idConta) errors['idConta'] = 'Conta é obrigatória';
+        if (f.repete) {
+          if (!f.dia || f.dia < 1 || f.dia > 31) {
             errors['dia'] = 'Dia deve estar entre 1 e 31';
-          } else if (this.form.diaUtil && this.form.dia > 5) {
+          } else if (f.diaUtil && f.dia > 5) {
             errors['dia'] = 'Dia útil deve estar entre 1 e 5';
           }
-          if (!this.form.dataFim) {
+          if (!f.dataFim) {
             errors['dataFim'] = 'Data fim é obrigatória';
-          } else if (this.form.data && this.form.dataFim <= this.form.data) {
+          } else if (f.data && f.dataFim <= f.data) {
             errors['dataFim'] = 'Data fim deve ser posterior à data início';
           }
         }
@@ -174,9 +174,10 @@ export class LancamentoModalComponent {
   }
 
   passoConcluido(indice: number): boolean {
-    if (indice === 0) return !!this.form.idCategoria;
-    if (indice === 1) return !!(this.form.descricao?.trim() && this.form.data && this.form.valor > 0);
-    return !!this.form.idConta;
+    const f = this.form();
+    if (indice === 0) return !!f.idCategoria;
+    if (indice === 1) return !!(f.descricao?.trim() && f.data && f.valor > 0);
+    return !!f.idConta;
   }
 
   voltar() {
@@ -187,25 +188,36 @@ export class LancamentoModalComponent {
   }
 
   selecionarSubcategoria(value: string) {
-    this.form.idSubcategoria = value || undefined;
+    const subId = value || undefined;
     const label = this.subcategoriasOptions().find(o => o.value === value)?.label;
-    if (label && !this.form.descricao?.trim()) {
-      this.form.descricao = label;
+    let descricaoSet = false;
+    this.form.update(f => {
+      const shouldSetDescricao = !!(label && !f.descricao?.trim());
+      if (shouldSetDescricao) descricaoSet = true;
+      return {
+        ...f,
+        idSubcategoria: subId,
+        descricao: shouldSetDescricao ? label : f.descricao
+      };
+    });
+    if (descricaoSet) {
       this.clearError('descricao');
     }
   }
 
   onDiaUtilChange() {
-    if (this.form.diaUtil && this.form.dia && this.form.dia > 5) {
-      this.form.dia = 5;
+    const f = this.form();
+    if (f.diaUtil && f.dia && f.dia > 5) {
+      this.form.update(form => ({ ...form, dia: 5 }));
     }
     this.calcularPreview();
   }
 
   calcularPreview() {
-    const ini = this.form.data;
-    const fim = this.form.dataFim;
-    if (ini && this.form.repete && fim) {
+    const f = this.form();
+    const ini = f.data;
+    const fim = f.dataFim;
+    if (ini && f.repete && fim) {
       const inicio = new Date(ini + 'T00:00:00');
       const final = new Date(fim + 'T00:00:00');
       if (final <= inicio) {
@@ -232,23 +244,24 @@ export class LancamentoModalComponent {
   fechar() { this.visibleChange.emit(false); }
 
   salvar() {
+    const f = this.form();
     const errors: Record<string, string> = {};
 
-    if (!this.form.descricao) errors['descricao'] = 'Descrição é obrigatória';
-    if (this.form.valor == null || isNaN(this.form.valor) || this.form.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
-    if (!this.form.idConta) errors['idConta'] = 'Conta é obrigatória';
-    if (!this.form.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
-    if (!this.form.data) errors['data'] = 'Data é obrigatória';
+    if (!f.descricao) errors['descricao'] = 'Descrição é obrigatória';
+    if (f.valor == null || isNaN(f.valor) || f.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
+    if (!f.idConta) errors['idConta'] = 'Conta é obrigatória';
+    if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
+    if (!f.data) errors['data'] = 'Data é obrigatória';
 
-    if (this.form.repete) {
-      if (!this.form.dia || this.form.dia < 1 || this.form.dia > 31) {
+    if (f.repete) {
+      if (!f.dia || f.dia < 1 || f.dia > 31) {
         errors['dia'] = 'Dia deve estar entre 1 e 31';
-      } else if (this.form.diaUtil && this.form.dia > 5) {
+      } else if (f.diaUtil && f.dia > 5) {
         errors['dia'] = 'Dia útil deve estar entre 1 e 5';
       }
-      if (!this.form.dataFim) {
+      if (!f.dataFim) {
         errors['dataFim'] = 'Data fim é obrigatória';
-      } else if (this.form.data && this.form.dataFim <= this.form.data) {
+      } else if (f.data && f.dataFim <= f.data) {
         errors['dataFim'] = 'Data fim deve ser posterior à data início';
       }
     }
@@ -260,7 +273,11 @@ export class LancamentoModalComponent {
     }
 
     this.fieldErrors.set({});
-    this.saved.emit({ ...this.form });
+    this.saved.emit({ ...f });
+  }
+
+  updateFormField<K extends keyof LancamentoForm>(key: K, value: LancamentoForm[K]) {
+    this.form.update(f => ({ ...f, [key]: value }));
   }
 
   private emptyForm(): LancamentoForm {

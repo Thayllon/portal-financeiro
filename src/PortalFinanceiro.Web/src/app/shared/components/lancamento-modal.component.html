@@ -80,8 +80,8 @@
                   <app-custom-select
                     placeholder="Selecione a categoria"
                     [options]="categoriasOptions()"
-                    [value]="form.idCategoria"
-                    (valueChange)="form.idCategoria = $event; onCategoriaChange(); clearError('idCategoria')"
+                    [value]="form().idCategoria"
+                    (valueChange)="onCategoriaChange($event); clearError('idCategoria')"
                   />
                   @if (fieldErrors()['idCategoria']) {
                     <span class="field-error">{{ fieldErrors()['idCategoria'] }}</span>
@@ -93,7 +93,7 @@
                     <app-custom-select
                       placeholder="Nenhuma"
                       [options]="subcategoriasOptions()"
-                      [value]="form.idSubcategoria ?? ''"
+                      [value]="form().idSubcategoria ?? ''"
                       (valueChange)="selecionarSubcategoria($event)"
                     />
                   </div>
@@ -107,11 +107,11 @@
                 <div class="field">
                   <label>Descrição<span class="required">*</span></label>
                   <input
-                    [(ngModel)]="form.descricao"
+                    [ngModel]="form().descricao"
+                    (ngModelChange)="updateFormField('descricao', $event); clearError('descricao')"
                     placeholder="Ex: Salário / Pizza"
                     class="input"
                     [class.input-error]="fieldErrors()['descricao']"
-                    (ngModelChange)="clearError('descricao')"
                   />
                   @if (fieldErrors()['descricao']) {
                     <span class="field-error">{{ fieldErrors()['descricao'] }}</span>
@@ -123,13 +123,13 @@
                     <input
                       type="text"
                       currencyInput
-                      [(ngModel)]="form.valor"
-                      (ngModelChange)="calcularPreview(); clearError('valor')"
+                      [ngModel]="form().valor"
+                      (ngModelChange)="updateFormField('valor', $event); calcularPreview(); clearError('valor')"
                       placeholder="0,00"
                       class="input"
-                    [class.input-error]="fieldErrors()['valor']"
-                    inputmode="decimal"
-                  />                  
+                      [class.input-error]="fieldErrors()['valor']"
+                      inputmode="decimal"
+                    />                  
                     @if (fieldErrors()['valor']) {
                       <span class="field-error">{{ fieldErrors()['valor'] }}</span>
                     }
@@ -139,8 +139,8 @@
                     <input
                       type="date"
                       lang="pt-BR"
-                      [(ngModel)]="form.data"
-                      (ngModelChange)="calcularPreview(); clearError('data')"
+                      [ngModel]="form().data"
+                      (ngModelChange)="updateFormField('data', $event); calcularPreview(); clearError('data')"
                       class="input"
                       [class.input-error]="fieldErrors()['data']"
                     />
@@ -161,8 +161,8 @@
                   <app-custom-select
                     placeholder="Selecione a conta"
                     [options]="contasOptions()"
-                    [value]="form.idConta"
-                    (valueChange)="form.idConta = $event; clearError('idConta')"
+                    [value]="form().idConta"
+                    (valueChange)="updateFormField('idConta', $event); clearError('idConta')"
                   />
                   @if (fieldErrors()['idConta']) {
                     <span class="field-error">{{ fieldErrors()['idConta'] }}</span>
@@ -172,13 +172,13 @@
 
               <div class="repete-toggle">
                 <label class="checkbox-label">
-                  <input type="checkbox" [(ngModel)]="form.repete" (ngModelChange)="calcularPreview()" class="checkbox" />
+                  <input type="checkbox" [ngModel]="form().repete" (ngModelChange)="updateFormField('repete', $event); calcularPreview()" class="checkbox" />
                   <svg lucideIcon="repeat" [size]="14" />
                   <span>Repete mensalmente?</span>
                 </label>
               </div>
 
-              @if (form.repete) {
+              @if (form().repete) {
                 <div class="section section--recorrencia">
                   <div class="section-header">
                     <svg lucideIcon="calendar-clock" [size]="16" />
@@ -190,9 +190,9 @@
                       <input
                         type="number"
                         [min]="1"
-                        [max]="form.diaUtil ? 5 : 31"
-                        [(ngModel)]="form.dia"
-                        (ngModelChange)="calcularPreview(); clearError('dia')"
+                        [max]="form().diaUtil ? 5 : 31"
+                        [ngModel]="form().dia"
+                        (ngModelChange)="updateFormField('dia', $event); calcularPreview(); clearError('dia')"
                         placeholder="1-31"
                         class="input"
                         [class.input-error]="fieldErrors()['dia']"
@@ -205,8 +205,8 @@
                       <label class="checkbox-label">
                         <input
                           type="checkbox"
-                          [(ngModel)]="form.diaUtil"
-                          (ngModelChange)="onDiaUtilChange()"
+                          [ngModel]="form().diaUtil"
+                          (ngModelChange)="updateFormField('diaUtil', $event); onDiaUtilChange()"
                           class="checkbox"
                         />
                         <span>Dia útil</span>
@@ -218,8 +218,8 @@
                       <input
                         type="date"
                         lang="pt-BR"
-                        [(ngModel)]="form.dataFim"
-                        (ngModelChange)="calcularPreview(); clearError('dataFim')"
+                        [ngModel]="form().dataFim"
+                        (ngModelChange)="updateFormField('dataFim', $event); calcularPreview(); clearError('dataFim')"
                         class="input"
                         [class.input-error]="fieldErrors()['dataFim']"
                       />
