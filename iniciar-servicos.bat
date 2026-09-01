@@ -2,10 +2,12 @@
 setlocal
 title Portal Financeiro - Iniciar servicos
 
+set "ROOT=%~dp0"
+
 echo ============================================
 echo  Iniciando a API (dotnet run)
 echo ============================================
-start "Portal-API" cmd /k "cd /d C:\Projetos\POC\portal-financeiro\src\PortalFinanceiro.API && dotnet run --launch-profile http"
+start "Portal-API" cmd /k "cd /d "%ROOT%src\PortalFinanceiro.API" && dotnet run --launch-profile http"
 
 echo.
 echo Aguardando a API subir na porta 5178...
@@ -14,7 +16,7 @@ timeout /t 5 /nobreak >nul
 echo ============================================
 echo  Iniciando o Frontend (npm start)
 echo ============================================
-start "Portal-Web" cmd /k "cd /d C:\Projetos\POC\portal-financeiro\src\PortalFinanceiro.Web && npm start"
+start "Portal-Web" cmd /k "cd /d "%ROOT%src\PortalFinanceiro.Web" && npm start"
 
 echo.
 echo Aguardando o front subir na porta 4200...
