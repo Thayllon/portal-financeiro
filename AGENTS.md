@@ -167,6 +167,10 @@ src/app/
 - `main` — versão estável
 - `develop` — branch de trabalho ativa
 
+## Limpeza de Branch
+
+- Depois que uma branch de trabalho for **mergeada na `develop`**, ela pode (e deve) ser **excluída**: `git branch -d <nome-da-branch>`.
+
 ## Checklist de Code Review
 
 - [ ] Status é `int?` (não `string?`) em toda a cadeia
