@@ -27,6 +27,18 @@ CREATE TABLE ContaBancaria (
     CONSTRAINT FK_ContaBancaria_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
 );
 
+CREATE TABLE Pessoa (
+    Id UUID PRIMARY KEY,
+    IdUsuario UUID NOT NULL,
+    Nome VARCHAR(150) NOT NULL,
+    Telefone VARCHAR(30) NULL,
+    Tipo INT NOT NULL,
+    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    DataCadastro TIMESTAMP NOT NULL,
+    DataAlteracao TIMESTAMP NOT NULL,
+    CONSTRAINT FK_Pessoa_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
+);
+
 CREATE TABLE CategoriaReceita (
     Id UUID PRIMARY KEY,
     IdUsuario UUID NOT NULL,

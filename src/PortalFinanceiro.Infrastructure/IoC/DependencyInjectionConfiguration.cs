@@ -27,6 +27,7 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IDespesaRepository, DespesaRepository>();
         services.AddScoped<IRegraReceitaRepository, RegraReceitaRepository>();
         services.AddScoped<IRegraDespesaRepository, RegraDespesaRepository>();
+        services.AddScoped<IPessoaRepository, PessoaRepository>();
 
         services.AddScoped<IAuthAppService, AuthAppService>();
         services.AddScoped<IUsuarioAppService, UsuarioAppService>();
@@ -38,6 +39,7 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IRegraReceitaAppService, RegraReceitaAppService>();
         services.AddScoped<IRegraDespesaAppService, RegraDespesaAppService>();
         services.AddScoped<IDashboardAppService, DashboardAppService>();
+        services.AddScoped<IPessoaAppService, PessoaAppService>();
 
         return services;
     }

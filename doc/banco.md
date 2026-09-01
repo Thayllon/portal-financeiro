@@ -47,6 +47,7 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 |--------|-----------|
 | `Usuario` | Usuários do sistema (`IsAdmin`) |
 | `ContaBancaria` | Contas PF/PJ |
+| `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
 | `CategoriaReceita` / `CategoriaDespesa` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) |
