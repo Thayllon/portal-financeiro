@@ -93,8 +93,6 @@ export class LancamentoModalComponent {
           const hoje = new Date().toISOString().split('T')[0];
           this.form.set({ ...this.emptyForm(), data: hoje });
         }
-        this.atualizarCategorizacao();
-        this.calcularPreview();
       }
     });
   }
