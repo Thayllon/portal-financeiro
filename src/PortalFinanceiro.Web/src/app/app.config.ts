@@ -14,16 +14,18 @@ import {
   LucideHandCoins, LucideCalendar1, LucideCalendarDays,
   LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
-LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
+  LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
+  LucideHandshake,
   } from '@lucide/angular';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideLucideIcons(
       LucideLayoutDashboard, LucideTrendingUp, LucideTrendingDown,
       LucideWallet, LucideCreditCard, LucideTag, LucidePlus,
@@ -37,6 +39,7 @@ export const appConfig: ApplicationConfig = {
       LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
       LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
+      LucideHandshake,
     ),
   ],
 };

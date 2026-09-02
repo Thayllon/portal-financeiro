@@ -119,14 +119,16 @@ Toda resposta de erro da API deve seguir o contrato único tipado `{ codigo, men
 
 - **Signals**: Usar `signal()` para estado, `computed()` para derivados
 - **Componentes standalone** com `imports` explícitos
-- **Lucide icons**: `<svg lucideIcon="nome" [size]="16" />`
+- **Lucide icons**: `<svg lucideIcon="nome" [size]="16" />` — ícones devem estar registrados em `provideLucideIcons()` em `app.config.ts`
 - **Forms**: ControlValueAccessor para componentes reutilizáveis (CustomSelect)
-- **SCSS**: Mixins do design system (`_responsive.scss`, `_transitions.scss`, etc.)
+- **SCSS**: Usar mixins do design system (`_page-layout.scss`, `_data-table.scss`, `_forms.scss`, `_responsive.scss`, `_transitions.scss`) — NÃO copiar/colar estilos inline entre features
 - **Params**: NUNCA enviar `undefined` como query param — usar spread condicional
 - **Status**: Enviar como `number` (1 ou 2), NÃO como string
 - **Repositorios**: NÃO incluir `idUsuario` nos params (vem do JWT)
 - **Categoria/Regra repositories**: usar classe base com parâmetro `rota` para evitar duplicação
 - **LancamentoRepository**: usar `LancamentoFiltros` compartilhado (alias `ReceitaFiltros`/`DespesaFiltros`)
+- **Listas**: Usar `useListPagination` + `ListPaginationComponent` em toda listagem de dados
+- **Interceptor de erro**: `errorInterceptor` registrado em `app.config.ts` para tratar 401 → logout automático
 
 ### Design System
 
@@ -134,6 +136,7 @@ Toda resposta de erro da API deve seguir o contrato único tipado `{ codigo, men
 - Responsividade: breakpoint mobile em 767px
 - Transições: usar `will-change` para GPU acceleration
 - Tokens: `_tokens.scss`, `_colors.scss`, `_responsive.scss`, `_transitions.scss`
+- **SCSS de features**: Usar mixins de `_page-layout.scss` (`page-wrapper`, `page-header`, `page-title`, `card`), `_data-table.scss` (`data-table`, `cell-name`, `cell-actions`, `action-btn`), `_forms.scss` — NÃO copiar/colar estilos inline entre features
 
 ## Estrutura de Pastas
 
@@ -152,6 +155,7 @@ src/app/
 │   ├── receitas/
 │   ├── despesas/
 │   ├── contas/
+│   ├── pessoas/
 │   ├── categorias-receita/
 │   └── login/
 └── shared/
@@ -188,3 +192,7 @@ src/app/
 - [ ] Leitura usa projeção (nomes display via `*Projecao`, não na entidade)
 - [ ] Mutação re-busca projeção antes de mapear resposta
 - [ ] `dotnet test` passando (backend)
+- [ ] Listas usam `useListPagination` + `ListPaginationComponent`
+- [ ] SCSS usa mixins do design system (sem duplicação entre features)
+- [ ] Ícones Lucide estão registrados em `provideLucideIcons()`
+- [ ] `errorInterceptor` registrado em `app.config.ts`
