@@ -67,11 +67,49 @@ cd src/PortalFinanceiro.Web && npm test
 ### Scripts e Documentação
 
 - **Scripts de banco**: `scripts/sqlserver/` (SQL Server, from scratch) e `scripts/postgres/`
-- **Documentação**: em `doc/` — `README.md` é o índice; arquivos por área (`back.md`, `front.md`, `banco.md`, `infra.md`, `primeiros-passos.md`). Manter sempre atualizada.
+- **Documentação**: em `doc/` — `README.md` é o índice; arquivos por área (`back.md`, `front.md`, `banco.md`, `infra.md`, `primeiros-passos.md`). **Manter sempre atualizada** — toda mudança que altere API, schema, telas ou conceitos deve atualizar a doc correspondente **na mesma entrega**. Doc desatualizada = feature incompleta.
 
 ## Padrões de Código
 
-> **Antes de criar qualquer componente, utilitário, estilo, serviço ou primitivo**: procure implementações equivalentes em `design-system/`, `shared/components/`, `shared/services/`, `core/` e nas páginas existentes. Reutilize ou estenda o que já existe; só crie algo novo se não houver equivalente — e confirme com o usuário. Não duplique código.
+> **Antes de criar qualquer componente, utilitário, estilo, serviço ou primitivo**: procure implementações equivalentes em `design-system/`, `shared/components/`, `shared/services/`, `core/` e nas páginas existentes. Reutilizar ou estender o que já existe **não requer confirmação**. **Duplicar código ou refatorar código existente sempre requer o aval do usuário** — sinalize a situação e deixe a decisão com ele.
+
+### Duplicação e conformidade de padrão (detectar e sinalizar)
+
+- **Papel do agente = detector/sinalizador, não refatorador.** Antes de implementar, verifique se a solução planejada vai **duplicar código existente** ou **divergir de padrões já decididos** neste arquivo.
+- Heurísticas de detecção: comparar com "irmãos" na mesma pasta (`*AppService.cs`, `*Repository.cs`, `features/*`); procurar shapes copiados (`page`/`table-card`/`field`, CRUD de `AppService`, `Repository` Dapper, dropdowns); rodar `Get-ChildItem` ou `grep` para mapear padrões repetidos.
+- Ao detectar duplicação/divergência, **sinalize ao usuário** com: (1) o que será duplicado/desviado, (2) o equivalente existente que poderia ser reutilizado/estendido, (3) a opção de refatorar.
+- **Nunca execute refactor** (extrair base genérica, consolidar, renomear) por iniciativa própria — a decisão de refatorar ou duplicar é sempre do usuário.
+
+### Comentários
+
+- **Não adicione comentários ao código.** Prefira código autoexplicativo e bons nomes.
+- Exceção: comentário **extremamente útil** — regra de negócio/edge case não óbvio — curto, explicando **o porquê** (nunca o quê).
+- Proibido: TODOs/FIXMEs, blocos de autoria/data, comentários que repetem o código.
+
+### Boas Práticas (regras curtas)
+
+- **Nomes e código autoexplicativo**: nomes claros e consistentes em pt-BR; métodos pequenos; classe com uma responsabilidade.
+- **Async correto**: `async/await` em toda a cadeia; proibido `.Result`/`.Wait()` e `async void`.
+- **Sem código morto**: sem imports/`using` não usados, sem propriedades/métodos sem uso.
+- **Segredos e segurança**: nunca commitar senhas, tokens ou connection strings (usar `.env`/variáveis); não logar dados sensíveis.
+
+### Linguagem e mensagens
+
+- Mensagens ao usuário (erros `Erro.*`, validações, notificações, placeholders, alertas) sempre em **português, com acentuação correta** (UTF-8).
+- Nunca remover acentos ("nao", "voce") nem usar caracteres especiais desnecessários (emojis, `\n` no texto exibido, entidades HTML).
+- Ex.: "Não é possível excluir…" (padrão já usado no projeto).
+
+### Arquivos
+
+- Não deixar arquivos "lixo": ao final da feature, remover classes/serviços/config/repos **não referenciados**.
+- Não commitar temporários (`.log`, `.tmp`, `.bak`, duplicados) nem arquivos criados "por precaução".
+- Arquivo sem uso = delete.
+
+### Migrações (scripts SQL)
+
+- Não **empilhar** scripts incrementalmente sem revisar os anteriores.
+- Ao criar migração nova, avaliar se scripts antigos ficaram obsoletos ou já foram absorvidos pelo `001_CriarTabelas` (from-scratch) — se sim, **propor** (caso a caso, com aval do usuário) remoção/extração/nova numeração, mantendo DbUp/journal coerente.
+- `001`/`099` refletem o schema final; incrementais só migram banco já criado.
 
 ### Mapeamento de Erro → HTTP
 
@@ -196,3 +234,10 @@ src/app/
 - [ ] SCSS usa mixins do design system (sem duplicação entre features)
 - [ ] Ícones Lucide estão registrados em `provideLucideIcons()`
 - [ ] `errorInterceptor` registrado em `app.config.ts`
+- [ ] Duplicação/fuga de padrão verificada e **sinalizada** quando detectada (nenhuma cópia ou refactor sem confirmação)
+- [ ] Sem comentários novos, salvo extremamente úteis (explicam o porquê)
+- [ ] Sem segredos/conn strings commitados; sem dados sensíveis em log
+- [ ] Mensagens em pt-BR, com acentuação, sem caracteres especiais indevidos
+- [ ] Sem arquivos lixo/não referenciados (classes, config, temporários)
+- [ ] Scripts SQL revisados (não apenas empilhados); sequência coerente
+- [ ] Docs (`back`/`front`/`banco`/`README`) atualizadas na mesma entrega
