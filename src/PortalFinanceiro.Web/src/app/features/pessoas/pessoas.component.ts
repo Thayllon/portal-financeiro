@@ -8,6 +8,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -15,7 +16,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 @Component({
   selector: 'app-pessoas',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SectionHeaderComponent, ListPaginationComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SectionHeaderComponent, ListPaginationComponent, CustomSelectComponent, LucideDynamicIcon],
   templateUrl: './pessoas.component.html',
   styleUrl: './pessoas.component.scss'
 })
@@ -31,6 +32,11 @@ export class PessoasComponent implements OnInit {
   salvando = signal(false);
 
   form: PessoaRequest = { nome: '', telefone: '', tipo: 'Cliente' };
+
+  tipoOptions: SelectOption[] = [
+    { value: 'Cliente', label: 'Cliente' },
+    { value: 'Parceiro', label: 'Parceiro' },
+  ];
 
   clientes = computed(() => this.pessoas().filter(p => p.tipo === 'Cliente'));
   parceiros = computed(() => this.pessoas().filter(p => p.tipo === 'Parceiro'));

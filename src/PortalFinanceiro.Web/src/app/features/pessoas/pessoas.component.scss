@@ -4,7 +4,8 @@
     .page__icon { color: var(--color-primary); flex-shrink: 0; }
     .page__title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; }
     .page__subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem; }
-    .section + .section { margin-top: 2rem; }
+    .section { position: relative; margin-bottom: 2rem; }
+    .section:last-child { margin-bottom: 0; }
     .add-btn {
       display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem;
       background: var(--color-primary); color: #fff; border: none; border-radius: var(--radius-md);
@@ -52,6 +53,7 @@
       .page { padding: 0.75rem; }
       .page__header { flex-direction: column; align-items: stretch; }
       .page__title { font-size: 1.25rem; }
+      .section { margin-bottom: 1.5rem; }
       .table th { display: none; }
       .table td { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; }
       .table td::before { content: attr(data-label); font-weight: 600; font-size: 0.75rem; color: var(--text-muted); }
