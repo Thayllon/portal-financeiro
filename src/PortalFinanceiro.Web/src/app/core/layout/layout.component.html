@@ -27,32 +27,43 @@
               <span>Despesas</span>
             }
           </a>
-          <a routerLink="/contas" routerLinkActive="active">
-            <svg lucideIcon="wallet" [size]="18" />
-            @if (!sidebarCollapsed()) {
-              <span>Contas</span>
-            }
-          </a>
-          <a routerLink="/pessoas" routerLinkActive="active">
-            <svg lucideIcon="handshake" [size]="18" />
-            @if (!sidebarCollapsed()) {
-              <span>Cliente / Parceiro</span>
-            }
-          </a>
-          <a routerLink="/categorias" routerLinkActive="active">
-            <svg lucideIcon="tag" [size]="18" />
-            @if (!sidebarCollapsed()) {
-              <span>Categorias</span>
-            }
-          </a>
-          @if (authService.isAdmin()) {
-            <a routerLink="/usuarios" routerLinkActive="active">
-              <svg lucideIcon="users" [size]="18" />
+          <div class="nav-group">
+            <button type="button" class="nav-group__toggle" [class.open]="cadastroBasicoOpen() && !sidebarCollapsed()" (click)="toggleCadastroBasico()" [title]="sidebarCollapsed() ? 'Cadastro Básico' : ''">
+              <svg lucideIcon="folder" [size]="18" />
               @if (!sidebarCollapsed()) {
-                <span>Usuários</span>
+                <span>Cadastro Básico</span>
               }
-            </a>
-          }
+              @if (!sidebarCollapsed()) {
+                <svg [lucideIcon]="cadastroBasicoOpen() ? 'chevron-down' : 'chevron-right'" class="nav-group__chevron" [size]="16" />
+              }
+            </button>
+            @if (cadastroBasicoOpen() && !sidebarCollapsed()) {
+              <div class="nav-group__items">
+                <a routerLink="/contas" routerLinkActive="active">
+                  <svg lucideIcon="wallet" [size]="18" />
+                  <span>Contas</span>
+                </a>
+                <a routerLink="/categorias" routerLinkActive="active">
+                  <svg lucideIcon="tag" [size]="18" />
+                  <span>Categorias</span>
+                </a>
+                <a routerLink="/clientes" routerLinkActive="active">
+                  <svg lucideIcon="users" [size]="18" />
+                  <span>Cliente</span>
+                </a>
+                <a routerLink="/parceiros" routerLinkActive="active">
+                  <svg lucideIcon="handshake" [size]="18" />
+                  <span>Parceiro</span>
+                </a>
+                @if (authService.isAdmin()) {
+                  <a routerLink="/usuarios" routerLinkActive="active">
+                    <svg lucideIcon="users" [size]="18" />
+                    <span>Usuários</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
         </nav>
         <div class="sidebar-footer">
           @if (!sidebarCollapsed()) {
