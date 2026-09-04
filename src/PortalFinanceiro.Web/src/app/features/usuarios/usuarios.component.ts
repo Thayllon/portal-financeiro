@@ -8,13 +8,14 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { SectionHeaderComponent } from '../../shared/components/section-header.component';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [FormsModule, ModalComponent, StatusBadgeComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, StatusBadgeComponent, SectionHeaderComponent, LucideDynamicIcon],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })

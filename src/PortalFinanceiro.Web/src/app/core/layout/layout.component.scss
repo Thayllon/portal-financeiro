@@ -83,6 +83,60 @@
       color: #fff;
     }
 
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+    }
+
+    .nav-group__toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border: none;
+      background: none;
+      color: #94a3b8;
+      font-size: 0.875rem;
+      font-weight: 400;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-group__toggle:hover {
+      background: #1e293b;
+      color: #e2e8f0;
+    }
+
+    .nav-group__toggle.open {
+      color: #e2e8f0;
+    }
+
+    .nav-group__chevron {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .nav-group__items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.125rem;
+      padding-left: 0.5rem;
+    }
+
+    .layout--collapsed .nav-group__items {
+      display: none;
+    }
+
+    .layout--collapsed .nav-group__toggle {
+      justify-content: center;
+      padding: 0.625rem;
+    }
+
     .layout--collapsed .sidebar-nav a {
       justify-content: center;
       padding: 0.625rem;
