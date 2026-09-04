@@ -17,9 +17,14 @@ export class LayoutComponent {
   authService = inject(AuthService);
   private confirmService = inject(ConfirmService);
   sidebarCollapsed = signal(false);
+  configuracoesOpen = signal(false);
 
   toggleSidebar() {
     this.sidebarCollapsed.update(v => !v);
+  }
+
+  toggleConfiguracoes() {
+    this.configuracoesOpen.update(v => !v);
   }
 
   async logout() {

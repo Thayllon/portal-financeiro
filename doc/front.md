@@ -6,7 +6,7 @@
 - **Design system** próprio em `src/app/design-system/styles/` (tokens, mixins, variáveis)
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes reutilizáveis** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias)
+- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias, clientes, parceiros, usuarios)
 
 ## Como rodar / buildar / testar
 
@@ -84,3 +84,12 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/despesas` | despesas | Lançamentos de despesa |
 | `/contas` | contas | Contas bancárias |
 | `/categorias` | categorias-receita | Categorias compartilhadas (com subcategorias) |
+| `/clientes` | clientes | Cadastro de clientes (tipo Cliente) |
+| `/parceiros` | parceiros | Cadastro de parceiros (tipo Parceiro) |
+| `/usuarios` | usuarios | Usuários e permissões (admin) |
+
+### Menu lateral
+
+- **Dashboard**, **Receitas** e **Despesas** ficam no nível principal.
+- **Configurações** é um grupo colapsável que reúne, nesta ordem: **Contas**, **Categorias**, **Cliente**, **Parceiro** e **Usuários** (admin).
+- O ícone `user-key` fica reservado para quando o item **Permissões** voltar.

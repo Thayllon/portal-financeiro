@@ -1,0 +1,79 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <svg lucideIcon="users" class="page__icon" [size]="22" />
+      <div>
+        <h1 class="page__title">Clientes</h1>
+        <p class="page__subtitle">Gerencie seus clientes</p>
+      </div>
+    </div>
+  </header>
+
+  <app-section-header title="Clientes" icon="users" addLabel="Novo cliente" (add)="abrirModal()" [showAdd]="true" />
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 40%"></div>
+          <div class="skeleton-line" style="width: 25%"></div>
+          <div class="skeleton-line" style="width: 10%"></div>
+        </div>
+      }
+    </div>
+  } @else if (clientesPaginacao.paginatedItems().length === 0) {
+    <div class="table-card">
+      <div class="empty-state">
+        <svg lucideIcon="users" [size]="36" class="empty-icon" />
+        <h3>Nenhum cliente cadastrado</h3>
+        <p>Cadastre seu primeiro cliente.</p>
+      </div>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of clientesPaginacao.paginatedItems(); track p.id) {
+            <tr>
+              <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
+              <td data-label="Telefone">{{ p.telefone || '—' }}</td>
+              <td class="cell-actions">
+                <button class="action-btn" title="Editar" (click)="editar(p)">
+                  <svg lucideIcon="pencil" [size]="16" />
+                </button>
+                <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(p)">
+                  <svg lucideIcon="trash-2" [size]="16" />
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <app-list-pagination [pagination]="clientesPaginacao" />
+    </div>
+  }
+</div>
+
+<app-modal
+  [visible]="modalVisible()"
+  [title]="editando() ? 'Editar cliente' : 'Novo cliente'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input [(ngModel)]="form.nome" placeholder="Ex: João da Silva" class="input" />
+  </div>
+  <div class="field">
+    <label>Telefone</label>
+    <input [(ngModel)]="form.telefone" placeholder="Ex: (11) 99999-9999" class="input" />
+  </div>
+</app-modal>
