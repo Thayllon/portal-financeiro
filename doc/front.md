@@ -91,5 +91,5 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 ### Menu lateral
 
 - **Dashboard**, **Receitas** e **Despesas** ficam no nível principal.
-- **Cadastro Básico** é um grupo colapsável que reúne, nesta ordem: **Contas**, **Categorias**, **Cliente**, **Parceiro** e **Usuários** (admin).
+- **Configurações** é um grupo colapsável que reúne, nesta ordem: **Contas**, **Categorias**, **Cliente**, **Parceiro** e **Usuários** (admin).
 - O ícone `user-key` fica reservado para quando o item **Permissões** voltar.
