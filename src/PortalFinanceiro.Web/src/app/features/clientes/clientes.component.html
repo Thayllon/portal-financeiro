@@ -1,15 +1,16 @@
 <div class="page">
   <header class="page__header">
     <div class="page__header-left">
-      <svg lucideIcon="users" class="page__icon" [size]="22" />
-      <div>
-        <h1 class="page__title">Clientes</h1>
-        <p class="page__subtitle">Gerencie seus clientes</p>
-      </div>
+      <span class="page__badge">
+        <svg lucideIcon="users" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">Clientes</h1>
     </div>
+    <button class="add-btn" (click)="abrirModal()">
+      <svg lucideIcon="plus" [size]="16" />
+      Novo cliente
+    </button>
   </header>
-
-  <app-section-header title="Clientes" icon="users" addLabel="Novo cliente" (add)="abrirModal()" [showAdd]="true" />
 
   @if (loading()) {
     <div class="table-card">

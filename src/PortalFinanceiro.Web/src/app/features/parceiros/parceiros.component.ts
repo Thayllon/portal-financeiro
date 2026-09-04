@@ -6,7 +6,6 @@ import { Pessoa, PessoaRequest } from '../../core/models/pessoa.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
-import { SectionHeaderComponent } from '../../shared/components/section-header.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
@@ -15,7 +14,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 @Component({
   selector: 'app-parceiros',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SectionHeaderComponent, ListPaginationComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './parceiros.component.html',
   styleUrl: './parceiros.component.scss'
 })

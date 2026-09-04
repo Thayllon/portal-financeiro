@@ -1,7 +1,9 @@
 <div class="section-header">
   <div class="section-header__left">
     @if (icon()) {
-      <svg lucideIcon [lucideIcon]="icon()!" class="section-header__icon" [size]="20" />
+      <span class="section-header__badge">
+        <svg lucideIcon [lucideIcon]="icon()!" class="section-header__icon" [size]="22" />
+      </span>
     }
     <div>
       <h1>{{ title() }}</h1>
