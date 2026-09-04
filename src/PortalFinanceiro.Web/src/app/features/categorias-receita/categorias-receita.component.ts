@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { CategoriaReceitaRepository, CategoriaDespesaRepository } from '../../core/repositories/categoria.repository';
+import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { Categoria, CategoriaRequest } from '../../core/models/categoria.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
@@ -24,10 +24,12 @@ export class CategoriasComponent implements OnInit {
   private confirmService = inject(ConfirmService);
   private repoReceita = inject(CategoriaReceitaRepository);
   private repoDespesa = inject(CategoriaDespesaRepository);
+  private repoServico = inject(CategoriaServicoRepository);
 
   tabs: Tab[] = [
     { id: 'receita', label: 'Receita' },
-    { id: 'despesa', label: 'Despesa' }
+    { id: 'despesa', label: 'Despesa' },
+    { id: 'servicos', label: 'Serviços' }
   ];
   tabAtiva = signal('receita');
   items = signal<Categoria[]>([]);
@@ -40,7 +42,9 @@ export class CategoriasComponent implements OnInit {
   ngOnInit() { this.carregar(); }
 
   private get repo() {
-    return this.tabAtiva() === 'receita' ? this.repoReceita : this.repoDespesa;
+    if (this.tabAtiva() === 'receita') return this.repoReceita;
+    if (this.tabAtiva() === 'despesa') return this.repoDespesa;
+    return this.repoServico;
   }
 
   trocarAba(tab: string) {
@@ -50,6 +54,7 @@ export class CategoriasComponent implements OnInit {
 
   async carregar() {
     this.loading.set(true);
+    this.items.set([]);
     try {
       this.items.set(await firstValueFrom(this.repo.listar()));
     } catch { this.notify.error('Erro ao carregar categorias'); }

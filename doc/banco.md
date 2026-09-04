@@ -48,7 +48,7 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `Usuario` | Usuários do sistema (`IsAdmin`) |
 | `ContaBancaria` | Contas PF/PJ |
 | `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
-| `CategoriaReceita` / `CategoriaDespesa` | Categorias (pai/sub) — **compartilhadas** |
+| `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) |
 | `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` disponível para vínculo manual |
@@ -60,4 +60,4 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 - **Editar/excluir**: apenas o dono (`IdUsuario`) ou usuário `IsAdmin` → senão HTTP 403 (`Erro.Permissao`)
 - Toda mutação (criar/editar/excluir, incluindo subcategorias) grava `CategoriaHistorico`
   - `Acao`: 1=Criado, 2=Editado, 3=Excluído
-  - `TipoCategoria`: 1=Receita, 2=Despesa
+  - `TipoCategoria`: 1=Receita, 2=Despesa, 3=Serviços

@@ -2,7 +2,7 @@ using PortalFinanceiro.Core.Domain.Results;
 
 namespace PortalFinanceiro.Core.Domain.Entities;
 
-public class CategoriaReceita
+public class CategoriaReceita : ICategoriaEntity
 {
     public Guid Id { get; private set; }
     public Guid IdUsuario { get; private set; }

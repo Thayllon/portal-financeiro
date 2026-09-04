@@ -63,6 +63,18 @@ CREATE TABLE CategoriaDespesa (
     CONSTRAINT FK_CategoriaDespesa_Pai FOREIGN KEY (CategoriaPaiId) REFERENCES CategoriaDespesa(Id)
 );
 
+CREATE TABLE CategoriaServico (
+    Id UUID PRIMARY KEY,
+    IdUsuario UUID NOT NULL,
+    Nome VARCHAR(100) NOT NULL,
+    CategoriaPaiId UUID NULL,
+    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    DataCadastro TIMESTAMP NOT NULL,
+    DataAlteracao TIMESTAMP NOT NULL,
+    CONSTRAINT FK_CategoriaServico_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
+    CONSTRAINT FK_CategoriaServico_Pai FOREIGN KEY (CategoriaPaiId) REFERENCES CategoriaServico(Id)
+);
+
 CREATE TABLE RegraReceita (
     Id UUID PRIMARY KEY,
     IdUsuario UUID NOT NULL,
