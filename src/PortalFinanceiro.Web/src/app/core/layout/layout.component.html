@@ -28,20 +28,20 @@
             }
           </a>
           <div class="nav-group">
-            <button type="button" class="nav-group__toggle" [class.open]="cadastroBasicoOpen() && !sidebarCollapsed()" (click)="toggleCadastroBasico()" [title]="sidebarCollapsed() ? 'Cadastro Básico' : ''">
-              <svg lucideIcon="folder" [size]="18" />
+            <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Configurações' : ''">
+              <svg lucideIcon="monitor-cog" [size]="18" />
               @if (!sidebarCollapsed()) {
-                <span>Cadastro Básico</span>
+                <span>Configurações</span>
               }
               @if (!sidebarCollapsed()) {
-                <svg [lucideIcon]="cadastroBasicoOpen() ? 'chevron-down' : 'chevron-right'" class="nav-group__chevron" [size]="16" />
+                <svg [lucideIcon]="configuracoesOpen() ? 'chevron-down' : 'chevron-right'" class="nav-group__chevron" [size]="16" />
               }
             </button>
-            @if (cadastroBasicoOpen() && !sidebarCollapsed()) {
+            @if (configuracoesOpen() && !sidebarCollapsed()) {
               <div class="nav-group__items">
                 <a routerLink="/contas" routerLinkActive="active">
                   <svg lucideIcon="wallet" [size]="18" />
-                  <span>Contas</span>
+                  <span>Contas bancárias</span>
                 </a>
                 <a routerLink="/categorias" routerLinkActive="active">
                   <svg lucideIcon="tag" [size]="18" />
@@ -49,11 +49,11 @@
                 </a>
                 <a routerLink="/clientes" routerLinkActive="active">
                   <svg lucideIcon="users" [size]="18" />
-                  <span>Cliente</span>
+                  <span>Clientes</span>
                 </a>
                 <a routerLink="/parceiros" routerLinkActive="active">
                   <svg lucideIcon="handshake" [size]="18" />
-                  <span>Parceiro</span>
+                  <span>Parceiros</span>
                 </a>
                 @if (authService.isAdmin()) {
                   <a routerLink="/usuarios" routerLinkActive="active">
