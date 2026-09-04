@@ -9,13 +9,13 @@ import {
   LucidePencil, LucideTrash2, LucideX, LucideSearch,
   LucideCalendar, LucideDollarSign, LucideLogOut,
   LucideChevronDown, LucideArrowLeft, LucideArrowRight,
-  LucideLoader, LucideInbox, LucideAlertCircle, LucideCheckCircle,
+  LucideLoader, LucideInbox,
   LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
   LucideHandCoins, LucideCalendar1, LucideCalendarDays,
   LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
   LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
-  LucideHandshake, LucideUserKey, LucideMonitorCog,
+  LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck,
   } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -33,13 +33,13 @@ export const appConfig: ApplicationConfig = {
       LucidePencil, LucideTrash2, LucideX, LucideSearch,
       LucideCalendar, LucideDollarSign, LucideLogOut,
       LucideChevronDown, LucideArrowLeft, LucideArrowRight,
-      LucideLoader, LucideInbox, LucideAlertCircle, LucideCheckCircle,
+  LucideLoader, LucideInbox,
       LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
       LucideHandCoins, LucideCalendar1, LucideCalendarDays,
       LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
       LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
-      LucideHandshake, LucideUserKey, LucideMonitorCog,
+      LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck,
     ),
   ],
 };
