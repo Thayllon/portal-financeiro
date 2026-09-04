@@ -2,7 +2,7 @@ using PortalFinanceiro.Core.Domain.Results;
 
 namespace PortalFinanceiro.Core.Domain.Entities;
 
-public class CategoriaDespesa : ICategoriaEntity
+public class CategoriaServico : ICategoriaEntity
 {
     public Guid Id { get; private set; }
     public Guid IdUsuario { get; private set; }
@@ -12,16 +12,16 @@ public class CategoriaDespesa : ICategoriaEntity
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
 
-    public CategoriaDespesa() { }
+    public CategoriaServico() { }
 
-    public static Result<CategoriaDespesa> Criar(Guid idUsuario, string nome, Guid? categoriaPaiId = null)
+    public static Result<CategoriaServico> Criar(Guid idUsuario, string nome, Guid? categoriaPaiId = null)
     {
         if (idUsuario == Guid.Empty)
             return Erro.Validacao("USUARIO_OBRIGATORIO", "Usuário é obrigatório.");
         if (string.IsNullOrWhiteSpace(nome))
             return Erro.Validacao("NOME_OBRIGATORIO", "Nome é obrigatório.");
 
-        return new CategoriaDespesa
+        return new CategoriaServico
         {
             Id = Guid.NewGuid(),
             IdUsuario = idUsuario,

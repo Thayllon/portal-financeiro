@@ -46,6 +46,7 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/pessoas` | GET/POST/PUT/DELETE | Clientes/parceiros (`Tipo`: 1=Cliente, 2=Parceiro) |
 | `/api/categorias/receita` | GET/POST/PUT/DELETE | Categorias de receita (compartilhadas) |
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa (compartilhadas) |
+| `/api/categorias/servicos` | GET/POST/PUT/DELETE | Categorias de serviços (compartilhadas) |
 | `/api/usuarios` | GET/POST/PUT · PATCH /{id}/ativo | Gerenciamento de usuários (somente admin) |
 | `/api/dashboard` | GET | Dashboard com resumo |
 

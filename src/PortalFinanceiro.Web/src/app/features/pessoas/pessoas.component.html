@@ -133,7 +133,5 @@
         <label>Telefone</label>
         <input [(ngModel)]="form.telefone" placeholder="Ex: (11) 99999-9999" class="input" />
       </div>
-      <div class="field">
-        <app-custom-select label="Tipo" placeholder="Selecione o tipo" [options]="tipoOptions" [value]="form.tipo" (valueChange)="form.tipo = $event" />
-      </div>
+
     </app-modal>
