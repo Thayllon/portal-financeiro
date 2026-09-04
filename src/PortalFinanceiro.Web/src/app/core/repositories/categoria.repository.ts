@@ -39,3 +39,8 @@ export class CategoriaReceitaRepository extends CategoriaBaseRepository {
 export class CategoriaDespesaRepository extends CategoriaBaseRepository {
   constructor() { super('despesa'); }
 }
+
+@Injectable({ providedIn: 'root' })
+export class CategoriaServicoRepository extends CategoriaBaseRepository {
+  constructor() { super('servicos'); }
+}

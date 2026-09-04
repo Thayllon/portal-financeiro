@@ -1,7 +1,7 @@
 -- Portal Financeiro - Schema unificado (SQL Server).
 -- ATENÇÃO: executar somente em banco NOVO (from scratch). O banco de desenvolvimento
 -- já existente foi migrado incrementalmente e NÃO deve receber este script.
--- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 002_SeedBase.sql.
+-- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 099_SeedBase.sql.
 
 CREATE TABLE Usuario (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
@@ -28,6 +28,18 @@ CREATE TABLE ContaBancaria (
     CONSTRAINT FK_ContaBancaria_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
 );
 
+CREATE TABLE Pessoa (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    IdUsuario UNIQUEIDENTIFIER NOT NULL,
+    Nome NVARCHAR(150) NOT NULL,
+    Telefone NVARCHAR(30) NULL,
+    Tipo INT NOT NULL,
+    Ativo BIT NOT NULL DEFAULT 1,
+    DataCadastro DATETIME2 NOT NULL,
+    DataAlteracao DATETIME2 NOT NULL,
+    CONSTRAINT FK_Pessoa_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
+);
+
 CREATE TABLE CategoriaReceita (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
     IdUsuario UNIQUEIDENTIFIER NOT NULL,
@@ -50,6 +62,18 @@ CREATE TABLE CategoriaDespesa (
     DataAlteracao DATETIME2 NOT NULL,
     CONSTRAINT FK_CategoriaDespesa_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
     CONSTRAINT FK_CategoriaDespesa_Pai FOREIGN KEY (CategoriaPaiId) REFERENCES CategoriaDespesa(Id)
+);
+
+CREATE TABLE CategoriaServico (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    IdUsuario UNIQUEIDENTIFIER NOT NULL,
+    Nome NVARCHAR(100) NOT NULL,
+    CategoriaPaiId UNIQUEIDENTIFIER NULL,
+    Ativo BIT NOT NULL DEFAULT 1,
+    DataCadastro DATETIME2 NOT NULL,
+    DataAlteracao DATETIME2 NOT NULL,
+    CONSTRAINT FK_CategoriaServico_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
+    CONSTRAINT FK_CategoriaServico_Pai FOREIGN KEY (CategoriaPaiId) REFERENCES CategoriaServico(Id)
 );
 
 CREATE TABLE RegraReceita (

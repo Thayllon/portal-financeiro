@@ -1,5 +1,5 @@
 @if (visible()) {
-  <div class="overlay" (click)="close()">
+  <div class="overlay" (mousedown)="aoMouseDownNoOverlay($event)" (mouseup)="aoMouseUpNoOverlay()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h3>{{ title() }}</h3>

@@ -1,30 +1,11 @@
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Infrastructure.Data;
-using PortalFinanceiro.Infrastructure.Sql;
-using PortalFinanceiro.Infrastructure.Sql.Base;
 
 namespace PortalFinanceiro.Infrastructure.Repositories;
 
-public class CategoriaReceitaRepository : SqlBaseRepository, ICategoriaReceitaRepository
+public class CategoriaReceitaRepository : CategoriaRepositoryBase<CategoriaReceita>, ICategoriaReceitaRepository
 {
-    public CategoriaReceitaRepository(IDatabaseConnectionFactory connectionFactory) : base(connectionFactory) { }
-
-    public async Task<CategoriaReceita?> ObterPorIdAsync(Guid id)
-        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ObterPorId, new { Id = id }));
-
-    public async Task<IEnumerable<CategoriaReceita>> ListarAsync()
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ListarAtivas));
-
-    public async Task<IEnumerable<CategoriaReceita>> ListarPorPaiAsync(Guid? categoriaPaiId)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<CategoriaReceita>(conn, CategoriaReceitaSql.ListarPorPai, new { CategoriaPaiId = categoriaPaiId }));
-
-    public async Task InserirAsync(CategoriaReceita entity)
-        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, CategoriaReceitaSql.Inserir, entity));
-
-    public async Task AtualizarAsync(CategoriaReceita entity)
-        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, CategoriaReceitaSql.Atualizar, entity));
-
-    public async Task ExcluirAsync(Guid id)
-        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, CategoriaReceitaSql.Excluir, new { Id = id }));
+    public CategoriaReceitaRepository(IDatabaseConnectionFactory connectionFactory)
+        : base(connectionFactory, "CategoriaReceita") { }
 }

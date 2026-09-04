@@ -33,6 +33,12 @@
               <span>Contas</span>
             }
           </a>
+          <a routerLink="/pessoas" routerLinkActive="active">
+            <svg lucideIcon="handshake" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Cliente / Parceiro</span>
+            }
+          </a>
           <a routerLink="/categorias" routerLinkActive="active">
             <svg lucideIcon="tag" [size]="18" />
             @if (!sidebarCollapsed()) {

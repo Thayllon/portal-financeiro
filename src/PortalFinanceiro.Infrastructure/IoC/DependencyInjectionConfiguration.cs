@@ -22,22 +22,26 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IContaBancariaRepository, ContaBancariaRepository>();
         services.AddScoped<ICategoriaReceitaRepository, CategoriaReceitaRepository>();
         services.AddScoped<ICategoriaDespesaRepository, CategoriaDespesaRepository>();
+        services.AddScoped<ICategoriaServicoRepository, CategoriaServicoRepository>();
         services.AddScoped<ICategoriaHistoricoRepository, CategoriaHistoricoRepository>();
         services.AddScoped<IReceitaRepository, ReceitaRepository>();
         services.AddScoped<IDespesaRepository, DespesaRepository>();
         services.AddScoped<IRegraReceitaRepository, RegraReceitaRepository>();
         services.AddScoped<IRegraDespesaRepository, RegraDespesaRepository>();
+        services.AddScoped<IPessoaRepository, PessoaRepository>();
 
         services.AddScoped<IAuthAppService, AuthAppService>();
         services.AddScoped<IUsuarioAppService, UsuarioAppService>();
         services.AddScoped<IContaBancariaAppService, ContaBancariaAppService>();
         services.AddScoped<ICategoriaReceitaAppService, CategoriaReceitaAppService>();
         services.AddScoped<ICategoriaDespesaAppService, CategoriaDespesaAppService>();
+        services.AddScoped<ICategoriaServicoAppService, CategoriaServicoAppService>();
         services.AddScoped<IReceitaAppService, ReceitaAppService>();
         services.AddScoped<IDespesaAppService, DespesaAppService>();
         services.AddScoped<IRegraReceitaAppService, RegraReceitaAppService>();
         services.AddScoped<IRegraDespesaAppService, RegraDespesaAppService>();
         services.AddScoped<IDashboardAppService, DashboardAppService>();
+        services.AddScoped<IPessoaAppService, PessoaAppService>();
 
         return services;
     }
