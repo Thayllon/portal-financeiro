@@ -28,6 +28,7 @@
             <span></span>
           }
           <div class="drawer__footer-actions">
+            <button class="btn btn--ghost" (click)="close()">Cancelar</button>
             <button class="btn btn--primary" [disabled]="saving()" (click)="save.emit()">
               {{ saving() ? 'Salvando...' : 'Salvar alterações' }}
             </button>

@@ -33,6 +33,27 @@ export class UsuariosComponent implements OnInit {
   editando = signal<Usuario | null>(null);
   salvando = signal(false);
   fluxoAdicional = signal(false);
+  buscaPermissao = signal('');
+
+  permLevels: Record<string, 'none' | 'read' | 'write'> = {};
+
+  modulosPermissao = [
+    { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line', cor: '#7c3aed' },
+    { id: 'receitas', nome: 'Receitas', descricao: 'Gestão de receitas e lançamentos financeiros.', icone: 'dollar-sign', cor: '#16a34a' },
+    { id: 'despesas', nome: 'Despesas', descricao: 'Gestão de despesas e pagamentos.', icone: 'minus', cor: '#ea580c' },
+    { id: 'contas', nome: 'Contas bancárias', descricao: 'Cadastro e gerenciamento de contas.', icone: 'building', cor: '#2563eb' },
+    { id: 'categorias', nome: 'Categorias', descricao: 'Cadastro e organização de categorias.', icone: 'tag', cor: '#d97706' },
+    { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users', cor: '#7c3aed' },
+    { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake', cor: '#ea580c' },
+    { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'user', cor: '#7c3aed' },
+  ];
+
+  modulosFiltrados = computed(() => {
+    const busca = this.buscaPermissao().toLowerCase();
+    return this.modulosPermissao.filter(m =>
+      m.nome.toLowerCase().includes(busca) || m.descricao.toLowerCase().includes(busca)
+    );
+  });
 
   form: UsuarioRequest = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
 
@@ -54,19 +75,6 @@ export class UsuariosComponent implements OnInit {
   statusBloqueado = computed(() => {
     const u = this.editando();
     return !!u && this.ehUsuarioAtual(u);
-  });
-
-  permissoes = computed(() => {
-    const admin = this.editando()?.isAdmin ?? false;
-    return [
-      { rotulo: 'Receitas', icone: 'trending-up', escrita: admin },
-      { rotulo: 'Despesas', icone: 'trending-down', escrita: admin },
-      { rotulo: 'Contas', icone: 'wallet', escrita: admin },
-      { rotulo: 'Categorias', icone: 'tag', escrita: admin },
-      { rotulo: 'Clientes', icone: 'users', escrita: admin },
-      { rotulo: 'Parceiros', icone: 'handshake', escrita: admin },
-      { rotulo: 'Usuários', icone: 'user-cog', escrita: admin },
-    ];
   });
 
   ngOnInit() { this.carregar(); }
@@ -95,6 +103,11 @@ export class UsuariosComponent implements OnInit {
     this.editando.set(item);
     this.modalVisible.set(false);
     this.drawerVisible.set(true);
+    this.buscaPermissao.set('');
+    this.permLevels = {};
+    this.modulosPermissao.forEach(m => {
+      this.permLevels[m.id] = item.isAdmin ? 'write' : 'none';
+    });
   }
 
   fecharDrawer() {
@@ -114,6 +127,12 @@ export class UsuariosComponent implements OnInit {
   alternarFluxoAdicional(event: Event) {
     const ligado = (event.target as HTMLInputElement).checked;
     this.fluxoAdicional.set(ligado);
+  }
+
+  alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
+    const u = this.editando();
+    if (u?.isAdmin) return;
+    this.permLevels[moduloId] = nivel;
   }
 
   async excluirAtual() {
