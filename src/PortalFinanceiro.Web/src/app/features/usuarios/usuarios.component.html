@@ -138,11 +138,11 @@
             <label>E-mail<span class="required">*</span></label>
             <input [(ngModel)]="form.email" type="email" placeholder="Ex: maria@exemplo.com" class="input" />
           </div>
-          <div class="grid-2">
-            <div class="field">
+          <div class="row-perfil">
+            <div class="field field--compact">
               <label>Perfil</label>
               <app-custom-select
-                placeholder="Selecione o perfil"
+                placeholder="Selecione"
                 [options]="perfilOptions"
                 [value]="form.isAdmin ? 'true' : 'false'"
                 [disabled]="perfilBloqueado()"
@@ -152,16 +152,19 @@
                 <span class="field-hint"><svg lucideIcon="lock" [size]="12" /> Perfil bloqueado</span>
               }
             </div>
-            <div class="field">
+            <div class="field field--compact">
               <label>Status</label>
               <app-custom-select
-                placeholder="Selecione o status"
+                placeholder="Selecione"
                 [options]="statusOptions"
                 [value]="form.ativo ? 'true' : 'false'"
                 [disabled]="statusBloqueado()"
                 (valueChange)="form.ativo = $event === 'true'"
               />
             </div>
+            <button type="button" class="btn-reset" title="Reset de senha">
+              <svg lucideIcon="rotate-ccw-key" [size]="16" />
+            </button>
           </div>
         </section>
 
