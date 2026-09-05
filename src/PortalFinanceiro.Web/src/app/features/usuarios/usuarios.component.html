@@ -211,9 +211,9 @@
             <div class="perm-modules">
               @for (m of modulosFiltrados(); track m.id) {
                 <div class="perm-module">
-                  <div class="perm-module__icon" [style.background]="m.cor + '18'" [style.color]="m.cor">
-                    <svg [lucideIcon]="m.icone" [size]="18" />
-                  </div>
+                <div class="perm-module__icon">
+                  <svg [lucideIcon]="m.icone" [size]="18" />
+                </div>
                   <div class="perm-module__info">
                     <span class="perm-module__nome">{{ m.nome }}</span>
                     <span class="perm-module__desc">{{ m.descricao }}</span>
