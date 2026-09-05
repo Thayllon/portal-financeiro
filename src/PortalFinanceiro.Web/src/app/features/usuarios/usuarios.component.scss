@@ -24,6 +24,7 @@
     }
     .table { width: 100%; border-collapse: collapse; }
     .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--surface-border); }
+    .table th.th-actions { text-align: right; }
     .table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-primary); border-bottom: 1px solid var(--surface-border); }
     .table tr:last-child td { border-bottom: none; }
     .table tr:hover { background: var(--surface-hover); }
