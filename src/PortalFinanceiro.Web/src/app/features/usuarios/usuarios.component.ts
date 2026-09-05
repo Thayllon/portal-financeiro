@@ -159,7 +159,7 @@ export class UsuariosComponent implements OnInit {
     const ok = await this.confirmService.confirm('Excluir usuário', `Deseja excluir "${u.nome}"?`);
     if (!ok) return;
     try {
-      await firstValueFrom(this.repo.alterarAtivo(u.id, false));
+      await firstValueFrom(this.repo.excluir(u.id));
       this.notify.success('Usuário excluído');
       this.fecharDrawer();
       await this.carregar();
@@ -171,12 +171,12 @@ export class UsuariosComponent implements OnInit {
     if (!u) return;
     const ok = await this.confirmService.confirm(
       'Reset de senha',
-      `A senha de "${u.nome}" será resetada para a senha padrão (123456). Deseja continuar?`
+      `A senha de "${u.nome}" será resetada para a senha padrão (portal). Deseja continuar?`
     );
     if (!ok) return;
     try {
       await firstValueFrom(this.repo.resetarSenha(u.id));
-      this.notify.success(`Senha de "${u.nome}" resetada para 123456`);
+      this.notify.success(`Senha de "${u.nome}" resetada para portal`);
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao resetar senha')); }
   }
 

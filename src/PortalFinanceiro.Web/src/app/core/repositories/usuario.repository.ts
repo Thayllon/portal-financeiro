@@ -27,4 +27,8 @@ export class UsuarioRepository extends BaseHttpRepository {
   resetarSenha(id: string): Observable<any> {
     return this.patch<any>(`/usuarios/${id}/senha`);
   }
+
+  excluir(id: string): Observable<any> {
+    return this.delete<any>(`/usuarios/${id}`);
+  }
 }

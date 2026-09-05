@@ -9,14 +9,12 @@
           }
         </div>
         <nav class="sidebar-nav">
-          @if (authService.temPermissao('dashboard')) {
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
             <svg lucideIcon="chart-line" [size]="18" />
             @if (!sidebarCollapsed()) {
               <span>Dashboard</span>
             }
           </a>
-          }
           @if (authService.temPermissao('receitas')) {
           <a routerLink="/receitas" routerLinkActive="active">
             <svg lucideIcon="trending-up" [size]="18" />
@@ -33,6 +31,7 @@
             }
           </a>
           }
+          @if (authService.temPermissao('contas') || authService.temPermissao('categorias') || authService.temPermissao('clientes') || authService.temPermissao('parceiros') || authService.isAdmin()) {
           <div class="nav-group">
             <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Configurações' : ''">
               <svg lucideIcon="monitor-cog" [size]="18" />
@@ -78,6 +77,7 @@
               </div>
             }
           </div>
+          }
         </nav>
         <div class="sidebar-footer">
           @if (!sidebarCollapsed()) {

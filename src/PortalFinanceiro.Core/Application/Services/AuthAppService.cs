@@ -1,7 +1,6 @@
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
-using PortalFinanceiro.Core.Domain.Constants;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Interfaces.Services;
@@ -36,7 +35,7 @@ public class AuthAppService : IAuthAppService
         if (!usuario.Ativo)
             return Erro.Negocio("USUARIO_INATIVO", "Usuário inativo.");
 
-        if (EhSenhaTemporaria(usuario.SenhaHash))
+        if (usuario.PrimeiroAcesso)
             return new LoginResponse
             {
                 UsuarioId = usuario.Id,
@@ -58,7 +57,7 @@ public class AuthAppService : IAuthAppService
         if (!_passwordService.Verificar(request.SenhaAtual, usuario.SenhaHash))
             return Erro.Validacao("CREDENCIAIS_INVALIDAS", "Senha atual inválida.");
 
-        if (!EhSenhaTemporaria(usuario.SenhaHash))
+        if (!usuario.PrimeiroAcesso)
             return Erro.Negocio("SENHA_JA_TROCADA", "A senha já foi alterada anteriormente.");
 
         if (string.IsNullOrWhiteSpace(request.NovaSenha) || request.NovaSenha.Length < 6)
@@ -72,10 +71,6 @@ public class AuthAppService : IAuthAppService
         await _usuarioRepository.AtualizarAsync(usuario);
         return await GerarSessao(usuario);
     }
-
-    private bool EhSenhaTemporaria(string senhaHash) =>
-        _passwordService.Verificar(SenhasPadrao.PrimeiroAcesso, senhaHash)
-        || _passwordService.Verificar(SenhasPadrao.Reset, senhaHash);
 
     private async Task<LoginResponse> GerarSessao(Usuario usuario)
     {

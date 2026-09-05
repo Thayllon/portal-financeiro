@@ -24,4 +24,7 @@ public class UsuarioRepository : SqlBaseRepository, IUsuarioRepository
 
     public async Task AtualizarAsync(Usuario entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, UsuarioSql.Atualizar, entity));
+
+    public async Task ExcluirAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, UsuarioSql.Excluir, new { Id = id }));
 }

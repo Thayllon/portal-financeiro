@@ -95,13 +95,21 @@ public class UsuarioAppService : IUsuarioAppService
         if (usuario is null)
             return Erro.NaoEncontrado("Usuário");
 
-        var senhaHash = _passwordService.Hash(SenhasPadrao.Reset);
-
-        var result = usuario.Atualizar(usuario.Nome, usuario.Email, senhaHash, usuario.IsAdmin, usuario.Ativo);
-        if (!result.EhSucesso)
-            return result.Erro!;
+        var novaSenhaHash = _passwordService.Hash(SenhasPadrao.Reset);
+        usuario.ResetarSenha(novaSenhaHash);
 
         await _repository.AtualizarAsync(usuario);
+        return Resultado.Sucesso();
+    }
+
+    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    {
+        var usuario = await _repository.ObterPorIdAsync(id);
+        if (usuario is null)
+            return Erro.NaoEncontrado("Usuário");
+
+        await _permissaoRepository.ExcluirPorUsuarioIdAsync(id);
+        await _repository.ExcluirAsync(id);
         return Resultado.Sucesso();
     }
 
@@ -112,6 +120,7 @@ public class UsuarioAppService : IUsuarioAppService
         Email = u.Email,
         IsAdmin = u.IsAdmin,
         Ativo = u.Ativo,
+        PrimeiroAcesso = u.PrimeiroAcesso,
         DataCadastro = u.DataCadastro
     };
 }

@@ -10,6 +10,7 @@ CREATE TABLE Usuario (
     SenhaHash NVARCHAR(500) NOT NULL,
     IsAdmin BIT NOT NULL DEFAULT 0,
     Ativo BIT NOT NULL DEFAULT 1,
+    PrimeiroAcesso BIT NOT NULL DEFAULT 1,
     DataCadastro DATETIME2 NOT NULL,
     DataAlteracao DATETIME2 NOT NULL
 );

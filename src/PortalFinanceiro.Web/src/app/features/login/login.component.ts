@@ -40,8 +40,8 @@ export class LoginComponent {
         }
         this.router.navigate(['/']);
       },
-      error: () => {
-        this.erro.set('Dados inválidos.');
+      error: (err) => {
+        this.erro.set(err.status === 0 ? 'Não foi possível conectar ao servidor.' : 'Dados inválidos.');
         this.loading.set(false);
       }
     });
@@ -60,8 +60,8 @@ export class LoginComponent {
     this.erroSenha.set('');
     this.authService.trocarSenha(this.email, this.senha, this.novaSenha).subscribe({
       next: () => this.router.navigate(['/']),
-      error: () => {
-        this.erroSenha.set('Não foi possível alterar a senha. Tente novamente.');
+      error: (err) => {
+        this.erroSenha.set(err.status === 0 ? 'Não foi possível conectar ao servidor.' : 'Não foi possível alterar a senha. Tente novamente.');
         this.salvandoSenha.set(false);
       }
     });
