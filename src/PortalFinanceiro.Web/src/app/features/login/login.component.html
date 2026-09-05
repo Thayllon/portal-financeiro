@@ -54,11 +54,11 @@
                 </button>
               </div>
             </div>
-            @if (erroSenha) {
-              <div class="error">{{ erroSenha }}</div>
+            @if (erroSenha()) {
+              <div class="error">{{ erroSenha() }}</div>
             }
-            <button type="submit" [disabled]="salvandoSenha">
-              {{ salvandoSenha ? 'Salvando...' : 'Definir nova senha' }}
+            <button type="submit" [disabled]="salvandoSenha()">
+              {{ salvandoSenha() ? 'Salvando...' : 'Definir nova senha' }}
             </button>
             <button type="button" class="link-btn" (click)="voltarLogin()">
               Voltar para o login
@@ -100,11 +100,11 @@
               </div>
               <span class="field-hint">Mínimo 6 caracteres</span>
             </div>
-            @if (erro) {
-              <div class="error">{{ erro }}</div>
+            @if (erro()) {
+              <div class="error">{{ erro() }}</div>
             }
-            <button type="submit" [disabled]="loading">
-              {{ loading ? 'Entrando...' : 'Entrar' }}
+            <button type="submit" [disabled]="loading()">
+              {{ loading() ? 'Entrando...' : 'Entrar' }}
             </button>
           </form>
         }

@@ -9,4 +9,5 @@ public class LoginResponse
     public bool IsAdmin { get; set; }
     public bool PrecisaTrocarSenha { get; set; }
     public DateTime DataExpiracao { get; set; }
+    public IEnumerable<PermissaoUsuarioResponse>? Permissoes { get; set; }
 }

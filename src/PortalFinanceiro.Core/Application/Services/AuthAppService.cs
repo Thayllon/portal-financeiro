@@ -12,12 +12,14 @@ namespace PortalFinanceiro.Core.Application.Services;
 public class AuthAppService : IAuthAppService
 {
     private readonly IUsuarioRepository _usuarioRepository;
+    private readonly IPermissaoUsuarioRepository _permissaoRepository;
     private readonly IPasswordService _passwordService;
     private readonly ITokenService _tokenService;
 
-    public AuthAppService(IUsuarioRepository usuarioRepository, IPasswordService passwordService, ITokenService tokenService)
+    public AuthAppService(IUsuarioRepository usuarioRepository, IPermissaoUsuarioRepository permissaoRepository, IPasswordService passwordService, ITokenService tokenService)
     {
         _usuarioRepository = usuarioRepository;
+        _permissaoRepository = permissaoRepository;
         _passwordService = passwordService;
         _tokenService = tokenService;
     }
@@ -29,7 +31,7 @@ public class AuthAppService : IAuthAppService
             return Erro.NaoEncontrado("Usuário");
 
         if (!_passwordService.Verificar(request.Senha, usuario.SenhaHash))
-            return Erro.Validacao("CREDENCIAIS_INVALIDAS", "Email ou senha inválidos.");
+            return Erro.Validacao("CREDENCIAIS_INVALIDAS", "Dados inválidos.");
 
         if (!usuario.Ativo)
             return Erro.Negocio("USUARIO_INATIVO", "Usuário inativo.");
@@ -44,7 +46,7 @@ public class AuthAppService : IAuthAppService
                 PrecisaTrocarSenha = true
             };
 
-        return GerarSessao(usuario);
+        return await GerarSessao(usuario);
     }
 
     public async Task<Result<LoginResponse>> AlterarSenhaAsync(AlterarSenhaRequest request)
@@ -68,16 +70,17 @@ public class AuthAppService : IAuthAppService
             return result.Erro!;
 
         await _usuarioRepository.AtualizarAsync(usuario);
-        return GerarSessao(usuario);
+        return await GerarSessao(usuario);
     }
 
     private bool EhSenhaTemporaria(string senhaHash) =>
         _passwordService.Verificar(SenhasPadrao.PrimeiroAcesso, senhaHash)
         || _passwordService.Verificar(SenhasPadrao.Reset, senhaHash);
 
-    private LoginResponse GerarSessao(Usuario usuario)
+    private async Task<LoginResponse> GerarSessao(Usuario usuario)
     {
-        var token = _tokenService.GerarToken(usuario);
+        var permissoes = (await _permissaoRepository.ObterPorUsuarioIdAsync(usuario.Id)).ToList();
+        var token = _tokenService.GerarToken(usuario, permissoes);
 
         return new LoginResponse
         {
@@ -87,7 +90,12 @@ public class AuthAppService : IAuthAppService
             Email = usuario.Email,
             IsAdmin = usuario.IsAdmin,
             PrecisaTrocarSenha = false,
-            DataExpiracao = DateTime.UtcNow.AddHours(_tokenService.ExpirationHours)
+            DataExpiracao = DateTime.UtcNow.AddHours(_tokenService.ExpirationHours),
+            Permissoes = permissoes.Select(p => new Application.Dtos.Response.PermissaoUsuarioResponse
+            {
+                Modulo = p.Modulo,
+                Nivel = (int)p.Nivel
+            })
         };
     }
 }

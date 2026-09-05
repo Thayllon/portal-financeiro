@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthRepository } from '../repositories/auth.repository';
 import { User } from '../models/user.model';
 import { LoginResponse } from '../models/login-response.model';
+import { Permissao, NivelPermissao } from '../models/permissao.model';
 import { tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -35,13 +36,22 @@ export class AuthService {
     );
   }
 
+  temPermissao(modulo: string, nivelMinimo: number = NivelPermissao.Leitura): boolean {
+    const u = this.userSignal();
+    if (!u) return false;
+    if (u.isAdmin) return true;
+    const p = u.permissoes.find(x => x.modulo === modulo);
+    return !!p && p.nivel >= nivelMinimo;
+  }
+
   private setSession(response: LoginResponse) {
     const user: User = {
       usuarioId: response.usuarioId,
       nome: response.nome,
       email: response.email,
       isAdmin: response.isAdmin,
-      token: response.token
+      token: response.token,
+      permissoes: response.permissoes ?? []
     };
     this.saveUser(user);
     this.userSignal.set(user);
@@ -66,7 +76,8 @@ export class AuthService {
     if (!stored) return null;
 
     try {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      return { ...parsed, permissoes: parsed.permissoes ?? [] };
     } catch {
       return null;
     }

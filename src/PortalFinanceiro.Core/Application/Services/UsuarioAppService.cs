@@ -12,11 +12,13 @@ namespace PortalFinanceiro.Core.Application.Services;
 public class UsuarioAppService : IUsuarioAppService
 {
     private readonly IUsuarioRepository _repository;
+    private readonly IPermissaoUsuarioRepository _permissaoRepository;
     private readonly IPasswordService _passwordService;
 
-    public UsuarioAppService(IUsuarioRepository repository, IPasswordService passwordService)
+    public UsuarioAppService(IUsuarioRepository repository, IPermissaoUsuarioRepository permissaoRepository, IPasswordService passwordService)
     {
         _repository = repository;
+        _permissaoRepository = permissaoRepository;
         _passwordService = passwordService;
     }
 
@@ -39,6 +41,14 @@ public class UsuarioAppService : IUsuarioAppService
             return result.Erro!;
 
         await _repository.InserirAsync(result.Dado!);
+
+        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros" };
+        foreach (var modulo in modulos)
+        {
+            var permissao = PermissaoUsuario.Criar(result.Dado!.Id, modulo, NivelPermissao.Nenhum);
+            await _permissaoRepository.InserirAsync(permissao);
+        }
+
         return Mapear(result.Dado!);
     }
 

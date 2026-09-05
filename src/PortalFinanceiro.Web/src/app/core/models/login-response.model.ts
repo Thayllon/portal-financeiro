@@ -1,3 +1,5 @@
+import { Permissao } from './permissao.model';
+
 export interface LoginResponse {
   token: string;
   usuarioId: string;
@@ -6,4 +8,5 @@ export interface LoginResponse {
   isAdmin: boolean;
   precisaTrocarSenha: boolean;
   dataExpiracao: string;
+  permissoes?: Permissao[];
 }

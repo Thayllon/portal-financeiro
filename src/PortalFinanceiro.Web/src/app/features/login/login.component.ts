@@ -17,23 +17,23 @@ export class LoginComponent {
 
   email = 'admin@portal.com';
   senha = '';
-  loading = false;
-  erro = '';
+  loading = signal(false);
+  erro = signal('');
   showPassword = signal(false);
   trocandoSenha = signal(false);
   novaSenha = '';
   confirmarSenha = '';
   showNovaSenha = signal(false);
   showConfirmarSenha = signal(false);
-  salvandoSenha = false;
-  erroSenha = '';
+  salvandoSenha = signal(false);
+  erroSenha = signal('');
 
   onSubmit() {
-    this.loading = true;
-    this.erro = '';
+    this.loading.set(true);
+    this.erro.set('');
     this.authService.login(this.email, this.senha).subscribe({
       next: (response) => {
-        this.loading = false;
+        this.loading.set(false);
         if (response.precisaTrocarSenha) {
           this.trocandoSenha.set(true);
           return;
@@ -41,28 +41,28 @@ export class LoginComponent {
         this.router.navigate(['/']);
       },
       error: () => {
-        this.erro = 'Email ou senha inválidos.';
-        this.loading = false;
+        this.erro.set('Dados inválidos.');
+        this.loading.set(false);
       }
     });
   }
 
   onTrocarSenha() {
     if (this.novaSenha.length < 6) {
-      this.erroSenha = 'A nova senha deve ter no mínimo 6 caracteres.';
+      this.erroSenha.set('A nova senha deve ter no mínimo 6 caracteres.');
       return;
     }
     if (this.novaSenha !== this.confirmarSenha) {
-      this.erroSenha = 'As senhas não coincidem.';
+      this.erroSenha.set('As senhas não coincidem.');
       return;
     }
-    this.salvandoSenha = true;
-    this.erroSenha = '';
+    this.salvandoSenha.set(true);
+    this.erroSenha.set('');
     this.authService.trocarSenha(this.email, this.senha, this.novaSenha).subscribe({
       next: () => this.router.navigate(['/']),
       error: () => {
-        this.erroSenha = 'Não foi possível alterar a senha. Tente novamente.';
-        this.salvandoSenha = false;
+        this.erroSenha.set('Não foi possível alterar a senha. Tente novamente.');
+        this.salvandoSenha.set(false);
       }
     });
   }
@@ -71,6 +71,6 @@ export class LoginComponent {
     this.trocandoSenha.set(false);
     this.novaSenha = '';
     this.confirmarSenha = '';
-    this.erroSenha = '';
+    this.erroSenha.set('');
   }
 }

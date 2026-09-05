@@ -3,7 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { UsuarioRepository } from '../../core/repositories/usuario.repository';
+import { PermissaoRepository } from '../../core/repositories/permissao.repository';
 import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
+import { Permissao, NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -22,6 +24,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 })
 export class UsuariosComponent implements OnInit {
   private repo = inject(UsuarioRepository);
+  private permissaoRepo = inject(PermissaoRepository);
   private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
@@ -101,7 +104,7 @@ export class UsuariosComponent implements OnInit {
     this.modalVisible.set(true);
   }
 
-  abrirDrawer(item: Usuario) {
+  async abrirDrawer(item: Usuario) {
     this.form = { nome: item.nome, email: item.email, senha: '', isAdmin: item.isAdmin, ativo: item.ativo };
     this.editando.set(item);
     this.modalVisible.set(false);
@@ -109,8 +112,16 @@ export class UsuariosComponent implements OnInit {
     this.buscaPermissao.set('');
     this.permLevels = {};
     this.modulosPermissao.forEach(m => {
-      this.permLevels[m.id] = item.isAdmin ? 'write' : (m.id === 'dashboard' ? 'read' : 'none');
+      this.permLevels[m.id] = item.isAdmin ? 'write' : 'none';
     });
+    try {
+      const permissoes = await firstValueFrom(this.permissaoRepo.listar(item.id));
+      permissoes.forEach(p => {
+        if (p.modulo in this.permLevels) {
+          this.permLevels[p.modulo] = p.nivel === NivelPermissao.Escrita ? 'write' : p.nivel === NivelPermissao.Leitura ? 'read' : 'none';
+        }
+      });
+    } catch {}
   }
 
   fecharDrawer() {
@@ -173,12 +184,22 @@ export class UsuariosComponent implements OnInit {
     if (!this.form.nome || !this.form.email) { this.notify.error('Preencha os campos obrigatórios'); return; }
     this.salvando.set(true);
     try {
+      let usuarioId: string;
       if (this.editando()) {
-        await firstValueFrom(this.repo.atualizar(this.editando()!.id, this.form));
+        usuarioId = this.editando()!.id;
+        await firstValueFrom(this.repo.atualizar(usuarioId, this.form));
         this.notify.success('Usuário atualizado');
       } else {
-        await firstValueFrom(this.repo.criar(this.form));
+        const novo = await firstValueFrom(this.repo.criar(this.form));
+        usuarioId = novo.id;
         this.notify.success('Usuário criado');
+      }
+      if (!this.form.isAdmin) {
+        const permissoes: Permissao[] = Object.entries(this.permLevels).map(([modulo, nivel]) => ({
+          modulo,
+          nivel: nivel === 'write' ? NivelPermissao.Escrita : nivel === 'read' ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+        }));
+        await firstValueFrom(this.permissaoRepo.salvar(usuarioId, permissoes));
       }
       this.fecharDrawer();
       this.fecharModal();

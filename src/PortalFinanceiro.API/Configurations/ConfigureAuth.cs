@@ -1,7 +1,9 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.Infrastructure.Extensions;
 
 namespace PortalFinanceiro.API.Configurations;
@@ -35,6 +37,7 @@ public static class ConfigureAuth
         });
 
         services.AddAuthorization();
+        services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 
         return services;
     }
