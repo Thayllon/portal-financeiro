@@ -34,6 +34,9 @@ export class UsuariosComponent implements OnInit {
   salvando = signal(false);
   fluxoAdicional = signal(false);
   buscaPermissao = signal('');
+  dadosAberto = signal(true);
+  permissoesAberto = signal(true);
+  especiaisAberto = signal(true);
 
   permLevels: Record<string, 'none' | 'read' | 'write'> = {};
 
@@ -106,7 +109,7 @@ export class UsuariosComponent implements OnInit {
     this.buscaPermissao.set('');
     this.permLevels = {};
     this.modulosPermissao.forEach(m => {
-      this.permLevels[m.id] = item.isAdmin ? 'write' : 'none';
+      this.permLevels[m.id] = item.isAdmin ? 'write' : (m.id === 'dashboard' ? 'read' : 'none');
     });
   }
 

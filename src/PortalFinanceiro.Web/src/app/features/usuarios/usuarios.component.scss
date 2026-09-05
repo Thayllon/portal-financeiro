@@ -68,18 +68,32 @@
     .dados-usuario { display: flex; flex-direction: column; gap: 0.875rem; }
     .dados-usuario .field--alinhado { width: 22.875rem; }
     .drawer-section__header {
-      display: flex; align-items: center; gap: 0.375rem;
+      display: flex; align-items: center; justify-content: space-between;
       font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.05em;
       padding-bottom: 0.5rem; border-bottom: 1px solid var(--surface-border);
     }
+    .drawer-section__header-left { display: flex; align-items: center; gap: 0.375rem; }
+    .drawer-section__header--toggle {
+      cursor: pointer; padding: 0.5rem 0; border-bottom: 1px solid var(--surface-border);
+      user-select: none; transition: color var(--transition-fast);
+    }
+    .drawer-section__header--toggle:hover { color: var(--text-primary); }
+    .drawer-section__chevron { flex-shrink: 0; transition: transform var(--transition-fast); }
     .perm-section { display: flex; flex-direction: column; gap: 0.75rem; }
     .perm-section__header {
-      display: flex; align-items: center; gap: 0.375rem;
+      display: flex; align-items: center; justify-content: space-between;
       font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.05em;
       padding-bottom: 0.5rem; border-bottom: 1px solid var(--surface-border);
     }
+    .perm-section__header-left { display: flex; align-items: center; gap: 0.375rem; }
+    .perm-section__header--toggle {
+      cursor: pointer; padding: 0.5rem 0; border-bottom: 1px solid var(--surface-border);
+      user-select: none; transition: color var(--transition-fast);
+    }
+    .perm-section__header--toggle:hover { color: var(--text-primary); }
+    .perm-section__chevron { flex-shrink: 0; }
     .perm-banner {
       display: flex; gap: 0.625rem; align-items: flex-start;
       padding: 0.75rem 0.875rem;

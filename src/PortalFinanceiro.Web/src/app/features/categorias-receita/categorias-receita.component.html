@@ -42,7 +42,13 @@
             <article class="cat-card">
               <header class="cat-card__header">
                 <span class="cat-card__icon">
-                  <svg lucideIcon="folder" [size]="18" />
+                  @if (tabAtiva() === 'receita') {
+                    <svg lucideIcon="banknote-arrow-up" [size]="18" />
+                  } @else if (tabAtiva() === 'despesa') {
+                    <svg lucideIcon="banknote-arrow-down" [size]="18" />
+                  } @else {
+                    <svg lucideIcon="briefcase-business" [size]="18" />
+                  }
                 </span>
                 <div class="cat-card__meta">
                   <h3 class="cat-card__name">{{ c.nome }}</h3>

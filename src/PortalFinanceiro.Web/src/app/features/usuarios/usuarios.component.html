@@ -125,140 +125,155 @@
     >
       @if (editando(); as u) {
         <section class="drawer-section">
-          <header class="drawer-section__header">
-            <svg lucideIcon="pencil" [size]="16" />
-            <span>Dados do usuário</span>
+          <header class="drawer-section__header drawer-section__header--toggle" (click)="dadosAberto.set(!dadosAberto())">
+            <div class="drawer-section__header-left">
+              <svg lucideIcon="user-pen" [size]="16" />
+              <span>Dados do usuário</span>
+            </div>
+            <svg [lucideIcon]="dadosAberto() ? 'chevron-up' : 'chevron-down'" [size]="16" class="drawer-section__chevron" />
           </header>
-          <div class="dados-usuario">
-            <div class="field field--alinhado">
-              <label>Nome<span class="required">*</span></label>
-              <input [(ngModel)]="form.nome" placeholder="Ex: Maria Silva" class="input" />
-            </div>
-            <div class="field field--alinhado">
-              <label>E-mail<span class="required">*</span></label>
-              <input [(ngModel)]="form.email" type="email" placeholder="Ex: maria@exemplo.com" class="input" />
-            </div>
-            <div class="row-perfil">
-              <div class="field field--compact">
-                <label>Perfil</label>
-                <app-custom-select
-                  placeholder="Selecione"
-                  [options]="perfilOptions"
-                  [value]="form.isAdmin ? 'true' : 'false'"
-                  [disabled]="perfilBloqueado()"
-                  (valueChange)="form.isAdmin = $event === 'true'"
-                />
-                @if (perfilBloqueado()) {
-                  <span class="field-hint"><svg lucideIcon="lock" [size]="12" /> Perfil bloqueado</span>
-                }
+          @if (dadosAberto()) {
+            <div class="dados-usuario">
+              <div class="field field--alinhado">
+                <label>Nome<span class="required">*</span></label>
+                <input [(ngModel)]="form.nome" placeholder="Ex: Maria Silva" class="input" />
               </div>
-              <div class="field field--compact">
-                <label>Status</label>
-                <app-custom-select
-                  placeholder="Selecione"
-                  [options]="statusOptions"
-                  [value]="form.ativo ? 'true' : 'false'"
-                  [disabled]="statusBloqueado()"
-                  (valueChange)="form.ativo = $event === 'true'"
-                />
+              <div class="field field--alinhado">
+                <label>E-mail<span class="required">*</span></label>
+                <input [(ngModel)]="form.email" type="email" placeholder="Ex: maria@exemplo.com" class="input" />
               </div>
-              <div class="field field--acao">
-                <label>Ação</label>
-                <button type="button" class="btn-reset" title="Reset de senha">
-                  <svg lucideIcon="rotate-ccw-key" [size]="16" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section class="perm-section">
-          <header class="perm-section__header">
-            <svg lucideIcon="user-cog" [size]="16" />
-            <span>Permissões do usuário</span>
-          </header>
-
-          @if (u.isAdmin) {
-            <div class="perm-banner">
-              <svg lucideIcon="lock" [size]="16" />
-              <div>
-                <strong>Acesso total</strong>
-                <span>Administradores possuem escrita total em todos os módulos e as permissões não podem ser alteradas.</span>
+              <div class="row-perfil">
+                <div class="field field--compact">
+                  <label>Perfil</label>
+                  <app-custom-select
+                    placeholder="Selecione"
+                    [options]="perfilOptions"
+                    [value]="form.isAdmin ? 'true' : 'false'"
+                    [disabled]="perfilBloqueado()"
+                    (valueChange)="form.isAdmin = $event === 'true'"
+                  />
+                  @if (perfilBloqueado()) {
+                    <span class="field-hint"><svg lucideIcon="lock" [size]="12" /> Perfil bloqueado</span>
+                  }
+                </div>
+                <div class="field field--compact">
+                  <label>Status</label>
+                  <app-custom-select
+                    placeholder="Selecione"
+                    [options]="statusOptions"
+                    [value]="form.ativo ? 'true' : 'false'"
+                    [disabled]="statusBloqueado()"
+                    (valueChange)="form.ativo = $event === 'true'"
+                  />
+                </div>
+                <div class="field field--acao">
+                  <label>Ação</label>
+                  <button type="button" class="btn-reset" title="Reset de senha">
+                    <svg lucideIcon="rotate-ccw-key" [size]="16" />
+                  </button>
+                </div>
               </div>
             </div>
           }
-
-          <div class="perm-search">
-            <svg lucideIcon="search" [size]="16" class="perm-search__icon" />
-            <input
-              type="text"
-              class="perm-search__input"
-              placeholder="Buscar tela..."
-              [value]="buscaPermissao()"
-              (input)="buscaPermissao.set($any($event.target).value)"
-            />
-          </div>
-
-          <div class="perm-modules">
-            @for (m of modulosFiltrados(); track m.id) {
-              <div class="perm-module">
-                <div class="perm-module__icon" [style.background]="m.cor + '18'" [style.color]="m.cor">
-                  <svg [lucideIcon]="m.icone" [size]="18" />
-                </div>
-                <div class="perm-module__info">
-                  <span class="perm-module__nome">{{ m.nome }}</span>
-                  <span class="perm-module__desc">{{ m.descricao }}</span>
-                </div>
-                <div class="perm-module__actions">
-                  <button
-                    class="perm-btn"
-                    [class.perm-btn--none]="permLevels[m.id] === 'none'"
-                    [disabled]="u.isAdmin"
-                    (click)="alternarPermissao(m.id, 'none')"
-                  >
-                    <svg lucideIcon="eye-off" [size]="14" />
-                    Não pode ver
-                  </button>
-                  <button
-                    class="perm-btn"
-                    [class.perm-btn--read]="permLevels[m.id] === 'read'"
-                    [disabled]="u.isAdmin"
-                    (click)="alternarPermissao(m.id, 'read')"
-                  >
-                    <svg lucideIcon="eye" [size]="14" />
-                    Leitura
-                  </button>
-                  <button
-                    class="perm-btn"
-                    [class.perm-btn--write]="permLevels[m.id] === 'write'"
-                    [disabled]="u.isAdmin"
-                    (click)="alternarPermissao(m.id, 'write')"
-                  >
-                    <svg lucideIcon="pencil" [size]="14" />
-                    Escrita
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
         </section>
 
         <section class="perm-section">
-          <header class="perm-section__header">
-            <svg lucideIcon="user-star" [size]="16" />
-            <span>Permissões especiais</span>
+          <header class="perm-section__header perm-section__header--toggle" (click)="permissoesAberto.set(!permissoesAberto())">
+            <div class="perm-section__header-left">
+              <svg lucideIcon="user-cog" [size]="16" />
+              <span>Permissões do usuário</span>
+            </div>
+            <svg [lucideIcon]="permissoesAberto() ? 'chevron-up' : 'chevron-down'" [size]="16" class="perm-section__chevron" />
           </header>
 
-          <div class="perm-list">
-            <div class="perm-item">
-              <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
-              <span class="perm-item__label">Fluxo adicional</span>
-              <label class="switch">
-                <input type="checkbox" [checked]="fluxoAdicional()" (change)="alternarFluxoAdicional($event)" />
-                <span class="switch__slider"></span>
-              </label>
+          @if (permissoesAberto()) {
+            @if (u.isAdmin) {
+              <div class="perm-banner">
+                <svg lucideIcon="lock" [size]="16" />
+                <div>
+                  <strong>Acesso total</strong>
+                  <span>Administradores possuem escrita total em todos os módulos e as permissões não podem ser alteradas.</span>
+                </div>
+              </div>
+            }
+
+            <div class="perm-search">
+              <svg lucideIcon="search" [size]="16" class="perm-search__icon" />
+              <input
+                type="text"
+                class="perm-search__input"
+                placeholder="Buscar tela..."
+                [value]="buscaPermissao()"
+                (input)="buscaPermissao.set($any($event.target).value)"
+              />
             </div>
-          </div>
+
+            <div class="perm-modules">
+              @for (m of modulosFiltrados(); track m.id) {
+                <div class="perm-module">
+                  <div class="perm-module__icon" [style.background]="m.cor + '18'" [style.color]="m.cor">
+                    <svg [lucideIcon]="m.icone" [size]="18" />
+                  </div>
+                  <div class="perm-module__info">
+                    <span class="perm-module__nome">{{ m.nome }}</span>
+                    <span class="perm-module__desc">{{ m.descricao }}</span>
+                  </div>
+                  <div class="perm-module__actions">
+                    <button
+                      class="perm-btn"
+                      [class.perm-btn--none]="permLevels[m.id] === 'none'"
+                      [disabled]="u.isAdmin"
+                      (click)="alternarPermissao(m.id, 'none')"
+                    >
+                      <svg lucideIcon="eye-off" [size]="14" />
+                      Não pode ver
+                    </button>
+                    <button
+                      class="perm-btn"
+                      [class.perm-btn--read]="permLevels[m.id] === 'read'"
+                      [disabled]="u.isAdmin"
+                      (click)="alternarPermissao(m.id, 'read')"
+                    >
+                      <svg lucideIcon="eye" [size]="14" />
+                      Leitura
+                    </button>
+                    <button
+                      class="perm-btn"
+                      [class.perm-btn--write]="permLevels[m.id] === 'write'"
+                      [disabled]="u.isAdmin"
+                      (click)="alternarPermissao(m.id, 'write')"
+                    >
+                      <svg lucideIcon="pencil" [size]="14" />
+                      Escrita
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="perm-section">
+          <header class="perm-section__header perm-section__header--toggle" (click)="especiaisAberto.set(!especiaisAberto())">
+            <div class="perm-section__header-left">
+              <svg lucideIcon="user-star" [size]="16" />
+              <span>Permissões especiais</span>
+            </div>
+            <svg [lucideIcon]="especiaisAberto() ? 'chevron-up' : 'chevron-down'" [size]="16" class="perm-section__chevron" />
+          </header>
+
+          @if (especiaisAberto()) {
+            <div class="perm-list">
+              <div class="perm-item">
+                <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
+                <span class="perm-item__label">Fluxo adicional</span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="fluxoAdicional()" (change)="alternarFluxoAdicional($event)" />
+                  <span class="switch__slider"></span>
+                </label>
+              </div>
+            </div>
+          }
         </section>
       }
     </app-side-drawer>
