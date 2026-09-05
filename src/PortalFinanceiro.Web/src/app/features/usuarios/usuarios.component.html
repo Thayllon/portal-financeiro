@@ -62,7 +62,7 @@
                   </td>
                   <td class="cell-actions">
                     <button class="action-btn" title="Editar" (click)="abrirDrawer(u)">
-                      <svg lucideIcon="pencil" [size]="16" />
+            <svg lucideIcon="user-pen" [size]="16" />
                     </button>
                     <button class="action-btn" [class.action-btn--danger]="u.ativo" [title]="u.ativo ? 'Desativar' : 'Ativar'" (click)="alterarAtivo(u)">
                       <svg [lucideIcon]="u.ativo ? 'user-x' : 'user-check'" [size]="16" />
@@ -174,7 +174,7 @@
 
         <section class="perm-section">
           <header class="perm-section__header">
-            <svg lucideIcon="shield-check" [size]="16" />
+            <svg lucideIcon="user-cog" [size]="16" />
             <span>Permissões do usuário</span>
           </header>
 

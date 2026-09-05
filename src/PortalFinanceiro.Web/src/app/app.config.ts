@@ -16,7 +16,7 @@ import {
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
   LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
 LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar, LucideTrendingUpDown,
-LucideBuilding, LucideMinus,
+LucideBuilding, LucideMinus, LucideUserPen,
   } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -41,7 +41,7 @@ export const appConfig: ApplicationConfig = {
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
       LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
 LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar, LucideTrendingUpDown,
-LucideBuilding, LucideMinus,
+LucideBuilding, LucideMinus, LucideUserPen,
     ),
   ],
 };
