@@ -61,7 +61,7 @@
                     <app-status-badge [type]="u.ativo ? 'ativo' : 'inativo'" [label]="u.ativo ? 'Ativo' : 'Inativo'" />
                   </td>
                   <td class="cell-actions">
-                    <button class="action-btn" title="Editar" (click)="abrirModal(u)">
+                    <button class="action-btn" title="Editar" (click)="abrirDrawer(u)">
                       <svg lucideIcon="pencil" [size]="16" />
                     </button>
                     <button class="action-btn" [class.action-btn--danger]="u.ativo" [title]="u.ativo ? 'Desativar' : 'Ativar'" (click)="alterarAtivo(u)">
@@ -114,3 +114,6 @@
         </div>
       }
     </app-modal>
+
+    <app-side-drawer [visible]="drawerVisible()" title="Editar usuário" (visibleChange)="fecharDrawer()">
+    </app-side-drawer>

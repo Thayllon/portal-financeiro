@@ -1,0 +1,15 @@
+@if (visible()) {
+  <div class="drawer-overlay" (mousedown)="close()">
+    <aside class="drawer" (mousedown)="$event.stopPropagation()">
+      <header class="drawer__header">
+        <h3>{{ title() }}</h3>
+        <button class="close-btn" (click)="close()">
+          <svg lucideIcon="x" [size]="18" />
+        </button>
+      </header>
+      <div class="drawer__body">
+        <ng-content />
+      </div>
+    </aside>
+  </div>
+}

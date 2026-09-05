@@ -7,6 +7,7 @@ import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
+import { SideDrawerComponent } from '../../shared/components/side-drawer.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header.component';
 import { mensagemErro } from '../../shared/utils/api-error.util';
@@ -15,7 +16,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [FormsModule, ModalComponent, StatusBadgeComponent, SectionHeaderComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SideDrawerComponent, StatusBadgeComponent, SectionHeaderComponent, LucideDynamicIcon],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
@@ -28,6 +29,7 @@ export class UsuariosComponent implements OnInit {
   usuarios = signal<Usuario[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
+  drawerVisible = signal(false);
   editando = signal<Usuario | null>(null);
   salvando = signal(false);
 
@@ -46,13 +48,24 @@ export class UsuariosComponent implements OnInit {
 
   abrirModal(item?: Usuario) {
     if (item) {
-      this.form = { nome: item.nome, email: item.email, senha: '', isAdmin: item.isAdmin, ativo: item.ativo };
-      this.editando.set(item);
-    } else {
-      this.form = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
-      this.editando.set(null);
+      this.abrirDrawer(item);
+      return;
     }
+    this.form = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
+    this.editando.set(null);
     this.modalVisible.set(true);
+  }
+
+  abrirDrawer(item: Usuario) {
+    this.form = { nome: item.nome, email: item.email, senha: '', isAdmin: item.isAdmin, ativo: item.ativo };
+    this.editando.set(item);
+    this.modalVisible.set(false);
+    this.drawerVisible.set(true);
+  }
+
+  fecharDrawer() {
+    this.drawerVisible.set(false);
+    this.editando.set(null);
   }
 
   fecharModal() {
