@@ -33,6 +33,7 @@ export class UsuariosComponent implements OnInit {
   drawerVisible = signal(false);
   editando = signal<Usuario | null>(null);
   salvando = signal(false);
+  fluxoAdicional = signal(false);
 
   form: UsuarioRequest = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
 
@@ -109,6 +110,11 @@ export class UsuariosComponent implements OnInit {
 
   ehUsuarioAtual(item: Usuario): boolean {
     return item.id === this.auth.user()?.usuarioId;
+  }
+
+  alternarFluxoAdicional(event: Event) {
+    const ligado = (event.target as HTMLInputElement).checked;
+    this.fluxoAdicional.set(ligado);
   }
 
   async salvar() {
