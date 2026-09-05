@@ -104,6 +104,8 @@
 .btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
 .btn--danger { background: var(--color-error); border: 1px solid var(--color-error); color: #fff; }
 .btn--danger:hover { background: #b91c1c; }
+.btn--write { background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; }
+.btn--write:hover:not(:disabled) { background: var(--color-primary-hover); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @keyframes drawerFadeIn {

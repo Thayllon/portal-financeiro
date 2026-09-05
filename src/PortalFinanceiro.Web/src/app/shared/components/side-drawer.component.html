@@ -28,8 +28,8 @@
             <span></span>
           }
           <div class="drawer__footer-actions">
-            <button class="btn btn--primary" [disabled]="saving()" (click)="save.emit()">
-              {{ saving() ? 'Salvando...' : 'Salvar alterações' }}
+            <button class="btn btn--write" [disabled]="saving()" (click)="save.emit()">
+              {{ saving() ? 'Salvando...' : 'Salvar' }}
             </button>
           </div>
         </footer>
