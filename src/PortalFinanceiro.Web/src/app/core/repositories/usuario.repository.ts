@@ -23,4 +23,8 @@ export class UsuarioRepository extends BaseHttpRepository {
   alterarAtivo(id: string, ativo: boolean): Observable<any> {
     return this.patch<any>(`/usuarios/${id}/ativo`, { ativo });
   }
+
+  resetarSenha(id: string): Observable<any> {
+    return this.patch<any>(`/usuarios/${id}/senha`);
+  }
 }

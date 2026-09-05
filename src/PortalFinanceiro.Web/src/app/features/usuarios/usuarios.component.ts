@@ -155,6 +155,20 @@ export class UsuariosComponent implements OnInit {
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir usuário')); }
   }
 
+  async resetarSenhaAtual() {
+    const u = this.editando();
+    if (!u) return;
+    const ok = await this.confirmService.confirm(
+      'Reset de senha',
+      `A senha de "${u.nome}" será resetada para a senha padrão (123456). Deseja continuar?`
+    );
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.repo.resetarSenha(u.id));
+      this.notify.success(`Senha de "${u.nome}" resetada para 123456`);
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao resetar senha')); }
+  }
+
   async salvar() {
     if (!this.form.nome || !this.form.email) { this.notify.error('Preencha os campos obrigatórios'); return; }
     if (!this.editando() && !this.form.senha) { this.notify.error('Informe uma senha para o novo usuário'); return; }

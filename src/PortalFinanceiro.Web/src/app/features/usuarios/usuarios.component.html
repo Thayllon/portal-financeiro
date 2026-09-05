@@ -168,7 +168,7 @@
                 </div>
                 <div class="field field--acao">
                   <label>Ação</label>
-                  <button type="button" class="btn-reset" title="Reset de senha">
+                  <button type="button" class="btn-reset" title="Reset de senha" (click)="resetarSenhaAtual()">
                     <svg lucideIcon="rotate-ccw-key" [size]="16" />
                   </button>
                 </div>
@@ -218,21 +218,19 @@
                   <span class="perm-module__nome">{{ m.nome }}</span>
                 </div>
                 <div class="perm-module__actions" [class.perm-module__actions--center]="m.id === 'dashboard'">
-                  @if (m.id !== 'dashboard') {
-                    <button
-                      class="perm-btn"
-                      [class.perm-btn--none]="permLevels[m.id] === 'none'"
-                      [disabled]="u.isAdmin"
-                      (click)="alternarPermissao(m.id, 'none')"
-                    >
-                      <svg lucideIcon="eye-off" [size]="14" />
-                      Não pode ver
-                    </button>
-                  }
+                  <button
+                    class="perm-btn"
+                    [class.perm-btn--none]="permLevels[m.id] === 'none'"
+                    [disabled]="u.isAdmin"
+                    (click)="alternarPermissao(m.id, 'none')"
+                  >
+                    <svg lucideIcon="eye-off" [size]="14" />
+                    Não pode ver
+                  </button>
                   <button
                     class="perm-btn"
                     [class.perm-btn--read]="permLevels[m.id] === 'read'"
-                    [disabled]="u.isAdmin || m.id === 'dashboard'"
+                    [disabled]="u.isAdmin"
                     (click)="alternarPermissao(m.id, 'read')"
                   >
                     <svg lucideIcon="eye" [size]="14" />

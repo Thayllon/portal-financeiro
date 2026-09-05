@@ -81,6 +81,23 @@ public class UsuarioAppService : IUsuarioAppService
         return Resultado.Sucesso();
     }
 
+    public async Task<Result<Unit>> ResetarSenhaAsync(Guid id)
+    {
+        var usuario = await _repository.ObterPorIdAsync(id);
+        if (usuario is null)
+            return Erro.NaoEncontrado("Usuário");
+
+        const string senhaPadrao = "123456";
+        var senhaHash = _passwordService.Hash(senhaPadrao);
+
+        var result = usuario.Atualizar(usuario.Nome, usuario.Email, senhaHash, usuario.IsAdmin, usuario.Ativo);
+        if (!result.EhSucesso)
+            return result.Erro!;
+
+        await _repository.AtualizarAsync(usuario);
+        return Resultado.Sucesso();
+    }
+
     private static UsuarioResponse Mapear(Usuario u) => new()
     {
         Id = u.Id,
