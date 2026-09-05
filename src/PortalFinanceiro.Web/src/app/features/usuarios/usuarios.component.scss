@@ -55,7 +55,7 @@
     .checkbox-label input:disabled { cursor: not-allowed; opacity: 0.5; }
     .btn-reset {
       display: flex; align-items: center; justify-content: center;
-      width: 2.75rem; height: 2.75rem; flex-shrink: 0;
+      width: 2.375rem; height: 2.375rem; flex-shrink: 0;
       background: var(--color-error); color: #fff; border: none;
       border-radius: var(--radius-md);
       transition: all var(--transition-fast);
