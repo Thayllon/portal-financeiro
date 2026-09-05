@@ -13,6 +13,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       if (err.status === 401 && !isLoggingOut) {
         isLoggingOut = true;
         authService.logout();
+        setTimeout(() => { isLoggingOut = false; }, 3000);
       }
       return throwError(() => err);
     })

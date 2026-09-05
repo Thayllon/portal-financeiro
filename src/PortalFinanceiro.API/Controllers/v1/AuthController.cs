@@ -10,10 +10,12 @@ namespace PortalFinanceiro.API.Controllers.v1;
 public class AuthController : BaseController
 {
     private readonly IAuthAppService _authAppService;
+    private readonly IWebHostEnvironment _env;
 
-    public AuthController(IAuthAppService authAppService)
+    public AuthController(IAuthAppService authAppService, IWebHostEnvironment env)
     {
         _authAppService = authAppService;
+        _env = env;
     }
 
     [HttpPost("login")]
@@ -32,11 +34,14 @@ public class AuthController : BaseController
         return ApiResponse(result);
     }
 
-    /// <summary>Obtém um token do usuário administrador padrão de desenvolvimento (admin@portal.com / senhasenha).</summary>
+    /// <summary>Obtém um token do usuário administrador padrão de desenvolvimento (admin@portal.com / senhasenha). Disponível apenas em Development.</summary>
     [HttpGet("token")]
     [AllowAnonymous]
     public async Task<IActionResult> ObterTokenDev()
     {
+        if (!_env.IsDevelopment())
+            return NotFound();
+
         var result = await _authAppService.LoginAsync(new LoginRequest
         {
             Email = "admin@portal.com",
