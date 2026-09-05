@@ -63,6 +63,8 @@
     .btn-reset:hover { background: var(--color-error-bg); color: var(--color-error); }
     .row-perfil { display: flex; align-items: flex-end; gap: 0.75rem; }
     .field--compact { flex: 0 0 9.5rem; }
+    .field--acao { flex: 0 0 auto; }
+    .field--alinhado { max-width: 22.875rem; }
     .drawer-section { display: flex; flex-direction: column; gap: 0.875rem; }
     .drawer-section__header {
       display: flex; align-items: center; gap: 0.375rem;
