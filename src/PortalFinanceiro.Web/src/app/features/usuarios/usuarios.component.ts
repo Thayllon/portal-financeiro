@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -34,6 +34,23 @@ export class UsuariosComponent implements OnInit {
   salvando = signal(false);
 
   form: UsuarioRequest = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
+
+  permissoes = computed(() => {
+    const admin = this.editando()?.isAdmin ?? false;
+    return [
+      { rotulo: 'Receitas', icone: 'trending-up', escrita: admin },
+      { rotulo: 'Despesas', icone: 'trending-down', escrita: admin },
+      { rotulo: 'Contas', icone: 'wallet', escrita: admin },
+      { rotulo: 'Categorias', icone: 'tag', escrita: admin },
+      { rotulo: 'Clientes', icone: 'users', escrita: admin },
+      { rotulo: 'Parceiros', icone: 'handshake', escrita: admin },
+      { rotulo: 'Usuários', icone: 'user-cog', escrita: admin },
+    ];
+  });
+
+  iniciais(nome: string): string {
+    return nome.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
+  }
 
   ngOnInit() { this.carregar(); }
 

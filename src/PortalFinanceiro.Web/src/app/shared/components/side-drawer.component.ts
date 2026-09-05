@@ -11,6 +11,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 export class SideDrawerComponent {
   visible = input(false);
   title = input('');
+  icon = input('');
   visibleChange = output<boolean>();
 
   close() { this.visibleChange.emit(false); }

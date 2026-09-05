@@ -115,5 +115,59 @@
       }
     </app-modal>
 
-    <app-side-drawer [visible]="drawerVisible()" title="Editar usuário" (visibleChange)="fecharDrawer()">
+    <app-side-drawer [visible]="drawerVisible()" title="Editar usuário" icon="user" (visibleChange)="fecharDrawer()">
+      @if (editando(); as u) {
+        <div class="user-card">
+          <div class="avatar avatar--lg">{{ iniciais(u.nome) }}</div>
+          <div class="user-card__info">
+            <strong>{{ u.nome }}</strong>
+            <span>{{ u.email }}</span>
+            <div class="user-card__badges">
+              <app-status-badge [type]="u.isAdmin ? 'realizado' : 'pendente'" [label]="u.isAdmin ? 'Admin' : 'Usuário'" />
+              <app-status-badge [type]="u.ativo ? 'ativo' : 'inativo'" [label]="u.ativo ? 'Ativo' : 'Inativo'" />
+            </div>
+          </div>
+        </div>
+
+        <section class="perm-section">
+          <header class="perm-section__header">
+            <svg lucideIcon="shield-check" [size]="16" />
+            <span>Permissões do usuário</span>
+          </header>
+
+          @if (u.isAdmin) {
+            <div class="perm-banner">
+              <svg lucideIcon="lock" [size]="16" />
+              <div>
+                <strong>Acesso total</strong>
+                <span>Administradores possuem escrita total em todos os módulos e as permissões não podem ser alteradas.</span>
+              </div>
+            </div>
+          } @else {
+            <div class="perm-banner perm-banner--muted">
+              <svg lucideIcon="info" [size]="16" />
+              <div>
+                <strong>Nenhuma permissão configurada</strong>
+                <span>A estrutura de permissões será habilitada em breve.</span>
+              </div>
+            </div>
+          }
+
+          <div class="perm-list">
+            @for (p of permissoes(); track p.rotulo) {
+              <div class="perm-item">
+                <svg [lucideIcon]="p.icone" [size]="16" class="perm-item__icon" />
+                <span class="perm-item__label">{{ p.rotulo }}</span>
+                <label class="switch" [class.switch--locked]="u.isAdmin">
+                  <input type="checkbox" [checked]="p.escrita" disabled />
+                  <span class="switch__slider"></span>
+                </label>
+                @if (u.isAdmin) {
+                  <svg lucideIcon="lock" [size]="14" class="perm-item__lock" />
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
     </app-side-drawer>
