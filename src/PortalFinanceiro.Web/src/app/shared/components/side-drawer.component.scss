@@ -72,8 +72,11 @@
   flex-direction: column;
   gap: 1.5rem;
   overflow-y: auto;
+  scrollbar-width: none;
   flex: 1;
 }
+
+.drawer__body::-webkit-scrollbar { display: none; }
 
 .drawer__footer {
   display: flex;

@@ -10,14 +10,13 @@ import { ModalComponent } from '../../shared/components/modal.component';
 import { SideDrawerComponent } from '../../shared/components/side-drawer.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
-import { SectionHeaderComponent } from '../../shared/components/section-header.component';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, SectionHeaderComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, LucideDynamicIcon],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
