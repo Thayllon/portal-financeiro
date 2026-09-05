@@ -15,6 +15,10 @@ public class ReceitaProjecao
     public string Categoria { get; set; } = string.Empty;
     public Guid? IdSubcategoria { get; set; }
     public string Subcategoria { get; set; } = string.Empty;
+    public Guid? IdParceiro { get; set; }
+    public string Parceiro { get; set; } = string.Empty;
+    public Guid? IdCliente { get; set; }
+    public string Cliente { get; set; } = string.Empty;
     public StatusMensal Status { get; set; }
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }

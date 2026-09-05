@@ -18,3 +18,5 @@ export const NivelPermissao = {
   Leitura: 1,
   Escrita: 2,
 } as const;
+
+export const MODULO_FLUXO_ADICIONAL = 'fluxo-adicional-receita';

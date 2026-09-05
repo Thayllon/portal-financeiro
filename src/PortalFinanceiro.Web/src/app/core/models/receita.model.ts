@@ -1,3 +1,11 @@
+export interface ReceitaServico {
+  id: string;
+  categoriaServicoId: string;
+  categoriaServico: string;
+  subcategoriaServicoId?: string;
+  subcategoriaServico: string;
+}
+
 export interface Receita {
   id: string;
   descricao: string;
@@ -9,12 +17,22 @@ export interface Receita {
   categoria: string;
   idSubcategoria?: string;
   subcategoria: string;
+  idParceiro?: string;
+  parceiro: string;
+  idCliente?: string;
+  cliente: string;
+  servicos: ReceitaServico[];
   status: number;
   dataRealizacao?: string;
   idRegra?: string;
   ehRecorrente: boolean;
   ativo: boolean;
   dataCadastro: string;
+}
+
+export interface ReceitaServicoRequest {
+  categoriaServicoId: string;
+  subcategoriaServicoId?: string;
 }
 
 export interface ReceitaRequest {
@@ -24,6 +42,9 @@ export interface ReceitaRequest {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
+  idParceiro?: string;
+  idCliente?: string;
+  servicos?: ReceitaServicoRequest[];
   repete: boolean;
   dia?: number;
   diaUtil?: boolean;

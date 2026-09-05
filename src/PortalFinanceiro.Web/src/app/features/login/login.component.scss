@@ -86,6 +86,11 @@
       padding-right: 2.5rem;
     }
 
+    .password-wrapper input::-webkit-credentials-auto-fill-button,
+    .password-wrapper input::-webkit-strong-password-auto-fill-button {
+      display: none !important;
+    }
+
     .toggle-password {
       position: absolute;
       right: 0.5rem;
