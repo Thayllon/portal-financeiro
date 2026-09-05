@@ -210,15 +210,15 @@
 
             <div class="perm-modules">
               @for (m of modulosFiltrados(); track m.id) {
-                <div class="perm-module">
+              <div class="perm-module">
                 <div class="perm-module__icon">
                   <svg [lucideIcon]="m.icone" [size]="18" />
                 </div>
-                  <div class="perm-module__info">
-                    <span class="perm-module__nome">{{ m.nome }}</span>
-                    <span class="perm-module__desc">{{ m.descricao }}</span>
-                  </div>
-                  <div class="perm-module__actions">
+                <div class="perm-module__info">
+                  <span class="perm-module__nome">{{ m.nome }}</span>
+                </div>
+                <div class="perm-module__actions" [class.perm-module__actions--center]="m.id === 'dashboard'">
+                  @if (m.id !== 'dashboard') {
                     <button
                       class="perm-btn"
                       [class.perm-btn--none]="permLevels[m.id] === 'none'"
@@ -228,15 +228,17 @@
                       <svg lucideIcon="eye-off" [size]="14" />
                       Não pode ver
                     </button>
-                    <button
-                      class="perm-btn"
-                      [class.perm-btn--read]="permLevels[m.id] === 'read'"
-                      [disabled]="u.isAdmin"
-                      (click)="alternarPermissao(m.id, 'read')"
-                    >
-                      <svg lucideIcon="eye" [size]="14" />
-                      Leitura
-                    </button>
+                  }
+                  <button
+                    class="perm-btn"
+                    [class.perm-btn--read]="permLevels[m.id] === 'read'"
+                    [disabled]="u.isAdmin || m.id === 'dashboard'"
+                    (click)="alternarPermissao(m.id, 'read')"
+                  >
+                    <svg lucideIcon="eye" [size]="14" />
+                    Leitura
+                  </button>
+                  @if (m.id !== 'dashboard') {
                     <button
                       class="perm-btn"
                       [class.perm-btn--write]="permLevels[m.id] === 'write'"
@@ -246,8 +248,9 @@
                       <svg lucideIcon="pencil" [size]="14" />
                       Escrita
                     </button>
-                  </div>
+                  }
                 </div>
+              </div>
               }
             </div>
           }
