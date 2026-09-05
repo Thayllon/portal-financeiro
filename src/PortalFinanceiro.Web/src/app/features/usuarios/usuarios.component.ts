@@ -116,6 +116,23 @@ export class UsuariosComponent implements OnInit {
     this.fluxoAdicional.set(ligado);
   }
 
+  async excluirAtual() {
+    const u = this.editando();
+    if (!u) return;
+    if (this.ehUsuarioAtual(u)) {
+      this.notify.error('Você não pode excluir o próprio usuário');
+      return;
+    }
+    const ok = await this.confirmService.confirm('Excluir usuário', `Deseja excluir "${u.nome}"?`);
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.repo.alterarAtivo(u.id, false));
+      this.notify.success('Usuário excluído');
+      this.fecharDrawer();
+      await this.carregar();
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir usuário')); }
+  }
+
   async salvar() {
     if (!this.form.nome || !this.form.email) { this.notify.error('Preencha os campos obrigatórios'); return; }
     if (!this.editando() && !this.form.senha) { this.notify.error('Informe uma senha para o novo usuário'); return; }

@@ -80,10 +80,16 @@
 
 .drawer__footer {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-top: 1px solid var(--surface-border);
+}
+
+.drawer__footer-actions {
+  display: flex;
   justify-content: flex-end;
   gap: 0.5rem;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid var(--surface-border);
 }
 
 .btn {
@@ -95,6 +101,8 @@
 .btn--ghost:hover { background: var(--surface-hover); }
 .btn--primary { background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; }
 .btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn--danger { background: transparent; border: 1px solid var(--color-error); color: var(--color-error); }
+.btn--danger:hover { background: var(--color-error-bg); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 @keyframes drawerFadeIn {

@@ -13,9 +13,11 @@ export class SideDrawerComponent {
   title = input('');
   icon = input('');
   showFooter = input(false);
+  showDelete = input(false);
   saving = input(false);
   visibleChange = output<boolean>();
   save = output<void>();
+  exclude = output<void>();
 
   close() { this.visibleChange.emit(false); }
 }

@@ -117,9 +117,11 @@
       title="Editar usuário"
       icon="user"
       [showFooter]="true"
+      [showDelete]="!!editando()"
       [saving]="salvando()"
       (visibleChange)="fecharDrawer()"
       (save)="salvar()"
+      (exclude)="excluirAtual()"
     >
       @if (editando(); as u) {
         <section class="drawer-section">
