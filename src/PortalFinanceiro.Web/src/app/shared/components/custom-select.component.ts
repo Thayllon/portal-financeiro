@@ -1,4 +1,4 @@
-import { Component, input, output, signal, effect, ElementRef, HostListener, forwardRef, OnDestroy } from '@angular/core';
+import { Component, input, output, signal, computed, effect, ElementRef, HostListener, forwardRef, OnDestroy } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { LucideDynamicIcon } from '@lucide/angular';
 
@@ -27,10 +27,11 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   placeholder = input('Selecione...');
   options = input<SelectOption[]>([]);
   value = input('');
+  disabled = input(false);
   valueChange = output<string>();
 
   private _disabled = signal(false);
-  disabled = this._disabled.asReadonly();
+  isDisabled = computed(() => this.disabled() || this._disabled());
 
   internalValue = signal('');
   isOpen = signal(false);
@@ -72,7 +73,7 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   }
 
   toggle() {
-    if (!this.disabled()) {
+    if (!this.isDisabled()) {
       const willOpen = !this.isOpen();
       this.isOpen.set(willOpen);
       if (willOpen) {

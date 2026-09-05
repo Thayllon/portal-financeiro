@@ -141,20 +141,26 @@
           <div class="grid-2">
             <div class="field">
               <label>Perfil</label>
-              <select [(ngModel)]="form.isAdmin" class="input" [disabled]="perfilBloqueado()">
-                <option [ngValue]="false">Usuário</option>
-                <option [ngValue]="true">Admin</option>
-              </select>
+              <app-custom-select
+                placeholder="Selecione o perfil"
+                [options]="perfilOptions"
+                [value]="form.isAdmin ? 'true' : 'false'"
+                [disabled]="perfilBloqueado()"
+                (valueChange)="form.isAdmin = $event === 'true'"
+              />
               @if (perfilBloqueado()) {
                 <span class="field-hint"><svg lucideIcon="lock" [size]="12" /> Perfil bloqueado</span>
               }
             </div>
             <div class="field">
               <label>Status</label>
-              <select [(ngModel)]="form.ativo" class="input" [disabled]="statusBloqueado()">
-                <option [ngValue]="true">Ativo</option>
-                <option [ngValue]="false">Inativo</option>
-              </select>
+              <app-custom-select
+                placeholder="Selecione o status"
+                [options]="statusOptions"
+                [value]="form.ativo ? 'true' : 'false'"
+                [disabled]="statusBloqueado()"
+                (valueChange)="form.ativo = $event === 'true'"
+              />
             </div>
           </div>
         </section>

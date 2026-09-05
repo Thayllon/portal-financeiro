@@ -8,6 +8,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { SideDrawerComponent } from '../../shared/components/side-drawer.component';
+import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { SectionHeaderComponent } from '../../shared/components/section-header.component';
 import { mensagemErro } from '../../shared/utils/api-error.util';
@@ -16,7 +17,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SideDrawerComponent, StatusBadgeComponent, SectionHeaderComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, SectionHeaderComponent, LucideDynamicIcon],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
@@ -34,6 +35,16 @@ export class UsuariosComponent implements OnInit {
   salvando = signal(false);
 
   form: UsuarioRequest = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
+
+  perfilOptions: SelectOption[] = [
+    { value: 'false', label: 'Usuário' },
+    { value: 'true', label: 'Admin' },
+  ];
+
+  statusOptions: SelectOption[] = [
+    { value: 'true', label: 'Ativo' },
+    { value: 'false', label: 'Inativo' },
+  ];
 
   perfilBloqueado = computed(() => {
     const u = this.editando();

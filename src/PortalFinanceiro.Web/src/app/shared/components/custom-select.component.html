@@ -1,4 +1,4 @@
-<div class="cs" [class.cs--open]="isOpen()" [class.cs--up]="openUp()" [class.cs--disabled]="disabled()">
+<div class="cs" [class.cs--open]="isOpen()" [class.cs--up]="openUp()" [class.cs--disabled]="isDisabled()">
   @if (label()) {
     <label class="cs__label">{{ label() }}</label>
   }
@@ -9,7 +9,7 @@
     (click)="toggle()"
     [attr.aria-expanded]="isOpen()"
     [attr.aria-haspopup]="'listbox'"
-    [disabled]="disabled()"
+    [disabled]="isDisabled()"
   >
     <span class="cs__trigger-text">{{ selectedLabel() || placeholder() }}</span>
     <svg lucideIcon="chevron-down" class="cs__chevron" [size]="16" [class.cs__chevron--open]="isOpen()" />
