@@ -171,7 +171,6 @@ export class UsuariosComponent implements OnInit {
 
   async salvar() {
     if (!this.form.nome || !this.form.email) { this.notify.error('Preencha os campos obrigatórios'); return; }
-    if (!this.editando() && !this.form.senha) { this.notify.error('Informe uma senha para o novo usuário'); return; }
     this.salvando.set(true);
     try {
       if (this.editando()) {

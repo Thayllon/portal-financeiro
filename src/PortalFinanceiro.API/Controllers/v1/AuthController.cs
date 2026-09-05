@@ -24,6 +24,14 @@ public class AuthController : BaseController
         return ApiResponse(result);
     }
 
+    [HttpPost("alterar-senha")]
+    [AllowAnonymous]
+    public async Task<IActionResult> AlterarSenha([FromBody] AlterarSenhaRequest request)
+    {
+        var result = await _authAppService.AlterarSenhaAsync(request);
+        return ApiResponse(result);
+    }
+
     /// <summary>Obtém um token do usuário administrador padrão de desenvolvimento (admin@portal.com / senhasenha).</summary>
     [HttpGet("token")]
     [AllowAnonymous]

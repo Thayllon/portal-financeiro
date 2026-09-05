@@ -92,10 +92,19 @@
         <label>E-mail<span class="required">*</span></label>
         <input [(ngModel)]="form.email" type="email" placeholder="Ex: maria@exemplo.com" class="input" />
       </div>
-      <div class="field">
-        <label>{{ editando() ? 'Nova senha (opcional)' : 'Senha' }}<span class="required">*</span></label>
-        <input [(ngModel)]="form.senha" type="password" placeholder="{{ editando() ? 'Deixe em branco para manter' : 'Defina uma senha' }}" class="input" />
-      </div>
+      @if (!editando()) {
+        <div class="field">
+          <span class="field-hint">
+            <svg lucideIcon="info" [size]="12" /> A senha inicial do usuário será <strong>portal</strong>
+            e deverá ser trocada no primeiro acesso.
+          </span>
+        </div>
+      } @else {
+        <div class="field">
+          <label>Nova senha (opcional)</label>
+          <input [(ngModel)]="form.senha" type="password" placeholder="Deixe em branco para manter" class="input" />
+        </div>
+      }
       <div class="field">
         <label class="checkbox-label">
           <input type="checkbox" [(ngModel)]="form.isAdmin" />

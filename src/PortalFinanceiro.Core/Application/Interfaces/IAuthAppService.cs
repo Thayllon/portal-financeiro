@@ -7,4 +7,5 @@ namespace PortalFinanceiro.Core.Application.Interfaces;
 public interface IAuthAppService
 {
     Task<Result<LoginResponse>> LoginAsync(LoginRequest request);
+    Task<Result<LoginResponse>> AlterarSenhaAsync(AlterarSenhaRequest request);
 }

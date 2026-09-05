@@ -140,3 +140,19 @@
       background: #fef2f2;
       border-radius: 6px;
     }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: #0f766e;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: color 0.15s ease;
+    }
+
+    .link-btn:hover {
+      color: #0d6b64;
+      text-decoration: underline;
+    }

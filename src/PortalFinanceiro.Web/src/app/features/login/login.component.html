@@ -1,50 +1,112 @@
-    <div class="login-wrapper">
+<div class="login-wrapper">
       <div class="login-card">
         <div class="login-header">
           <h1>Portal Financeiro</h1>
-          <p>Acesse sua conta para gerenciar suas finanças</p>
-        </div>
-        <form (ngSubmit)="onSubmit()" class="login-form">
-          <div class="field">
-            <label for="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              [(ngModel)]="email"
-              name="email"
-              placeholder="seu&#64;email.com"
-              required
-              autocomplete="email"
-            />
-          </div>
-          <div class="field">
-            <label for="senha">Senha</label>
-            <div class="password-wrapper">
-              <input
-                id="senha"
-                [type]="showPassword() ? 'text' : 'password'"
-                [(ngModel)]="senha"
-                name="senha"
-                placeholder="Sua senha"
-                required
-                autocomplete="current-password"
-              />
-              <button type="button" class="toggle-password" (click)="showPassword.set(!showPassword())">
-                @if (showPassword()) {
-                  <svg lucideIcon="eye-off" [size]="16" />
-                } @else {
-                  <svg lucideIcon="eye" [size]="16" />
-                }
-              </button>
-            </div>
-            <span class="field-hint">Mínimo 6 caracteres</span>
-          </div>
-          @if (erro) {
-            <div class="error">{{ erro }}</div>
+          @if (trocandoSenha()) {
+            <p>Defina sua nova senha para continuar</p>
+          } @else {
+            <p>Acesse sua conta para gerenciar suas finanças</p>
           }
-          <button type="submit" [disabled]="loading">
-            {{ loading ? 'Entrando...' : 'Entrar' }}
-          </button>
-        </form>
+        </div>
+
+        @if (trocandoSenha()) {
+          <form (ngSubmit)="onTrocarSenha()" class="login-form">
+            <div class="field">
+              <label for="novaSenha">Nova senha</label>
+              <div class="password-wrapper">
+                <input
+                  id="novaSenha"
+                  [type]="showNovaSenha() ? 'text' : 'password'"
+                  [(ngModel)]="novaSenha"
+                  name="novaSenha"
+                  placeholder="Digite a nova senha"
+                  required
+                  autocomplete="new-password"
+                />
+                <button type="button" class="toggle-password" (click)="showNovaSenha.set(!showNovaSenha())">
+                  @if (showNovaSenha()) {
+                    <svg lucideIcon="eye-off" [size]="16" />
+                  } @else {
+                    <svg lucideIcon="eye" [size]="16" />
+                  }
+                </button>
+              </div>
+              <span class="field-hint">Mínimo 6 caracteres</span>
+            </div>
+            <div class="field">
+              <label for="confirmarSenha">Confirmar nova senha</label>
+              <div class="password-wrapper">
+                <input
+                  id="confirmarSenha"
+                  [type]="showConfirmarSenha() ? 'text' : 'password'"
+                  [(ngModel)]="confirmarSenha"
+                  name="confirmarSenha"
+                  placeholder="Repita a nova senha"
+                  required
+                  autocomplete="new-password"
+                />
+                <button type="button" class="toggle-password" (click)="showConfirmarSenha.set(!showConfirmarSenha())">
+                  @if (showConfirmarSenha()) {
+                    <svg lucideIcon="eye-off" [size]="16" />
+                  } @else {
+                    <svg lucideIcon="eye" [size]="16" />
+                  }
+                </button>
+              </div>
+            </div>
+            @if (erroSenha) {
+              <div class="error">{{ erroSenha }}</div>
+            }
+            <button type="submit" [disabled]="salvandoSenha">
+              {{ salvandoSenha ? 'Salvando...' : 'Definir nova senha' }}
+            </button>
+            <button type="button" class="link-btn" (click)="voltarLogin()">
+              Voltar para o login
+            </button>
+          </form>
+        } @else {
+          <form (ngSubmit)="onSubmit()" class="login-form">
+            <div class="field">
+              <label for="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                [(ngModel)]="email"
+                name="email"
+                placeholder="seu&#64;email.com"
+                required
+                autocomplete="email"
+              />
+            </div>
+            <div class="field">
+              <label for="senha">Senha</label>
+              <div class="password-wrapper">
+                <input
+                  id="senha"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  [(ngModel)]="senha"
+                  name="senha"
+                  placeholder="Sua senha"
+                  required
+                  autocomplete="current-password"
+                />
+                <button type="button" class="toggle-password" (click)="showPassword.set(!showPassword())">
+                  @if (showPassword()) {
+                    <svg lucideIcon="eye-off" [size]="16" />
+                  } @else {
+                    <svg lucideIcon="eye" [size]="16" />
+                  }
+                </button>
+              </div>
+              <span class="field-hint">Mínimo 6 caracteres</span>
+            </div>
+            @if (erro) {
+              <div class="error">{{ erro }}</div>
+            }
+            <button type="submit" [disabled]="loading">
+              {{ loading ? 'Entrando...' : 'Entrar' }}
+            </button>
+          </form>
+        }
       </div>
     </div>

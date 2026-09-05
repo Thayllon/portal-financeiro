@@ -4,5 +4,6 @@ export interface LoginResponse {
   nome: string;
   email: string;
   isAdmin: boolean;
+  precisaTrocarSenha: boolean;
   dataExpiracao: string;
 }

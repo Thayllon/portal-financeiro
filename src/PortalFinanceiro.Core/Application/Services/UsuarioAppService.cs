@@ -1,6 +1,7 @@
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
+using PortalFinanceiro.Core.Domain.Constants;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Interfaces.Services;
@@ -31,10 +32,7 @@ public class UsuarioAppService : IUsuarioAppService
         if (existente is not null)
             return Erro.Conflito("EMAIL_EXISTENTE", "Este email já está cadastrado.");
 
-        if (string.IsNullOrWhiteSpace(request.Senha))
-            return Erro.Validacao("SENHA_OBRIGATORIA", "Senha é obrigatória.");
-
-        var senhaHash = _passwordService.Hash(request.Senha);
+        var senhaHash = _passwordService.Hash(SenhasPadrao.PrimeiroAcesso);
 
         var result = Usuario.Criar(request.Nome, request.Email, senhaHash, request.IsAdmin);
         if (!result.EhSucesso)
@@ -87,8 +85,7 @@ public class UsuarioAppService : IUsuarioAppService
         if (usuario is null)
             return Erro.NaoEncontrado("Usuário");
 
-        const string senhaPadrao = "123456";
-        var senhaHash = _passwordService.Hash(senhaPadrao);
+        var senhaHash = _passwordService.Hash(SenhasPadrao.Reset);
 
         var result = usuario.Atualizar(usuario.Nome, usuario.Email, senhaHash, usuario.IsAdmin, usuario.Ativo);
         if (!result.EhSucesso)
