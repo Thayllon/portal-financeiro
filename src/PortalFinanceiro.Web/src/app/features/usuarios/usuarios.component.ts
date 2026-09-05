@@ -34,9 +34,9 @@ export class UsuariosComponent implements OnInit {
   salvando = signal(false);
   fluxoAdicional = signal(false);
   buscaPermissao = signal('');
-  dadosAberto = signal(true);
-  permissoesAberto = signal(true);
-  especiaisAberto = signal(true);
+  dadosAberto = signal(false);
+  permissoesAberto = signal(false);
+  especiaisAberto = signal(false);
 
   permLevels: Record<string, 'none' | 'read' | 'write'> = {};
 
