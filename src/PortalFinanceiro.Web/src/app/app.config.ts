@@ -15,7 +15,7 @@ import {
   LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
   LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
-  LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey,
+  LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar,
   } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -39,7 +39,7 @@ export const appConfig: ApplicationConfig = {
       LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
       LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
-LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey,
+LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar,
     ),
   ],
 };
