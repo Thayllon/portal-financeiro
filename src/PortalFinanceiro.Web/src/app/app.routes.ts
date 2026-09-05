@@ -11,7 +11,7 @@ export const routes: Routes = [
     component: LayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent), canActivate: [permissionGuard('dashboard')] },
+      { path: '', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'receitas', loadComponent: () => import('./features/receitas/receitas.component').then(m => m.ReceitasComponent), canActivate: [permissionGuard('receitas')] },
       { path: 'despesas', loadComponent: () => import('./features/despesas/despesas.component').then(m => m.DespesasComponent), canActivate: [permissionGuard('despesas')] },
       { path: 'contas', loadComponent: () => import('./features/contas/contas.component').then(m => m.ContasComponent), canActivate: [permissionGuard('contas')] },
