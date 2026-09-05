@@ -115,19 +115,49 @@
       }
     </app-modal>
 
-    <app-side-drawer [visible]="drawerVisible()" title="Editar usuário" icon="user" (visibleChange)="fecharDrawer()">
+    <app-side-drawer
+      [visible]="drawerVisible()"
+      title="Editar usuário"
+      icon="user"
+      [showFooter]="true"
+      [saving]="salvando()"
+      (visibleChange)="fecharDrawer()"
+      (save)="salvar()"
+    >
       @if (editando(); as u) {
-        <div class="user-card">
-          <div class="avatar avatar--lg">{{ iniciais(u.nome) }}</div>
-          <div class="user-card__info">
-            <strong>{{ u.nome }}</strong>
-            <span>{{ u.email }}</span>
-            <div class="user-card__badges">
-              <app-status-badge [type]="u.isAdmin ? 'realizado' : 'pendente'" [label]="u.isAdmin ? 'Admin' : 'Usuário'" />
-              <app-status-badge [type]="u.ativo ? 'ativo' : 'inativo'" [label]="u.ativo ? 'Ativo' : 'Inativo'" />
+        <section class="drawer-section">
+          <header class="drawer-section__header">
+            <svg lucideIcon="pencil" [size]="16" />
+            <span>Dados do usuário</span>
+          </header>
+          <div class="field">
+            <label>Nome<span class="required">*</span></label>
+            <input [(ngModel)]="form.nome" placeholder="Ex: Maria Silva" class="input" />
+          </div>
+          <div class="field">
+            <label>E-mail<span class="required">*</span></label>
+            <input [(ngModel)]="form.email" type="email" placeholder="Ex: maria@exemplo.com" class="input" />
+          </div>
+          <div class="grid-2">
+            <div class="field">
+              <label>Perfil</label>
+              <select [(ngModel)]="form.isAdmin" class="input" [disabled]="perfilBloqueado()">
+                <option [ngValue]="false">Usuário</option>
+                <option [ngValue]="true">Admin</option>
+              </select>
+              @if (perfilBloqueado()) {
+                <span class="field-hint"><svg lucideIcon="lock" [size]="12" /> Perfil bloqueado</span>
+              }
+            </div>
+            <div class="field">
+              <label>Status</label>
+              <select [(ngModel)]="form.ativo" class="input" [disabled]="statusBloqueado()">
+                <option [ngValue]="true">Ativo</option>
+                <option [ngValue]="false">Inativo</option>
+              </select>
             </div>
           </div>
-        </div>
+        </section>
 
         <section class="perm-section">
           <header class="perm-section__header">

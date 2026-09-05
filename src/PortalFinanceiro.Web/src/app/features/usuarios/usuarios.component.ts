@@ -35,6 +35,16 @@ export class UsuariosComponent implements OnInit {
 
   form: UsuarioRequest = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
 
+  perfilBloqueado = computed(() => {
+    const u = this.editando();
+    return !!u && (u.isAdmin || this.ehUsuarioAtual(u));
+  });
+
+  statusBloqueado = computed(() => {
+    const u = this.editando();
+    return !!u && this.ehUsuarioAtual(u);
+  });
+
   permissoes = computed(() => {
     const admin = this.editando()?.isAdmin ?? false;
     return [
@@ -47,10 +57,6 @@ export class UsuariosComponent implements OnInit {
       { rotulo: 'Usuários', icone: 'user-cog', escrita: admin },
     ];
   });
-
-  iniciais(nome: string): string {
-    return nome.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase();
-  }
 
   ngOnInit() { this.carregar(); }
 
@@ -106,6 +112,7 @@ export class UsuariosComponent implements OnInit {
         await firstValueFrom(this.repo.criar(this.form));
         this.notify.success('Usuário criado');
       }
+      this.fecharDrawer();
       this.fecharModal();
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar usuário')); }

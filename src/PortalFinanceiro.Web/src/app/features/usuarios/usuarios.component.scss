@@ -43,6 +43,7 @@
     .action-btn--danger:hover { border-color: var(--color-error); color: var(--color-error); }
     .field { display: flex; flex-direction: column; gap: 0.375rem; }
     .field label { font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
+    .field-hint { font-size: 0.6875rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 0.25rem; }
     .input {
       padding: 0.625rem 0.75rem; border: 1px solid var(--surface-border); border-radius: var(--radius-md);
       font-size: 0.875rem; color: var(--text-primary); background: var(--content-surface);
@@ -52,22 +53,14 @@
     .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
     .checkbox-label input { width: 1rem; height: 1rem; accent-color: var(--color-primary); }
     .checkbox-label input:disabled { cursor: not-allowed; opacity: 0.5; }
-    .avatar {
-      width: 2.25rem; height: 2.25rem; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--color-primary-tint); color: var(--color-primary);
-      border-radius: 50%; font-weight: 600; font-size: 0.8125rem;
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+    .drawer-section { display: flex; flex-direction: column; gap: 0.875rem; }
+    .drawer-section__header {
+      display: flex; align-items: center; gap: 0.375rem;
+      font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--surface-border);
     }
-    .avatar--lg { width: 3rem; height: 3rem; font-size: 1rem; }
-    .user-card {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 1rem; border: 1px solid var(--surface-border);
-      border-radius: var(--radius-lg);
-    }
-    .user-card__info { display: flex; flex-direction: column; gap: 0.125rem; min-width: 0; }
-    .user-card__info strong { font-size: 0.9375rem; color: var(--text-primary); }
-    .user-card__info span { font-size: 0.8125rem; color: var(--text-muted); word-break: break-all; }
-    .user-card__badges { display: flex; gap: 0.375rem; margin-top: 0.375rem; }
     .perm-section { display: flex; flex-direction: column; gap: 0.75rem; }
     .perm-section__header {
       display: flex; align-items: center; gap: 0.375rem;

@@ -17,6 +17,14 @@
       <div class="drawer__body">
         <ng-content />
       </div>
+      @if (showFooter()) {
+        <footer class="drawer__footer">
+          <button class="btn btn--ghost" (click)="close()">Cancelar</button>
+          <button class="btn btn--primary" [disabled]="saving()" (click)="save.emit()">
+            {{ saving() ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </footer>
+      }
     </aside>
   </div>
 }
