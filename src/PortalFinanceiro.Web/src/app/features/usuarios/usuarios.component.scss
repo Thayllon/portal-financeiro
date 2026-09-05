@@ -64,9 +64,9 @@
     .row-perfil { display: flex; align-items: flex-end; gap: 0.75rem; }
     .field--compact { flex: 0 0 9.5rem; }
     .field--acao { flex: 0 0 auto; }
-    .field--alinhado { max-width: 22.875rem; }
     .drawer-section { display: flex; flex-direction: column; gap: 0.875rem; }
-    .dados-usuario { display: flex; flex-direction: column; align-items: center; gap: 0.875rem; }
+    .dados-usuario { display: flex; flex-direction: column; gap: 0.875rem; }
+    .dados-usuario .field--alinhado { width: 22.875rem; }
     .drawer-section__header {
       display: flex; align-items: center; gap: 0.375rem;
       font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
