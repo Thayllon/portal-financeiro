@@ -1,0 +1,39 @@
+@if (visible()) {
+  <div class="drawer-overlay" (mousedown)="close()">
+    <aside class="drawer" (mousedown)="$event.stopPropagation()">
+      <header class="drawer__header">
+        <div class="drawer__header-left">
+          @if (icon()) {
+            <span class="drawer__badge">
+              <svg [lucideIcon]="icon()" [size]="18" />
+            </span>
+          }
+          <h3>{{ title() }}</h3>
+        </div>
+        <button class="close-btn" (click)="close()">
+          <svg lucideIcon="x" [size]="18" />
+        </button>
+      </header>
+      <div class="drawer__body">
+        <ng-content />
+      </div>
+      @if (showFooter()) {
+        <footer class="drawer__footer">
+          @if (showDelete()) {
+            <button class="btn btn--danger" (click)="exclude.emit()">
+              <svg lucideIcon="trash-2" [size]="16" />
+              Excluir usuário
+            </button>
+          } @else {
+            <span></span>
+          }
+          <div class="drawer__footer-actions">
+            <button class="btn btn--write" [disabled]="saving()" (click)="save.emit()">
+              {{ saving() ? 'Salvando...' : 'Salvar' }}
+            </button>
+          </div>
+        </footer>
+      }
+    </aside>
+  </div>
+}

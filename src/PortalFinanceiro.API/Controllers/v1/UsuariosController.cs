@@ -44,4 +44,18 @@ public class UsuariosController : BaseController
         var result = await _service.AlterarAtivoAsync(id, request.Ativo);
         return ApiResponse(result);
     }
+
+    [HttpPatch("{id}/senha")]
+    public async Task<IActionResult> ResetarSenha(Guid id)
+    {
+        var result = await _service.ResetarSenhaAsync(id);
+        return ApiResponse(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Excluir(Guid id)
+    {
+        var result = await _service.ExcluirAsync(id);
+        return ApiResponse(result);
+    }
 }

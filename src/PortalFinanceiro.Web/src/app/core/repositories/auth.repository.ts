@@ -11,4 +11,8 @@ export class AuthRepository extends BaseHttpRepository {
   login(email: string, senha: string): Observable<LoginResponse> {
     return this.post<LoginResponse>('/auth/login', { email, senha });
   }
+
+  alterarSenha(email: string, senhaAtual: string, novaSenha: string): Observable<LoginResponse> {
+    return this.post<LoginResponse>('/auth/alterar-senha', { email, senhaAtual, novaSenha });
+  }
 }

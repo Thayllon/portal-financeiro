@@ -8,8 +8,17 @@ public class ReceitaRequest
     public Guid IdConta { get; set; }
     public Guid IdCategoria { get; set; }
     public Guid? IdSubcategoria { get; set; }
+    public Guid? IdParceiro { get; set; }
+    public Guid? IdCliente { get; set; }
+    public List<ReceitaServicoRequest>? Servicos { get; set; }
     public bool Repete { get; set; }
     public int? Dia { get; set; }
     public bool? DiaUtil { get; set; }
     public DateTime? DataFim { get; set; }
+}
+
+public class ReceitaServicoRequest
+{
+    public Guid CategoriaServicoId { get; set; }
+    public Guid? SubcategoriaServicoId { get; set; }
 }

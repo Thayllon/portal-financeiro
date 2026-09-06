@@ -20,18 +20,26 @@ public class TokenService : ITokenService
 
     public int ExpirationHours => _options.ExpirationHours;
 
-    public string GerarToken(Usuario usuario)
+    public string GerarToken(Usuario usuario, IEnumerable<PermissaoUsuario>? permissoes = null)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new Claim(ClaimTypes.Name, usuario.Nome),
-            new Claim(ClaimTypes.Email, usuario.Email),
-            new Claim(ClaimTypes.Role, usuario.IsAdmin ? "Admin" : "Usuario")
+            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+            new(ClaimTypes.Name, usuario.Nome),
+            new(ClaimTypes.Email, usuario.Email),
+            new(ClaimTypes.Role, usuario.IsAdmin ? "Admin" : "Usuario")
         };
+
+        if (permissoes is not null)
+        {
+            foreach (var p in permissoes)
+            {
+                claims.Add(new Claim($"perm:{p.Modulo}", ((int)p.Nivel).ToString()));
+            }
+        }
 
         var token = new JwtSecurityToken(
             issuer: _options.Issuer,

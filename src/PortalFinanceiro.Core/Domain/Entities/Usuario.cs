@@ -10,6 +10,7 @@ public class Usuario
     public string SenhaHash { get; private set; } = string.Empty;
     public bool IsAdmin { get; private set; }
     public bool Ativo { get; private set; }
+    public bool PrimeiroAcesso { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
 
@@ -32,6 +33,7 @@ public class Usuario
             SenhaHash = senhaHash,
             IsAdmin = isAdmin,
             Ativo = true,
+            PrimeiroAcesso = true,
             DataCadastro = DateTime.UtcNow,
             DataAlteracao = DateTime.UtcNow
         };
@@ -60,7 +62,10 @@ public class Usuario
         Nome = nome;
         Email = email;
         if (!string.IsNullOrWhiteSpace(senhaHash))
+        {
             SenhaHash = senhaHash;
+            PrimeiroAcesso = false;
+        }
         IsAdmin = isAdmin;
         Ativo = ativo;
         DataAlteracao = DateTime.UtcNow;
@@ -70,6 +75,19 @@ public class Usuario
     public void Desativar()
     {
         Ativo = false;
+        DataAlteracao = DateTime.UtcNow;
+    }
+
+    public void MarcarSenhaAlterada()
+    {
+        PrimeiroAcesso = false;
+        DataAlteracao = DateTime.UtcNow;
+    }
+
+    public void ResetarSenha(string novaSenhaHash)
+    {
+        SenhaHash = novaSenhaHash;
+        PrimeiroAcesso = true;
         DataAlteracao = DateTime.UtcNow;
     }
 }

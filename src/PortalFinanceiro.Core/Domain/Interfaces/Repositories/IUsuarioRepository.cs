@@ -9,4 +9,5 @@ public interface IUsuarioRepository
     Task<IEnumerable<Usuario>> ListarAsync();
     Task InserirAsync(Usuario entity);
     Task AtualizarAsync(Usuario entity);
+    Task ExcluirAsync(Guid id);
 }

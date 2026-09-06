@@ -3,12 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { ReceitaRepository, LancamentoFiltros as ReceitaFiltros } from '../../core/repositories/lancamento.repository';
-import { CategoriaReceitaRepository } from '../../core/repositories/categoria.repository';
+import { CategoriaReceitaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
+import { PessoaRepository } from '../../core/repositories/pessoa.repository';
+import { AuthService } from '../../core/services/auth.service';
 import { Receita, ReceitaRequest } from '../../core/models/receita.model';
 import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
+import { Pessoa } from '../../core/models/pessoa.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
@@ -34,10 +37,16 @@ export class ReceitasComponent implements OnInit {
   private repo = inject(ReceitaRepository);
   private catRepo = inject(CategoriaReceitaRepository);
   private contaRepo = inject(ContaBancariaRepository);
+  private pessoaRepo = inject(PessoaRepository);
+  private catServicoRepo = inject(CategoriaServicoRepository);
+  private auth = inject(AuthService);
 
   items = signal<Receita[]>([]);
   categorias = signal<Categoria[]>([]);
   contas = signal<ContaBancaria[]>([]);
+  parceiros = signal<Pessoa[]>([]);
+  clientes = signal<Pessoa[]>([]);
+  categoriasServico = signal<Categoria[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
   editando = signal<Receita | null>(null);
@@ -58,13 +67,17 @@ export class ReceitasComponent implements OnInit {
 
   readonly statusRealizado = STATUS_REALIZADO;
 
+  fluxoAdicional = computed(() => this.auth.temFluxoAdicionalReceita());
   contasOptions = computed(() => this.contas().map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` })));
   categoriasOptions = computed(() => this.categorias().map(c => ({ value: c.id, label: c.nome })));
+  parceirosOptions = computed(() => this.parceiros().map(p => ({ value: p.id, label: p.nome })));
+  clientesOptions = computed(() => this.clientes().map(c => ({ value: c.id, label: c.nome })));
+  categoriasServicoOptions = computed(() => this.categoriasServico().map(c => ({ value: c.id, label: c.nome })));
 
   pagination = useListPagination(this.items, { initialPageSize: 10 });
 
   async ngOnInit() {
-    await Promise.all([this.carregarCategorias(), this.carregarContas()]);
+    await Promise.all([this.carregarCategorias(), this.carregarContas(), this.carregarParceiros(), this.carregarClientes(), this.carregarCategoriasServico()]);
     await this.carregar();
   }
 
@@ -90,6 +103,24 @@ export class ReceitasComponent implements OnInit {
 
   async carregarContas() {
     try { this.contas.set(await firstValueFrom(this.contaRepo.listar())); } catch {}
+  }
+
+  async carregarParceiros() {
+    try {
+      const todas = await firstValueFrom(this.pessoaRepo.listar());
+      this.parceiros.set(todas.filter(p => p.tipo === 'Parceiro'));
+    } catch {}
+  }
+
+  async carregarClientes() {
+    try {
+      const todas = await firstValueFrom(this.pessoaRepo.listar());
+      this.clientes.set(todas.filter(p => p.tipo === 'Cliente'));
+    } catch {}
+  }
+
+  async carregarCategoriasServico() {
+    try { this.categoriasServico.set(await firstValueFrom(this.catServicoRepo.listar())); } catch {}
   }
 
   onBuscaChange() {
@@ -120,6 +151,17 @@ export class ReceitasComponent implements OnInit {
       categoria: item.categoria,
       idSubcategoria: item.idSubcategoria,
       subcategoria: item.subcategoria,
+      idParceiro: item.idParceiro,
+      parceiro: item.parceiro,
+      idCliente: item.idCliente,
+      cliente: item.cliente,
+      servicos: item.servicos?.map(s => ({
+        id: s.id,
+        categoriaServicoId: s.categoriaServicoId,
+        categoriaServico: s.categoriaServico,
+        subcategoriaServicoId: s.subcategoriaServicoId,
+        subcategoriaServico: s.subcategoriaServico
+      })) ?? [],
       status: STATUS_PENDENTE,
       ehRecorrente: false,
       ativo: true,
@@ -139,6 +181,12 @@ export class ReceitasComponent implements OnInit {
         idConta: data.idConta,
         idCategoria: data.idCategoria,
         idSubcategoria: data.idSubcategoria || undefined,
+        idParceiro: data.idParceiro || undefined,
+        servicos: data.servicos?.map(s => ({
+          categoriaServicoId: s.categoriaServicoId,
+          subcategoriaServicoId: s.subcategoriaServicoId
+        })) || undefined,
+        idCliente: data.idCliente || undefined,
         repete: data.repete,
         dia: data.repete ? data.dia : undefined,
         diaUtil: data.repete ? data.diaUtil : undefined,

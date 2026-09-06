@@ -158,6 +158,8 @@ Toda resposta de erro da API deve seguir o contrato único tipado `{ codigo, men
 - **Signals**: Usar `signal()` para estado, `computed()` para derivados
 - **Componentes standalone** com `imports` explícitos
 - **Lucide icons**: `<svg lucideIcon="nome" [size]="16" />` — ícones devem estar registrados em `provideLucideIcons()` em `app.config.ts`
+- **Selects/Dropdowns**: usar SEMPRE `app-custom-select` (padrão reutilizável) — proibido `<select>` nativo
+- **Inputs de texto**: usar a classe `input` do design system
 - **Forms**: ControlValueAccessor para componentes reutilizáveis (CustomSelect)
 - **SCSS**: Usar mixins do design system (`_page-layout.scss`, `_data-table.scss`, `_forms.scss`, `_responsive.scss`, `_transitions.scss`) — NÃO copiar/colar estilos inline entre features
 - **Params**: NUNCA enviar `undefined` como query param — usar spread condicional

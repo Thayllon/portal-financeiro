@@ -1,0 +1,9 @@
+ALTER TABLE Receita ADD IdParceiro UNIQUEIDENTIFIER NULL;
+ALTER TABLE Receita ADD IdCategoriaServico UNIQUEIDENTIFIER NULL;
+ALTER TABLE Receita ADD IdSubcategoriaServico UNIQUEIDENTIFIER NULL;
+ALTER TABLE Receita ADD IdCliente UNIQUEIDENTIFIER NULL;
+
+ALTER TABLE Receita ADD CONSTRAINT FK_Receita_Parceiro FOREIGN KEY (IdParceiro) REFERENCES Pessoa(Id);
+ALTER TABLE Receita ADD CONSTRAINT FK_Receita_CategoriaServico FOREIGN KEY (IdCategoriaServico) REFERENCES CategoriaServico(Id);
+ALTER TABLE Receita ADD CONSTRAINT FK_Receita_SubcategoriaServico FOREIGN KEY (IdSubcategoriaServico) REFERENCES CategoriaServico(Id);
+ALTER TABLE Receita ADD CONSTRAINT FK_Receita_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id);

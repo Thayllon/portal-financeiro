@@ -1,6 +1,7 @@
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
+using PortalFinanceiro.Core.Domain.Constants;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Interfaces.Services;
@@ -11,11 +12,13 @@ namespace PortalFinanceiro.Core.Application.Services;
 public class UsuarioAppService : IUsuarioAppService
 {
     private readonly IUsuarioRepository _repository;
+    private readonly IPermissaoUsuarioRepository _permissaoRepository;
     private readonly IPasswordService _passwordService;
 
-    public UsuarioAppService(IUsuarioRepository repository, IPasswordService passwordService)
+    public UsuarioAppService(IUsuarioRepository repository, IPermissaoUsuarioRepository permissaoRepository, IPasswordService passwordService)
     {
         _repository = repository;
+        _permissaoRepository = permissaoRepository;
         _passwordService = passwordService;
     }
 
@@ -31,16 +34,21 @@ public class UsuarioAppService : IUsuarioAppService
         if (existente is not null)
             return Erro.Conflito("EMAIL_EXISTENTE", "Este email já está cadastrado.");
 
-        if (string.IsNullOrWhiteSpace(request.Senha))
-            return Erro.Validacao("SENHA_OBRIGATORIA", "Senha é obrigatória.");
-
-        var senhaHash = _passwordService.Hash(request.Senha);
+        var senhaHash = _passwordService.Hash(SenhasPadrao.PrimeiroAcesso);
 
         var result = Usuario.Criar(request.Nome, request.Email, senhaHash, request.IsAdmin);
         if (!result.EhSucesso)
             return result.Erro!;
 
         await _repository.InserirAsync(result.Dado!);
+
+        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros" };
+        foreach (var modulo in modulos)
+        {
+            var permissao = PermissaoUsuario.Criar(result.Dado!.Id, modulo, NivelPermissao.Nenhum);
+            await _permissaoRepository.InserirAsync(permissao);
+        }
+
         return Mapear(result.Dado!);
     }
 
@@ -81,6 +89,30 @@ public class UsuarioAppService : IUsuarioAppService
         return Resultado.Sucesso();
     }
 
+    public async Task<Result<Unit>> ResetarSenhaAsync(Guid id)
+    {
+        var usuario = await _repository.ObterPorIdAsync(id);
+        if (usuario is null)
+            return Erro.NaoEncontrado("Usuário");
+
+        var novaSenhaHash = _passwordService.Hash(SenhasPadrao.Reset);
+        usuario.ResetarSenha(novaSenhaHash);
+
+        await _repository.AtualizarAsync(usuario);
+        return Resultado.Sucesso();
+    }
+
+    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    {
+        var usuario = await _repository.ObterPorIdAsync(id);
+        if (usuario is null)
+            return Erro.NaoEncontrado("Usuário");
+
+        await _permissaoRepository.ExcluirPorUsuarioIdAsync(id);
+        await _repository.ExcluirAsync(id);
+        return Resultado.Sucesso();
+    }
+
     private static UsuarioResponse Mapear(Usuario u) => new()
     {
         Id = u.Id,
@@ -88,6 +120,7 @@ public class UsuarioAppService : IUsuarioAppService
         Email = u.Email,
         IsAdmin = u.IsAdmin,
         Ativo = u.Ativo,
+        PrimeiroAcesso = u.PrimeiroAcesso,
         DataCadastro = u.DataCadastro
     };
 }

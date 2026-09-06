@@ -1,26 +1,30 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { UsuarioRepository } from '../../core/repositories/usuario.repository';
+import { PermissaoRepository } from '../../core/repositories/permissao.repository';
 import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
+import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
+import { SideDrawerComponent } from '../../shared/components/side-drawer.component';
+import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
-import { SectionHeaderComponent } from '../../shared/components/section-header.component';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [FormsModule, ModalComponent, StatusBadgeComponent, SectionHeaderComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, LucideDynamicIcon],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
 export class UsuariosComponent implements OnInit {
   private repo = inject(UsuarioRepository);
+  private permissaoRepo = inject(PermissaoRepository);
   private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
@@ -28,10 +32,56 @@ export class UsuariosComponent implements OnInit {
   usuarios = signal<Usuario[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
+  drawerVisible = signal(false);
   editando = signal<Usuario | null>(null);
   salvando = signal(false);
+  fluxoAdicional = signal(false);
+  buscaPermissao = signal('');
+  dadosAberto = signal(false);
+  permissoesAberto = signal(false);
+  especiaisAberto = signal(false);
+
+  permLevels: Record<string, 'none' | 'read' | 'write'> = {};
+
+  modulosPermissao = [
+    { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line' },
+    { id: 'receitas', nome: 'Receitas', descricao: 'Gestão de receitas e lançamentos financeiros.', icone: 'trending-up' },
+    { id: 'despesas', nome: 'Despesas', descricao: 'Gestão de despesas e pagamentos.', icone: 'trending-down' },
+    { id: 'contas', nome: 'Contas bancárias', descricao: 'Cadastro e gerenciamento de contas.', icone: 'wallet' },
+    { id: 'categorias', nome: 'Categorias', descricao: 'Cadastro e organização de categorias.', icone: 'tag' },
+    { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
+    { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake' },
+    { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'users' },
+  ];
+
+  modulosFiltrados = computed(() => {
+    const busca = this.buscaPermissao().toLowerCase();
+    return this.modulosPermissao.filter(m =>
+      m.nome.toLowerCase().includes(busca) || m.descricao.toLowerCase().includes(busca)
+    );
+  });
 
   form: UsuarioRequest = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
+
+  perfilOptions: SelectOption[] = [
+    { value: 'false', label: 'Usuário' },
+    { value: 'true', label: 'Admin' },
+  ];
+
+  statusOptions: SelectOption[] = [
+    { value: 'true', label: 'Ativo' },
+    { value: 'false', label: 'Inativo' },
+  ];
+
+  perfilBloqueado = computed(() => {
+    const u = this.editando();
+    return !!u && (u.isAdmin || this.ehUsuarioAtual(u));
+  });
+
+  statusBloqueado = computed(() => {
+    const u = this.editando();
+    return !!u && this.ehUsuarioAtual(u);
+  });
 
   ngOnInit() { this.carregar(); }
 
@@ -46,13 +96,39 @@ export class UsuariosComponent implements OnInit {
 
   abrirModal(item?: Usuario) {
     if (item) {
-      this.form = { nome: item.nome, email: item.email, senha: '', isAdmin: item.isAdmin, ativo: item.ativo };
-      this.editando.set(item);
-    } else {
-      this.form = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
-      this.editando.set(null);
+      this.abrirDrawer(item);
+      return;
     }
+    this.form = { nome: '', email: '', senha: '', isAdmin: false, ativo: true };
+    this.editando.set(null);
     this.modalVisible.set(true);
+  }
+
+  async abrirDrawer(item: Usuario) {
+    this.form = { nome: item.nome, email: item.email, senha: '', isAdmin: item.isAdmin, ativo: item.ativo };
+    this.editando.set(item);
+    this.modalVisible.set(false);
+    this.drawerVisible.set(true);
+    this.buscaPermissao.set('');
+    this.permLevels = {};
+    this.modulosPermissao.forEach(m => {
+      this.permLevels[m.id] = item.isAdmin ? 'write' : 'none';
+    });
+    try {
+      const permissoes = await firstValueFrom(this.permissaoRepo.listar(item.id));
+      permissoes.forEach(p => {
+        if (p.modulo in this.permLevels) {
+          this.permLevels[p.modulo] = p.nivel === NivelPermissao.Escrita ? 'write' : p.nivel === NivelPermissao.Leitura ? 'read' : 'none';
+        }
+      });
+      const fluxoPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL);
+      this.fluxoAdicional.set(!!fluxoPerm && fluxoPerm.nivel >= NivelPermissao.Leitura);
+    } catch {}
+  }
+
+  fecharDrawer() {
+    this.drawerVisible.set(false);
+    this.editando.set(null);
   }
 
   fecharModal() {
@@ -64,18 +140,74 @@ export class UsuariosComponent implements OnInit {
     return item.id === this.auth.user()?.usuarioId;
   }
 
+  alternarFluxoAdicional(event: Event) {
+    const ligado = (event.target as HTMLInputElement).checked;
+    this.fluxoAdicional.set(ligado);
+  }
+
+  alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
+    const u = this.editando();
+    if (u?.isAdmin) return;
+    this.permLevels[moduloId] = nivel;
+  }
+
+  async excluirAtual() {
+    const u = this.editando();
+    if (!u) return;
+    if (this.ehUsuarioAtual(u)) {
+      this.notify.error('Você não pode excluir o próprio usuário');
+      return;
+    }
+    const ok = await this.confirmService.confirm('Excluir usuário', `Deseja excluir "${u.nome}"?`);
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.repo.excluir(u.id));
+      this.notify.success('Usuário excluído');
+      this.fecharDrawer();
+      await this.carregar();
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir usuário')); }
+  }
+
+  async resetarSenhaAtual() {
+    const u = this.editando();
+    if (!u) return;
+    const ok = await this.confirmService.confirm(
+      'Reset de senha',
+      `A senha de "${u.nome}" será resetada para a senha padrão (portal). Deseja continuar?`
+    );
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.repo.resetarSenha(u.id));
+      this.notify.success(`Senha de "${u.nome}" resetada para portal`);
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao resetar senha')); }
+  }
+
   async salvar() {
     if (!this.form.nome || !this.form.email) { this.notify.error('Preencha os campos obrigatórios'); return; }
-    if (!this.editando() && !this.form.senha) { this.notify.error('Informe uma senha para o novo usuário'); return; }
     this.salvando.set(true);
     try {
+      let usuarioId: string;
       if (this.editando()) {
-        await firstValueFrom(this.repo.atualizar(this.editando()!.id, this.form));
+        usuarioId = this.editando()!.id;
+        await firstValueFrom(this.repo.atualizar(usuarioId, this.form));
         this.notify.success('Usuário atualizado');
       } else {
-        await firstValueFrom(this.repo.criar(this.form));
+        const novo = await firstValueFrom(this.repo.criar(this.form));
+        usuarioId = novo.id;
         this.notify.success('Usuário criado');
       }
+      if (!this.form.isAdmin) {
+        const permissoes: Permissao[] = Object.entries(this.permLevels).map(([modulo, nivel]) => ({
+          modulo,
+          nivel: nivel === 'write' ? NivelPermissao.Escrita : nivel === 'read' ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+        }));
+        permissoes.push({
+          modulo: MODULO_FLUXO_ADICIONAL,
+          nivel: this.fluxoAdicional() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+        });
+        await firstValueFrom(this.permissaoRepo.salvar(usuarioId, permissoes));
+      }
+      this.fecharDrawer();
       this.fecharModal();
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar usuário')); }

@@ -12,10 +12,24 @@ public class ReceitaResponse
     public string Categoria { get; set; } = string.Empty;
     public Guid? IdSubcategoria { get; set; }
     public string Subcategoria { get; set; } = string.Empty;
+    public Guid? IdParceiro { get; set; }
+    public string Parceiro { get; set; } = string.Empty;
+    public Guid? IdCliente { get; set; }
+    public string Cliente { get; set; } = string.Empty;
+    public List<ReceitaServicoResponse> Servicos { get; set; } = new();
     public int Status { get; set; }
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }
     public bool EhRecorrente { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+}
+
+public class ReceitaServicoResponse
+{
+    public Guid Id { get; set; }
+    public Guid CategoriaServicoId { get; set; }
+    public string CategoriaServico { get; set; } = string.Empty;
+    public Guid? SubcategoriaServicoId { get; set; }
+    public string SubcategoriaServico { get; set; } = string.Empty;
 }

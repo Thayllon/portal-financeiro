@@ -6,7 +6,18 @@ import { CustomSelectComponent, SelectOption } from './custom-select.component';
 import { CurrencyInputDirective } from '../directives/currency-input.directive';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
+import { Pessoa } from '../../core/models/pessoa.model';
 import { NotificationService } from '../../core/services/notification.service';
+
+export interface CategoriaServicoBloco {
+  categoriaServicoId: string;
+  subcategoriasSelecionadas: string[];
+}
+
+export interface ServicoItem {
+  categoriaServicoId: string;
+  subcategoriaServicoId?: string;
+}
 
 export interface LancamentoForm {
   descricao: string;
@@ -15,6 +26,11 @@ export interface LancamentoForm {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
+  temParceiro: boolean;
+  idParceiro?: string;
+  categoriasServicoBloco: CategoriaServicoBloco[];
+  servicos?: ServicoItem[];
+  idCliente?: string;
   repete: boolean;
   dia?: number;
   diaUtil?: boolean;
@@ -29,6 +45,9 @@ interface LancamentoItem {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
+  idParceiro?: string;
+  servicos?: { categoriaServicoId: string; subcategoriaServicoId?: string }[];
+  idCliente?: string;
 }
 
 @Component({
@@ -46,6 +65,10 @@ export class LancamentoModalComponent {
   tipoLabel = input('receita');
   categorias = input<Categoria[]>([]);
   contas = input<ContaBancaria[]>([]);
+  fluxoAdicional = input(false);
+  parceiros = input<Pessoa[]>([]);
+  clientes = input<Pessoa[]>([]);
+  categoriasServico = input<Categoria[]>([]);
   salvando = input(false);
 
   visibleChange = output<boolean>();
@@ -59,6 +82,17 @@ export class LancamentoModalComponent {
   contasOptions = signal<SelectOption[]>([]);
   categoriasOptions = signal<SelectOption[]>([]);
   subcategoriasOptions = signal<SelectOption[]>([]);
+  parceirosOptions = signal<SelectOption[]>([]);
+  clientesOptions = signal<SelectOption[]>([]);
+  categoriasServicoPais = signal<SelectOption[]>([]);
+  subcategoriasServicoMap = signal<Map<string, SelectOption[]>>(new Map());
+
+  categoriasServicoDisponiveis = computed(() => {
+    const usadas = new Set(this.form().categoriasServicoBloco.map(b => b.categoriaServicoId));
+    return this.categoriasServicoPais().filter(o => !usadas.has(o.value));
+  });
+
+  ultimoPasso = computed(() => this.fluxoAdicional() ? 5 : 2);
 
   constructor() {
     effect(() => {
@@ -71,12 +105,27 @@ export class LancamentoModalComponent {
     });
 
     effect(() => {
+      this.atualizarCategoriasServico();
+    });
+
+    effect(() => {
+      const p = this.parceiros();
+      this.parceirosOptions.set(p.map(x => ({ value: x.id, label: x.nome })));
+    });
+
+    effect(() => {
+      const c = this.clientes();
+      this.clientesOptions.set(c.map(x => ({ value: x.id, label: x.nome })));
+    });
+
+    effect(() => {
       const ini = this.editando();
       const visible = this.visible();
       if (visible) {
         this.fieldErrors.set({});
         this.passoAtual.set(0);
         if (ini) {
+          const blocos = this.agruparServicosEmBlocos(ini.servicos ?? []);
           this.form.set({
             descricao: ini.descricao,
             valor: ini.valor,
@@ -84,6 +133,10 @@ export class LancamentoModalComponent {
             idConta: ini.idConta,
             idCategoria: ini.idCategoria,
             idSubcategoria: ini.idSubcategoria ?? undefined,
+            temParceiro: !!ini.idParceiro,
+            idParceiro: ini.idParceiro ?? undefined,
+            categoriasServicoBloco: blocos,
+            idCliente: ini.idCliente ?? undefined,
             repete: false,
             dia: 1,
             diaUtil: false,
@@ -97,6 +150,18 @@ export class LancamentoModalComponent {
     });
   }
 
+  private agruparServicosEmBlocos(servicos: { categoriaServicoId: string; subcategoriaServicoId?: string }[]): CategoriaServicoBloco[] {
+    const mapa = new Map<string, Set<string>>();
+    for (const s of servicos) {
+      if (!mapa.has(s.categoriaServicoId)) mapa.set(s.categoriaServicoId, new Set());
+      if (s.subcategoriaServicoId) mapa.get(s.categoriaServicoId)!.add(s.subcategoriaServicoId);
+    }
+    return Array.from(mapa.entries()).map(([catId, subs]) => ({
+      categoriaServicoId: catId,
+      subcategoriasSelecionadas: Array.from(subs)
+    }));
+  }
+
   private atualizarCategorizacao() {
     const cats = this.categorias();
     const paiId = this.form().idCategoria;
@@ -108,9 +173,80 @@ export class LancamentoModalComponent {
     );
   }
 
+  private atualizarCategoriasServico() {
+    const cats = this.categoriasServico();
+    const pais = cats.filter(c => !c.categoriaPaiId);
+    this.categoriasServicoPais.set(pais.map(c => ({ value: c.id, label: c.nome })));
+    const map = new Map<string, SelectOption[]>();
+    for (const pai of pais) {
+      const subs = cats.filter(c => c.categoriaPaiId === pai.id);
+      map.set(pai.id, subs.map(s => ({ value: s.id, label: s.nome })));
+    }
+    this.subcategoriasServicoMap.set(map);
+  }
+
+  getSubcategoriasServico(categoriaId: string): SelectOption[] {
+    return this.subcategoriasServicoMap().get(categoriaId) ?? [];
+  }
+
+  getCategoriaServicoNome(categoriaId: string): string {
+    return this.categoriasServicoPais().find(o => o.value === categoriaId)?.label ?? '';
+  }
+
+  temSubcategorias(categoriaId: string): boolean {
+    return this.getSubcategoriasServico(categoriaId).length > 0;
+  }
+
   onCategoriaChange(value: string) {
     this.form.update(f => ({ ...f, idCategoria: value, idSubcategoria: undefined }));
     this.atualizarCategorizacao();
+  }
+
+  adicionarBlocoServico(categoriaId: string) {
+    this.form.update(f => ({
+      ...f,
+      categoriasServicoBloco: [...f.categoriasServicoBloco, { categoriaServicoId: categoriaId, subcategoriasSelecionadas: [] }]
+    }));
+  }
+
+  removerBlocoServico(index: number) {
+    this.form.update(f => ({
+      ...f,
+      categoriasServicoBloco: f.categoriasServicoBloco.filter((_, i) => i !== index)
+    }));
+  }
+
+  toggleSubcategoriaServico(blocoIndex: number, subcategoriaId: string) {
+    this.form.update(f => {
+      const blocos = [...f.categoriasServicoBloco];
+      const bloco = { ...blocos[blocoIndex] };
+      const idx = bloco.subcategoriasSelecionadas.indexOf(subcategoriaId);
+      if (idx >= 0) {
+        bloco.subcategoriasSelecionadas = bloco.subcategoriasSelecionadas.filter(s => s !== subcategoriaId);
+      } else {
+        bloco.subcategoriasSelecionadas = [...bloco.subcategoriasSelecionadas, subcategoriaId];
+      }
+      blocos[blocoIndex] = bloco;
+      return { ...f, categoriasServicoBloco: blocos };
+    });
+  }
+
+  isSubcategoriaSelected(blocoIndex: number, subcategoriaId: string): boolean {
+    return this.form().categoriasServicoBloco[blocoIndex]?.subcategoriasSelecionadas.includes(subcategoriaId) ?? false;
+  }
+
+  flatttenServicos(): ServicoItem[] {
+    const result: ServicoItem[] = [];
+    for (const bloco of this.form().categoriasServicoBloco) {
+      if (bloco.subcategoriasSelecionadas.length > 0) {
+        for (const subId of bloco.subcategoriasSelecionadas) {
+          result.push({ categoriaServicoId: bloco.categoriaServicoId, subcategoriaServicoId: subId });
+        }
+      } else {
+        result.push({ categoriaServicoId: bloco.categoriaServicoId });
+      }
+    }
+    return result;
   }
 
   irPara(indice: number) {
@@ -129,7 +265,7 @@ export class LancamentoModalComponent {
       this.notify.error('Preencha os campos destacados para avançar');
       return false;
     }
-    if (this.passoAtual() < 2) {
+    if (this.passoAtual() < this.ultimoPasso()) {
       this.fieldErrors.set({});
       this.passoAtual.update(v => v + 1);
     }
@@ -139,31 +275,82 @@ export class LancamentoModalComponent {
   private validarPassoAtual(): boolean {
     const errors: Record<string, string> = {};
     const f = this.form();
-    switch (this.passoAtual()) {
-      case 0:
-        if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
-        break;
-      case 1:
-        if (!f.descricao) errors['descricao'] = 'Descrição é obrigatória';
-        if (f.valor == null || isNaN(f.valor) || f.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
-        if (!f.data) errors['data'] = 'Data é obrigatória';
-        break;
-      case 2:
-        if (!f.idConta) errors['idConta'] = 'Conta é obrigatória';
-        if (f.repete) {
-          if (!f.dia || f.dia < 1 || f.dia > 31) {
-            errors['dia'] = 'Dia deve estar entre 1 e 31';
-          } else if (f.diaUtil && f.dia > 5) {
-            errors['dia'] = 'Dia útil deve estar entre 1 e 5';
+    const passo = this.passoAtual();
+    const fluxo = this.fluxoAdicional();
+
+    if (fluxo) {
+      switch (passo) {
+        case 0:
+          if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
+          break;
+        case 1:
+          if (f.temParceiro && !f.idParceiro) errors['idParceiro'] = 'Selecione um parceiro';
+          break;
+        case 2:
+          if (f.categoriasServicoBloco.length === 0) {
+            errors['servicos'] = 'Adicione pelo menos um serviço';
+          } else {
+            for (let i = 0; i < f.categoriasServicoBloco.length; i++) {
+              const bloco = f.categoriasServicoBloco[i];
+              if (this.temSubcategorias(bloco.categoriaServicoId) && bloco.subcategoriasSelecionadas.length === 0) {
+                errors['servicos'] = `Selecione ao menos uma subcategoria no serviço ${i + 1}`;
+                break;
+              }
+            }
           }
-          if (!f.dataFim) {
-            errors['dataFim'] = 'Data fim é obrigatória';
-          } else if (f.data && f.dataFim <= f.data) {
-            errors['dataFim'] = 'Data fim deve ser posterior à data início';
+          break;
+        case 3:
+          if (!f.idCliente) errors['idCliente'] = 'Selecione um cliente';
+          break;
+        case 4:
+          if (!f.descricao) errors['descricao'] = 'Descrição é obrigatória';
+          if (f.valor == null || isNaN(f.valor) || f.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
+          if (!f.data) errors['data'] = 'Data é obrigatória';
+          break;
+        case 5:
+          if (!f.idConta) errors['idConta'] = 'Conta é obrigatória';
+          if (f.repete) {
+            if (!f.dia || f.dia < 1 || f.dia > 31) {
+              errors['dia'] = 'Dia deve estar entre 1 e 31';
+            } else if (f.diaUtil && f.dia > 5) {
+              errors['dia'] = 'Dia útil deve estar entre 1 e 5';
+            }
+            if (!f.dataFim) {
+              errors['dataFim'] = 'Data fim é obrigatória';
+            } else if (f.data && f.dataFim <= f.data) {
+              errors['dataFim'] = 'Data fim deve ser posterior à data início';
+            }
           }
-        }
-        break;
+          break;
+      }
+    } else {
+      switch (passo) {
+        case 0:
+          if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
+          break;
+        case 1:
+          if (!f.descricao) errors['descricao'] = 'Descrição é obrigatória';
+          if (f.valor == null || isNaN(f.valor) || f.valor <= 0) errors['valor'] = 'Valor deve ser maior que zero';
+          if (!f.data) errors['data'] = 'Data é obrigatória';
+          break;
+        case 2:
+          if (!f.idConta) errors['idConta'] = 'Conta é obrigatória';
+          if (f.repete) {
+            if (!f.dia || f.dia < 1 || f.dia > 31) {
+              errors['dia'] = 'Dia deve estar entre 1 e 31';
+            } else if (f.diaUtil && f.dia > 5) {
+              errors['dia'] = 'Dia útil deve estar entre 1 e 5';
+            }
+            if (!f.dataFim) {
+              errors['dataFim'] = 'Data fim é obrigatória';
+            } else if (f.data && f.dataFim <= f.data) {
+              errors['dataFim'] = 'Data fim deve ser posterior à data início';
+            }
+          }
+          break;
+      }
     }
+
     if (Object.keys(errors).length > 0) {
       this.fieldErrors.set(errors);
       return false;
@@ -173,9 +360,26 @@ export class LancamentoModalComponent {
 
   passoConcluido(indice: number): boolean {
     const f = this.form();
-    if (indice === 0) return !!f.idCategoria;
-    if (indice === 1) return !!(f.descricao?.trim() && f.data && f.valor > 0);
-    return !!f.idConta;
+    const fluxo = this.fluxoAdicional();
+
+    if (fluxo) {
+      switch (indice) {
+        case 0: return !!f.idCategoria;
+        case 1: return !!f.idParceiro;
+        case 2: return f.categoriasServicoBloco.length > 0;
+        case 3: return !!f.idCliente;
+        case 4: return !!(f.descricao?.trim() && f.data && f.valor > 0);
+        case 5: return !!f.idConta;
+        default: return false;
+      }
+    } else {
+      switch (indice) {
+        case 0: return !!f.idCategoria;
+        case 1: return !!(f.descricao?.trim() && f.data && f.valor > 0);
+        case 2: return !!f.idConta;
+        default: return false;
+      }
+    }
   }
 
   voltar() {
@@ -200,6 +404,17 @@ export class LancamentoModalComponent {
     });
     if (descricaoSet) {
       this.clearError('descricao');
+    }
+  }
+
+  onTemParceiroChange(value: boolean) {
+    this.form.update(f => ({
+      ...f,
+      temParceiro: value,
+      idParceiro: value ? f.idParceiro : undefined
+    }));
+    if (!value) {
+      this.clearError('idParceiro');
     }
   }
 
@@ -251,6 +466,14 @@ export class LancamentoModalComponent {
     if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
     if (!f.data) errors['data'] = 'Data é obrigatória';
 
+    if (this.fluxoAdicional()) {
+      if (f.categoriasServicoBloco.length === 0) {
+        errors['servicos'] = 'Adicione pelo menos um serviço';
+      }
+      if (!f.idCliente) errors['idCliente'] = 'Cliente é obrigatório';
+      if (f.temParceiro && !f.idParceiro) errors['idParceiro'] = 'Selecione um parceiro';
+    }
+
     if (f.repete) {
       if (!f.dia || f.dia < 1 || f.dia > 31) {
         errors['dia'] = 'Dia deve estar entre 1 e 31';
@@ -271,7 +494,7 @@ export class LancamentoModalComponent {
     }
 
     this.fieldErrors.set({});
-    this.saved.emit({ ...f });
+    this.saved.emit({ ...f, servicos: this.flatttenServicos() });
   }
 
   updateFormField<K extends keyof LancamentoForm>(key: K, value: LancamentoForm[K]) {
@@ -281,7 +504,7 @@ export class LancamentoModalComponent {
   private emptyForm(): LancamentoForm {
     return {
       descricao: '', valor: 0, data: '', idConta: '', idCategoria: '',
-      repete: false, dia: 1, diaUtil: false, dataFim: ''
+      temParceiro: false, categoriasServicoBloco: [], repete: false, dia: 1, diaUtil: false, dataFim: ''
     };
   }
 }

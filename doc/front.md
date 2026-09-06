@@ -61,6 +61,8 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - **Signals**: `signal()` para estado, `computed()` para derivados
 - Componentes standalone com `imports` explícitos
 - Ícones Lucide: `<svg lucideIcon="nome" [size]="16" />`
+- **Selects/Dropdowns**: SEMPRE `app-custom-select` (padrão reutilizável) — proibido `<select>` nativo
+- **Inputs de texto**: classe `input` do design system
 - Forms: `ControlValueAccessor` para componentes reutilizáveis (CustomSelect)
 - SCSS com mixins do design system (`_responsive.scss`, `_transitions.scss`, etc.)
 - Nunca enviar `undefined` como query param — usar spread condicional

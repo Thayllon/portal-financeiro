@@ -4,7 +4,7 @@
     .page__badge {
       display: flex; align-items: center; justify-content: center;
       width: 2.75rem; height: 2.75rem; flex-shrink: 0;
-      background: var(--color-primary-tint); color: var(--color-primary);
+      background: var(--color-primary-muted); color: var(--color-primary);
       border-radius: var(--radius-lg);
     }
     .page__badge .page__icon { color: var(--color-primary); }

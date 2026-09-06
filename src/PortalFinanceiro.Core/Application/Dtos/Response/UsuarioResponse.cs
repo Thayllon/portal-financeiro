@@ -7,5 +7,6 @@ public class UsuarioResponse
     public string Email { get; set; } = string.Empty;
     public bool IsAdmin { get; set; }
     public bool Ativo { get; set; }
+    public bool PrimeiroAcesso { get; set; }
     public DateTime DataCadastro { get; set; }
 }

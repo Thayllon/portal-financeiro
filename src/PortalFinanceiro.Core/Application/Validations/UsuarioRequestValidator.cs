@@ -9,6 +9,9 @@ public class UsuarioRequestValidator : AbstractValidator<UsuarioRequest>
     {
         RuleFor(x => x.Nome).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Email).NotEmpty().EmailAddress().MaximumLength(200);
-        RuleFor(x => x.Senha).NotEmpty().MinimumLength(6).MaximumLength(100);
+        When(x => !string.IsNullOrWhiteSpace(x.Senha), () =>
+        {
+            RuleFor(x => x.Senha).MinimumLength(6).MaximumLength(100);
+        });
     }
 }
