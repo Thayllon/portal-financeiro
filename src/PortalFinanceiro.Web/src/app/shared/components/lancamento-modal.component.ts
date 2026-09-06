@@ -454,6 +454,10 @@ export class LancamentoModalComponent {
     return this.editando()?.id ? `Editar ${this.tipoLabel()}` : `Nova ${this.tipoLabel()}`;
   }
 
+  subtitleText() {
+    return this.editando()?.id ? `Altere os dados da ${this.tipoLabel()}` : `Cadastre uma nova ${this.tipoLabel()} em poucos passos.`;
+  }
+
   fechar() { this.visibleChange.emit(false); }
 
   salvar() {

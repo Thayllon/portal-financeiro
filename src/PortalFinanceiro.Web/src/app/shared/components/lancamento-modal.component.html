@@ -1,6 +1,7 @@
 <app-modal
       [visible]="visible()"
       [title]="title()"
+      [subtitle]="subtitleText()"
       [saving]="salvando()"
       [showFooter]="false"
       (visibleChange)="fechar()"
@@ -122,6 +123,15 @@
           @if (passoAtual() === 0) {
             <!-- PASSO: CATEGORIZAÇÃO RECEITA -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="tag" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Categorização</strong>
+                  <span>Selecione a categoria da receita.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Categoria<span class="required">*</span></label>
@@ -147,10 +157,26 @@
                   </div>
                 }
               </div>
+              <div class="info-box">
+                <svg lucideIcon="info" [size]="16" />
+                <div>
+                  <strong>Não encontrou a categoria?</strong>
+                  <span>Cadastre uma nova categoria em <strong>Configurações</strong>.</span>
+                </div>
+              </div>
             </div>
           } @else if (passoAtual() === 1 && fluxoAdicional()) {
             <!-- PASSO: PARCERIA -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="handshake" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Parceria</strong>
+                  <span>Informe se há um parceiro vinculado.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
                   <label class="checkbox-label">
@@ -178,6 +204,15 @@
           } @else if (passoAtual() === 2 && fluxoAdicional()) {
             <!-- PASSO: CATEGORIZAÇÃO SERVIÇO (BLOCOS POR CATEGORIA) -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="briefcase-business" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Serviço</strong>
+                  <span>Adicione as categorias de serviço.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="servico-blocos">
                   @for (bloco of form().categoriasServicoBloco; track bloco.categoriaServicoId; let i = $index) {
@@ -227,6 +262,15 @@
           } @else if (passoAtual() === 3 && fluxoAdicional()) {
             <!-- PASSO: CLIENTE -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="user" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Cliente</strong>
+                  <span>Selecione o cliente vinculado a esta receita.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Cliente<span class="required">*</span></label>
@@ -245,6 +289,15 @@
           } @else if ((passoAtual() === 1 && !fluxoAdicional()) || (passoAtual() === 4 && fluxoAdicional())) {
             <!-- PASSO: DADOS GERAIS -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="file" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Dados Gerais</strong>
+                  <span>Informe a descrição, valor e data.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Descrição<span class="required">*</span></label>
@@ -297,6 +350,15 @@
           } @else {
             <!-- PASSO: CONTA & RECORRÊNCIA -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="repeat" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Conta &amp; Recorrência</strong>
+                  <span>Selecione a conta e configure a repetição.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Conta<span class="required">*</span></label>

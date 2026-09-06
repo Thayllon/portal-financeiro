@@ -2,7 +2,12 @@
   <div class="overlay" (mousedown)="aoMouseDownNoOverlay($event)" (mouseup)="aoMouseUpNoOverlay()">
     <div class="modal" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h3>{{ title() }}</h3>
+        <div>
+          <h3>{{ title() }}</h3>
+          @if (subtitle()) {
+            <p class="modal-subtitle">{{ subtitle() }}</p>
+          }
+        </div>
         <button class="close-btn" (click)="close()">
           <svg lucideIcon="x" [size]="18" />
         </button>

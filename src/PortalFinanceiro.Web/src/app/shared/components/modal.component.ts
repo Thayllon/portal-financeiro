@@ -11,6 +11,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 export class ModalComponent {
   visible = input(false);
   title = input('');
+  subtitle = input('');
   saving = input(false);
   showFooter = input(true);
   visibleChange = output<boolean>();
