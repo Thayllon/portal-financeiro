@@ -184,6 +184,21 @@ public class ReceitaAppService : IReceitaAppService
 
         receita.Desativar();
         await _repository.AtualizarAsync(receita);
+
+        if (receita.IdRegra.HasValue)
+        {
+            var restantes = await _repository.ContarPorRegraAsync(receita.IdRegra.Value);
+            if (restantes == 0)
+            {
+                var regra = await _regraRepository.ObterPorIdAsync(receita.IdRegra.Value);
+                if (regra is not null)
+                {
+                    regra.Desativar();
+                    await _regraRepository.AtualizarAsync(regra);
+                }
+            }
+        }
+
         return Resultado.Sucesso();
     }
 

@@ -133,6 +133,21 @@ public class DespesaAppService : IDespesaAppService
 
         despesa.Desativar();
         await _repository.AtualizarAsync(despesa);
+
+        if (despesa.IdRegra.HasValue)
+        {
+            var restantes = await _repository.ContarPorRegraAsync(despesa.IdRegra.Value);
+            if (restantes == 0)
+            {
+                var regra = await _regraRepository.ObterPorIdAsync(despesa.IdRegra.Value);
+                if (regra is not null)
+                {
+                    regra.Desativar();
+                    await _regraRepository.AtualizarAsync(regra);
+                }
+            }
+        }
+
         return Resultado.Sucesso();
     }
 
