@@ -31,6 +31,14 @@
             }
           </a>
           }
+          @if (authService.temParcerias()) {
+          <a routerLink="/parcerias" routerLinkActive="active">
+            <svg lucideIcon="briefcase-business" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Parcerias</span>
+            }
+          </a>
+          }
           @if (authService.temPermissao('contas') || authService.temPermissao('categorias') || authService.temPermissao('clientes') || authService.temPermissao('parceiros') || authService.isAdmin()) {
           <div class="nav-group">
             <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Configurações' : ''">
