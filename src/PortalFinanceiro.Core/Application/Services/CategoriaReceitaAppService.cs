@@ -21,7 +21,7 @@ public class CategoriaReceitaAppService : CategoriaBaseAppService<CategoriaRecei
         _receitaRepository = receitaRepository;
     }
 
-    public new async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario, bool isAdmin)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario, bool isAdmin)
         => await base.ExcluirAsync(id, idUsuario, isAdmin, async categoriaId =>
         {
             var vinculadas = await _receitaRepository.ContarPorCategoriaAsync(categoriaId);

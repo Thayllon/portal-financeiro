@@ -60,9 +60,6 @@ public abstract class CategoriaBaseAppService<T> where T : class
         if (categoria is null)
             return Erro.NaoEncontrado("Categoria");
 
-        if (!PodeGerenciar(categoria, idUsuario, isAdmin))
-            return Erro.Permissao("SEM_PERMISSAO", "Você não tem permissão para editar esta categoria.");
-
         if (request is null)
             return Erro.Validacao("REQUISICAO_INVALIDA", "Corpo da requisição é obrigatório.");
 
@@ -84,9 +81,6 @@ public abstract class CategoriaBaseAppService<T> where T : class
         var categoria = await Repository.ObterPorIdAsync(id);
         if (categoria is null)
             return Erro.NaoEncontrado("Categoria");
-
-        if (!PodeGerenciar(categoria, idUsuario, isAdmin))
-            return Erro.Permissao("SEM_PERMISSAO", "Apenas o proprietário da categoria ou um administrador pode excluí-la.");
 
         var vinculadas = await contarVinculos(id);
         if (vinculadas > 0)
@@ -146,7 +140,7 @@ public abstract class CategoriaBaseAppService<T> where T : class
             Nome = obterNome(c),
             CategoriaPaiId = obterCategoriaPaiId(c),
             Ativo = obterAtivo(c),
-            PodeEditar = obterIdUsuario(c) == idUsuario || isAdmin,
+            PodeEditar = true,
             DataCadastro = obterDataCadastro(c)
         };
 
