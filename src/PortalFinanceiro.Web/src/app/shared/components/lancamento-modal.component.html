@@ -257,8 +257,10 @@
                   <label>Cliente<span class="required">*</span></label>
                   <app-custom-select
                     placeholder="Selecione o cliente"
+                    searchPlaceholder="Buscar cliente..."
                     [options]="clientesOptions()"
                     [value]="form().idCliente ?? ''"
+                    [searchable]="true"
                     (valueChange)="updateFormField('idCliente', $event); clearError('idCliente')"
                   />
                   @if (fieldErrors()['idCliente']) {

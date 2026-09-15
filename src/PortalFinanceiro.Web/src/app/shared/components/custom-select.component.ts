@@ -1,5 +1,5 @@
-import { Component, input, output, signal, computed, effect, ElementRef, HostListener, forwardRef, OnDestroy } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+﻿import { Component, input, output, signal, computed, effect, ElementRef, HostListener, forwardRef, OnDestroy } from '@angular/core';
+import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 export interface SelectOption {
@@ -11,7 +11,7 @@ export interface SelectOption {
 @Component({
   selector: 'app-custom-select',
   standalone: true,
-  imports: [LucideDynamicIcon],
+  imports: [FormsModule, LucideDynamicIcon],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -28,6 +28,8 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   options = input<SelectOption[]>([]);
   value = input('');
   disabled = input(false);
+  searchable = input(false);
+  searchPlaceholder = input('Buscar...');
   valueChange = output<string>();
 
   private _disabled = signal(false);
@@ -37,6 +39,13 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   isOpen = signal(false);
   openUp = signal(false);
   selectedLabel = signal('');
+  searchTerm = signal('');
+  showSearch = computed(() => this.searchable() && this.options().length > 5);
+  filteredOptions = computed(() => {
+    const termo = this.normalizar(this.searchTerm());
+    if (!termo) return this.options();
+    return this.options().filter(o => this.normalizar(o.label).includes(termo));
+  });
 
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
@@ -77,9 +86,11 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
       const willOpen = !this.isOpen();
       this.isOpen.set(willOpen);
       if (willOpen) {
+        this.searchTerm.set('');
         setTimeout(() => {
           this.posicionarDropdown();
           document.addEventListener('scroll', this.scrollHandler, true);
+          this.el.nativeElement.querySelector('.cs__search-input')?.focus();
         });
       } else {
         this.fechar();
@@ -89,6 +100,7 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
 
   private fechar() {
     this.isOpen.set(false);
+    this.searchTerm.set('');
     document.removeEventListener('scroll', this.scrollHandler, true);
   }
 
@@ -131,6 +143,10 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
     this.valueChange.emit(option.value);
   }
 
+  private normalizar(texto: string): string {
+    return (texto ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
   writeValue(value: string): void {
     this.internalValue.set(value ?? '');
   }
@@ -147,3 +163,4 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
     this._disabled.set(isDisabled);
   }
 }
+
