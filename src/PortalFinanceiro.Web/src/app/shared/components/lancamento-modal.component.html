@@ -131,16 +131,13 @@
                   <strong>Categoria de Receita</strong>
                   <span>Selecione a categoria da receita.</span>
                 </div>
+                <button type="button" class="step-header__add" title="Nova categoria" (click)="abrirQuickAdd('categoria')">
+                  <svg lucideIcon="plus" [size]="20" />
+                </button>
               </div>
               <div class="section">
                 <div class="field">
-                  <div class="field__header">
-                    <label>Categoria<span class="required">*</span></label>
-                    <button type="button" class="link-btn" (click)="abrirQuickAdd('categoria')">
-                      <svg lucideIcon="plus" [size]="14" />
-                      Nova
-                    </button>
-                  </div>
+                  <label>Categoria<span class="required">*</span></label>
                   <app-custom-select
                     placeholder="Selecione a categoria"
                     [options]="categoriasOptions()"
@@ -199,6 +196,9 @@
                   <strong>Categoria de Serviço</strong>
                   <span>Adicione as categorias de serviço.</span>
                 </div>
+                <button type="button" class="step-header__add" title="Nova categoria de serviço" (click)="abrirQuickAdd('servico')">
+                  <svg lucideIcon="plus" [size]="20" />
+                </button>
               </div>
               <div class="section">
                 <div class="servico-blocos">
@@ -231,13 +231,7 @@
                   }
                   @if (categoriasServicoDisponiveis().length > 0) {
                     <div class="servico-add">
-                      <div class="field__header">
-                        <label>Adicionar serviço</label>
-                        <button type="button" class="link-btn" (click)="abrirQuickAdd('servico')">
-                          <svg lucideIcon="plus" [size]="14" />
-                          Nova
-                        </button>
-                      </div>
+                      <label>Adicionar serviço</label>
                       <app-custom-select
                         placeholder="Selecione a categoria"
                         [options]="categoriasServicoDisponiveis()"
@@ -263,16 +257,13 @@
                   <strong>Cliente</strong>
                   <span>Selecione o cliente vinculado a esta receita.</span>
                 </div>
+                <button type="button" class="step-header__add" title="Novo cliente" (click)="abrirQuickAdd('cliente')">
+                  <svg lucideIcon="plus" [size]="20" />
+                </button>
               </div>
               <div class="section">
                 <div class="field">
-                  <div class="field__header">
-                    <label>Cliente<span class="required">*</span></label>
-                    <button type="button" class="link-btn" (click)="abrirQuickAdd('cliente')">
-                      <svg lucideIcon="plus" [size]="14" />
-                      Novo
-                    </button>
-                  </div>
+                  <label>Cliente<span class="required">*</span></label>
                   <app-custom-select
                     placeholder="Selecione o cliente"
                     searchPlaceholder="Buscar cliente..."
