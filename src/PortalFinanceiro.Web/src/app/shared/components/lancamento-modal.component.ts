@@ -365,7 +365,7 @@ export class LancamentoModalComponent {
     if (fluxo) {
       switch (indice) {
         case 0: return !!f.idCategoria;
-        case 1: return true;
+        case 1: return !!f.idParceria;
         case 2: return f.categoriasServicoBloco.length > 0;
         case 3: return !!f.idCliente;
         case 4: return !!(f.descricao?.trim() && f.data && f.valor > 0);
