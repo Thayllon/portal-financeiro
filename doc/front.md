@@ -62,6 +62,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Componentes standalone com `imports` explícitos
 - Ícones Lucide: `<svg lucideIcon="nome" [size]="16" />`
 - **Selects/Dropdowns**: SEMPRE `app-custom-select` (padrão reutilizável) — proibido `<select>` nativo
+- **Busca no select**: `app-custom-select` aceita `[searchable]="true"` + `searchPlaceholder="..."`; o campo de busca aparece só quando há mais de 5 opções e filtra sem diferenciar acentos nem maiúsculas/minúsculas (ex.: Cliente na Nova Receita)
 - **Inputs de texto**: classe `input` do design system
 - Forms: `ControlValueAccessor` para componentes reutilizáveis (CustomSelect)
 - SCSS com mixins do design system (`_responsive.scss`, `_transitions.scss`, etc.)

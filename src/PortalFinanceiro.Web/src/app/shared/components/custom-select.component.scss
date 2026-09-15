@@ -78,6 +78,30 @@
   color: var(--text-muted);
   font-size: 0.8125rem;
 }
+.cs__search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--surface-border);
+  background: var(--content-surface);
+  position: sticky;
+  top: 0;
+}
+.cs__search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.cs__search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+.cs__search-input::placeholder { color: var(--text-muted); }
 @keyframes csSlideDown {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
