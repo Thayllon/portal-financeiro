@@ -2,13 +2,13 @@
   <header class="page__header">
     <div class="page__header-left">
       <span class="page__badge">
-        <svg lucideIcon="handshake" class="page__icon" [size]="22" />
+        <svg [lucideIcon]="icone()" class="page__icon" [size]="22" />
       </span>
-      <h1 class="page__title">Parceiros</h1>
+      <h1 class="page__title">{{ rotulo() }}s</h1>
     </div>
     <button class="add-btn" (click)="abrirModal()">
       <svg lucideIcon="plus" [size]="16" />
-      Novo parceiro
+      Novo {{ rotulo().toLowerCase() }}
     </button>
   </header>
 
@@ -22,12 +22,12 @@
         </div>
       }
     </div>
-  } @else if (parceirosPaginacao.paginatedItems().length === 0) {
+  } @else if (paginacao.paginatedItems().length === 0) {
     <div class="table-card">
       <div class="empty-state">
-        <svg lucideIcon="handshake" [size]="36" class="empty-icon" />
-        <h3>Nenhum parceiro cadastrado</h3>
-        <p>Cadastre seu primeiro parceiro.</p>
+        <svg [lucideIcon]="icone()" [size]="36" class="empty-icon" />
+        <h3>Nenhum {{ rotulo().toLowerCase() }} cadastrado</h3>
+        <p>Cadastre seu primeiro {{ rotulo().toLowerCase() }}.</p>
       </div>
     </div>
   } @else {
@@ -41,7 +41,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (p of parceirosPaginacao.paginatedItems(); track p.id) {
+          @for (p of paginacao.paginatedItems(); track p.id) {
             <tr>
               <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
               <td data-label="Telefone">{{ p.telefone || '—' }}</td>
@@ -57,21 +57,21 @@
           }
         </tbody>
       </table>
-      <app-list-pagination [pagination]="parceirosPaginacao" />
+      <app-list-pagination [pagination]="paginacao" />
     </div>
   }
 </div>
 
 <app-modal
   [visible]="modalVisible()"
-  [title]="editando() ? 'Editar parceiro' : 'Novo parceiro'"
+  [title]="editando() ? 'Editar ' + rotulo().toLowerCase() : 'Novo ' + rotulo().toLowerCase()"
   [saving]="salvando()"
   (visibleChange)="fecharModal()"
   (save)="salvar()"
 >
   <div class="field">
     <label>Nome<span class="required">*</span></label>
-    <input [(ngModel)]="form.nome" placeholder="Ex: Empresa XYZ" class="input" />
+    <input [(ngModel)]="form.nome" [placeholder]="placeholderNome()" class="input" />
   </div>
   <div class="field">
     <label>Telefone</label>

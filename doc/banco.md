@@ -13,14 +13,14 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 
 | Script | Conteúdo |
 |--------|----------|
-| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `Parceria` com `Nome`/`PercentualParceiro` e `PermissaoUsuario`) |
-| `002_AdicionarNomePercentualParceria.sql` | `Nome` + `PercentualParceiro` na `Parceria` (bancos já criados) |
+| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro` e `PermissaoUsuario`) |
 | `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
 > migrado **não** deve recebê-los novamente (DbUp rastreia por nome).
 >
-> Os incrementais antigos (`006`–`014` no SQL Server, `002`–`006` no Postgres) foram
+> Os incrementais antigos (`006`–`014` no SQL Server, `002`–`006` no Postgres, mais
+> `002_AdicionarNomePercentualParceria` e `003_FluxoAdicionalDespesa` em ambos) foram
 > removidos por já estarem absorvidos no `001` — com exceção do backfill de
 > `parcerias`, movido para o `099_SeedBase`. Bancos existentes não são afetados
 > (journal do DbUp já registra esses scripts como executados).

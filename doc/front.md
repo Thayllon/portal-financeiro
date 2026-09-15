@@ -6,7 +6,7 @@
 - **Design system** próprio em `src/app/design-system/styles/` (tokens, mixins, variáveis)
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes reutilizáveis** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias, clientes, parceiros, parcerias, usuarios)
+- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, categorias-receita, usuarios, login)
 
 ## Como rodar / buildar / testar
 
@@ -22,6 +22,9 @@ npm run build
 
 # Testes unitários (headless)
 npm test
+
+# Lint (ESLint, 0 erros; warnings = débito documentado)
+npm run lint
 ```
 
 > O frontend consome a API em `http://localhost:5178` — suba o backend antes.
@@ -36,22 +39,32 @@ src/app/
 │   ├── models/          # Interfaces de domínio
 │   ├── repositories/    # Services HTTP
 │   ├── services/        # AuthService, NotificationService
-│   └── guards/          # authGuard
+│   ├── guards/          # authGuard, adminGuard, permissionGuard
+│   └── interceptors/    # authInterceptor, errorInterceptor
 ├── design-system/
 │   └── styles/          # Tokens, mixins, variáveis CSS
 ├── features/
+│   ├── home/
 │   ├── dashboard/
-│   ├── receitas/
-│   ├── despesas/
+│   ├── receitas/        # wrapper fino → LancamentoListagemComponent
+│   ├── despesas/        # wrapper fino → LancamentoListagemComponent
+│   ├── lancamentos/     # LancamentoListagemComponent (tipo receita/despesa)
 │   ├── contas/
+│   ├── pessoas/         # PessoaListagemComponent (tipo Cliente/Parceiro)
+│   ├── clientes/        # wrapper fino → PessoaListagemComponent
+│   ├── parceiros/       # wrapper fino → PessoaListagemComponent
+│   ├── parcerias/       # + parceria-detalhe/
 │   ├── categorias-receita/
+│   ├── usuarios/
 │   └── login/
 └── shared/
     ├── components/      # Componentes reutilizáveis (LancamentoModal, CustomSelect...)
     ├── composables/     # useListPagination
     ├── constants/       # PAGE_SIZE_OPTIONS
+    ├── directives/      # currency-input
     ├── pipes/           # CurrencyBRLPipe
-    └── services/        # ConfirmService
+    ├── services/        # ConfirmService
+    └── utils/           # api-error
 ```
 
 ## Padrões de código
@@ -69,7 +82,9 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - **Grid de receitas**: coluna `Conta` substituída por `Parceria` (`Sim` com vínculo, `—` sem); totais com `Parceria` (soma das receitas vinculadas) quando o fluxo adicional está ligado
 - **Inputs de texto**: classe `input` do design system
 - Forms: `ControlValueAccessor` para componentes reutilizáveis (CustomSelect)
-- SCSS com mixins do design system (`_responsive.scss`, `_transitions.scss`, etc.)
+- **Páginas parametrizadas**: `PessoaListagemComponent` (`tipo` Cliente/Parceiro) e `LancamentoListagemComponent` (`tipo` receita/despesa) — não duplicar páginas de listagem
+- **SQL de lançamentos (backend)**: `LancamentoSql` é a base parametrizada; `ReceitaSql`/`DespesaSql` são wrappers finos
+- SCSS com mixins do design system (`_page-layout.scss`, `_data-table.scss`, `_forms.scss`, `_responsive.scss`) — proibido copiar/colar estilos entre features
 - Nunca enviar `undefined` como query param — usar spread condicional
 - Status enviado como `number` (1 ou 2), nunca string
 - Repositórios NÃO enviam `idUsuario` nos params (vem do JWT)

@@ -1,114 +1,300 @@
-    .page { max-width: 1200px; padding: 1.5rem; margin: 0 auto; }
-    .page__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; }
-    .page__header-left { display: flex; align-items: center; gap: 0.75rem; }
-    .page__badge {
-      display: flex; align-items: center; justify-content: center;
-      width: 2.75rem; height: 2.75rem; flex-shrink: 0;
-      background: var(--color-primary-muted); color: var(--color-primary);
-      border-radius: var(--radius-lg);
-    }
-    .page__badge .page__icon { color: var(--color-primary); }
-    .page__icon { color: var(--color-primary); flex-shrink: 0; }
-    .page__title { font-size: 1.5rem; font-weight: 600; color: var(--text-primary); margin: 0; }
-    .month-area { margin-bottom: 1.5rem; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .card {
-      background: var(--content-surface); border: 1px solid var(--surface-border);
-      border-radius: var(--radius-xl); padding: 1.25rem;
-      position: relative; overflow: hidden;
-      transition: box-shadow var(--transition-fast), transform var(--transition-fast);
-    }
-    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
-    .card::before {
-      content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
-      background: var(--text-muted);
-    }
-    .card:has(.card-icon--green)::before { background: var(--color-success); }
-    .card:has(.card-icon--red)::before { background: var(--color-error); }
-    .card:has(.card-icon--primary)::before { background: var(--color-primary); }
-    .card--compact { padding: 1rem; }
-    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
-    .card-icon {
-      width: 40px; height: 40px; border-radius: var(--radius-lg);
-      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .card-icon--green { background: var(--color-success-bg); color: var(--color-success); }
-    .card-icon--red { background: var(--color-error-bg); color: var(--color-error); }
-    .card-icon--primary { background: var(--color-primary-tint); color: var(--color-primary); }
-    .card-icon--warning { background: var(--color-warning-bg); color: var(--color-warning); }
-    .card-icon svg,
-    .card-icon lucide-icon svg {
-      width: 22px !important; height: 22px !important;
-      display: block; fill: none; stroke: currentColor; stroke-width: 2;
-    }
-    .card-label { font-size: 0.8125rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 500; }
-    .card-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; letter-spacing: -0.02em; }
-    .card-value.green { color: var(--color-success); }
-    .card-value.red { color: var(--color-error); }
-    .card-sub { font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 0.5rem; align-items: center; }
-    .pill { display: inline-flex; padding: 0.125rem 0.5rem; border-radius: 999px; font-weight: 500; }
-    .pill--green { background: var(--color-success-bg); color: var(--color-success); }
-    .previsao-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
-    .table-card { background: transparent; border: none; border-radius: var(--radius-lg); overflow: hidden; }
-    .table { width: 100%; border-collapse: collapse; }
-    .table th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--surface-border); background: var(--surface-muted); }
-    .table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-primary); border-bottom: 1px solid var(--surface-border); }
-    .table tr:last-child td { border-bottom: none; }
-    .table tr:hover { background: var(--surface-hover); }
-    .cell-name { font-weight: 500; }
-    .cell-value { font-variant-numeric: tabular-nums; white-space: nowrap; }
-    .cell-meta { color: var(--text-muted); font-size: 0.8125rem; margin-left: 0.5rem; }
-    .cell-value.green { color: var(--color-success); }
-    .cell-value.red { color: var(--color-error); }
+@use '../../design-system/styles/page-layout' as layout;
+@use '../../design-system/styles/data-table' as table;
 
-    .view-toggle {
-      display: flex; gap: 0.25rem; background: var(--surface-muted); border-radius: var(--radius-lg); padding: 0.25rem;
-    }
-    .toggle-btn {
-      display: flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem;
-      background: transparent; border: none; border-radius: var(--radius-md);
-      font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-    .toggle-btn:hover { color: var(--text-primary); }
-    .toggle-btn.active {
-      background: var(--color-primary); color: #fff;
-      box-shadow: var(--shadow-sm);
-    }
+.page {
+  @include layout.page-wrapper;
+}
 
-    .year-nav {
-      display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;
-    }
-    .nav-btn {
-      width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--surface-border);
-      background: var(--content-surface); display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--text-secondary); transition: all var(--transition-fast);
-    }
-    .nav-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
-    .year-label { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); min-width: 80px; text-align: center; }
+.page__header {
+  @include layout.page-header;
+}
 
-    .anual-filtros {
-      display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center;
-    }
+.page__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 
-    .chart-container {
-      position: relative;
-      background: var(--surface-muted);
-      border-radius: var(--radius-lg); padding: 1rem; height: 350px;
-    }
+.page__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
+  border-radius: var(--radius-lg);
+}
 
-    @media (max-width: 767px) {
-      .page { padding: 0.75rem; }
-      .page__title { font-size: 1.25rem; }
-      .page__header { flex-direction: column; align-items: stretch; }
-      .view-toggle { justify-content: center; }
-      .cards { grid-template-columns: 1fr 1fr; }
-      .table { font-size: 0.8125rem; }
-      .table th { display: none; }
-      .table td { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 1rem; border-bottom: 1px solid var(--surface-border); }
-      .table td::before { content: attr(data-label); font-weight: 600; font-size: 0.75rem; color: var(--text-muted); }
-      .table tr { display: block; }
-    }
-    @media (max-width: 480px) {
-      .cards { grid-template-columns: 1fr; }
-    }
+.page__icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.page__title {
+  @include layout.page-title;
+}
+
+.month-area {
+  margin-bottom: 1.5rem;
+}
+
+.cards {
+  @include layout.grid-cards(240px);
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  @include layout.card-padded;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow var(--transition-fast), transform var(--transition-fast);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--text-muted);
+  }
+
+  &:has(.card-icon--green)::before {
+    background: var(--color-success);
+  }
+
+  &:has(.card-icon--red)::before {
+    background: var(--color-error);
+  }
+
+  &:has(.card-icon--primary)::before {
+    background: var(--color-primary);
+  }
+}
+
+.card--compact {
+  padding: 1rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.card-icon--green {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.card-icon--red {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.card-icon--primary {
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+}
+
+.card-icon--warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.card-icon svg,
+.card-icon lucide-icon svg {
+  width: 22px !important;
+  height: 22px !important;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+
+.card-label {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: 500;
+}
+
+.card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.card-value.green {
+  color: var(--color-success);
+}
+
+.card-value.red {
+  color: var(--color-error);
+}
+
+.card-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pill {
+  display: inline-flex;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+}
+
+.pill--green {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.previsao-cards {
+  @include layout.grid-cards(200px);
+}
+
+.table-card {
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.table {
+  @include table.data-table;
+
+  th {
+    color: var(--text-secondary);
+    background: var(--surface-muted);
+  }
+}
+
+.cell-name {
+  @include table.cell-name;
+}
+
+.cell-value {
+  @include table.cell-value;
+}
+
+.cell-meta {
+  @include table.cell-meta;
+  margin-left: 0.5rem;
+}
+
+.cell-value.green {
+  color: var(--color-success);
+}
+
+.cell-value.red {
+  color: var(--color-error);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--surface-muted);
+  border-radius: var(--radius-lg);
+  padding: 0.25rem;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    color: var(--text-primary);
+  }
+}
+
+.toggle-btn.active {
+  background: var(--color-primary);
+  color: var(--content-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.year-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.nav-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--surface-border);
+  background: var(--content-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.year-label {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 80px;
+  text-align: center;
+}
+
+.anual-filtros {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.chart-container {
+  position: relative;
+  background: var(--surface-muted);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  height: 350px;
+}

@@ -10,13 +10,15 @@ import { STATUS_REALIZADO } from '../../../core/models/status.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CurrencyBRLPipe } from '../../../shared/pipes/currency-brl.pipe';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
+import { ListPaginationComponent } from '../../../shared/components/list-pagination.component';
+import { useListPagination } from '../../../shared/composables/use-list-pagination.composable';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { mensagemErro } from '../../../shared/utils/api-error.util';
 
 @Component({
   selector: 'app-parceria-detalhe',
   standalone: true,
-  imports: [DatePipe, CurrencyBRLPipe, StatusBadgeComponent, LucideDynamicIcon],
+  imports: [DatePipe, CurrencyBRLPipe, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './parceria-detalhe.component.html',
   styleUrl: './parceria-detalhe.component.scss'
 })
@@ -30,6 +32,9 @@ export class ParceriaDetalheComponent implements OnInit {
   receitas = signal<Receita[]>([]);
   despesas = signal<Despesa[]>([]);
   loading = signal(true);
+
+  receitasPaginacao = useListPagination(this.receitas, { initialPageSize: 10 });
+  despesasPaginacao = useListPagination(this.despesas, { initialPageSize: 10 });
 
   readonly statusRealizado = STATUS_REALIZADO;
 

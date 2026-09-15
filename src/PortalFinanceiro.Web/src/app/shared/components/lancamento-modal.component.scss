@@ -254,11 +254,11 @@
     }
     .wizard__step--active .wizard__indicator {
       background: var(--color-primary);
-      color: #fff;
+      color: var(--content-surface);
     }
     .wizard__step--done .wizard__indicator {
       background: var(--color-success);
-      color: #fff;
+      color: var(--content-surface);
       border-color: var(--color-success);
     }
     .wizard__meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
@@ -299,7 +299,7 @@
     }
     .btn--ghost { background: transparent; border: 1px solid var(--surface-border); color: var(--text-secondary); }
     .btn--ghost:hover:not(:disabled) { background: var(--surface-hover); }
-    .btn--primary { background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; }
+    .btn--primary { background: var(--color-primary); border: 1px solid var(--color-primary); color: var(--content-surface); }
     .btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 

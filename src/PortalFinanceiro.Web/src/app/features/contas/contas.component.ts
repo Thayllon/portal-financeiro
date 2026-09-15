@@ -9,13 +9,15 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
+import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-contas',
   standalone: true,
-  imports: [FormsModule, ModalComponent, StatusBadgeComponent, CustomSelectComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, StatusBadgeComponent, CustomSelectComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './contas.component.html',
   styleUrl: './contas.component.scss'
 })
@@ -32,6 +34,8 @@ export class ContasComponent implements OnInit {
   salvando = signal(false);
 
   form: ContaBancariaRequest = { nome: '', banco: '', tipo: 'Pf' };
+
+  contasPaginacao = useListPagination(this.contas, { initialPageSize: 10 });
 
   tipoOptions: SelectOption[] = [
     { value: 'Pf', label: 'Pessoa Física' },

@@ -18,6 +18,11 @@ Chart.register(...registerables);
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
+const COR_GRAFICO_RECEITA = '#16a34a';
+const COR_GRAFICO_RECEITA_BG = '#16a34acc';
+const COR_GRAFICO_DESPESA = '#dc2626';
+const COR_GRAFICO_DESPESA_BG = '#dc2626cc';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -159,15 +164,15 @@ if (seq !== this.requestSeq) return;
         {
           data: itens.map(i => i.d.totalReceitas),
           label: 'Receitas',
-          backgroundColor: 'rgba(22, 163, 74, 0.8)',
-          borderColor: 'rgb(22, 163, 74)',
+          backgroundColor: COR_GRAFICO_RECEITA_BG,
+          borderColor: COR_GRAFICO_RECEITA,
           borderWidth: 1
         },
         {
           data: itens.map(i => i.d.totalDespesas),
           label: 'Despesas',
-          backgroundColor: 'rgba(220, 38, 38, 0.8)',
-          borderColor: 'rgb(220, 38, 38)',
+          backgroundColor: COR_GRAFICO_DESPESA_BG,
+          borderColor: COR_GRAFICO_DESPESA,
           borderWidth: 1
         }
       ]
@@ -192,15 +197,15 @@ if (seq !== this.requestSeq) return;
         {
           data: anual.resumoPorMes.map(m => m.totalReceitas),
           label: 'Receitas',
-          backgroundColor: 'rgba(22, 163, 74, 0.8)',
-          borderColor: 'rgb(22, 163, 74)',
+          backgroundColor: COR_GRAFICO_RECEITA_BG,
+          borderColor: COR_GRAFICO_RECEITA,
           borderWidth: 1
         },
         {
           data: anual.resumoPorMes.map(m => m.totalDespesas),
           label: 'Despesas',
-          backgroundColor: 'rgba(220, 38, 38, 0.8)',
-          borderColor: 'rgb(220, 38, 38)',
+          backgroundColor: COR_GRAFICO_DESPESA_BG,
+          borderColor: COR_GRAFICO_DESPESA,
           borderWidth: 1
         }
       ]

@@ -438,7 +438,7 @@ export class LancamentoModalComponent {
         this.previewMeses.set(0);
         return;
       }
-      let meses = (final.getFullYear() - inicio.getFullYear()) * 12 + (final.getMonth() - inicio.getMonth());
+      const meses = (final.getFullYear() - inicio.getFullYear()) * 12 + (final.getMonth() - inicio.getMonth());
       this.previewMeses.set(meses > 0 ? meses : 1);
     } else {
       this.previewMeses.set(0);

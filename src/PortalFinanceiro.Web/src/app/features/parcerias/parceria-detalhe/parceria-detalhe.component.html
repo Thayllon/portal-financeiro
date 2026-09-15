@@ -62,7 +62,7 @@
         <table class="table">
           <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
           <tbody>
-            @for (r of receitas(); track r.id) {
+            @for (r of receitasPaginacao.paginatedItems(); track r.id) {
               <tr>
                 <td class="cell-name" data-label="Descrição">{{ r.descricao }}</td>
                 <td class="cell-value" data-label="Valor">{{ r.valor | currencyBRL }}</td>
@@ -72,6 +72,7 @@
             }
           </tbody>
         </table>
+        <app-list-pagination [pagination]="receitasPaginacao" />
         <div class="table-footer">
           <span>Recebido: <strong style="color: var(--color-success)">{{ entradasRecebidas() | currencyBRL }}</strong></span>
           <span>Pendente: <strong style="color: var(--color-warning)">{{ entradasPendentes() | currencyBRL }}</strong></span>
@@ -96,7 +97,7 @@
         <table class="table">
           <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
           <tbody>
-            @for (d of despesas(); track d.id) {
+            @for (d of despesasPaginacao.paginatedItems(); track d.id) {
               <tr>
                 <td class="cell-name" data-label="Descrição">{{ d.descricao }}</td>
                 <td class="cell-value" data-label="Valor">{{ d.valor | currencyBRL }}</td>
@@ -106,6 +107,7 @@
             }
           </tbody>
         </table>
+        <app-list-pagination [pagination]="despesasPaginacao" />
         <div class="table-footer">
           <span>Pago: <strong style="color: var(--color-success)">{{ saidasPagas() | currencyBRL }}</strong></span>
           <span>Pendente: <strong style="color: var(--color-warning)">{{ saidasPendentes() | currencyBRL }}</strong></span>

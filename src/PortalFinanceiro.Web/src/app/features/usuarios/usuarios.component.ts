@@ -12,13 +12,15 @@ import { ModalComponent } from '../../shared/components/modal.component';
 import { SideDrawerComponent } from '../../shared/components/side-drawer.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
@@ -28,13 +30,12 @@ export class UsuariosComponent implements OnInit {
   private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
-
   usuarios = signal<Usuario[]>([]);
   loading = signal(true);
+  usuariosPaginacao = useListPagination(this.usuarios, { initialPageSize: 10 });
   modalVisible = signal(false);
   drawerVisible = signal(false);
-  editando = signal<Usuario | null>(null);
-  salvando = signal(false);
+  editando = signal<Usuario | null>(null);  salvando = signal(false);
   fluxoAdicional = signal(false);
   fluxoAdicionalDespesa = signal(false);
   buscaPermissao = signal('');
@@ -237,7 +238,7 @@ export class UsuariosComponent implements OnInit {
     if (!ok) return;
     try {
       await firstValueFrom(this.repo.alterarAtivo(item.id, !item.ativo));
-      this.notify.success(`Usuário ${acao}do`);
+      this.notify.success(`Usuário ${acao === 'desativar' ? 'desativado' : 'ativado'}`);
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, `Erro ao ${acao} usuário`)); }
   }

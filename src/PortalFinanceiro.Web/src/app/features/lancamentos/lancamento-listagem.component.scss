@@ -37,10 +37,6 @@
   @include layout.page-title;
 }
 
-.page__subtitle {
-  @include layout.page-subtitle;
-}
-
 .add-btn {
   display: inline-flex;
   align-items: center;
@@ -61,6 +57,44 @@
   }
 }
 
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.filtros {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.search-wrapper {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.search-input {
+  @include forms.input;
+  padding-left: 2.25rem;
+  min-width: 180px;
+}
+
+.totals {
+  @include layout.totals-bar;
+}
+
 .table-card {
   @include layout.card;
 }
@@ -77,24 +111,20 @@
   @include table.cell-name;
 }
 
+.cell-value {
+  @include table.cell-value;
+}
+
+.cell-meta {
+  @include table.cell-meta;
+}
+
 .cell-actions {
   @include table.cell-actions;
 }
 
 .action-btn {
   @include table.action-btn;
-}
-
-.field {
-  @include forms.field;
-}
-
-.field label {
-  @include forms.label;
-}
-
-.input {
-  @include forms.input;
 }
 
 .empty-state {

@@ -31,7 +31,7 @@
 }
 .btn--ghost { background: transparent; border: 1px solid var(--surface-border); color: var(--text-secondary); }
 .btn--ghost:hover { background: var(--surface-hover); }
-.btn--primary { background: var(--color-primary); border: 1px solid var(--color-primary); color: #fff; }
+.btn--primary { background: var(--color-primary); border: 1px solid var(--color-primary); color: var(--content-surface); }
 .btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }

@@ -14,9 +14,6 @@ public class DespesaServicoRepository : SqlBaseRepository, IDespesaServicoReposi
     public async Task<IEnumerable<DespesaServico>> ListarPorDespesaAsync(Guid despesaId)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<DespesaServico>(conn, DespesaServicoSql.ListarPorDespesaId, new { DespesaId = despesaId }));
 
-    public async Task InserirAsync(DespesaServico entity)
-        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, DespesaServicoSql.Inserir, entity));
-
     public async Task InserirEmMassaAsync(IEnumerable<DespesaServico> entities)
     {
         await ExecuteWithConnectionAsync(async conn =>

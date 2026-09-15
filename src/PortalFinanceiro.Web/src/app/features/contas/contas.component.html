@@ -22,7 +22,7 @@
             </div>
           }
         </div>
-      } @else if (contas().length === 0) {
+      } @else if (contasPaginacao.paginatedItems().length === 0) {
         <div class="empty-state">
           <svg lucideIcon="wallet" [size]="48" class="empty-icon" />
           <h3>Nenhuma conta cadastrada</h3>
@@ -44,7 +44,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (c of contas(); track c.id) {
+              @for (c of contasPaginacao.paginatedItems(); track c.id) {
                 <tr>
                   <td class="cell-name" data-label="Nome">{{ c.nome }}</td>
                   <td data-label="Banco">{{ c.banco }}</td>
@@ -61,6 +61,7 @@
               }
             </tbody>
           </table>
+          <app-list-pagination [pagination]="contasPaginacao" />
         </div>
       }
     </div>
