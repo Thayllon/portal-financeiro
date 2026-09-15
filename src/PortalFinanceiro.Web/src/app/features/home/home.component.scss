@@ -2,39 +2,18 @@
   padding: 24px 32px 16px;
   max-width: 1400px;
   margin: 0 auto;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  overflow: hidden;
 
   @media (max-width: 1279px) {
-    height: auto;
-    overflow: visible;
-    display: block;
     padding: 20px 20px;
   }
 
   @media (max-width: 767px) {
     padding: 16px 16px;
   }
-
-  @media (max-height: 800px) and (min-width: 1280px) {
-    padding: 16px 28px 12px;
-  }
 }
 
 .home-header {
-  margin-bottom: 20px;
-  flex-shrink: 0;
-
-  @media (max-height: 800px) and (min-width: 1280px) {
-    margin-bottom: 12px;
-  }
-
-  @media (max-width: 1279px) {
-    margin-bottom: 18px;
-  }
+  margin-bottom: 24px;
 }
 
 .home-title {
@@ -57,22 +36,10 @@
 }
 
 .section {
-  margin-bottom: 18px;
-  display: flex;
-  flex-direction: column;
-  flex: none;
-  min-height: 0;
+  margin-bottom: 24px;
 
   &:last-child {
     margin-bottom: 0;
-  }
-
-  @media (max-width: 1279px) {
-    margin-bottom: 18px;
-  }
-
-  @media (max-height: 800px) and (min-width: 1280px) {
-    margin-bottom: 12px;
   }
 }
 
@@ -81,12 +48,6 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  flex-shrink: 0;
-  flex-wrap: wrap;
-
-  @media (max-height: 800px) and (min-width: 1280px) {
-    margin-bottom: 8px;
-  }
 }
 
 .section-indicator {
@@ -125,10 +86,7 @@
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  align-items: stretch;
-  flex: none;
-  grid-auto-rows: minmax(165px, auto);
+  gap: 20px;
 
   &.two-cols {
     grid-template-columns: repeat(3, 1fr);
@@ -140,12 +98,8 @@
 
   @media (max-width: 1279px) {
     grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows: auto;
 
-    &.two-cols {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
+    &.two-cols,
     &.single-col {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -160,15 +114,4 @@
       grid-template-columns: 1fr;
     }
   }
-
-  @media (max-height: 800px) and (min-width: 1280px) {
-    gap: 12px;
-    grid-auto-rows: minmax(145px, auto);
-  }
-}
-
-:host ::ng-deep app-module-card {
-  display: flex;
-  height: 100%;
-  min-height: 0;
 }
