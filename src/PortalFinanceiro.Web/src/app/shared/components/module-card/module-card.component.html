@@ -1,10 +1,11 @@
 <a class="module-card" [routerLink]="item.route">
-  <div class="card-progress"></div>
-  <div class="card-arrow">
-    <svg lucideIcon="arrow-right" [size]="18"></svg>
-  </div>
-  <div class="card-icon">
-    <svg [lucideIcon]="item.icon" [size]="22"></svg>
+  <div class="card-top">
+    <div class="card-icon">
+      <svg [lucideIcon]="item.icon" [size]="20"></svg>
+    </div>
+    <div class="card-arrow">
+      <svg lucideIcon="arrow-right" [size]="16"></svg>
+    </div>
   </div>
   <h3 class="card-title">{{ item.title }}</h3>
   <p class="card-description">{{ item.description }}</p>

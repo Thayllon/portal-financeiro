@@ -9,8 +9,11 @@
       <div class="section-header">
         <div class="section-indicator"></div>
         <h2 class="section-title">{{ secao.titulo }}</h2>
+        @if (secao.subtitulo) {
+          <span class="section-subtitle">{{ secao.subtitulo }}</span>
+        }
       </div>
-      <div class="cards-grid" [class.four-cols]="secao.cards.length === 4" [class.two-cols]="secao.cards.length === 2">
+      <div class="cards-grid" [class.two-cols]="secao.cards.length === 2" [class.single-col]="secao.cards.length === 1">
         @for (card of secao.cards; track card.title) {
           <app-module-card [item]="card" />
         }

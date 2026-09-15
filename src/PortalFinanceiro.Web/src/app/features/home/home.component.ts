@@ -4,6 +4,7 @@ import { ModuleCardComponent, ModuleCardItem } from '../../shared/components/mod
 
 interface Secao {
   titulo: string;
+  subtitulo?: string;
   cards: ModuleCardItem[];
 }
 
@@ -20,6 +21,7 @@ export class HomeComponent {
   private sections = signal<Secao[]>([
     {
       titulo: 'FINANCEIRO',
+      subtitulo: 'Gestão principal das movimentações financeiras',
       cards: [
         {
           title: 'Dashboard',
@@ -45,7 +47,8 @@ export class HomeComponent {
       ]
     },
     {
-      titulo: 'CONTAS E CATEGORIAS',
+      titulo: 'CONTAS E ORGANIZAÇÃO',
+      subtitulo: 'Gerencie suas contas bancárias e organize suas categorias',
       cards: [
         {
           title: 'Contas Bancárias',
@@ -65,6 +68,7 @@ export class HomeComponent {
     },
     {
       titulo: 'CADASTROS',
+      subtitulo: 'Mantenha suas informações sempre atualizadas',
       cards: [
         {
           title: 'Clientes',
@@ -91,6 +95,7 @@ export class HomeComponent {
     },
     {
       titulo: 'ADMINISTRAÇÃO',
+      subtitulo: 'Controle de acessos e permissões',
       cards: [
         {
           title: 'Usuários',
