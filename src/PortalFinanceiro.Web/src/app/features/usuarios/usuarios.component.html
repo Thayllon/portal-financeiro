@@ -282,6 +282,14 @@
                   <span class="switch__slider"></span>
                 </label>
               </div>
+              <div class="perm-item">
+                <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
+                <span class="perm-item__label">Fluxo de despesa adicional</span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="fluxoAdicionalDespesa()" (change)="alternarFluxoAdicionalDespesa($event)" />
+                  <span class="switch__slider"></span>
+                </label>
+              </div>
             </div>
           }
         </section>

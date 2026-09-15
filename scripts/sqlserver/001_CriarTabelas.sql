@@ -200,6 +200,7 @@ CREATE TABLE Despesa (
     IdRegra UNIQUEIDENTIFIER NULL,
     IdReceitaOrigem UNIQUEIDENTIFIER NULL,
     IdParceria UNIQUEIDENTIFIER NULL,
+    IdCliente UNIQUEIDENTIFIER NULL,
     Ativo BIT NOT NULL DEFAULT 1,
     DataCadastro DATETIME2 NOT NULL,
     DataAlteracao DATETIME2 NOT NULL,
@@ -209,8 +210,21 @@ CREATE TABLE Despesa (
     CONSTRAINT FK_Despesa_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id),
     CONSTRAINT FK_Despesa_Regra FOREIGN KEY (IdRegra) REFERENCES RegraDespesa(Id),
     CONSTRAINT FK_Despesa_ReceitaOrigem FOREIGN KEY (IdReceitaOrigem) REFERENCES Receita(Id),
-    CONSTRAINT FK_Despesa_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id)
+    CONSTRAINT FK_Despesa_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id),
+    CONSTRAINT FK_Despesa_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id)
 );
+
+CREATE TABLE DespesaServico (
+    Id              UNIQUEIDENTIFIER PRIMARY KEY,
+    DespesaId       UNIQUEIDENTIFIER NOT NULL,
+    CategoriaServicoId UNIQUEIDENTIFIER NOT NULL,
+    SubcategoriaServicoId UNIQUEIDENTIFIER NULL,
+    CONSTRAINT FK_DespesaServico_Despesa FOREIGN KEY (DespesaId) REFERENCES Despesa(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_DespesaServico_CategoriaServico FOREIGN KEY (CategoriaServicoId) REFERENCES CategoriaServico(Id),
+    CONSTRAINT FK_DespesaServico_SubcategoriaServico FOREIGN KEY (SubcategoriaServicoId) REFERENCES CategoriaServico(Id)
+);
+
+CREATE INDEX IX_DespesaServico_DespesaId ON DespesaServico(DespesaId);
 
 CREATE INDEX IX_Despesa_Parceria ON Despesa(IdParceria);
 

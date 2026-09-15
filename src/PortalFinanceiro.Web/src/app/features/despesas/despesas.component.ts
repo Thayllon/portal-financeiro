@@ -3,13 +3,16 @@ import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { DespesaRepository, LancamentoFiltros as DespesaFiltros } from '../../core/repositories/lancamento.repository';
-import { CategoriaDespesaRepository } from '../../core/repositories/categoria.repository';
+import { CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
-import { Despesa, DespesaRequest } from '../../core/models/despesa.model';
+import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { ParceriaRepository } from '../../core/repositories/parceria.repository';
+import { AuthService } from '../../core/services/auth.service';
+import { Despesa, DespesaRequest } from '../../core/models/despesa.model';
 import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
+import { Pessoa } from '../../core/models/pessoa.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
@@ -36,11 +39,16 @@ export class DespesasComponent implements OnInit {
   private catRepo = inject(CategoriaDespesaRepository);
   private contaRepo = inject(ContaBancariaRepository);
   private parceriaRepo = inject(ParceriaRepository);
+  private pessoaRepo = inject(PessoaRepository);
+  private catServicoRepo = inject(CategoriaServicoRepository);
+  private auth = inject(AuthService);
 
   items = signal<Despesa[]>([]);
   categorias = signal<Categoria[]>([]);
   contas = signal<ContaBancaria[]>([]);
   parcerias = signal<any[]>([]);
+  clientes = signal<Pessoa[]>([]);
+  categoriasServico = signal<Categoria[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
   editando = signal<Despesa | null>(null);
@@ -61,13 +69,14 @@ export class DespesasComponent implements OnInit {
 
   readonly statusRealizado = STATUS_REALIZADO;
 
+  fluxoAdicional = computed(() => this.auth.temFluxoAdicionalDespesa());
   contasOptions = computed(() => this.contas().map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` })));
   categoriasOptions = computed(() => this.categorias().map(c => ({ value: c.id, label: c.nome })));
 
   pagination = useListPagination(this.items, { initialPageSize: 10 });
 
   async ngOnInit() {
-    await Promise.all([this.carregarCategorias(), this.carregarContas(), this.carregarParcerias()]);
+    await Promise.all([this.carregarCategorias(), this.carregarContas(), this.carregarParcerias(), this.carregarClientes(), this.carregarCategoriasServico()]);
     await this.carregar();
   }
 
@@ -99,6 +108,17 @@ export class DespesasComponent implements OnInit {
     try { this.parcerias.set(await firstValueFrom(this.parceriaRepo.listar())); } catch {}
   }
 
+  async carregarClientes() {
+    try {
+      const todas = await firstValueFrom(this.pessoaRepo.listar());
+      this.clientes.set(todas.filter(p => p.tipo === 'Cliente'));
+    } catch {}
+  }
+
+  async carregarCategoriasServico() {
+    try { this.categoriasServico.set(await firstValueFrom(this.catServicoRepo.listar())); } catch {}
+  }
+
   onBuscaChange() {
     if (this._buscaTimer) clearTimeout(this._buscaTimer);
     this._buscaTimer = setTimeout(() => this.carregar(), 400);
@@ -119,6 +139,14 @@ export class DespesasComponent implements OnInit {
     this.categorias.update(list => [...list, categoria]);
   }
 
+  onServicoCriado(categoria: Categoria) {
+    this.categoriasServico.update(list => [...list, categoria]);
+  }
+
+  onClienteCriado(cliente: Pessoa) {
+    this.clientes.update(list => [...list, cliente]);
+  }
+
   copiar(item: Despesa) {
     const copia: Despesa = {
       id: '',
@@ -134,6 +162,15 @@ export class DespesasComponent implements OnInit {
       idParceria: item.idParceria,
       parceria: item.parceria,
       parceriaValor: item.parceriaValor,
+      idCliente: item.idCliente,
+      cliente: item.cliente,
+      servicos: item.servicos?.map(s => ({
+        id: s.id,
+        categoriaServicoId: s.categoriaServicoId,
+        categoriaServico: s.categoriaServico,
+        subcategoriaServicoId: s.subcategoriaServicoId,
+        subcategoriaServico: s.subcategoriaServico
+      })) ?? [],
       status: STATUS_PENDENTE,
       ehRecorrente: false,
       ativo: true,
@@ -154,6 +191,11 @@ export class DespesasComponent implements OnInit {
         idCategoria: data.idCategoria,
         idSubcategoria: data.idSubcategoria || undefined,
         idParceria: data.idParceria || undefined,
+        idCliente: data.idCliente || undefined,
+        servicos: data.servicos?.map(s => ({
+          categoriaServicoId: s.categoriaServicoId,
+          subcategoriaServicoId: s.subcategoriaServicoId
+        })) || undefined,
         repete: data.repete,
         dia: data.repete ? data.dia : undefined,
         diaUtil: data.repete ? data.diaUtil : undefined,

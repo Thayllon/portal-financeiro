@@ -10,7 +10,6 @@
         <!-- STEPPER LATERAL -->
         <nav class="wizard__nav">
           @if (fluxoAdicional()) {
-            <!-- Passo 0: Categorização Receita -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 0"
               [class.wizard__step--done]="passoConcluido(0)"
@@ -18,7 +17,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>Categoria de Receita</strong><small>Categoria da receita</small></span>
+              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong><small>{{ dominioCategoria() === 'despesa' ? 'Categoria da despesa' : 'Categoria da receita' }}</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
@@ -81,7 +80,6 @@
               <span class="wizard__meta"><strong>Conta &amp; Recorrência</strong><small>Conta e repetição</small></span>
             </button>
           } @else {
-            <!-- Passo 0: Categorização -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 0"
               [class.wizard__step--done]="passoConcluido(0)"
@@ -89,7 +87,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>Categoria de Receita</strong><small>Categoria e subcategoria</small></span>
+              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong><small>Categoria e subcategoria</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
@@ -121,15 +119,14 @@
         <!-- CONTEÚDO -->
         <div class="wizard__panel">
           @if (passoAtual() === 0) {
-            <!-- PASSO: CATEGORIZAÇÃO RECEITA -->
             <div class="wizard__content">
               <div class="step-header">
                 <div class="step-header__icon">
                   <svg lucideIcon="tag" [size]="20" />
                 </div>
                 <div class="step-header__text">
-                  <strong>Categoria de Receita</strong>
-                  <span>Selecione a categoria da receita.</span>
+                  <strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong>
+                  <span>{{ dominioCategoria() === 'despesa' ? 'Selecione a categoria da despesa.' : 'Selecione a categoria da receita.' }}</span>
                 </div>
                 <button type="button" class="step-header__add" title="Nova categoria" (click)="abrirQuickAdd('categoria')">
                   <svg lucideIcon="plus" [size]="20" />
@@ -247,7 +244,6 @@
               </div>
             </div>
           } @else if (passoAtual() === 3 && fluxoAdicional()) {
-            <!-- PASSO: CLIENTE -->
             <div class="wizard__content">
               <div class="step-header">
                 <div class="step-header__icon">
@@ -255,7 +251,7 @@
                 </div>
                 <div class="step-header__text">
                   <strong>Cliente</strong>
-                  <span>Selecione o cliente vinculado a esta receita.</span>
+                  <span>{{ dominioCategoria() === 'despesa' ? 'Selecione o cliente vinculado a esta despesa.' : 'Selecione o cliente vinculado a esta receita.' }}</span>
                 </div>
                 <button type="button" class="step-header__add" title="Novo cliente" (click)="abrirQuickAdd('cliente')">
                   <svg lucideIcon="plus" [size]="20" />
