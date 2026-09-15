@@ -101,10 +101,12 @@
       [visible]="modalVisible()"
       [editando]="editando()"
       tipoLabel="despesa"
+      dominioCategoria="despesa"
       [categorias]="categorias()"
       [contas]="contas()"
       [parcerias]="parcerias()"
       [salvando]="salvando()"
       (visibleChange)="fecharModal()"
       (saved)="salvar($event)"
+      (categoriaCriada)="onCategoriaCriada($event)"
     />

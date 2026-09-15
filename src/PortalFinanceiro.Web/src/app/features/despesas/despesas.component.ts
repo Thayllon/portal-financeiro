@@ -115,6 +115,10 @@ export class DespesasComponent implements OnInit {
   abrirModal(item?: Despesa) { this.editando.set(item ?? null); this.modalVisible.set(true); }
   fecharModal() { this.modalVisible.set(false); this.editando.set(null); }
 
+  onCategoriaCriada(categoria: Categoria) {
+    this.categorias.update(list => [...list, categoria]);
+  }
+
   copiar(item: Despesa) {
     const copia: Despesa = {
       id: '',
