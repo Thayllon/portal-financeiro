@@ -41,6 +41,22 @@ CREATE TABLE Pessoa (
     CONSTRAINT FK_Pessoa_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
 );
 
+CREATE TABLE Parceria (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    IdUsuario UNIQUEIDENTIFIER NOT NULL,
+    IdParceiro UNIQUEIDENTIFIER NOT NULL,
+    IdCliente UNIQUEIDENTIFIER NOT NULL,
+    Valor DECIMAL(18,2) NOT NULL,
+    Ativo BIT NOT NULL DEFAULT 1,
+    DataCadastro DATETIME2 NOT NULL,
+    DataAlteracao DATETIME2 NOT NULL,
+    CONSTRAINT FK_Parceria_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
+    CONSTRAINT FK_Parceria_Parceiro FOREIGN KEY (IdParceiro) REFERENCES Pessoa(Id),
+    CONSTRAINT FK_Parceria_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id)
+);
+
+CREATE INDEX IX_Parceria_Usuario ON Parceria(IdUsuario);
+
 CREATE TABLE CategoriaReceita (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
     IdUsuario UNIQUEIDENTIFIER NOT NULL,
@@ -126,6 +142,7 @@ CREATE TABLE Receita (
     IdSubcategoria UNIQUEIDENTIFIER NULL,
     IdParceiro UNIQUEIDENTIFIER NULL,
     IdCliente UNIQUEIDENTIFIER NULL,
+    IdParceria UNIQUEIDENTIFIER NULL,
     Status INT NOT NULL DEFAULT 1,
     DataRealizacao DATETIME2 NULL,
     IdRegra UNIQUEIDENTIFIER NULL,
@@ -138,8 +155,11 @@ CREATE TABLE Receita (
     CONSTRAINT FK_Receita_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id),
     CONSTRAINT FK_Receita_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id),
     CONSTRAINT FK_Receita_Parceiro FOREIGN KEY (IdParceiro) REFERENCES Pessoa(Id),
-    CONSTRAINT FK_Receita_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id)
+    CONSTRAINT FK_Receita_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id),
+    CONSTRAINT FK_Receita_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id)
 );
+
+CREATE INDEX IX_Receita_Parceria ON Receita(IdParceria);
 
 CREATE TABLE ReceitaServico (
     Id              UNIQUEIDENTIFIER PRIMARY KEY,
@@ -166,6 +186,7 @@ CREATE TABLE Despesa (
     DataRealizacao DATETIME2 NULL,
     IdRegra UNIQUEIDENTIFIER NULL,
     IdReceitaOrigem UNIQUEIDENTIFIER NULL,
+    IdParceria UNIQUEIDENTIFIER NULL,
     Ativo BIT NOT NULL DEFAULT 1,
     DataCadastro DATETIME2 NOT NULL,
     DataAlteracao DATETIME2 NOT NULL,
@@ -174,8 +195,11 @@ CREATE TABLE Despesa (
     CONSTRAINT FK_Despesa_Subcategoria FOREIGN KEY (IdSubcategoria) REFERENCES CategoriaDespesa(Id),
     CONSTRAINT FK_Despesa_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id),
     CONSTRAINT FK_Despesa_Regra FOREIGN KEY (IdRegra) REFERENCES RegraDespesa(Id),
-    CONSTRAINT FK_Despesa_ReceitaOrigem FOREIGN KEY (IdReceitaOrigem) REFERENCES Receita(Id)
+    CONSTRAINT FK_Despesa_ReceitaOrigem FOREIGN KEY (IdReceitaOrigem) REFERENCES Receita(Id),
+    CONSTRAINT FK_Despesa_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id)
 );
+
+CREATE INDEX IX_Despesa_Parceria ON Despesa(IdParceria);
 
 CREATE TABLE CategoriaHistorico (
     Id UNIQUEIDENTIFIER PRIMARY KEY,

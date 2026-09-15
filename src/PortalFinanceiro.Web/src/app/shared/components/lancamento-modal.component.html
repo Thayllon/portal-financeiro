@@ -30,7 +30,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(1) && passoAtual() !== 1) { <svg lucideIcon="check" [size]="16" /> } @else { <span>2</span> }
               </span>
-              <span class="wizard__meta"><strong>Parceria</strong><small>Parceiro opcional</small></span>
+              <span class="wizard__meta"><strong>Parceria</strong><small>Parceria opcional</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 1"></span>
 
@@ -157,13 +157,6 @@
                   </div>
                 }
               </div>
-              <div class="info-box">
-                <svg lucideIcon="info" [size]="16" />
-                <div>
-                  <strong>Não encontrou a categoria?</strong>
-                  <span>Cadastre uma nova categoria em <strong>Configurações</strong>.</span>
-                </div>
-              </div>
             </div>
           } @else if (passoAtual() === 1 && fluxoAdicional()) {
             <!-- PASSO: PARCERIA -->
@@ -174,31 +167,19 @@
                 </div>
                 <div class="step-header__text">
                   <strong>Parceria</strong>
-                  <span>Informe se há um parceiro vinculado.</span>
+                  <span>Selecione a parceria vinculada (opcional).</span>
                 </div>
               </div>
               <div class="section">
                 <div class="field">
-                  <label class="checkbox-label">
-                    <input type="checkbox" [ngModel]="form().temParceiro" (ngModelChange)="onTemParceiroChange($event)" class="checkbox" />
-                    <svg lucideIcon="handshake" [size]="14" />
-                    <span>Possui parceiro?</span>
-                  </label>
+                  <label>Parceria</label>
+                  <app-custom-select
+                    placeholder="Nenhuma (opcional)"
+                    [options]="parceriasOptions()"
+                    [value]="form().idParceria ?? ''"
+                    (valueChange)="updateFormField('idParceria', $event)"
+                  />
                 </div>
-                @if (form().temParceiro) {
-                  <div class="field">
-                    <label>Parceiro<span class="required">*</span></label>
-                    <app-custom-select
-                      placeholder="Selecione o parceiro"
-                      [options]="parceirosOptions()"
-                      [value]="form().idParceiro ?? ''"
-                      (valueChange)="updateFormField('idParceiro', $event); clearError('idParceiro')"
-                    />
-                    @if (fieldErrors()['idParceiro']) {
-                      <span class="field-error">{{ fieldErrors()['idParceiro'] }}</span>
-                    }
-                  </div>
-                }
               </div>
             </div>
           } @else if (passoAtual() === 2 && fluxoAdicional()) {
@@ -345,6 +326,17 @@
                     }
                   </div>
                 </div>
+                @if (parceriasOptions().length > 0) {
+                  <div class="field">
+                    <label>Parceria (opcional)</label>
+                    <app-custom-select
+                      placeholder="Nenhuma"
+                      [options]="parceriasOptions()"
+                      [value]="form().idParceria ?? ''"
+                      (valueChange)="updateFormField('idParceria', $event)"
+                    />
+                  </div>
+                }
               </div>
             </div>
           } @else {

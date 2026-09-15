@@ -88,11 +88,11 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/categorias` | categorias-receita | Categorias compartilhadas (com subcategorias) |
 | `/clientes` | clientes | Cadastro de clientes (tipo Cliente) |
 | `/parceiros` | parceiros | Cadastro de parceiros (tipo Parceiro) |
-| `/parcerias` | parcerias | Tela vazia (placeholder), acesso via permissão especial |
+| `/parcerias` | parcerias | Cadastro de parcerias (parceiro + cliente + valor) com visão de falta receber/pagar |
 | `/usuarios` | usuarios | Usuários e permissões (admin) |
 
 ### Menu lateral
 
-- **Dashboard**, **Receitas**, **Despesas** e **Parcerias** ficam no nível principal. **Parcerias** só aparece para quem tem a permissão especial (ao lado de Fluxo de receita adicional) ou admin.
+- **Dashboard**, **Receitas**, **Despesas** e **Parcerias** ficam no nível principal. **Parcerias** usa permissão regular (Leitura/Escrita) como Clientes e Parceiros. Parcerias são vinculadas em Receitas/Despesas via `IdParceria` e exibem saldo (falta receber/pagar).
 - **Configurações** é um grupo colapsável que reúne, nesta ordem: **Contas**, **Categorias**, **Cliente**, **Parceiro** e **Usuários** (admin).
 - O ícone `user-key` fica reservado para quando o item **Permissões** voltar.

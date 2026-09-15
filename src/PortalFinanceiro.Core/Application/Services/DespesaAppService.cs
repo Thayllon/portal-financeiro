@@ -14,11 +14,13 @@ public class DespesaAppService : IDespesaAppService
 {
     private readonly IDespesaRepository _repository;
     private readonly IRegraDespesaRepository _regraRepository;
+    private readonly IParceriaRepository? _parceriaRepository;
 
-    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository)
+    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IParceriaRepository? parceriaRepository = null)
     {
         _repository = repository;
         _regraRepository = regraRepository;
+        _parceriaRepository = parceriaRepository;
     }
 
     public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
@@ -38,9 +40,16 @@ public class DespesaAppService : IDespesaAppService
 
     public async Task<Result<DespesaResponse>> AdicionarAsync(Guid idUsuario, DespesaRequest request)
     {
+        if (request.IdParceria.HasValue && _parceriaRepository is not null)
+        {
+            var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
+            if (parceria is null || parceria.IdUsuario != idUsuario || !parceria.Ativo)
+                return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
+        }
+
         if (!request.Repete)
         {
-            var result = Despesa.Criar(idUsuario, request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria);
+            var result = Despesa.Criar(idUsuario, request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria, idParceria: request.IdParceria);
             if (!result.EhSucesso)
                 return result.Erro!;
 
@@ -57,7 +66,7 @@ public class DespesaAppService : IDespesaAppService
         var regra = regraResult.Dado!;
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
-        var despesas = meses.Select(m => Despesa.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id))
+        var despesas = meses.Select(m => Despesa.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id, idParceria: request.IdParceria))
                             .Where(d => d.EhSucesso)
                             .Select(d => d.Dado!)
                             .ToList();
@@ -80,7 +89,14 @@ public class DespesaAppService : IDespesaAppService
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
 
-        var result = despesa.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria);
+        if (request.IdParceria.HasValue && _parceriaRepository is not null)
+        {
+            var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
+            if (parceria is null || parceria.IdUsuario != despesa.IdUsuario || !parceria.Ativo)
+                return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
+        }
+
+        var result = despesa.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria, idParceria: request.IdParceria);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -164,6 +180,9 @@ public class DespesaAppService : IDespesaAppService
         IdSubcategoria = p.IdSubcategoria,
         Subcategoria = p.Subcategoria,
         Status = (int)p.Status,
+        IdParceria = p.IdParceria,
+        Parceria = p.Parceria,
+        ParceriaValor = p.ParceriaValor,
         DataRealizacao = p.DataRealizacao,
         IdRegra = p.IdRegra,
         EhRecorrente = p.EhRecorrente,

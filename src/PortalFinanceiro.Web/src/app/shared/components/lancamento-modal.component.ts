@@ -7,6 +7,7 @@ import { CurrencyInputDirective } from '../directives/currency-input.directive';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
+import { Parceria } from '../../core/models/parceria.model';
 import { NotificationService } from '../../core/services/notification.service';
 
 export interface CategoriaServicoBloco {
@@ -26,8 +27,7 @@ export interface LancamentoForm {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
-  temParceiro: boolean;
-  idParceiro?: string;
+  idParceria?: string;
   categoriasServicoBloco: CategoriaServicoBloco[];
   servicos?: ServicoItem[];
   idCliente?: string;
@@ -46,6 +46,7 @@ interface LancamentoItem {
   idCategoria: string;
   idSubcategoria?: string;
   idParceiro?: string;
+  idParceria?: string;
   servicos?: { categoriaServicoId: string; subcategoriaServicoId?: string }[];
   idCliente?: string;
 }
@@ -67,6 +68,7 @@ export class LancamentoModalComponent {
   contas = input<ContaBancaria[]>([]);
   fluxoAdicional = input(false);
   parceiros = input<Pessoa[]>([]);
+  parcerias = input<Parceria[]>([]);
   clientes = input<Pessoa[]>([]);
   categoriasServico = input<Categoria[]>([]);
   salvando = input(false);
@@ -82,7 +84,7 @@ export class LancamentoModalComponent {
   contasOptions = signal<SelectOption[]>([]);
   categoriasOptions = signal<SelectOption[]>([]);
   subcategoriasOptions = signal<SelectOption[]>([]);
-  parceirosOptions = signal<SelectOption[]>([]);
+  parceriasOptions = signal<SelectOption[]>([]);
   clientesOptions = signal<SelectOption[]>([]);
   categoriasServicoPais = signal<SelectOption[]>([]);
   subcategoriasServicoMap = signal<Map<string, SelectOption[]>>(new Map());
@@ -109,8 +111,8 @@ export class LancamentoModalComponent {
     });
 
     effect(() => {
-      const p = this.parceiros();
-      this.parceirosOptions.set(p.map(x => ({ value: x.id, label: x.nome })));
+      const p = this.parcerias();
+      this.parceriasOptions.set(p.map(x => ({ value: x.id, label: `${x.parceiro} - ${x.cliente} (${x.valor})` })));
     });
 
     effect(() => {
@@ -133,8 +135,7 @@ export class LancamentoModalComponent {
             idConta: ini.idConta,
             idCategoria: ini.idCategoria,
             idSubcategoria: ini.idSubcategoria ?? undefined,
-            temParceiro: !!ini.idParceiro,
-            idParceiro: ini.idParceiro ?? undefined,
+            idParceria: ini.idParceria ?? undefined,
             categoriasServicoBloco: blocos,
             idCliente: ini.idCliente ?? undefined,
             repete: false,
@@ -284,7 +285,6 @@ export class LancamentoModalComponent {
           if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
           break;
         case 1:
-          if (f.temParceiro && !f.idParceiro) errors['idParceiro'] = 'Selecione um parceiro';
           break;
         case 2:
           if (f.categoriasServicoBloco.length === 0) {
@@ -365,7 +365,7 @@ export class LancamentoModalComponent {
     if (fluxo) {
       switch (indice) {
         case 0: return !!f.idCategoria;
-        case 1: return !!f.idParceiro;
+        case 1: return true;
         case 2: return f.categoriasServicoBloco.length > 0;
         case 3: return !!f.idCliente;
         case 4: return !!(f.descricao?.trim() && f.data && f.valor > 0);
@@ -404,17 +404,6 @@ export class LancamentoModalComponent {
     });
     if (descricaoSet) {
       this.clearError('descricao');
-    }
-  }
-
-  onTemParceiroChange(value: boolean) {
-    this.form.update(f => ({
-      ...f,
-      temParceiro: value,
-      idParceiro: value ? f.idParceiro : undefined
-    }));
-    if (!value) {
-      this.clearError('idParceiro');
     }
   }
 
@@ -475,7 +464,6 @@ export class LancamentoModalComponent {
         errors['servicos'] = 'Adicione pelo menos um serviço';
       }
       if (!f.idCliente) errors['idCliente'] = 'Cliente é obrigatório';
-      if (f.temParceiro && !f.idParceiro) errors['idParceiro'] = 'Selecione um parceiro';
     }
 
     if (f.repete) {
@@ -508,7 +496,7 @@ export class LancamentoModalComponent {
   private emptyForm(): LancamentoForm {
     return {
       descricao: '', valor: 0, data: '', idConta: '', idCategoria: '',
-      temParceiro: false, categoriasServicoBloco: [], repete: false, dia: 1, diaUtil: false, dataFim: ''
+      categoriasServicoBloco: [], repete: false, dia: 1, diaUtil: false, dataFim: ''
     };
   }
 }

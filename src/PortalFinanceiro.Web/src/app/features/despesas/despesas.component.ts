@@ -6,6 +6,7 @@ import { DespesaRepository, LancamentoFiltros as DespesaFiltros } from '../../co
 import { CategoriaDespesaRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { Despesa, DespesaRequest } from '../../core/models/despesa.model';
+import { ParceriaRepository } from '../../core/repositories/parceria.repository';
 import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
@@ -34,10 +35,12 @@ export class DespesasComponent implements OnInit {
   private repo = inject(DespesaRepository);
   private catRepo = inject(CategoriaDespesaRepository);
   private contaRepo = inject(ContaBancariaRepository);
+  private parceriaRepo = inject(ParceriaRepository);
 
   items = signal<Despesa[]>([]);
   categorias = signal<Categoria[]>([]);
   contas = signal<ContaBancaria[]>([]);
+  parcerias = signal<any[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
   editando = signal<Despesa | null>(null);
@@ -64,7 +67,7 @@ export class DespesasComponent implements OnInit {
   pagination = useListPagination(this.items, { initialPageSize: 10 });
 
   async ngOnInit() {
-    await Promise.all([this.carregarCategorias(), this.carregarContas()]);
+    await Promise.all([this.carregarCategorias(), this.carregarContas(), this.carregarParcerias()]);
     await this.carregar();
   }
 
@@ -90,6 +93,10 @@ export class DespesasComponent implements OnInit {
 
   async carregarContas() {
     try { this.contas.set(await firstValueFrom(this.contaRepo.listar())); } catch {}
+  }
+
+  async carregarParcerias() {
+    try { this.parcerias.set(await firstValueFrom(this.parceriaRepo.listar())); } catch {}
   }
 
   onBuscaChange() {
@@ -120,6 +127,9 @@ export class DespesasComponent implements OnInit {
       categoria: item.categoria,
       idSubcategoria: item.idSubcategoria,
       subcategoria: item.subcategoria,
+      idParceria: item.idParceria,
+      parceria: item.parceria,
+      parceriaValor: item.parceriaValor,
       status: STATUS_PENDENTE,
       ehRecorrente: false,
       ativo: true,
@@ -139,6 +149,7 @@ export class DespesasComponent implements OnInit {
         idConta: data.idConta,
         idCategoria: data.idCategoria,
         idSubcategoria: data.idSubcategoria || undefined,
+        idParceria: data.idParceria || undefined,
         repete: data.repete,
         dia: data.repete ? data.dia : undefined,
         diaUtil: data.repete ? data.diaUtil : undefined,

@@ -17,6 +17,9 @@ public class DespesaResponse
     public Guid? IdRegra { get; set; }
     public bool EhRecorrente { get; set; }
     public Guid? IdReceitaOrigem { get; set; }
+    public Guid? IdParceria { get; set; }
+    public string Parceria { get; set; } = string.Empty;
+    public decimal? ParceriaValor { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
 }

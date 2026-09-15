@@ -6,6 +6,7 @@ import { ReceitaRepository, LancamentoFiltros as ReceitaFiltros } from '../../co
 import { CategoriaReceitaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
+import { ParceriaRepository } from '../../core/repositories/parceria.repository';
 import { AuthService } from '../../core/services/auth.service';
 import { Receita, ReceitaRequest } from '../../core/models/receita.model';
 import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
@@ -38,6 +39,7 @@ export class ReceitasComponent implements OnInit {
   private catRepo = inject(CategoriaReceitaRepository);
   private contaRepo = inject(ContaBancariaRepository);
   private pessoaRepo = inject(PessoaRepository);
+  private parceriaRepo = inject(ParceriaRepository);
   private catServicoRepo = inject(CategoriaServicoRepository);
   private auth = inject(AuthService);
 
@@ -45,6 +47,7 @@ export class ReceitasComponent implements OnInit {
   categorias = signal<Categoria[]>([]);
   contas = signal<ContaBancaria[]>([]);
   parceiros = signal<Pessoa[]>([]);
+  parcerias = signal<any[]>([]);
   clientes = signal<Pessoa[]>([]);
   categoriasServico = signal<Categoria[]>([]);
   loading = signal(true);
@@ -77,7 +80,7 @@ export class ReceitasComponent implements OnInit {
   pagination = useListPagination(this.items, { initialPageSize: 10 });
 
   async ngOnInit() {
-    await Promise.all([this.carregarCategorias(), this.carregarContas(), this.carregarParceiros(), this.carregarClientes(), this.carregarCategoriasServico()]);
+    await Promise.all([this.carregarCategorias(), this.carregarContas(), this.carregarParceiros(), this.carregarParcerias(), this.carregarClientes(), this.carregarCategoriasServico()]);
     await this.carregar();
   }
 
@@ -110,6 +113,10 @@ export class ReceitasComponent implements OnInit {
       const todas = await firstValueFrom(this.pessoaRepo.listar());
       this.parceiros.set(todas.filter(p => p.tipo === 'Parceiro'));
     } catch {}
+  }
+
+  async carregarParcerias() {
+    try { this.parcerias.set(await firstValueFrom(this.parceriaRepo.listar())); } catch {}
   }
 
   async carregarClientes() {
@@ -153,6 +160,9 @@ export class ReceitasComponent implements OnInit {
       subcategoria: item.subcategoria,
       idParceiro: item.idParceiro,
       parceiro: item.parceiro,
+      idParceria: item.idParceria,
+      parceria: item.parceria,
+      parceriaValor: item.parceriaValor,
       idCliente: item.idCliente,
       cliente: item.cliente,
       servicos: item.servicos?.map(s => ({
@@ -181,7 +191,7 @@ export class ReceitasComponent implements OnInit {
         idConta: data.idConta,
         idCategoria: data.idCategoria,
         idSubcategoria: data.idSubcategoria || undefined,
-        idParceiro: data.idParceiro || undefined,
+        idParceria: data.idParceria || undefined,
         servicos: data.servicos?.map(s => ({
           categoriaServicoId: s.categoriaServicoId,
           subcategoriaServicoId: s.subcategoriaServicoId

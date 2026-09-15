@@ -3,21 +3,26 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class ReceitaSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}Receita";
-    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, IdParceiro, IdCliente, Status, DataRealizacao, IdRegra, Ativo, DataCadastro, DataAlteracao";
+    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, IdParceiro, IdCliente, IdParceria, Status, DataRealizacao, IdRegra, Ativo, DataCadastro, DataAlteracao";
     static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria,
-        {T}.IdParceiro, {T}.IdCliente,
+        {T}.IdParceiro, {T}.IdCliente, {T}.IdParceria,
         {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
         cb.Nome AS Conta,
         cat.Nome AS Categoria,
         sub.Nome AS Subcategoria,
         par.Nome AS Parceiro,
-        cli.Nome AS Cliente";
+        cli.Nome AS Cliente,
+        pa.Valor AS ParceriaValor,
+        CASE WHEN pa.Id IS NULL THEN '' ELSE CONCAT(COALESCE(par2.Nome,''), ' - ', COALESCE(cli2.Nome,'')) END AS Parceria";
     static string Joins => $@"
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}ContaBancaria cb ON {T}.IdConta = cb.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaReceita cat ON {T}.IdCategoria = cat.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaReceita sub ON {T}.IdSubcategoria = sub.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa par ON {T}.IdParceiro = par.Id
-        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa cli ON {T}.IdCliente = cli.Id";
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa cli ON {T}.IdCliente = cli.Id
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Parceria pa ON {T}.IdParceria = pa.Id
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa par2 ON pa.IdParceiro = par2.Id
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa cli2 ON pa.IdCliente = cli2.Id";
     public static string ObterPorId => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.Id = @Id";
     public static string ListarPorMes => $@"
         SELECT {CComNomes} FROM {T} {Joins}
@@ -32,8 +37,8 @@ internal static class ReceitaSql
     public static string ContarPorSubcategoria => $"SELECT COUNT(*) FROM {T} WHERE IdSubcategoria = @IdSubcategoria AND Ativo = 1";
     public static string ContarPorRegra => $"SELECT COUNT(*) FROM {T} WHERE IdRegra = @IdRegra AND Ativo = 1";
     public static string ListarPorRegra => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdRegra = @IdRegra AND {T}.Ativo = 1 ORDER BY {T}.Data";
-    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @IdParceiro, @IdCliente, @Status, @DataRealizacao, @IdRegra, @Ativo, @DataCadastro, @DataAlteracao)";
-    public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, IdParceiro = @IdParceiro, IdCliente = @IdCliente, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
+    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @IdParceiro, @IdCliente, @IdParceria, @Status, @DataRealizacao, @IdRegra, @Ativo, @DataCadastro, @DataAlteracao)";
+    public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, IdParceiro = @IdParceiro, IdCliente = @IdCliente, IdParceria = @IdParceria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
     public static string Excluir => $"UPDATE {T} SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id";
     public static string ResumoAnualPorMes => $@"
         SELECT MONTH({T}.Data) AS Mes,
