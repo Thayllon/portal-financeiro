@@ -44,9 +44,11 @@ CREATE TABLE Pessoa (
 CREATE TABLE Parceria (
     Id UUID PRIMARY KEY,
     IdUsuario UUID NOT NULL,
+    Nome VARCHAR(150) NOT NULL,
     IdParceiro UUID NOT NULL,
     IdCliente UUID NOT NULL,
     Valor NUMERIC(18,2) NOT NULL,
+    PercentualParceiro NUMERIC(5,2) NOT NULL DEFAULT 0,
     Ativo BOOLEAN NOT NULL DEFAULT TRUE,
     DataCadastro TIMESTAMP NOT NULL,
     DataAlteracao TIMESTAMP NOT NULL,

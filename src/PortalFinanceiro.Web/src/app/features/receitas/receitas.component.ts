@@ -244,4 +244,5 @@ export class ReceitasComponent implements OnInit {
   total = computed(() => this.items().reduce((s, l) => s + l.valor, 0));
   totalRecebido = computed(() => this.items().filter(l => l.status === STATUS_REALIZADO).reduce((s, l) => s + l.valor, 0));
   totalPendente = computed(() => this.total() - this.totalRecebido());
+  totalParceria = computed(() => this.items().filter(l => !!l.idParceria).reduce((s, l) => s + l.valor, 0));
 }

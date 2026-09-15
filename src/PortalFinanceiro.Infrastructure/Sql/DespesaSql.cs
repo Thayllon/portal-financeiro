@@ -28,6 +28,7 @@ internal static class DespesaSql
           AND (@Busca IS NULL OR {T}.Descricao LIKE '%' + @Busca + '%')
         ORDER BY {T}.Status, {T}.Data";
     public static string ContarPorCategoria => $"SELECT COUNT(*) FROM {T} WHERE IdCategoria = @IdCategoria AND Ativo = 1";
+    public static string ListarPorParceria => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdParceria = @IdParceria AND {T}.Ativo = 1 ORDER BY {T}.Data";
     public static string ContarPorSubcategoria => $"SELECT COUNT(*) FROM {T} WHERE IdSubcategoria = @IdSubcategoria AND Ativo = 1";
     public static string ContarPorRegra => $"SELECT COUNT(*) FROM {T} WHERE IdRegra = @IdRegra AND Ativo = 1";
     public static string ListarPorRegra => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdRegra = @IdRegra AND {T}.Ativo = 1 ORDER BY {T}.Data";

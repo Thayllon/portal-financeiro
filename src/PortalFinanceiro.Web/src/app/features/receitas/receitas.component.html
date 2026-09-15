@@ -29,6 +29,9 @@
         <span>Total: <strong>{{ total() | currencyBRL }}</strong></span>
         <span>Recebido: <strong style="color: var(--color-success)">{{ totalRecebido() | currencyBRL }}</strong></span>
         <span>Pendente: <strong style="color: var(--color-warning)">{{ totalPendente() | currencyBRL }}</strong></span>
+        @if (fluxoAdicional()) {
+          <span>Parceria: <strong>{{ totalParceria() | currencyBRL }}</strong></span>
+        }
       </div>
 
       @if (loading()) {
@@ -54,14 +57,14 @@
       } @else {
         <div class="table-card">
           <table class="table">
-            <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Conta</th><th>Categoria</th><th>Status</th><th class="th-actions">Ações</th></tr></thead>
+            <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Parceria</th><th>Categoria</th><th>Status</th><th class="th-actions">Ações</th></tr></thead>
             <tbody>
               @for (l of pagination.paginatedItems(); track l.id) {
                 <tr>
                   <td class="cell-name" data-label="Descrição">{{ l.descricao }}</td>
                   <td class="cell-value" data-label="Valor">{{ l.valor | currencyBRL }}</td>
                   <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
-                  <td class="cell-meta" data-label="Conta">{{ l.conta }}</td>
+                  <td class="cell-meta" data-label="Parceria" [title]="l.parceria">{{ l.idParceria ? 'Sim' : '—' }}</td>
                   <td class="cell-meta" data-label="Categoria">{{ l.categoria }}{{ l.subcategoria ? ' → ' + l.subcategoria : '' }}</td>
                   <td data-label="Status"><app-status-badge [type]="l.status === statusRealizado ? 'realizado' : 'pendente'" [label]="l.status === statusRealizado ? 'Recebido' : 'Pendente'" /></td>
                   <td class="cell-actions">

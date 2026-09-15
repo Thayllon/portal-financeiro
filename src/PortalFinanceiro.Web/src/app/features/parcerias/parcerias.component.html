@@ -2,7 +2,7 @@
   <header class="page__header">
     <div class="page__header-left">
       <span class="page__badge">
-        <svg lucideIcon="briefcase-business" class="page__icon" [size]="22" />
+        <svg lucideIcon="handshake" class="page__icon" [size]="22" />
       </span>
       <h1 class="page__title">Parcerias</h1>
     </div>
@@ -27,7 +27,7 @@
   } @else if (paginacao.paginatedItems().length === 0) {
     <div class="table-card">
       <div class="empty-state">
-        <svg lucideIcon="briefcase-business" [size]="36" class="empty-icon" />
+        <svg lucideIcon="handshake" [size]="36" class="empty-icon" />
         <h3>Nenhuma parceria cadastrada</h3>
         <p>Cadastre sua primeira parceria vinculando parceiro, cliente e valor.</p>
       </div>
@@ -37,6 +37,7 @@
       <table class="table">
         <thead>
           <tr>
+            <th>Nome</th>
             <th>Parceiro</th>
             <th>Cliente</th>
             <th>Valor</th>
@@ -48,12 +49,16 @@
         <tbody>
           @for (p of paginacao.paginatedItems(); track p.id) {
             <tr>
-              <td class="cell-name" data-label="Parceiro">{{ p.parceiro }}</td>
+              <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
+              <td data-label="Parceiro">{{ p.parceiro }}</td>
               <td data-label="Cliente">{{ p.cliente }}</td>
               <td data-label="Valor">{{ p.valor | currencyBRL }}</td>
               <td data-label="Falta receber" [class.negative]="p.faltaReceber > 0">{{ p.faltaReceber | currencyBRL }}</td>
               <td data-label="Falta pagar" [class.negative]="p.faltaPagar > 0">{{ p.faltaPagar | currencyBRL }}</td>
               <td class="cell-actions">
+                <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(p)">
+                  <svg lucideIcon="eye" [size]="16" />
+                </button>
                 <button class="action-btn" title="Editar" (click)="editar(p)">
                   <svg lucideIcon="pencil" [size]="16" />
                 </button>
@@ -77,6 +82,15 @@
   (visibleChange)="fecharModal()"
   (save)="salvar()"
 >
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input
+      type="text"
+      [(ngModel)]="form.nome"
+      placeholder="Ex: Site NKG"
+      class="input"
+    />
+  </div>
   <div class="field">
     <label>Parceiro<span class="required">*</span></label>
     <app-custom-select
@@ -105,5 +119,17 @@
       class="input"
       inputmode="decimal"
     />
+  </div>
+  <div class="field">
+    <label>Percentual do parceiro (%)<span class="required">*</span></label>
+    <input
+      type="number"
+      [min]="0"
+      [max]="100"
+      [(ngModel)]="form.percentualParceiro"
+      placeholder="0-100"
+      class="input"
+    />
+    <span class="field-hint">Ex: 50 = metade do valor é do parceiro</span>
   </div>
 </app-modal>

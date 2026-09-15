@@ -63,6 +63,8 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Ícones Lucide: `<svg lucideIcon="nome" [size]="16" />`
 - **Selects/Dropdowns**: SEMPRE `app-custom-select` (padrão reutilizável) — proibido `<select>` nativo
 - **Busca no select**: `app-custom-select` aceita `[searchable]="true"` + `searchPlaceholder="..."`; o campo de busca aparece só quando há mais de 5 opções e filtra sem diferenciar acentos nem maiúsculas/minúsculas (ex.: Cliente na Nova Receita)
+- **Modal de lançamento (edição)**: com item em edição, o botão **Salvar** aparece em todos os passos (cópia sem id mantém o wizard)
+- **Grid de receitas**: coluna `Conta` substituída por `Parceria` (`Sim` com vínculo, `—` sem); totais com `Parceria` (soma das receitas vinculadas) quando o fluxo adicional está ligado
 - **Inputs de texto**: classe `input` do design system
 - Forms: `ControlValueAccessor` para componentes reutilizáveis (CustomSelect)
 - SCSS com mixins do design system (`_responsive.scss`, `_transitions.scss`, etc.)
@@ -89,7 +91,8 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/categorias` | categorias-receita | Categorias compartilhadas (com subcategorias) |
 | `/clientes` | clientes | Cadastro de clientes (tipo Cliente) |
 | `/parceiros` | parceiros | Cadastro de parceiros (tipo Parceiro) |
-| `/parcerias` | parcerias | Cadastro de parcerias (parceiro + cliente + valor) com visão de falta receber/pagar |
+| `/parcerias` | parcerias | Cadastro de parcerias (nome + parceiro + cliente + valor + % do parceiro) com visão de falta receber/pagar |
+| `/parcerias/:id` | parceria-detalhe | Detalhe da parceria: resumo (partes, recebido, pago, faltas) + entradas (receitas) + saídas (despesas) |
 | `/usuarios` | usuarios | Usuários e permissões (admin) |
 
 ### Menu lateral

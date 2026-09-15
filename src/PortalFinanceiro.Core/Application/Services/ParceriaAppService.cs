@@ -43,7 +43,7 @@ public class ParceriaAppService : IParceriaAppService
         if (!validacao.EhSucesso)
             return validacao.Erro!;
 
-        var result = Parceria.Criar(idUsuario, request.IdParceiro, request.IdCliente, request.Valor);
+        var result = Parceria.Criar(idUsuario, request.Nome, request.IdParceiro, request.IdCliente, request.Valor, request.PercentualParceiro);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -62,7 +62,7 @@ public class ParceriaAppService : IParceriaAppService
         if (!validacao.EhSucesso)
             return validacao.Erro!;
 
-        var result = parceria.Atualizar(request.IdParceiro, request.IdCliente, request.Valor);
+        var result = parceria.Atualizar(request.Nome, request.IdParceiro, request.IdCliente, request.Valor, request.PercentualParceiro);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -112,20 +112,25 @@ public class ParceriaAppService : IParceriaAppService
     {
         var totalRecebido = await _repository.SomarReceitasPorStatusAsync(p.Id, 2);
         var totalPago = await _repository.SomarDespesasPorStatusAsync(p.Id, 2);
+        var valorParceiro = Math.Round(p.Valor * p.PercentualParceiro / 100, 2);
         return new ParceriaResponse
         {
             Id = p.Id,
+            Nome = p.Nome,
             IdParceiro = p.IdParceiro,
             Parceiro = p.Parceiro,
             IdCliente = p.IdCliente,
             Cliente = p.Cliente,
             Valor = p.Valor,
+            PercentualParceiro = p.PercentualParceiro,
+            ValorParceiro = valorParceiro,
+            MinhaParte = p.Valor - valorParceiro,
             Ativo = p.Ativo,
             DataCadastro = p.DataCadastro,
             TotalRecebido = totalRecebido,
             TotalPago = totalPago,
             FaltaReceber = p.Valor - totalRecebido,
-            FaltaPagar = p.Valor - totalPago
+            FaltaPagar = valorParceiro - totalPago
         };
     }
 }

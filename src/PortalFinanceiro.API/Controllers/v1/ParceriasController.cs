@@ -11,10 +11,14 @@ namespace PortalFinanceiro.API.Controllers.v1;
 public class ParceriasController : BaseController
 {
     private readonly IParceriaAppService _service;
+    private readonly IReceitaAppService _receitaService;
+    private readonly IDespesaAppService _despesaService;
 
-    public ParceriasController(IParceriaAppService service)
+    public ParceriasController(IParceriaAppService service, IReceitaAppService receitaService, IDespesaAppService despesaService)
     {
         _service = service;
+        _receitaService = receitaService;
+        _despesaService = despesaService;
     }
 
     [HttpGet]
@@ -49,6 +53,20 @@ public class ParceriasController : BaseController
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id);
+        return ApiResponse(result);
+    }
+
+    [HttpGet("{id}/receitas")]
+    public async Task<IActionResult> ListarReceitas(Guid id)
+    {
+        var result = await _receitaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
+        return ApiResponse(result);
+    }
+
+    [HttpGet("{id}/despesas")]
+    public async Task<IActionResult> ListarDespesas(Guid id)
+    {
+        var result = await _despesaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
         return ApiResponse(result);
     }
 }
