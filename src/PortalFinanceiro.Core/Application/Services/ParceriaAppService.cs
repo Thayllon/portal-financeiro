@@ -29,11 +29,13 @@ public class ParceriaAppService : IParceriaAppService
         return responses;
     }
 
-    public async Task<Result<ParceriaResponse>> ObterPorIdAsync(Guid id)
+    public async Task<Result<ParceriaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario)
     {
         var parceria = await _repository.ObterProjecaoPorIdAsync(id);
         if (parceria is null)
             return Erro.NaoEncontrado("Parceria");
+        if (parceria.IdUsuario != idUsuario)
+            return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
         return await MapearComResumoAsync(parceria);
     }
 
@@ -52,11 +54,13 @@ public class ParceriaAppService : IParceriaAppService
         return await MapearComResumoAsync(projecao!);
     }
 
-    public async Task<Result<ParceriaResponse>> AtualizarAsync(Guid id, ParceriaRequest request)
+    public async Task<Result<ParceriaResponse>> AtualizarAsync(Guid id, Guid idUsuario, ParceriaRequest request)
     {
         var parceria = await _repository.ObterPorIdAsync(id);
         if (parceria is null)
             return Erro.NaoEncontrado("Parceria");
+        if (parceria.IdUsuario != idUsuario)
+            return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
 
         var validacao = await ValidarPessoasAsync(parceria.IdUsuario, request.IdParceiro, request.IdCliente);
         if (!validacao.EhSucesso)
@@ -71,11 +75,13 @@ public class ParceriaAppService : IParceriaAppService
         return await MapearComResumoAsync(projecao!);
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario)
     {
         var parceria = await _repository.ObterPorIdAsync(id);
         if (parceria is null)
             return Erro.NaoEncontrado("Parceria");
+        if (parceria.IdUsuario != idUsuario)
+            return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
 
         var totalReceitas = await _repository.SomarReceitasPorStatusAsync(id, 1) + await _repository.SomarReceitasPorStatusAsync(id, 2);
         var totalDespesas = await _repository.SomarDespesasPorStatusAsync(id, 1) + await _repository.SomarDespesasPorStatusAsync(id, 2);

@@ -27,7 +27,7 @@ public class ReceitasController : BaseController
     [HttpGet("{id}")]
     public async Task<IActionResult> Obter(Guid id)
     {
-        var result = await _service.ObterPorIdAsync(id);
+        var result = await _service.ObterPorIdAsync(id, ObterIdUsuario());
         return ApiResponse(result);
     }
 
@@ -41,28 +41,28 @@ public class ReceitasController : BaseController
     [HttpPut("{id}")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] ReceitaRequest request)
     {
-        var result = await _service.AtualizarAsync(id, request);
+        var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
         return ApiResponse(result);
     }
 
     [HttpPost("{id}/receber")]
     public async Task<IActionResult> Receber(Guid id, [FromBody] MensalStatusRequest request)
     {
-        var result = await _service.ReceberAsync(id, request);
+        var result = await _service.ReceberAsync(id, ObterIdUsuario(), request);
         return ApiResponse(result);
     }
 
     [HttpPost("{id}/estornar")]
     public async Task<IActionResult> Estornar(Guid id)
     {
-        var result = await _service.EstornarAsync(id);
+        var result = await _service.EstornarAsync(id, ObterIdUsuario());
         return ApiResponse(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Excluir(Guid id)
     {
-        var result = await _service.ExcluirAsync(id);
+        var result = await _service.ExcluirAsync(id, ObterIdUsuario());
         return ApiResponse(result);
     }
 }

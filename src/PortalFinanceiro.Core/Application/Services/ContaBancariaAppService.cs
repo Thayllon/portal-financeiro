@@ -22,11 +22,13 @@ public class ContaBancariaAppService : IContaBancariaAppService
         return contas.Select(Mapear).ToList();
     }
 
-    public async Task<Result<ContaBancariaResponse>> ObterPorIdAsync(Guid id)
+    public async Task<Result<ContaBancariaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario)
     {
         var conta = await _repository.ObterPorIdAsync(id);
         if (conta is null)
             return Erro.NaoEncontrado("Conta bancária");
+        if (conta.IdUsuario != idUsuario)
+            return Erro.Permissao("CONTA_ACESSO_NEGADO", "Conta de outro usuário.");
 
         return Mapear(conta);
     }
@@ -41,11 +43,13 @@ public class ContaBancariaAppService : IContaBancariaAppService
         return Mapear(result.Dado!);
     }
 
-    public async Task<Result<ContaBancariaResponse>> AtualizarAsync(Guid id, ContaBancariaRequest request)
+    public async Task<Result<ContaBancariaResponse>> AtualizarAsync(Guid id, Guid idUsuario, ContaBancariaRequest request)
     {
         var conta = await _repository.ObterPorIdAsync(id);
         if (conta is null)
             return Erro.NaoEncontrado("Conta bancária");
+        if (conta.IdUsuario != idUsuario)
+            return Erro.Permissao("CONTA_ACESSO_NEGADO", "Conta de outro usuário.");
 
         var result = conta.Atualizar(request.Nome, request.Banco, request.Tipo);
         if (!result.EhSucesso)
@@ -55,11 +59,13 @@ public class ContaBancariaAppService : IContaBancariaAppService
         return Mapear(conta);
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario)
     {
         var conta = await _repository.ObterPorIdAsync(id);
         if (conta is null)
             return Erro.NaoEncontrado("Conta bancária");
+        if (conta.IdUsuario != idUsuario)
+            return Erro.Permissao("CONTA_ACESSO_NEGADO", "Conta de outro usuário.");
 
         var receitas = await _repository.ContarReceitasAsync(id);
         var despesas = await _repository.ContarDespesasAsync(id);

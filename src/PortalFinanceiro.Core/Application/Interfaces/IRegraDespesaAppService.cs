@@ -7,7 +7,7 @@ namespace PortalFinanceiro.Core.Application.Interfaces;
 public interface IRegraDespesaAppService
 {
     Task<Result<IEnumerable<RegraDespesaResponse>>> ListarAsync(Guid idUsuario);
-    Task<Result<RegraDespesaResponse>> ObterPorIdAsync(Guid id);
-    Task<Result<RegraDespesaResponse>> AtualizarAsync(Guid id, RegraDespesaRequest request);
-    Task<Result<Unit>> ExcluirAsync(Guid id);
+    Task<Result<RegraDespesaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario);
+    Task<Result<RegraDespesaResponse>> AtualizarAsync(Guid id, Guid idUsuario, RegraDespesaRequest request);
+    Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario);
 }

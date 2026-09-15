@@ -59,11 +59,13 @@ public class DespesaAppService : IDespesaAppService
         return despesas.Select(Mapear).ToList();
     }
 
-    public async Task<Result<DespesaResponse>> ObterPorIdAsync(Guid id)
+    public async Task<Result<DespesaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario)
     {
         var despesa = await _repository.ObterProjecaoPorIdAsync(id);
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
+        if (despesa.IdUsuario != idUsuario)
+            return Erro.Permissao("DESPESA_ACESSO_NEGADO", "Despesa de outro usuário.");
 
         var response = Mapear(despesa);
         var servicos = await _despesaServicoRepository.ListarPorDespesaAsync(id);
@@ -136,11 +138,13 @@ public class DespesaAppService : IDespesaAppService
         return Mapear(primeiraProjecao!);
     }
 
-    public async Task<Result<DespesaResponse>> AtualizarAsync(Guid id, DespesaRequest request)
+    public async Task<Result<DespesaResponse>> AtualizarAsync(Guid id, Guid idUsuario, DespesaRequest request)
     {
         var despesa = await _repository.ObterPorIdAsync(id);
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
+        if (despesa.IdUsuario != idUsuario)
+            return Erro.Permissao("DESPESA_ACESSO_NEGADO", "Despesa de outro usuário.");
 
         if (request.IdParceria.HasValue && _parceriaRepository is not null)
         {
@@ -169,11 +173,13 @@ public class DespesaAppService : IDespesaAppService
         return Mapear(projecao!);
     }
 
-    public async Task<Result<DespesaResponse>> PagarAsync(Guid id, MensalStatusRequest request)
+    public async Task<Result<DespesaResponse>> PagarAsync(Guid id, Guid idUsuario, MensalStatusRequest request)
     {
         var despesa = await _repository.ObterPorIdAsync(id);
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
+        if (despesa.IdUsuario != idUsuario)
+            return Erro.Permissao("DESPESA_ACESSO_NEGADO", "Despesa de outro usuário.");
 
         var result = despesa.Pagar(request.Data);
         if (!result.EhSucesso)
@@ -185,11 +191,13 @@ public class DespesaAppService : IDespesaAppService
         return Mapear(projecao!);
     }
 
-    public async Task<Result<DespesaResponse>> EstornarAsync(Guid id)
+    public async Task<Result<DespesaResponse>> EstornarAsync(Guid id, Guid idUsuario)
     {
         var despesa = await _repository.ObterPorIdAsync(id);
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
+        if (despesa.IdUsuario != idUsuario)
+            return Erro.Permissao("DESPESA_ACESSO_NEGADO", "Despesa de outro usuário.");
 
         var result = despesa.Estornar();
         if (!result.EhSucesso)
@@ -201,11 +209,13 @@ public class DespesaAppService : IDespesaAppService
         return Mapear(projecao!);
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario)
     {
         var despesa = await _repository.ObterPorIdAsync(id);
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
+        if (despesa.IdUsuario != idUsuario)
+            return Erro.Permissao("DESPESA_ACESSO_NEGADO", "Despesa de outro usuário.");
 
         if (despesa.Status == Domain.Enums.StatusMensal.Realizado)
             return Erro.Negocio("DESPESA_JA_PAGA", "Não é possível excluir uma despesa já paga. Estorne primeiro.");

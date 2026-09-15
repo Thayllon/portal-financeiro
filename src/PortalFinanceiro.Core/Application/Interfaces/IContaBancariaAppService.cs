@@ -7,8 +7,8 @@ namespace PortalFinanceiro.Core.Application.Interfaces;
 public interface IContaBancariaAppService
 {
     Task<Result<IEnumerable<ContaBancariaResponse>>> ListarAsync(Guid idUsuario);
-    Task<Result<ContaBancariaResponse>> ObterPorIdAsync(Guid id);
+    Task<Result<ContaBancariaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario);
     Task<Result<ContaBancariaResponse>> AdicionarAsync(Guid idUsuario, ContaBancariaRequest request);
-    Task<Result<ContaBancariaResponse>> AtualizarAsync(Guid id, ContaBancariaRequest request);
-    Task<Result<Unit>> ExcluirAsync(Guid id);
+    Task<Result<ContaBancariaResponse>> AtualizarAsync(Guid id, Guid idUsuario, ContaBancariaRequest request);
+    Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario);
 }

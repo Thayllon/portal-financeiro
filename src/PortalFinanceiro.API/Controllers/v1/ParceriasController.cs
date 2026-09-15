@@ -31,7 +31,7 @@ public class ParceriasController : BaseController
     [HttpGet("{id}")]
     public async Task<IActionResult> Obter(Guid id)
     {
-        var result = await _service.ObterPorIdAsync(id);
+        var result = await _service.ObterPorIdAsync(id, ObterIdUsuario());
         return ApiResponse(result);
     }
 
@@ -45,14 +45,14 @@ public class ParceriasController : BaseController
     [HttpPut("{id}")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] ParceriaRequest request)
     {
-        var result = await _service.AtualizarAsync(id, request);
+        var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
         return ApiResponse(result);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Excluir(Guid id)
     {
-        var result = await _service.ExcluirAsync(id);
+        var result = await _service.ExcluirAsync(id, ObterIdUsuario());
         return ApiResponse(result);
     }
 

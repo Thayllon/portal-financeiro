@@ -22,11 +22,13 @@ public class PessoaAppService : IPessoaAppService
         return pessoas.Select(Mapear).ToList();
     }
 
-    public async Task<Result<PessoaResponse>> ObterPorIdAsync(Guid id)
+    public async Task<Result<PessoaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario)
     {
         var pessoa = await _repository.ObterPorIdAsync(id);
         if (pessoa is null)
             return Erro.NaoEncontrado("Pessoa");
+        if (pessoa.IdUsuario != idUsuario)
+            return Erro.Permissao("PESSOA_ACESSO_NEGADO", "Pessoa de outro usuário.");
 
         return Mapear(pessoa);
     }
@@ -41,11 +43,13 @@ public class PessoaAppService : IPessoaAppService
         return Mapear(result.Dado!);
     }
 
-    public async Task<Result<PessoaResponse>> AtualizarAsync(Guid id, PessoaRequest request)
+    public async Task<Result<PessoaResponse>> AtualizarAsync(Guid id, Guid idUsuario, PessoaRequest request)
     {
         var pessoa = await _repository.ObterPorIdAsync(id);
         if (pessoa is null)
             return Erro.NaoEncontrado("Pessoa");
+        if (pessoa.IdUsuario != idUsuario)
+            return Erro.Permissao("PESSOA_ACESSO_NEGADO", "Pessoa de outro usuário.");
 
         var result = pessoa.Atualizar(request.Nome, request.Telefone, request.Tipo);
         if (!result.EhSucesso)
@@ -55,11 +59,13 @@ public class PessoaAppService : IPessoaAppService
         return Mapear(pessoa);
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario)
     {
         var pessoa = await _repository.ObterPorIdAsync(id);
         if (pessoa is null)
             return Erro.NaoEncontrado("Pessoa");
+        if (pessoa.IdUsuario != idUsuario)
+            return Erro.Permissao("PESSOA_ACESSO_NEGADO", "Pessoa de outro usuário.");
 
         pessoa.Desativar();
         await _repository.AtualizarAsync(pessoa);

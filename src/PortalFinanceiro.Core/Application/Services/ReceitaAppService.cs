@@ -59,11 +59,13 @@ public class ReceitaAppService : IReceitaAppService
         return receitas.Select(Mapear).ToList();
     }
 
-    public async Task<Result<ReceitaResponse>> ObterPorIdAsync(Guid id)
+    public async Task<Result<ReceitaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario)
     {
         var receita = await _repository.ObterProjecaoPorIdAsync(id);
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
+        if (receita.IdUsuario != idUsuario)
+            return Erro.Permissao("RECEITA_ACESSO_NEGADO", "Receita de outro usuário.");
 
         var response = Mapear(receita);
         var servicos = await _receitaServicoRepository.ListarPorReceitaAsync(id);
@@ -138,11 +140,13 @@ public class ReceitaAppService : IReceitaAppService
         return Mapear(primeiraProjecao!);
     }
 
-    public async Task<Result<ReceitaResponse>> AtualizarAsync(Guid id, ReceitaRequest request)
+    public async Task<Result<ReceitaResponse>> AtualizarAsync(Guid id, Guid idUsuario, ReceitaRequest request)
     {
         var receita = await _repository.ObterPorIdAsync(id);
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
+        if (receita.IdUsuario != idUsuario)
+            return Erro.Permissao("RECEITA_ACESSO_NEGADO", "Receita de outro usuário.");
 
         if (request.IdParceria.HasValue && _parceriaRepository is not null)
         {
@@ -172,11 +176,13 @@ public class ReceitaAppService : IReceitaAppService
         return Mapear(projecao!);
     }
 
-    public async Task<Result<ReceitaResponse>> ReceberAsync(Guid id, MensalStatusRequest request)
+    public async Task<Result<ReceitaResponse>> ReceberAsync(Guid id, Guid idUsuario, MensalStatusRequest request)
     {
         var receita = await _repository.ObterPorIdAsync(id);
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
+        if (receita.IdUsuario != idUsuario)
+            return Erro.Permissao("RECEITA_ACESSO_NEGADO", "Receita de outro usuário.");
 
         var result = receita.Receber(request.Data);
         if (!result.EhSucesso)
@@ -188,11 +194,13 @@ public class ReceitaAppService : IReceitaAppService
         return Mapear(projecao!);
     }
 
-    public async Task<Result<ReceitaResponse>> EstornarAsync(Guid id)
+    public async Task<Result<ReceitaResponse>> EstornarAsync(Guid id, Guid idUsuario)
     {
         var receita = await _repository.ObterPorIdAsync(id);
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
+        if (receita.IdUsuario != idUsuario)
+            return Erro.Permissao("RECEITA_ACESSO_NEGADO", "Receita de outro usuário.");
 
         var result = receita.Estornar();
         if (!result.EhSucesso)
@@ -204,11 +212,13 @@ public class ReceitaAppService : IReceitaAppService
         return Mapear(projecao!);
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario)
     {
         var receita = await _repository.ObterPorIdAsync(id);
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
+        if (receita.IdUsuario != idUsuario)
+            return Erro.Permissao("RECEITA_ACESSO_NEGADO", "Receita de outro usuário.");
 
         if (receita.Status == Domain.Enums.StatusMensal.Realizado)
             return Erro.Negocio("RECEITA_JA_RECEBIDA", "Não é possível excluir uma receita já recebida. Estorne primeiro.");

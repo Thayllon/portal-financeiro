@@ -23,10 +23,12 @@
 dotnet build PortalFinanceiro.API.slnx
 
 # Rodar API (http://localhost:5178, Swagger em /swagger)
+$env:Auth__Secret = "um-segredo-aleatorio-forte"   # obrigatório (JWT), ver .env.example
 dotnet run --project src/PortalFinanceiro.API
 ```
 
 > A API precisa do banco criado primeiro — veja [primeiros-passos.md](primeiros-passos.md).
+> A chave JWT não é versionada: vem da variável de ambiente `Auth__Secret` (config `Auth:Secret`). Em docker, o `docker-compose*.yml` injeta a partir de `JWT_SECRET`. A aplicação falha ao iniciar se a chave estiver vazia.
 
 ## Rotas da API
 
@@ -53,6 +55,8 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/usuarios` | GET/POST/PUT · PATCH /{id}/ativo | Gerenciamento de usuários (somente admin) |
 | `/api/dashboard` | GET | Dashboard com resumo |
 
+**Autorização por posse:** operações por `{id}` (Obter, Atualizar, Excluir e marcar/estornar de receitas/despesas) validam que o recurso pertence ao usuário autenticado (via `IdUsuario` do registro). Recurso de outro usuário retorna `Erro.Permissao` → **HTTP 403**. Categorias compartilhadas: editar/excluir somente o dono ou admin → 403.
+
 ## Padrões de código
 
 Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
@@ -60,6 +64,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Entidades usam `private set`; propriedades de navegação (string display) vão em DTO/projeção
 - Services retornam `Result<T>` (result pattern), nunca exceptions
 - `idUsuario` vem de `User.FindFirst(ClaimTypes.NameIdentifier)` (JWT), nunca de query param
+- Recursos por `{id}` validam posse (`Erro.Permissao` → 403) contra o `IdUsuario` do registro
 - Controllers só chamam service + `ApiResponse`; sem lógica de negócio
 - Categorias compartilhadas: editar/excluir só dono ou admin → senão `Erro.Permissao` (HTTP 403)
 - Auditoria de categorias grava `CategoriaHistorico` em toda mutação

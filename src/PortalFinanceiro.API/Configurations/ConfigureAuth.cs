@@ -17,6 +17,10 @@ public static class ConfigureAuth
 
         var authOptions = authSection.Get<AuthOptions>() ?? new AuthOptions();
 
+        if (string.IsNullOrWhiteSpace(authOptions.Secret))
+            throw new InvalidOperationException(
+                "A chave secreta JWT (Auth__Secret) não foi configurada. Defina a variável de ambiente Auth__Secret antes de iniciar a aplicação.");
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
