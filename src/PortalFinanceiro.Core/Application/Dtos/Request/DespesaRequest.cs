@@ -8,6 +8,7 @@ public class DespesaRequest
     public Guid IdConta { get; set; }
     public Guid IdCategoria { get; set; }
     public Guid? IdSubcategoria { get; set; }
+    public Guid? IdParceria { get; set; }
     public bool Repete { get; set; }
     public int? Dia { get; set; }
     public bool? DiaUtil { get; set; }

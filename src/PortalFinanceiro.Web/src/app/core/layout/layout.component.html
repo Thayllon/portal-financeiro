@@ -31,7 +31,7 @@
             }
           </a>
           }
-          @if (authService.temParcerias()) {
+          @if (authService.temPermissao('parcerias')) {
           <a routerLink="/parcerias" routerLinkActive="active">
             <svg lucideIcon="briefcase-business" [size]="18" />
             @if (!sidebarCollapsed()) {

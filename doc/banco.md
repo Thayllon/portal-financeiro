@@ -48,10 +48,11 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `Usuario` | Usuários do sistema (`IsAdmin`) |
 | `ContaBancaria` | Contas PF/PJ |
 | `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
+| `Parceria` | Parcerias (parceiro + cliente + valor) por usuário |
 | `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
-| `Receita` | Receitas (avulsas e recorrentes) |
-| `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` disponível para vínculo manual |
+| `Receita` | Receitas (avulsas e recorrentes) — `IdParceria` opcional para vínculo com Parceria |
+| `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
 
 ### Categorias compartilhadas

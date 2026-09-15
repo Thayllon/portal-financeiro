@@ -44,6 +44,7 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/regras-despesas` | GET/PUT/DELETE | Regras recorrentes de despesa |
 | `/api/contas-bancarias` | GET/POST/PUT/DELETE | Contas bancárias |
 | `/api/pessoas` | GET/POST/PUT/DELETE | Clientes/parceiros (`Tipo`: 1=Cliente, 2=Parceiro) |
+| `/api/parcerias` | GET/POST/PUT/DELETE | Parcerias (parceiro + cliente + valor) — saldo via `TotalRecebido/Pago` e `FaltaReceber/Pagar` |
 | `/api/categorias/receita` | GET/POST/PUT/DELETE | Categorias de receita (compartilhadas) |
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa (compartilhadas) |
 | `/api/categorias/servicos` | GET/POST/PUT/DELETE | Categorias de serviços (compartilhadas) |

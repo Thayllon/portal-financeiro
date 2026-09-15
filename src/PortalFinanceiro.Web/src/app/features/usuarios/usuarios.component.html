@@ -275,14 +275,6 @@
           @if (especiaisAberto()) {
             <div class="perm-list">
               <div class="perm-item">
-                <svg lucideIcon="briefcase-business" [size]="16" class="perm-item__icon" />
-                <span class="perm-item__label">Parcerias</span>
-                <label class="switch">
-                  <input type="checkbox" [checked]="parcerias()" (change)="alternarParcerias($event)" />
-                  <span class="switch__slider"></span>
-                </label>
-              </div>
-              <div class="perm-item">
                 <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
                 <span class="perm-item__label">Fluxo de receita adicional</span>
                 <label class="switch">

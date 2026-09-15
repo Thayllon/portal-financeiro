@@ -1,7 +1,7 @@
 -- Migration: Substituir colunas únicas de serviço por tabela de junção (muitos-para-muitos)
 
 -- 1. Criar tabela de junção
-CREATE TABLE ReceitaServico (
+CREATE TABLE IF NOT EXISTS ReceitaServico (
     Id              UUID PRIMARY KEY,
     ReceitaId       UUID NOT NULL,
     CategoriaServicoId UUID NOT NULL,
@@ -17,7 +17,8 @@ CREATE INDEX IX_ReceitaServico_ReceitaId ON ReceitaServico(ReceitaId);
 INSERT INTO ReceitaServico (Id, ReceitaId, CategoriaServicoId, SubcategoriaServicoId)
 SELECT gen_random_uuid(), Id, IdCategoriaServico, IdSubcategoriaServico
 FROM Receita
-WHERE IdCategoriaServico IS NOT NULL;
+WHERE IdCategoriaServico IS NOT NULL
+ON CONFLICT DO NOTHING;
 
 -- 3. Remover colunas antigas
 ALTER TABLE Receita DROP CONSTRAINT IF EXISTS FK_Receita_CategoriaServico;

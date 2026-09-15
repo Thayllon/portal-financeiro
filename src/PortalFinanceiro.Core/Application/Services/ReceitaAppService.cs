@@ -15,12 +15,14 @@ public class ReceitaAppService : IReceitaAppService
     private readonly IReceitaRepository _repository;
     private readonly IRegraReceitaRepository _regraRepository;
     private readonly IReceitaServicoRepository _receitaServicoRepository;
+    private readonly IParceriaRepository? _parceriaRepository;
 
-    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IReceitaServicoRepository receitaServicoRepository)
+    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IReceitaServicoRepository receitaServicoRepository, IParceriaRepository? parceriaRepository = null)
     {
         _repository = repository;
         _regraRepository = regraRepository;
         _receitaServicoRepository = receitaServicoRepository;
+        _parceriaRepository = parceriaRepository;
     }
 
     public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
@@ -62,10 +64,17 @@ public class ReceitaAppService : IReceitaAppService
 
     public async Task<Result<ReceitaResponse>> AdicionarAsync(Guid idUsuario, ReceitaRequest request)
     {
+        if (request.IdParceria.HasValue && _parceriaRepository is not null)
+        {
+            var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
+            if (parceria is null || parceria.IdUsuario != idUsuario || !parceria.Ativo)
+                return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
+        }
+
         if (!request.Repete)
         {
             var result = Receita.Criar(idUsuario, request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria,
-                idParceiro: request.IdParceiro, idCliente: request.IdCliente);
+                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria);
             if (!result.EhSucesso)
                 return result.Erro!;
 
@@ -90,7 +99,7 @@ public class ReceitaAppService : IReceitaAppService
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
         var receitas = meses.Select(m => Receita.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id,
-                                idParceiro: request.IdParceiro, idCliente: request.IdCliente))
+                                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria))
                             .Where(r => r.EhSucesso)
                             .Select(r => r.Dado!)
                             .ToList();
@@ -120,8 +129,15 @@ public class ReceitaAppService : IReceitaAppService
         if (receita is null)
             return Erro.NaoEncontrado("Receita");
 
+        if (request.IdParceria.HasValue && _parceriaRepository is not null)
+        {
+            var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
+            if (parceria is null || parceria.IdUsuario != receita.IdUsuario || !parceria.Ativo)
+                return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
+        }
+
         var result = receita.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria,
-            idParceiro: request.IdParceiro, idCliente: request.IdCliente);
+            idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -218,6 +234,9 @@ public class ReceitaAppService : IReceitaAppService
         Parceiro = p.Parceiro,
         IdCliente = p.IdCliente,
         Cliente = p.Cliente,
+        IdParceria = p.IdParceria,
+        Parceria = p.Parceria,
+        ParceriaValor = p.ParceriaValor,
         Status = (int)p.Status,
         DataRealizacao = p.DataRealizacao,
         IdRegra = p.IdRegra,

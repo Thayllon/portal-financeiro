@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { UsuarioRepository } from '../../core/repositories/usuario.repository';
 import { PermissaoRepository } from '../../core/repositories/permissao.repository';
 import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
-import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_PARCERIAS } from '../../core/models/permissao.model';
+import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -36,7 +36,6 @@ export class UsuariosComponent implements OnInit {
   editando = signal<Usuario | null>(null);
   salvando = signal(false);
   fluxoAdicional = signal(false);
-  parcerias = signal(false);
   buscaPermissao = signal('');
   dadosAberto = signal(false);
   permissoesAberto = signal(false);
@@ -52,6 +51,7 @@ export class UsuariosComponent implements OnInit {
     { id: 'categorias', nome: 'Categorias', descricao: 'Cadastro e organização de categorias.', icone: 'tag' },
     { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
     { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake' },
+    { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'briefcase-business' },
     { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'users' },
   ];
 
@@ -124,8 +124,6 @@ export class UsuariosComponent implements OnInit {
       });
       const fluxoPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL);
       this.fluxoAdicional.set(!!fluxoPerm && fluxoPerm.nivel >= NivelPermissao.Leitura);
-      const parceriasPerm = permissoes.find(p => p.modulo === MODULO_PARCERIAS);
-      this.parcerias.set(!!parceriasPerm && parceriasPerm.nivel >= NivelPermissao.Leitura);
     } catch {}
   }
 
@@ -146,11 +144,6 @@ export class UsuariosComponent implements OnInit {
   alternarFluxoAdicional(event: Event) {
     const ligado = (event.target as HTMLInputElement).checked;
     this.fluxoAdicional.set(ligado);
-  }
-
-  alternarParcerias(event: Event) {
-    const ligado = (event.target as HTMLInputElement).checked;
-    this.parcerias.set(ligado);
   }
 
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
@@ -212,10 +205,6 @@ export class UsuariosComponent implements OnInit {
         permissoes.push({
           modulo: MODULO_FLUXO_ADICIONAL,
           nivel: this.fluxoAdicional() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
-        });
-        permissoes.push({
-          modulo: MODULO_PARCERIAS,
-          nivel: this.parcerias() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
         });
         await firstValueFrom(this.permissaoRepo.salvar(usuarioId, permissoes));
       }

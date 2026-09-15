@@ -3,15 +3,20 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class DespesaSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}Despesa";
-    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, IdReceitaOrigem, Ativo, DataCadastro, DataAlteracao";
-    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria, {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.IdReceitaOrigem, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
+    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, IdReceitaOrigem, IdParceria, Ativo, DataCadastro, DataAlteracao";
+    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Descricao, {T}.Valor, {T}.Data, {T}.IdConta, {T}.IdCategoria, {T}.IdSubcategoria, {T}.Status, {T}.DataRealizacao, {T}.IdRegra, {T}.IdReceitaOrigem, {T}.IdParceria, {T}.Ativo, {T}.DataCadastro, {T}.DataAlteracao,
         cb.Nome AS Conta,
         cat.Nome AS Categoria,
-        sub.Nome AS Subcategoria";
+        sub.Nome AS Subcategoria,
+        pa.Valor AS ParceriaValor,
+        CASE WHEN pa.Id IS NULL THEN '' ELSE CONCAT(COALESCE(par2.Nome,''), ' - ', COALESCE(cli2.Nome,'')) END AS Parceria";
     static string Joins => $@"
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}ContaBancaria cb ON {T}.IdConta = cb.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa cat ON {T}.IdCategoria = cat.Id
-        LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa sub ON {T}.IdSubcategoria = sub.Id";
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaDespesa sub ON {T}.IdSubcategoria = sub.Id
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Parceria pa ON {T}.IdParceria = pa.Id
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa par2 ON pa.IdParceiro = par2.Id
+        LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa cli2 ON pa.IdCliente = cli2.Id";
     public static string ObterPorId => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.Id = @Id";
     public static string ListarPorMes => $@"
         SELECT {CComNomes} FROM {T} {Joins}
@@ -27,8 +32,8 @@ internal static class DespesaSql
     public static string ContarPorRegra => $"SELECT COUNT(*) FROM {T} WHERE IdRegra = @IdRegra AND Ativo = 1";
     public static string ListarPorRegra => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdRegra = @IdRegra AND {T}.Ativo = 1 ORDER BY {T}.Data";
     public static string ListarPorReceitaOrigem => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdReceitaOrigem = @IdReceitaOrigem AND {T}.Ativo = 1";
-    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @Status, @DataRealizacao, @IdRegra, @IdReceitaOrigem, @Ativo, @DataCadastro, @DataAlteracao)";
-    public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
+    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Data, @IdConta, @IdCategoria, @IdSubcategoria, @Status, @DataRealizacao, @IdRegra, @IdReceitaOrigem, @IdParceria, @Ativo, @DataCadastro, @DataAlteracao)";
+    public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao, IdParceria = @IdParceria WHERE Id = @Id";
     public static string Excluir => $"UPDATE {T} SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id";
     public static string ResumoAnualPorMes => $@"
         SELECT MONTH({T}.Data) AS Mes,

@@ -9,6 +9,9 @@ export interface Despesa {
   categoria: string;
   idSubcategoria?: string;
   subcategoria: string;
+  idParceria?: string;
+  parceria: string;
+  parceriaValor?: number;
   status: number;
   dataRealizacao?: string;
   idRegra?: string;
@@ -25,6 +28,7 @@ export interface DespesaRequest {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
+  idParceria?: string;
   repete: boolean;
   dia?: number;
   diaUtil?: boolean;
