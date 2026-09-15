@@ -146,6 +146,18 @@ export class ReceitasComponent implements OnInit {
   abrirModal(item?: Receita) { this.editando.set(item ?? null); this.modalVisible.set(true); }
   fecharModal() { this.modalVisible.set(false); this.editando.set(null); }
 
+  onCategoriaCriada(categoria: Categoria) {
+    this.categorias.update(list => [...list, categoria]);
+  }
+
+  onServicoCriado(categoria: Categoria) {
+    this.categoriasServico.update(list => [...list, categoria]);
+  }
+
+  onClienteCriado(cliente: Pessoa) {
+    this.clientes.update(list => [...list, cliente]);
+  }
+
   copiar(item: Receita) {
     const copia: Receita = {
       id: '',

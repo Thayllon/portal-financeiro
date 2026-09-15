@@ -1,5 +1,6 @@
 import { Component, input, output, signal, effect, inject, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ModalComponent } from './modal.component';
 import { CustomSelectComponent, SelectOption } from './custom-select.component';
@@ -8,7 +9,10 @@ import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
 import { Parceria } from '../../core/models/parceria.model';
+import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
+import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { NotificationService } from '../../core/services/notification.service';
+import { mensagemErro } from '../../shared/utils/api-error.util';
 
 export interface CategoriaServicoBloco {
   categoriaServicoId: string;
@@ -60,10 +64,15 @@ interface LancamentoItem {
 })
 export class LancamentoModalComponent {
   private notify = inject(NotificationService);
+  private catReceitaRepo = inject(CategoriaReceitaRepository);
+  private catDespesaRepo = inject(CategoriaDespesaRepository);
+  private catServicoRepo = inject(CategoriaServicoRepository);
+  private pessoaRepo = inject(PessoaRepository);
 
   visible = input(false);
   editando = input<LancamentoItem | null>(null);
   tipoLabel = input('receita');
+  dominioCategoria = input<'receita' | 'despesa'>('receita');
   categorias = input<Categoria[]>([]);
   contas = input<ContaBancaria[]>([]);
   fluxoAdicional = input(false);
@@ -75,6 +84,9 @@ export class LancamentoModalComponent {
 
   visibleChange = output<boolean>();
   saved = output<LancamentoForm>();
+  categoriaCriada = output<Categoria>();
+  servicoCriado = output<Categoria>();
+  clienteCriado = output<Pessoa>();
 
   form = signal<LancamentoForm>(this.emptyForm());
   previewMeses = signal(0);
@@ -491,6 +503,88 @@ export class LancamentoModalComponent {
 
   updateFormField<K extends keyof LancamentoForm>(key: K, value: LancamentoForm[K]) {
     this.form.update(f => ({ ...f, [key]: value }));
+  }
+
+  quickAdd = signal<'categoria' | 'servico' | 'cliente' | null>(null);
+  quickNome = signal('');
+  quickPaiId = signal('');
+  quickTelefone = signal('');
+  quickSalvando = signal(false);
+  quickError = signal('');
+
+  quickTitulo = computed(() => {
+    switch (this.quickAdd()) {
+      case 'categoria': return this.dominioCategoria() === 'despesa' ? 'Nova categoria de despesa' : 'Nova categoria de receita';
+      case 'servico': return 'Nova categoria de serviço';
+      case 'cliente': return 'Novo cliente';
+      default: return '';
+    }
+  });
+
+  quickPaisOptions = computed(() => {
+    if (this.quickAdd() === 'servico') return this.categoriasServicoPais();
+    return this.categoriasOptions();
+  });
+
+  abrirQuickAdd(tipo: 'categoria' | 'servico' | 'cliente') {
+    this.quickNome.set('');
+    this.quickPaiId.set('');
+    this.quickTelefone.set('');
+    this.quickError.set('');
+    this.quickAdd.set(tipo);
+  }
+
+  fecharQuickAdd() {
+    if (!this.quickSalvando()) this.quickAdd.set(null);
+  }
+
+  async salvarQuickAdd() {
+    const nome = this.quickNome().trim();
+    if (!nome) { this.quickError.set('Informe o nome'); return; }
+    const tipo = this.quickAdd();
+    if (!tipo) return;
+    this.quickError.set('');
+    this.quickSalvando.set(true);
+    try {
+      if (tipo === 'categoria') {
+        const repo = this.dominioCategoria() === 'despesa' ? this.catDespesaRepo : this.catReceitaRepo;
+        const paiId = this.quickPaiId() || undefined;
+        const criada = await firstValueFrom(repo.criar({ nome, ...(paiId ? { categoriaPaiId: paiId } : {}) }));
+        this.categoriaCriada.emit(criada);
+        if (paiId) {
+          this.form.update(f => ({ ...f, idCategoria: paiId, idSubcategoria: criada.id }));
+          this.atualizarCategorizacao();
+        } else {
+          this.onCategoriaChange(criada.id);
+        }
+        this.clearError('idCategoria');
+      } else if (tipo === 'servico') {
+        const paiId = this.quickPaiId() || undefined;
+        const criada = await firstValueFrom(this.catServicoRepo.criar({ nome, ...(paiId ? { categoriaPaiId: paiId } : {}) }));
+        this.servicoCriado.emit(criada);
+        if (paiId) {
+          this.form.update(f => ({
+            ...f,
+            categoriasServicoBloco: [...f.categoriasServicoBloco, { categoriaServicoId: paiId, subcategoriasSelecionadas: [criada.id] }]
+          }));
+          this.atualizarCategoriasServico();
+        } else {
+          this.atualizarCategoriasServico();
+          this.adicionarBlocoServico(criada.id);
+        }
+        this.clearError('servicos');
+      } else {
+        const criada = await firstValueFrom(this.pessoaRepo.criar({ nome, telefone: this.quickTelefone().trim(), tipo: 'Cliente' }));
+        this.clienteCriado.emit(criada);
+        this.updateFormField('idCliente', criada.id);
+        this.clearError('idCliente');
+      }
+      this.quickAdd.set(null);
+    } catch (e) {
+      this.quickError.set(mensagemErro(e, 'Erro ao salvar'));
+    } finally {
+      this.quickSalvando.set(false);
+    }
   }
 
   private emptyForm(): LancamentoForm {
