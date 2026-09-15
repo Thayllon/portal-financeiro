@@ -1,0 +1,90 @@
+.home-page {
+  padding: 32px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (max-width: 1279px) {
+    padding: 24px 24px;
+  }
+
+  @media (max-width: 767px) {
+    padding: 16px 16px;
+  }
+}
+
+.home-header {
+  margin-bottom: 32px;
+}
+
+.home-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.home-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.section-indicator {
+  width: 4px;
+  height: 18px;
+  background: var(--color-primary);
+  border-radius: 2px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  &.four-cols {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  &.two-cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 1279px) {
+    grid-template-columns: repeat(2, 1fr);
+
+    &.four-cols,
+    &.two-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr;
+
+    &.four-cols,
+    &.two-cols {
+      grid-template-columns: 1fr;
+    }
+  }
+}

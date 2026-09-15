@@ -1,0 +1,20 @@
+<div class="home-page">
+  <div class="home-header">
+    <h1 class="home-title">Portal Financeiro</h1>
+    <p class="home-subtitle">Acesse rapidamente os módulos do sistema e gerencie suas finanças de forma organizada.</p>
+  </div>
+
+  @for (secao of secoesVisiveis(); track secao.titulo) {
+    <div class="section">
+      <div class="section-header">
+        <div class="section-indicator"></div>
+        <h2 class="section-title">{{ secao.titulo }}</h2>
+      </div>
+      <div class="cards-grid" [class.four-cols]="secao.cards.length === 4" [class.two-cols]="secao.cards.length === 2">
+        @for (card of secao.cards; track card.title) {
+          <app-module-card [item]="card" />
+        }
+      </div>
+    </div>
+  }
+</div>
