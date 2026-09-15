@@ -14,19 +14,34 @@ public class DespesaAppService : IDespesaAppService
 {
     private readonly IDespesaRepository _repository;
     private readonly IRegraDespesaRepository _regraRepository;
+    private readonly IDespesaServicoRepository _despesaServicoRepository;
     private readonly IParceriaRepository? _parceriaRepository;
 
-    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IParceriaRepository? parceriaRepository = null)
+    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IDespesaServicoRepository despesaServicoRepository, IParceriaRepository? parceriaRepository = null)
     {
         _repository = repository;
         _regraRepository = regraRepository;
+        _despesaServicoRepository = despesaServicoRepository;
         _parceriaRepository = parceriaRepository;
     }
 
     public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
     {
         var despesas = await _repository.ListarAsync(idUsuario, mes, ano, idConta, status, idCategoria, busca);
-        return despesas.Select(Mapear).ToList();
+        var responses = new List<DespesaResponse>();
+        foreach (var p in despesas)
+        {
+            var response = Mapear(p);
+            var servicos = await _despesaServicoRepository.ListarPorDespesaAsync(p.Id);
+            response.Servicos = servicos.Select(s => new DespesaServicoResponse
+            {
+                Id = s.Id,
+                CategoriaServicoId = s.CategoriaServicoId,
+                SubcategoriaServicoId = s.SubcategoriaServicoId
+            }).ToList();
+            responses.Add(response);
+        }
+        return responses;
     }
 
     public async Task<Result<IEnumerable<DespesaResponse>>> ListarPorParceriaAsync(Guid idUsuario, Guid idParceria)
@@ -50,7 +65,16 @@ public class DespesaAppService : IDespesaAppService
         if (despesa is null)
             return Erro.NaoEncontrado("Despesa");
 
-        return Mapear(despesa);
+        var response = Mapear(despesa);
+        var servicos = await _despesaServicoRepository.ListarPorDespesaAsync(id);
+        response.Servicos = servicos.Select(s => new DespesaServicoResponse
+        {
+            Id = s.Id,
+            CategoriaServicoId = s.CategoriaServicoId,
+            SubcategoriaServicoId = s.SubcategoriaServicoId
+        }).ToList();
+
+        return response;
     }
 
     public async Task<Result<DespesaResponse>> AdicionarAsync(Guid idUsuario, DespesaRequest request)
@@ -64,13 +88,20 @@ public class DespesaAppService : IDespesaAppService
 
         if (!request.Repete)
         {
-            var result = Despesa.Criar(idUsuario, request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria, idParceria: request.IdParceria);
+            var result = Despesa.Criar(idUsuario, request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria, idParceria: request.IdParceria, idCliente: request.IdCliente);
             if (!result.EhSucesso)
                 return result.Erro!;
 
-            await _repository.InserirAsync(result.Dado!);
+            var despesa = result.Dado!;
+            await _repository.InserirAsync(despesa);
 
-            var projecao = await _repository.ObterProjecaoPorIdAsync(result.Dado!.Id);
+            if (request.Servicos != null && request.Servicos.Any())
+            {
+                var servicos = request.Servicos.Select(s => new DespesaServico(despesa.Id, s.CategoriaServicoId, s.SubcategoriaServicoId)).ToList();
+                await _despesaServicoRepository.InserirEmMassaAsync(servicos);
+            }
+
+            var projecao = await _repository.ObterProjecaoPorIdAsync(despesa.Id);
             return Mapear(projecao!);
         }
 
@@ -81,7 +112,7 @@ public class DespesaAppService : IDespesaAppService
         var regra = regraResult.Dado!;
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
-        var despesas = meses.Select(m => Despesa.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id, idParceria: request.IdParceria))
+        var despesas = meses.Select(m => Despesa.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id, idParceria: request.IdParceria, idCliente: request.IdCliente))
                             .Where(d => d.EhSucesso)
                             .Select(d => d.Dado!)
                             .ToList();
@@ -92,6 +123,13 @@ public class DespesaAppService : IDespesaAppService
         using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         await _regraRepository.InserirAsync(regra);
         await _repository.InserirEmMassaAsync(despesas);
+
+        if (request.Servicos != null && request.Servicos.Any())
+        {
+            var servicosEmMassa = despesas.SelectMany(r => request.Servicos.Select(s => new DespesaServico(r.Id, s.CategoriaServicoId, s.SubcategoriaServicoId))).ToList();
+            await _despesaServicoRepository.InserirEmMassaAsync(servicosEmMassa);
+        }
+
         scope.Complete();
 
         var primeiraProjecao = await _repository.ObterProjecaoPorIdAsync(despesas.First().Id);
@@ -111,11 +149,21 @@ public class DespesaAppService : IDespesaAppService
                 return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
         }
 
-        var result = despesa.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria, idParceria: request.IdParceria);
+        var result = despesa.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria, idParceria: request.IdParceria, idCliente: request.IdCliente);
         if (!result.EhSucesso)
             return result.Erro!;
 
         await _repository.AtualizarAsync(despesa);
+
+        if (request.Servicos != null)
+        {
+            await _despesaServicoRepository.ExcluirPorDespesaAsync(id);
+            if (request.Servicos.Any())
+            {
+                var servicos = request.Servicos.Select(s => new DespesaServico(id, s.CategoriaServicoId, s.SubcategoriaServicoId)).ToList();
+                await _despesaServicoRepository.InserirEmMassaAsync(servicos);
+            }
+        }
 
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         return Mapear(projecao!);
@@ -198,6 +246,8 @@ public class DespesaAppService : IDespesaAppService
         IdParceria = p.IdParceria,
         Parceria = p.Parceria,
         ParceriaValor = p.ParceriaValor,
+        IdCliente = p.IdCliente,
+        Cliente = p.Cliente,
         DataRealizacao = p.DataRealizacao,
         IdRegra = p.IdRegra,
         EhRecorrente = p.EhRecorrente,

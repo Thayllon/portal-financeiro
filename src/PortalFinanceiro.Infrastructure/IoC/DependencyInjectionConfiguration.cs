@@ -32,6 +32,7 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IPessoaRepository, PessoaRepository>();
         services.AddScoped<IParceriaRepository, ParceriaRepository>();
         services.AddScoped<IReceitaServicoRepository, ReceitaServicoRepository>();
+        services.AddScoped<IDespesaServicoRepository, DespesaServicoRepository>();
 
         services.AddScoped<IAuthAppService, AuthAppService>();
         services.AddScoped<IUsuarioAppService, UsuarioAppService>();

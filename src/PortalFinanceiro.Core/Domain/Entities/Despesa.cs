@@ -18,6 +18,7 @@ public class Despesa
     public Guid? IdRegra { get; private set; }
     public Guid? IdReceitaOrigem { get; private set; }
     public Guid? IdParceria { get; private set; }
+    public Guid? IdCliente { get; private set; }
     public bool Ativo { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
@@ -26,7 +27,7 @@ public class Despesa
 
     public Despesa() { }
 
-    public static Result<Despesa> Criar(Guid idUsuario, string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria, Guid? idRegra = null, Guid? idReceitaOrigem = null, Guid? idParceria = null)
+    public static Result<Despesa> Criar(Guid idUsuario, string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria, Guid? idRegra = null, Guid? idReceitaOrigem = null, Guid? idParceria = null, Guid? idCliente = null)
     {
         if (idUsuario == Guid.Empty)
             return Erro.Validacao("USUARIO_OBRIGATORIO", "Usuário é obrigatório.");
@@ -53,13 +54,14 @@ public class Despesa
             IdRegra = idRegra,
             IdReceitaOrigem = idReceitaOrigem,
             IdParceria = idParceria,
+            IdCliente = idCliente,
             Ativo = true,
             DataCadastro = DateTime.UtcNow,
             DataAlteracao = DateTime.UtcNow
         };
     }
 
-    public Result<Unit> Atualizar(string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria, Guid? idParceria = null)
+    public Result<Unit> Atualizar(string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria, Guid? idParceria = null, Guid? idCliente = null)
     {
         if (string.IsNullOrWhiteSpace(descricao))
             return Erro.Validacao("DESCRICAO_OBRIGATORIA", "Descrição é obrigatória.");
@@ -73,6 +75,7 @@ public class Despesa
         IdCategoria = idCategoria;
         IdSubcategoria = idSubcategoria;
         IdParceria = idParceria;
+        IdCliente = idCliente;
         DataAlteracao = DateTime.UtcNow;
         return Resultado.Sucesso();
     }

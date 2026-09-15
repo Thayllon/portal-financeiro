@@ -20,3 +20,4 @@ export const NivelPermissao = {
 } as const;
 
 export const MODULO_FLUXO_ADICIONAL = 'fluxo-adicional-receita';
+export const MODULO_FLUXO_ADICIONAL_DESPESA = 'fluxo-adicional-despesa';

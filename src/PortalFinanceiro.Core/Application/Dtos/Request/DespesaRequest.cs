@@ -9,8 +9,16 @@ public class DespesaRequest
     public Guid IdCategoria { get; set; }
     public Guid? IdSubcategoria { get; set; }
     public Guid? IdParceria { get; set; }
+    public Guid? IdCliente { get; set; }
+    public List<DespesaServicoRequest>? Servicos { get; set; }
     public bool Repete { get; set; }
     public int? Dia { get; set; }
     public bool? DiaUtil { get; set; }
     public DateTime? DataFim { get; set; }
+}
+
+public class DespesaServicoRequest
+{
+    public Guid CategoriaServicoId { get; set; }
+    public Guid? SubcategoriaServicoId { get; set; }
 }
