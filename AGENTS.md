@@ -92,6 +92,7 @@ cd src/PortalFinanceiro.Web && npm test
 - **Async correto**: `async/await` em toda a cadeia; proibido `.Result`/`.Wait()` e `async void`.
 - **Sem código morto**: sem imports/`using` não usados, sem propriedades/métodos sem uso.
 - **Segredos e segurança**: nunca commitar senhas, tokens ou connection strings (usar `.env`/variáveis); não logar dados sensíveis.
+- **Banco/dados**: nunca apagar, limpar, truncar ou dropar bancos, tabelas ou dados sem confirmação explícita do usuário — vale para dev, teste e prod, inclusive bancos temporários criados na sessão.
 
 ### Linguagem e mensagens
 

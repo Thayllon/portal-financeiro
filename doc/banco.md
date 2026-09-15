@@ -13,11 +13,16 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 
 | Script | Conteúdo |
 |--------|----------|
-| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs) |
-| `099_SeedBase.sql` | Admin + categorias base |
+| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `Parceria` e `PermissaoUsuario`) |
+| `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
 > migrado **não** deve recebê-los novamente (DbUp rastreia por nome).
+>
+> Os incrementais antigos (`006`–`014` no SQL Server, `002`–`006` no Postgres) foram
+> removidos por já estarem absorvidos no `001` — com exceção do backfill de
+> `parcerias`, movido para o `099_SeedBase`. Bancos existentes não são afetados
+> (journal do DbUp já registra esses scripts como executados).
 
 ### Differs entre providers
 
@@ -53,6 +58,7 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) — `IdParceria` opcional para vínculo com Parceria |
 | `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
+| `PermissaoUsuario` | Nível por módulo por usuário (`parcerias` garantido via seed) |
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
 
 ### Categorias compartilhadas
