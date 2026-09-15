@@ -1,6 +1,7 @@
 -- Portal Financeiro - Schema unificado (PostgreSQL).
 -- ATENÇÃO: executar somente em banco NOVO (from scratch).
 -- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 099_SeedBase.sql.
+-- Bancos já criados evoluem apenas via scripts incrementais (quando existirem).
 
 CREATE TABLE Usuario (
     Id UUID PRIMARY KEY,
@@ -9,6 +10,7 @@ CREATE TABLE Usuario (
     SenhaHash VARCHAR(500) NOT NULL,
     IsAdmin BOOLEAN NOT NULL DEFAULT FALSE,
     Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    PrimeiroAcesso BOOLEAN NOT NULL DEFAULT TRUE,
     DataCadastro TIMESTAMP NOT NULL,
     DataAlteracao TIMESTAMP NOT NULL
 );
@@ -54,6 +56,15 @@ CREATE TABLE Parceria (
 );
 
 CREATE INDEX IX_Parceria_Usuario ON Parceria(IdUsuario);
+
+CREATE TABLE PermissaoUsuario (
+    Id UUID PRIMARY KEY,
+    UsuarioId UUID NOT NULL,
+    Modulo VARCHAR(50) NOT NULL,
+    Nivel INT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_PermissaoUsuario_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+    CONSTRAINT UQ_PermissaoUsuario_UsuarioModulo UNIQUE (UsuarioId, Modulo)
+);
 
 CREATE TABLE CategoriaReceita (
     Id UUID PRIMARY KEY,

@@ -2,6 +2,8 @@
 -- ATENÇÃO: executar somente em banco NOVO (from scratch). O banco de desenvolvimento
 -- já existente foi migrado incrementalmente e NÃO deve receber este script.
 -- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 099_SeedBase.sql.
+-- Bancos já criados evoluem apenas via scripts incrementais (quando existirem);
+-- o DbUp rastreia os scripts executados por nome (journal) e não reaplica o 001.
 
 CREATE TABLE Usuario (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
@@ -56,6 +58,15 @@ CREATE TABLE Parceria (
 );
 
 CREATE INDEX IX_Parceria_Usuario ON Parceria(IdUsuario);
+
+CREATE TABLE PermissaoUsuario (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    UsuarioId UNIQUEIDENTIFIER NOT NULL,
+    Modulo NVARCHAR(50) NOT NULL,
+    Nivel INT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_PermissaoUsuario_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+    CONSTRAINT UQ_PermissaoUsuario_UsuarioModulo UNIQUE (UsuarioId, Modulo)
+);
 
 CREATE TABLE CategoriaReceita (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
