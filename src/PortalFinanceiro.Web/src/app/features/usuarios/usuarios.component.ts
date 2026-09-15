@@ -220,6 +220,9 @@ export class UsuariosComponent implements OnInit {
           nivel: this.fluxoAdicionalDespesa() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
         });
         await firstValueFrom(this.permissaoRepo.salvar(usuarioId, permissoes));
+        if (usuarioId === this.auth.user()?.usuarioId) {
+          this.auth.atualizarPermissoes(permissoes);
+        }
       }
       this.fecharDrawer();
       this.fecharModal();

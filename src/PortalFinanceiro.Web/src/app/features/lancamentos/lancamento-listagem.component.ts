@@ -19,6 +19,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { LancamentoModalComponent, LancamentoForm } from '../../shared/components/lancamento-modal.component';
+import { FluxoSelectorModalComponent } from '../../shared/components/fluxo-selector-modal.component';
 import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
@@ -64,7 +65,7 @@ interface LancamentoItem {
 @Component({
   selector: 'app-lancamento-listagem',
   standalone: true,
-  imports: [DatePipe, FormsModule, MonthNavComponent, StatusBadgeComponent, LancamentoModalComponent, CurrencyBRLPipe, CustomSelectComponent, ListPaginationComponent, LucideDynamicIcon],
+  imports: [DatePipe, FormsModule, MonthNavComponent, StatusBadgeComponent, LancamentoModalComponent, FluxoSelectorModalComponent, CurrencyBRLPipe, CustomSelectComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './lancamento-listagem.component.html',
   styleUrl: './lancamento-listagem.component.scss'
 })
@@ -128,6 +129,15 @@ export class LancamentoListagemComponent implements OnInit {
   readonly statusRealizado = STATUS_REALIZADO;
 
   fluxoAdicional = computed(() => this.ehReceita() ? this.auth.temFluxoAdicionalReceita() : this.auth.temFluxoAdicionalDespesa());
+  fluxoSelectorVisible = signal(false);
+  fluxoContratoEscolhido = signal<boolean | null>(null);
+  fluxoEfetivo = computed(() => {
+    const escolha = this.fluxoContratoEscolhido();
+    if (escolha !== null) return escolha;
+    const editando = this.editando();
+    if (editando) return this.inferirFluxoContrato(editando);
+    return this.fluxoAdicional();
+  });
   contasOptions = computed(() => this.contas().map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` })));
   categoriasOptions = computed(() => this.categorias().map(c => ({ value: c.id, label: c.nome })));
   parceirosOptions = computed(() => this.parceiros().map(p => ({ value: p.id, label: p.nome })));
@@ -216,8 +226,44 @@ export class LancamentoListagemComponent implements OnInit {
     this.carregar();
   }
 
-  abrirModal(item?: LancamentoItem) { this.editando.set(item ?? null); this.modalVisible.set(true); }
-  fecharModal() { this.modalVisible.set(false); this.editando.set(null); }
+  abrirModal(item?: LancamentoItem) {
+    if (item) {
+      this.fluxoContratoEscolhido.set(this.inferirFluxoContrato(item));
+      this.editando.set(item);
+      this.modalVisible.set(true);
+      return;
+    }
+    if (this.fluxoAdicional()) {
+      this.fluxoContratoEscolhido.set(null);
+      this.editando.set(null);
+      this.fluxoSelectorVisible.set(true);
+      return;
+    }
+    this.fluxoContratoEscolhido.set(false);
+    this.editando.set(null);
+    this.modalVisible.set(true);
+  }
+
+  escolherFluxo(contrato: boolean) {
+    this.fluxoSelectorVisible.set(false);
+    this.fluxoContratoEscolhido.set(contrato);
+    this.editando.set(null);
+    this.modalVisible.set(true);
+  }
+
+  fecharSeletor() {
+    this.fluxoSelectorVisible.set(false);
+  }
+
+  fecharModal() {
+    this.modalVisible.set(false);
+    this.editando.set(null);
+    this.fluxoContratoEscolhido.set(null);
+  }
+
+  private inferirFluxoContrato(item: LancamentoItem): boolean {
+    return !!(item.idCliente || (item.servicos && item.servicos.length > 0) || item.idParceria);
+  }
 
   onCategoriaCriada(categoria: Categoria) {
     this.categorias.update(list => [...list, categoria]);
@@ -261,6 +307,7 @@ export class LancamentoListagemComponent implements OnInit {
       ativo: true,
       dataCadastro: new Date().toISOString(),
     };
+    this.fluxoContratoEscolhido.set(this.inferirFluxoContrato(copia));
     this.editando.set(copia);
     this.modalVisible.set(true);
   }

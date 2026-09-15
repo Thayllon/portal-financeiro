@@ -78,8 +78,10 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - **Busca no select**: `app-custom-select` aceita `[searchable]="true"` + `searchPlaceholder="..."`; o campo de busca aparece só quando há mais de 5 opções e filtra sem diferenciar acentos nem maiúsculas/minúsculas (ex.: Cliente na Nova Receita)
 - **Modal de lançamento (edição)**: com item em edição, o botão **Salvar** aparece em todos os passos (cópia sem id mantém o wizard)
 - **Cadastro rápido no wizard**: botões `+ Nova/Novo` ao lado do label criam categoria/subcategoria, categoria de serviço ou cliente sem sair do fluxo — o item criado é pré-selecionado e nada do digitado se perde (pais atualizam suas listas via `categoriaCriada`/`servicoCriado`/`clienteCriado`)
-- **Parceria no wizard**: passo dedicado só no fluxo adicional; em Dados Gerais o campo aparece só no fluxo simples (despesas)
-- **Grid de receitas**: coluna `Conta` substituída por `Parceria` (`Sim` com vínculo, `—` sem); totais com `Parceria` (soma das receitas vinculadas) quando o fluxo adicional está ligado
+ - **Parceria no wizard**: passo dedicado só no fluxo adicional; em Dados Gerais o campo aparece só no fluxo simples (despesas)
+ - **Seletor de fluxo**: quando `fluxo-adicional-receita`/`fluxo-adicional-despesa` está habilitado, o botão **Nova receita/despesa** abre `FluxoSelectorModal` com dois quadrados — `Fluxo receita` / `Fluxo receita (contrato)` (e análogo para despesa) com ícone `file` × `briefcase-business`; a escolha define se o wizard roda em 3 ou 6 passos; edição/cópia segue fluxo de origem (tem `idCliente`/`servicos`/`idParceria` → contrato)
+ - **Permissões em tempo real**: ao salvar permissões do próprio usuário logado, `AuthService.atualizarPermissoes` atualiza o `signal` sem exigir relogin
+ - **Grid de receitas**: coluna `Conta` substituída por `Parceria` (`Sim` com vínculo, `—` sem); totais com `Parceria` (soma das receitas vinculadas) quando o fluxo adicional está ligado
 - **Inputs de texto**: classe `input` do design system
 - Forms: `ControlValueAccessor` para componentes reutilizáveis (CustomSelect)
 - **Páginas parametrizadas**: `PessoaListagemComponent` (`tipo` Cliente/Parceiro) e `LancamentoListagemComponent` (`tipo` receita/despesa) — não duplicar páginas de listagem
