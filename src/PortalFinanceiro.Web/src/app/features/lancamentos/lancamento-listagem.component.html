@@ -114,6 +114,13 @@
   }
 </div>
 
+<app-fluxo-selector-modal
+  [visible]="fluxoSelectorVisible()"
+  [tipo]="tipo()"
+  (visibleChange)="fecharSeletor()"
+  (escolher)="escolherFluxo($event)"
+/>
+
 <app-lancamento-modal
   [visible]="modalVisible()"
   [editando]="editando()"
@@ -121,7 +128,7 @@
   [dominioCategoria]="tipo()"
   [categorias]="categorias()"
   [contas]="contas()"
-  [fluxoAdicional]="fluxoAdicional()"
+  [fluxoAdicional]="fluxoEfetivo()"
   [parceiros]="parceiros()"
   [parcerias]="parcerias()"
   [clientes]="clientes()"
