@@ -117,7 +117,7 @@
           </app-collapsible-section>
         }
 
-        @if (data()?.previsaoProximosMeses?.length) {
+        @if (data()?.previsaoProximosMeses?.length && exibirPrevisao()) {
           <app-collapsible-section title="Previsão próximos meses" icon="calendar-days" iconVariant="primary" [badge]="data()!.previsaoProximosMeses.length + ''">
             <div class="previsao-cards">
               @for (p of data()!.previsaoProximosMeses; track p.mes + '' + p.ano) {

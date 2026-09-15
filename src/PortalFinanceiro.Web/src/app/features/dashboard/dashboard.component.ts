@@ -40,6 +40,11 @@ export class DashboardComponent implements OnInit {
 
   readonly MESES = MESES;
 
+  exibirPrevisao = computed(() => {
+    const hoje = new Date();
+    return this.ano() > hoje.getFullYear() || (this.ano() === hoje.getFullYear() && this.mes() >= hoje.getMonth() + 1);
+  });
+
   barChartData: ChartConfiguration<'bar'>['data'] = {
     labels: [],
     datasets: []
