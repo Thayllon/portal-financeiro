@@ -33,6 +33,9 @@ public class ReceitaRepository : SqlBaseRepository, IReceitaRepository
     public async Task<IEnumerable<Receita>> ListarPorRegraAsync(Guid idRegra)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<Receita>(conn, ReceitaSql.ListarPorRegra, new { IdRegra = idRegra }));
 
+    public async Task<IEnumerable<ReceitaProjecao>> ListarPorParceriaAsync(Guid idParceria)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ReceitaProjecao>(conn, ReceitaSql.ListarPorParceria, new { IdParceria = idParceria }));
+
     public async Task InserirAsync(Receita entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ReceitaSql.Inserir, entity));
 

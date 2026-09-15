@@ -112,7 +112,7 @@ export class LancamentoModalComponent {
 
     effect(() => {
       const p = this.parcerias();
-      this.parceriasOptions.set(p.map(x => ({ value: x.id, label: `${x.parceiro} - ${x.cliente} (${x.valor})` })));
+      this.parceriasOptions.set(p.map(x => ({ value: x.id, label: `${x.nome} (${x.parceiro} - ${x.cliente})` })));
     });
 
     effect(() => {

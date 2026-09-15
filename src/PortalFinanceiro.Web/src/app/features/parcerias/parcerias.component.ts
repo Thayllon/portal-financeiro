@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ParceriaRepository } from '../../core/repositories/parceria.repository';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
@@ -28,6 +29,7 @@ export class ParceriasComponent implements OnInit {
   private pessoaRepo = inject(PessoaRepository);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
+  private router = inject(Router);
 
   parcerias = signal<Parceria[]>([]);
   parceiros = signal<Pessoa[]>([]);
@@ -37,7 +39,7 @@ export class ParceriasComponent implements OnInit {
   editando = signal<Parceria | null>(null);
   salvando = signal(false);
 
-  form: ParceriaRequest = { idParceiro: '', idCliente: '', valor: 0 };
+  form: ParceriaRequest = { nome: '', idParceiro: '', idCliente: '', valor: 0, percentualParceiro: 50 };
 
   parceirosOptions = computed<SelectOption[]>(() => this.parceiros().map(p => ({ value: p.id, label: p.nome })));
   clientesOptions = computed<SelectOption[]>(() => this.clientes().map(p => ({ value: p.id, label: p.nome })));
@@ -64,15 +66,19 @@ export class ParceriasComponent implements OnInit {
   }
 
   abrirModal() {
-    this.form = { idParceiro: '', idCliente: '', valor: 0 };
+    this.form = { nome: '', idParceiro: '', idCliente: '', valor: 0, percentualParceiro: 50 };
     this.editando.set(null);
     this.modalVisible.set(true);
   }
 
   editar(item: Parceria) {
-    this.form = { idParceiro: item.idParceiro, idCliente: item.idCliente, valor: item.valor };
+    this.form = { nome: item.nome, idParceiro: item.idParceiro, idCliente: item.idCliente, valor: item.valor, percentualParceiro: item.percentualParceiro };
     this.editando.set(item);
     this.modalVisible.set(true);
+  }
+
+  verDetalhes(item: Parceria) {
+    this.router.navigate(['/parcerias', item.id]);
   }
 
   fecharModal() {
@@ -81,9 +87,11 @@ export class ParceriasComponent implements OnInit {
   }
 
   async salvar() {
+    if (!this.form.nome?.trim()) { this.notify.error('Informe o nome'); return; }
     if (!this.form.idParceiro) { this.notify.error('Selecione o parceiro'); return; }
     if (!this.form.idCliente) { this.notify.error('Selecione o cliente'); return; }
     if (!this.form.valor || this.form.valor <= 0) { this.notify.error('Informe um valor válido'); return; }
+    if (this.form.percentualParceiro == null || this.form.percentualParceiro < 0 || this.form.percentualParceiro > 100) { this.notify.error('Informe um percentual entre 0 e 100'); return; }
     this.salvando.set(true);
     try {
       if (this.editando()) {
@@ -100,7 +108,7 @@ export class ParceriasComponent implements OnInit {
   }
 
   async excluir(item: Parceria) {
-    const ok = await this.confirmService.confirm('Excluir parceria', `Deseja excluir a parceria "${item.parceiro} - ${item.cliente}"?`);
+    const ok = await this.confirmService.confirm('Excluir parceria', `Deseja excluir a parceria "${item.nome}"?`);
     if (!ok) return;
     try {
       await firstValueFrom(this.repo.excluir(item.id));

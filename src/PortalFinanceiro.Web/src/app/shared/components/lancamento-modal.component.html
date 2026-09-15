@@ -18,7 +18,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>Categorização</strong><small>Categoria da receita</small></span>
+              <span class="wizard__meta"><strong>Categoria de Receita</strong><small>Categoria da receita</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
@@ -42,7 +42,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(2) && passoAtual() !== 2) { <svg lucideIcon="check" [size]="16" /> } @else { <span>3</span> }
               </span>
-              <span class="wizard__meta"><strong>Serviço</strong><small>Categoria de serviço</small></span>
+              <span class="wizard__meta"><strong>Categoria de Serviço</strong><small>Categoria de serviço</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 2"></span>
 
@@ -89,7 +89,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>Categorização</strong><small>Categoria e subcategoria</small></span>
+              <span class="wizard__meta"><strong>Categoria de Receita</strong><small>Categoria e subcategoria</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
@@ -128,7 +128,7 @@
                   <svg lucideIcon="tag" [size]="20" />
                 </div>
                 <div class="step-header__text">
-                  <strong>Categorização</strong>
+                  <strong>Categoria de Receita</strong>
                   <span>Selecione a categoria da receita.</span>
                 </div>
               </div>
@@ -190,7 +190,7 @@
                   <svg lucideIcon="briefcase-business" [size]="20" />
                 </div>
                 <div class="step-header__text">
-                  <strong>Serviço</strong>
+                  <strong>Categoria de Serviço</strong>
                   <span>Adicione as categorias de serviço.</span>
                 </div>
               </div>
@@ -450,7 +450,7 @@
               Voltar
             </button>
 
-            @if (passoAtual() === ultimoPasso()) {
+            @if (passoAtual() === ultimoPasso() || editando()?.id) {
               <button type="button" class="btn btn--primary" [disabled]="salvando()" (click)="salvar()">
                 {{ salvando() ? 'Salvando...' : 'Salvar' }}
               </button>

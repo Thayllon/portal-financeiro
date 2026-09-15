@@ -29,6 +29,21 @@ public class DespesaAppService : IDespesaAppService
         return despesas.Select(Mapear).ToList();
     }
 
+    public async Task<Result<IEnumerable<DespesaResponse>>> ListarPorParceriaAsync(Guid idUsuario, Guid idParceria)
+    {
+        if (_parceriaRepository is null)
+            return Erro.Infraestrutura("Repositório de parcerias não configurado.");
+
+        var parceria = await _parceriaRepository.ObterPorIdAsync(idParceria);
+        if (parceria is null)
+            return Erro.NaoEncontrado("Parceria");
+        if (parceria.IdUsuario != idUsuario)
+            return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
+
+        var despesas = await _repository.ListarPorParceriaAsync(idParceria);
+        return despesas.Select(Mapear).ToList();
+    }
+
     public async Task<Result<DespesaResponse>> ObterPorIdAsync(Guid id)
     {
         var despesa = await _repository.ObterProjecaoPorIdAsync(id);

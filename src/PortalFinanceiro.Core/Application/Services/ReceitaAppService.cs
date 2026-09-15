@@ -44,6 +44,21 @@ public class ReceitaAppService : IReceitaAppService
         return responses;
     }
 
+    public async Task<Result<IEnumerable<ReceitaResponse>>> ListarPorParceriaAsync(Guid idUsuario, Guid idParceria)
+    {
+        if (_parceriaRepository is null)
+            return Erro.Infraestrutura("Repositório de parcerias não configurado.");
+
+        var parceria = await _parceriaRepository.ObterPorIdAsync(idParceria);
+        if (parceria is null)
+            return Erro.NaoEncontrado("Parceria");
+        if (parceria.IdUsuario != idUsuario)
+            return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
+
+        var receitas = await _repository.ListarPorParceriaAsync(idParceria);
+        return receitas.Select(Mapear).ToList();
+    }
+
     public async Task<Result<ReceitaResponse>> ObterPorIdAsync(Guid id)
     {
         var receita = await _repository.ObterProjecaoPorIdAsync(id);

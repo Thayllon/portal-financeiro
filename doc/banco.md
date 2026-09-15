@@ -13,7 +13,8 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 
 | Script | Conteúdo |
 |--------|----------|
-| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `Parceria` e `PermissaoUsuario`) |
+| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `Parceria` com `Nome`/`PercentualParceiro` e `PermissaoUsuario`) |
+| `002_AdicionarNomePercentualParceria.sql` | `Nome` + `PercentualParceiro` na `Parceria` (bancos já criados) |
 | `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
@@ -53,7 +54,7 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `Usuario` | Usuários do sistema (`IsAdmin`) |
 | `ContaBancaria` | Contas PF/PJ |
 | `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
-| `Parceria` | Parcerias (parceiro + cliente + valor) por usuário |
+| `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuário |
 | `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) — `IdParceria` opcional para vínculo com Parceria |
