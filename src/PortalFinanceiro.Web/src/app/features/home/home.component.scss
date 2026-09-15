@@ -1,5 +1,5 @@
 .home-page {
-  padding: 18px 28px 12px;
+  padding: 24px 32px 16px;
   max-width: 1400px;
   margin: 0 auto;
   height: 100%;
@@ -20,24 +20,16 @@
   }
 
   @media (max-height: 800px) and (min-width: 1280px) {
-    padding: 12px 28px 10px;
-  }
-
-  @media (max-height: 860px) and (min-width: 1280px) {
-    padding: 14px 28px 10px;
+    padding: 16px 28px 12px;
   }
 }
 
 .home-header {
-  margin-bottom: 14px;
+  margin-bottom: 20px;
   flex-shrink: 0;
 
   @media (max-height: 800px) and (min-width: 1280px) {
-    margin-bottom: 8px;
-  }
-
-  @media (max-height: 860px) and (min-width: 1280px) {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
   }
 
   @media (max-width: 1279px) {
@@ -46,10 +38,10 @@
 }
 
 .home-title {
-  font-size: 1.45rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 4px 0;
+  margin: 0 0 6px 0;
   line-height: 1.2;
 
   @media (max-width: 767px) {
@@ -65,7 +57,7 @@
 }
 
 .section {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
   display: flex;
   flex-direction: column;
   flex: none;
@@ -78,38 +70,38 @@
   @media (max-width: 1279px) {
     margin-bottom: 18px;
   }
+
+  @media (max-height: 800px) and (min-width: 1280px) {
+    margin-bottom: 12px;
+  }
 }
 
 .section-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   flex-shrink: 0;
   flex-wrap: wrap;
 
-  @media (max-height: 860px) and (min-width: 1280px) {
-    margin-bottom: 8px;
-  }
-
   @media (max-height: 800px) and (min-width: 1280px) {
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
 }
 
 .section-indicator {
-  width: 3px;
-  height: 16px;
+  width: 4px;
+  height: 18px;
   background: var(--color-primary);
   border-radius: 2px;
   flex-shrink: 0;
 }
 
 .section-title {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   margin: 0;
   line-height: 1;
@@ -133,10 +125,10 @@
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  gap: 16px;
   align-items: stretch;
   flex: none;
-  grid-auto-rows: minmax(132px, auto);
+  grid-auto-rows: minmax(165px, auto);
 
   &.two-cols {
     grid-template-columns: repeat(3, 1fr);
@@ -148,7 +140,6 @@
 
   @media (max-width: 1279px) {
     grid-template-columns: repeat(2, 1fr);
-    flex: none;
     grid-auto-rows: auto;
 
     &.two-cols {
@@ -169,30 +160,15 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media (max-height: 800px) and (min-width: 1280px) {
+    gap: 12px;
+    grid-auto-rows: minmax(145px, auto);
+  }
 }
 
 :host ::ng-deep app-module-card {
   display: flex;
   height: 100%;
   min-height: 0;
-}
-
-@media (max-height: 800px) and (min-width: 1280px) {
-  .cards-grid {
-    gap: 12px;
-    grid-auto-rows: minmax(118px, auto);
-  }
-
-  :host ::ng-deep app-module-card .module-card {
-    min-height: 118px;
-    padding: 14px 16px 12px;
-  }
-
-  :host ::ng-deep app-module-card .card-top {
-    margin-bottom: 8px;
-  }
-
-  .section {
-    margin-bottom: 10px;
-  }
 }
