@@ -88,6 +88,19 @@ internal static class LancamentoSql
         FROM {t}
         LEFT JOIN {S}ContaBancaria cb ON {t}.IdConta = cb.Id
         WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = 1 AND YEAR({t}.Data) = @Ano
+          AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
         GROUP BY cb.Nome, cb.Banco, cb.Tipo
         HAVING SUM({t}.Valor) > 0";
+
+    public static string ResumoAnualPorCategoria(string t, string tabelaCategoria)
+        => $@"
+        SELECT COALESCE(cat.Nome, 'Sem categoria') AS Categoria,
+               COALESCE(sub.Nome, '') AS Subcategoria,
+               SUM({t}.Valor) AS Total
+        FROM {t}
+        LEFT JOIN {S}{tabelaCategoria} cat ON {t}.IdCategoria = cat.Id
+        LEFT JOIN {S}{tabelaCategoria} sub ON {t}.IdSubcategoria = sub.Id
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = 1 AND YEAR({t}.Data) = @Ano
+          AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
+        GROUP BY cat.Nome, sub.Nome";
 }

@@ -14,6 +14,7 @@ public class DashboardAppService : IDashboardAppService
     private readonly IRegraReceitaRepository _regraReceitaRepository;
     private readonly IRegraDespesaRepository _regraDespesaRepository;
     private readonly IContaBancariaRepository _contaBancariaRepository;
+    private readonly IParceriaRepository _parceriaRepository;
     private readonly ILogger<DashboardAppService> _logger;
 
     public DashboardAppService(
@@ -22,6 +23,7 @@ public class DashboardAppService : IDashboardAppService
         IRegraReceitaRepository regraReceitaRepository,
         IRegraDespesaRepository regraDespesaRepository,
         IContaBancariaRepository contaBancariaRepository,
+        IParceriaRepository parceriaRepository,
         ILogger<DashboardAppService> logger)
     {
         _receitaRepository = receitaRepository;
@@ -29,6 +31,7 @@ public class DashboardAppService : IDashboardAppService
         _regraReceitaRepository = regraReceitaRepository;
         _regraDespesaRepository = regraDespesaRepository;
         _contaBancariaRepository = contaBancariaRepository;
+        _parceriaRepository = parceriaRepository;
         _logger = logger;
     }
 
@@ -130,8 +133,13 @@ public class DashboardAppService : IDashboardAppService
             var receitasPorMes = (await _receitaRepository.ResumoAnualPorMesAsync(idUsuario, ano, idConta)).ToList();
             var despesasPorMes = (await _despesaRepository.ResumoAnualPorMesAsync(idUsuario, ano, idConta)).ToList();
 
-            var receitasPorConta = (await _receitaRepository.ResumoAnualPorContaAsync(idUsuario, ano)).ToList();
-            var despesasPorConta = (await _despesaRepository.ResumoAnualPorContaAsync(idUsuario, ano)).ToList();
+            var receitasPorConta = (await _receitaRepository.ResumoAnualPorContaAsync(idUsuario, ano, idConta)).ToList();
+            var despesasPorConta = (await _despesaRepository.ResumoAnualPorContaAsync(idUsuario, ano, idConta)).ToList();
+
+            var receitasPorCategoria = (await _receitaRepository.ResumoAnualPorCategoriaAsync(idUsuario, ano, idConta)).ToList();
+            var despesasPorCategoria = (await _despesaRepository.ResumoAnualPorCategoriaAsync(idUsuario, ano, idConta)).ToList();
+
+            var resumoParceria = await _parceriaRepository.ResumoAnualAsync(idUsuario, ano, idConta);
 
             var resumoPorMes = new List<MensalResumoAnual>();
             for (int m = 1; m <= 12; m++)
@@ -198,6 +206,17 @@ public class DashboardAppService : IDashboardAppService
             var totalRecebidoAno = resumoPorMes.Sum(m => m.TotalRecebido);
             var totalDespesasAno = resumoPorMes.Sum(m => m.TotalDespesas);
             var totalPagoAno = resumoPorMes.Sum(m => m.TotalPago);
+            var saldoAno = totalReceitasAno - totalDespesasAno;
+
+            var anoAnterior = ano - 1;
+            var recAnterior = (await _receitaRepository.ResumoAnualPorMesAsync(idUsuario, anoAnterior, idConta)).Sum(r => r.Total);
+            var despAnterior = (await _despesaRepository.ResumoAnualPorMesAsync(idUsuario, anoAnterior, idConta)).Sum(d => d.Total);
+
+            var hoje = DateTime.Today;
+            var mesesConsiderados = ano < hoje.Year ? 12 : ano == hoje.Year ? hoje.Month : 0;
+            var mediaMensalSaldo = mesesConsiderados > 0 ? Math.Round(saldoAno / mesesConsiderados, 2) : 0;
+
+            var previsaoRestante = await MontarPrevisaoRestanteAnoAsync(idUsuario, ano);
 
             return new DashboardAnualResponse
             {
@@ -206,10 +225,26 @@ public class DashboardAppService : IDashboardAppService
                 TotalRecebido = totalRecebidoAno,
                 TotalDespesas = totalDespesasAno,
                 TotalPago = totalPagoAno,
-                Saldo = totalReceitasAno - totalDespesasAno,
+                Saldo = saldoAno,
                 SaldoRealizado = totalRecebidoAno - totalPagoAno,
+                VariacaoReceitasPercentual = CalcularVariacao(totalReceitasAno, recAnterior),
+                VariacaoDespesasPercentual = CalcularVariacao(totalDespesasAno, despAnterior),
+                VariacaoSaldoPercentual = CalcularVariacao(saldoAno, recAnterior - despAnterior),
+                MediaMensalSaldo = mediaMensalSaldo,
+                MesesConsiderados = mesesConsiderados,
                 ResumoPorMes = resumoPorMes,
-                ResumoPorConta = todasContas.Values.ToList()
+                ResumoPorConta = todasContas.Values.ToList(),
+                DistribuicaoReceitas = MontarDistribuicao(receitasPorCategoria),
+                DistribuicaoDespesas = MontarDistribuicao(despesasPorCategoria),
+                PrevisaoRestanteAno = previsaoRestante,
+                ResumoParcerias = new ResumoParceriasAnual
+                {
+                    TotalRecebido = resumoParceria.TotalRecebido,
+                    TotalPago = resumoParceria.TotalPago,
+                    AReceber = resumoParceria.AReceber,
+                    APagar = resumoParceria.APagar,
+                    QtdParcerias = resumoParceria.QtdParcerias
+                }
             };
         }
         catch (Exception ex)
@@ -217,5 +252,84 @@ public class DashboardAppService : IDashboardAppService
             _logger.LogError(ex, "Erro ao carregar dashboard anual");
             return Erro.Infraestrutura("Erro ao carregar o dashboard anual.");
         }
+    }
+
+    private static decimal? CalcularVariacao(decimal atual, decimal anterior)
+    {
+        if (anterior == 0)
+            return null;
+        return Math.Round((atual - anterior) / Math.Abs(anterior) * 100, 1);
+    }
+
+    private static List<DistribuicaoCategoriaAnual> MontarDistribuicao(IEnumerable<Domain.Projections.ResumoAnualCategoriaItem> itens)
+    {
+        var lista = itens.ToList();
+        var totalGeral = lista.Sum(i => i.Total);
+        var grupos = lista
+            .GroupBy(i => string.IsNullOrWhiteSpace(i.Categoria) ? "Sem categoria" : i.Categoria)
+            .Select(g =>
+            {
+                var totalCategoria = g.Sum(i => i.Total);
+                return new DistribuicaoCategoriaAnual
+                {
+                    Nome = g.Key,
+                    Total = totalCategoria,
+                    Percentual = totalGeral == 0 ? 0 : Math.Round(totalCategoria / totalGeral * 100, 1),
+                    Subcategorias = g
+                        .Where(i => !string.IsNullOrWhiteSpace(i.Subcategoria))
+                        .GroupBy(i => i.Subcategoria)
+                        .Select(sg =>
+                        {
+                            var totalSub = sg.Sum(i => i.Total);
+                            return new DistribuicaoCategoriaAnual
+                            {
+                                Nome = sg.Key,
+                                Total = totalSub,
+                                Percentual = totalGeral == 0 ? 0 : Math.Round(totalSub / totalGeral * 100, 1)
+                            };
+                        })
+                        .OrderByDescending(s => s.Total)
+                        .ToList()
+                };
+            })
+            .OrderByDescending(c => c.Total)
+            .ToList();
+        return grupos;
+    }
+
+    private async Task<List<PrevisaoMensal>> MontarPrevisaoRestanteAnoAsync(Guid idUsuario, int ano)
+    {
+        var hoje = DateTime.Today;
+        int mesInicial;
+        if (ano < hoje.Year)
+            return [];
+        mesInicial = ano == hoje.Year ? hoje.Month : 1;
+
+        var regrasReceita = (await _regraReceitaRepository.ListarPorUsuarioAsync(idUsuario)).ToList();
+        var regrasDespesa = (await _regraDespesaRepository.ListarPorUsuarioAsync(idUsuario)).ToList();
+
+        var previsao = new List<PrevisaoMensal>();
+        for (int m = mesInicial; m <= 12; m++)
+        {
+            var inicioMes = new DateTime(ano, m, 1);
+            var inicioMesSeguinte = inicioMes.AddMonths(1);
+
+            var rec = regrasReceita
+                .Where(r => r.Ativo && r.DataInicio < inicioMesSeguinte && r.DataFim >= inicioMes)
+                .Sum(r => r.Valor);
+            var desp = regrasDespesa
+                .Where(d => d.Ativo && d.DataInicio < inicioMesSeguinte && d.DataFim >= inicioMes)
+                .Sum(d => d.Valor);
+
+            previsao.Add(new PrevisaoMensal
+            {
+                Mes = m,
+                Ano = ano,
+                TotalReceitas = rec,
+                TotalDespesas = desp,
+                SaldoPrevisto = rec - desp
+            });
+        }
+        return previsao;
     }
 }

@@ -18,4 +18,11 @@ internal static class ParceriaSql
     public static string Atualizar => $"UPDATE {T} SET Nome = @Nome, IdParceiro = @IdParceiro, IdCliente = @IdCliente, Valor = @Valor, PercentualParceiro = @PercentualParceiro, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
     public static string SomarReceitas => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdParceria = @IdParceria AND Ativo = 1 AND Status = @Status";
     public static string SomarDespesas => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdParceria = @IdParceria AND Ativo = 1 AND Status = @Status";
+    public static string SomarReceitasAnual => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND (@IdConta IS NULL OR IdConta = @IdConta) AND Status = @Status";
+    public static string SomarDespesasAnual => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND (@IdConta IS NULL OR IdConta = @IdConta) AND Status = @Status";
+    public static string ContarParceriasAnual => $@"SELECT COUNT(DISTINCT IdParceria) FROM (
+        SELECT IdParceria FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND (@IdConta IS NULL OR IdConta = @IdConta)
+        UNION
+        SELECT IdParceria FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND (@IdConta IS NULL OR IdConta = @IdConta)
+    ) AS P";
 }

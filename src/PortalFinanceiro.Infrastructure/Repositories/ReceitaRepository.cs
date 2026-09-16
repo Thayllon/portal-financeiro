@@ -60,6 +60,9 @@ public class ReceitaRepository : SqlBaseRepository, IReceitaRepository
     public async Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualItem>(conn, ReceitaSql.ResumoAnualPorMes, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
 
-    public async Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualContaItem>(conn, ReceitaSql.ResumoAnualPorConta, new { IdUsuario = idUsuario, Ano = ano }));
+    public async Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualContaItem>(conn, ReceitaSql.ResumoAnualPorConta, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
+
+    public async Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualCategoriaItem>(conn, ReceitaSql.ResumoAnualPorCategoria, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
 }
