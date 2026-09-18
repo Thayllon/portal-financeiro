@@ -333,17 +333,6 @@
                     }
                   </div>
                 </div>
-                @if (!fluxoAdicional() && parceriasOptions().length > 0) {
-                  <div class="field">
-                    <label>Parceria (opcional)</label>
-                    <app-custom-select
-                      placeholder="Nenhuma"
-                      [options]="parceriasOptions()"
-                      [value]="form().idParceria ?? ''"
-                      (valueChange)="updateFormField('idParceria', $event)"
-                    />
-                  </div>
-                }
               </div>
             </div>
           } @else {
