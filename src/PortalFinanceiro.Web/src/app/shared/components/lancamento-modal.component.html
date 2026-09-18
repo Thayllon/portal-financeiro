@@ -444,7 +444,7 @@
               Voltar
             </button>
 
-            @if (passoAtual() === ultimoPasso() || editando()?.id) {
+            @if (passoAtual() === ultimoPasso() || editando()) {
               <button type="button" class="btn btn--primary" [disabled]="salvando()" (click)="salvar()">
                 {{ salvando() ? 'Salvando...' : 'Salvar' }}
               </button>
