@@ -214,6 +214,16 @@
   margin-bottom: 0;
 }
 
+.kpi-main .pill {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cards--fixo .kpi-main {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
 .kpi-foot {
   display: flex;
   align-items: flex-end;
