@@ -13,9 +13,14 @@ public static class ConfigureCors
         {
             options.AddPolicy("AllowAngular", policy =>
             {
-                policy.WithOrigins(origins)
-                      .AllowAnyHeader()
-                      .AllowAnyMethod();
+                policy.SetIsOriginAllowed(origin =>
+                    {
+                        if (origins.Contains(origin)) return true;
+                        if (origin.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase)) return true;
+                        return false;
+                    })
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
             });
         });
 
