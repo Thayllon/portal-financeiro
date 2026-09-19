@@ -11,9 +11,9 @@ Stack real em produção: **Neon** (banco) + **Render** (backend) + **Vercel** (
 
 | Ambiente | Front (Vercel) | Back (Render) | Banco (Neon) | Branch git | Uso |
 |----------|----------------|---------------|--------------|------------|-----|
-| **alpha** | portal-financeiro-alpha.vercel.app | portal-financeiro-alpha.onrender.com | **banco prod** | `main` | pessoal (thayllon e alana) |
+| **alpha** | portal-financeiro-alpha.vercel.app | portal-financeiro-p57h.onrender.com | **banco prod** | `main` | pessoal (thayllon e alana) |
 | **bravo** | portal-financeiro-bravo.vercel.app | portal-financeiro-bravo.onrender.com | **banco separado** (isolado) | `main` | portfólio (joão e maria) |
-| **charlie** | portal-financeiro-charlie.vercel.app | portal-financeiro-charlie.onrender.com | **banco prod** | `develop` | dev |
+| **charlie** | portal-financeiro-charlie.vercel.app | portal-financeiro-e0xw.onrender.com | **banco prod** | `develop` | dev |
 
 > **Banco:** alpha e charlie usam o **banco prod**; **bravo usa um projeto Neon separado**
 > (isolado, mais seguro para o portfólio). Frontend: **cada ambiente tem o próprio build**
@@ -48,7 +48,7 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
    - Env vars: `ConnectionStrings__DefaultConnection` = conn prod, `Auth__Secret` = segredo 1,
      `Cors__AllowedOrigins` = `https://portal-financeiro-alpha.vercel.app`,
      `Database__Provider` = `Postgres`, `ASPNETCORE_ENVIRONMENT` = `Production`.
-   - Anotar a URL (ex.: `https://portal-financeiro-alpha.onrender.com`).
+   - Anotar a URL (ex.: `https://portal-financeiro-p57h.onrender.com`).
 3. **Frontend (Vercel):**
    - **Add New → Project** → importar o repo → nome **`portal-financeiro-alpha`**.
    - Root Directory: **`src/PortalFinanceiro.Web`** · Production Branch: **`main`**.
