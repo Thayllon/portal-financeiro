@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://SEU-BACKEND-BRAVO.onrender.com/api'
+  apiUrl: 'https://portal-financeiro-bravo.onrender.com/api'
 };
