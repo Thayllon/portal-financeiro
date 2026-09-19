@@ -1,0 +1,32 @@
+# Render Blueprint — API (.NET 11) do Portal Financeiro
+#
+# Template para criar o backend de cada ambiente (alpha/bravo/charlie).
+# Como usar:
+#   1. Render Dashboard -> New -> Blueprint -> selecionar este repositório
+#   2. Escolher a branch: main (alpha/bravo) ou develop (charlie)
+#   3. Preencher as variáveis marcadas com sync:false com os valores do ambiente
+#      (a connection string e o segredo JWT são definidos por instância, nunca no repo)
+#   4. Create -> render serviço é criado em um subdomínio .onrender.com próprio
+#
+# Aviso free: as 750h/mês são compartilhadas por workspace entre TODOS os serviços
+# free. Serviços dormem após 15min de inatividade (cold start ~30-60s). Não usar
+# keep-alive pingando vários serviços (devora o balde de horas).
+
+services:
+  - type: web
+    name: portal-financeiro-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    # healthCheckPath: /api/dashboard   # opcional; resposta 401 conta como saudável
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: Database__Provider
+        value: Postgres
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: Auth__Secret
+        sync: false
+      - key: Cors__AllowedOrigins
+        sync: false

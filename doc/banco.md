@@ -16,6 +16,8 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 | `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro` e `PermissaoUsuario`) |
 | `003_FluxoAdicionalDespesa.sql` | Incremental idempotente para bancos criados antes do refactor: adiciona `Despesa.IdCliente` e tabela `DespesaServico` se ainda não existirem |
 | `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
+| `100_SeedDemo.sql` | Dados fake de demonstração (Maria/João) — 2024-01 a 2026-09 |
+| `101_AtualizarUsuariosDemo.sql` | Troca e-mail/senha dos usuários demo para produção: `maria@portal.com` / `joao@portal.com`, senha `123456` (idempotente) |
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
 > migrado **não** deve recebê-los novamente (DbUp rastreia por nome).

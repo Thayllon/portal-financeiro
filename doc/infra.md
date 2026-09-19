@@ -1,5 +1,115 @@
 # Infraestrutura — Portal Financeiro
 
+> Produção atual: **Neon** (PostgreSQL) + **Render** (API .NET) + **Vercel** (Angular).
+> Publicado em `https://portal-financeiro-alpha.vercel.app/`. Veja os 3 ambientes abaixo.
+
+## Ambientes publicados — Vercel + Render + Neon
+
+Stack real em produção: **Neon** (banco) + **Render** (backend) + **Vercel** (frontend).
+
+### Ambientes
+
+| Ambiente | Front (Vercel) | Back (Render) | Banco (Neon) | Branch git | Uso |
+|----------|----------------|---------------|--------------|------------|-----|
+| **alpha** | portal-financeiro-alpha.vercel.app | portal-financeiro-alpha.onrender.com | **banco prod** | `main` | pessoal (thayllon e alana) |
+| **bravo** | portal-financeiro-bravo.vercel.app | portal-financeiro-bravo.onrender.com | **banco prod** (mesmo por enquanto) | `main` | portfólio (joão e maria) |
+| **charlie** | portal-financeiro-charlie.vercel.app | portal-financeiro-charlie.onrender.com | **banco prod** | `develop` | dev |
+
+> Por enquanto **alpha e bravo apontam para o mesmo banco prod** (isolamento do bravo em um
+> projeto Neon separado fica como opção futura). Frontend: alpha/bravo usam o mesmo build de
+> produção (`environment.prod.ts` + `npm run build`); charlie usa `build:charlie`
+> (`environment.charlie.ts`, config `charlie` no `angular.json`).
+
+### Custo real (planos free, 2026)
+
+| Plataforma | Plano | Limites | Notas |
+|------------|-------|---------|-------|
+| **Vercel** | Hobby ($0) | 200 projetos, 25 projetos/repo, 100 deploys/dia | Uso pessoal/não-comercial; domínio `.vercel.app` derivado do nome do projeto (escolhível, único global) |
+| **Render** | Hobby ($0) | até 25 serviços; **750h/mês por workspace** | Free dorme após 15min de inatividade; horas compartilhadas entre **todos** os serviços free do workspace |
+| **Neon** | Free ($0) | 100 projetos, 10 branches/projeto, 0,5 GB/projeto, 100 CU-h/mês | Escala a zero após 5min; storage/compute são por projeto |
+
+⚠️ **Render: as 750h/mês são compartilhadas por workspace** — os 3 backends free gastam do
+mesmo balde de horas. **Não** manter keep-alive pingando os 3 serviços (devora o balde e pode
+suspender todos). Uso esparso (demo/portfólio) fica perto de R$ 0; cold start após dormir ~30–60s.
+
+### Passo a passo — criar cada ambiente
+
+Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**, **Render** e
+**Vercel** já criadas.
+
+#### Ambiente alpha (pessoal — thayllon e alana)
+
+1. **Banco (Neon):** usar o **projeto prod já existente** — nada a criar.
+2. **Backend (Render):**
+   - Dashboard → **New → Web Service** (ou **Blueprint** com `render.yaml`) → conectar o repo.
+   - Branch: **`main`** · Runtime: **Docker** (`Dockerfile`).
+   - Env vars: `ConnectionStrings__DefaultConnection` = conn prod, `Auth__Secret` = segredo 1,
+     `Cors__AllowedOrigins` = `https://portal-financeiro-alpha.vercel.app`,
+     `Database__Provider` = `Postgres`, `ASPNETCORE_ENVIRONMENT` = `Production`.
+   - Anotar a URL (ex.: `https://portal-financeiro-alpha.onrender.com`).
+3. **Frontend (Vercel):**
+   - **Add New → Project** → importar o repo → nome **`portal-financeiro-alpha`**.
+   - Root Directory: **`src/PortalFinanceiro.Web`** · Production Branch: **`main`**.
+   - Build Command: **`npm run build`** (usa `environment.prod.ts`).
+   - Conferir se `environment.prod.ts` aponta para a URL do backend alpha.
+4. Testar login e o fluxo.
+
+#### Ambiente bravo (portfólio — joão e maria)
+
+> Igual ao alpha hoje, exceto: mesmo banco prod, **URLs e segredos próprios**.
+
+1. **Banco (Neon):** usar o **mesmo banco prod** por enquanto (isolamento futuro: projeto Neon
+   separado; aí aplicar `001_CriarTabelas`, `099_SeedBase`, `100_SeedDemo`,
+   `101_AtualizarUsuariosDemo`).
+2. **Backend (Render):** novo Web Service → branch **`main`** → Docker.
+   - Env vars iguais ao alpha, mas `Auth__Secret` = segredo 2 e
+     `Cors__AllowedOrigins` = `https://portal-financeiro-bravo.vercel.app`.
+3. **Frontend (Vercel):** novo projeto **`portal-financeiro-bravo`** → Root Directory
+   `src/PortalFinanceiro.Web` → Production Branch `main` → Build Command `npm run build`
+   (mesmo `environment.prod.ts`).
+4. Testar com as credenciais do portfólio (maria/joão).
+
+#### Ambiente charlie (dev — espelha develop)
+
+1. **Banco (Neon):** usar o **mesmo banco prod** (ou criar um **branch** Neon p/ não poluir).
+2. **Backend (Render):** novo Web Service → branch **`develop`** → Docker.
+   - `Auth__Secret` = segredo 3; `Cors__AllowedOrigins` = `https://portal-financeiro-charlie.vercel.app`.
+3. **Frontend (Vercel):** novo projeto **`portal-financeiro-charlie`** → Root Directory
+   `src/PortalFinanceiro.Web` → Production Branch **`develop`** → Build Command
+   **`npm run build:charlie`** (usa `environment.charlie.ts` — ajuste o `apiUrl` para o backend charlie).
+
+### Variáveis por ambiente (Render)
+
+| Chave | alpha | bravo | charlie |
+|-------|-------|-------|---------|
+| `Database__Provider` | `Postgres` | `Postgres` | `Postgres` |
+| `ConnectionStrings__DefaultConnection` | conn prod | conn prod (mesmo banco) | conn prod (ou branch própria) |
+| `Auth__Secret` | segredo 1 | segredo 2 | segredo 3 |
+| `Cors__AllowedOrigins` | `https://portal-financeiro-alpha.vercel.app` | `https://portal-financeiro-bravo.vercel.app` | `https://portal-financeiro-charlie.vercel.app` |
+
+> Frontend — `apiUrl` compilado no build:
+> - alpha/bravo → `src/environments/environment.prod.ts`
+> - charlie → `src/environments/environment.charlie.ts`
+> Atualize o arquivo do ambiente antes de publicar cada projeto.
+
+### Atualização (deploy por branch)
+
+- Push em `main` → alpha e bravo (front + back) fazem redeploy automático.
+- Push em `develop` → charlie faz redeploy automático.
+- Migração/seed em banco existente é **manual** (psql / SQL editor do Neon).
+
+### Segurança
+
+- Segredos (connection string, JWT) só em env vars das plataformas — nunca no repo.
+- alpha/bravo compartilham o banco prod por enquanto — se separar o bravo em um projeto Neon,
+  o portfólio fica isolado dos dados pessoais.
+- CORS por ambiente restringe qual front pode chamar a API.
+- Vercel Hobby é **uso pessoal/não-comercial** — portfólio para clientes fica no limite da regra.
+
+---
+
+## Alternativa self-hosted na Oracle Cloud (legado)
+
 > Deploy completo **na Oracle Cloud** (Always Free — **R$ 0/mês**) com
 > Frontend + Backend + PostgreSQL **no mesmo servidor**, via Docker Compose.
 
