@@ -32,31 +32,31 @@ internal static class LancamentoSql
     public static string ListarPorMes(string t, string tabelaCategoria, string extras, string joinsExtras)
         => $@"
         SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)}
-        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = 1
-          AND MONTH({t}.Data) = @Mes AND YEAR({t}.Data) = @Ano
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue}
+          AND {SqlDialect.Current.MonthOf($"{t}.Data")} = @Mes AND {SqlDialect.Current.YearOf($"{t}.Data")} = @Ano
           AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
           AND (@IdCategoria IS NULL OR {t}.IdCategoria = @IdCategoria)
           AND (@Status IS NULL OR {t}.Status = @Status)
-          AND (@Busca IS NULL OR {t}.Descricao LIKE '%' + @Busca + '%')
+          AND (@Busca IS NULL OR {SqlDialect.Current.Like($"{t}.Descricao", "@Busca")})
         ORDER BY {t}.Status, {t}.Data";
 
     public static string ContarPorCategoria(string t)
-        => $"SELECT COUNT(*) FROM {t} WHERE IdCategoria = @IdCategoria AND Ativo = 1";
+        => $"SELECT COUNT(*) FROM {t} WHERE IdCategoria = @IdCategoria AND Ativo = {SqlDialect.Current.BooleanTrue}";
 
     public static string ListarPorParceria(string t, string tabelaCategoria, string extras, string joinsExtras)
-        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdParceria = @IdParceria AND {t}.Ativo = 1 ORDER BY {t}.Data";
+        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdParceria = @IdParceria AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} ORDER BY {t}.Data";
 
     public static string ContarPorSubcategoria(string t)
-        => $"SELECT COUNT(*) FROM {t} WHERE IdSubcategoria = @IdSubcategoria AND Ativo = 1";
+        => $"SELECT COUNT(*) FROM {t} WHERE IdSubcategoria = @IdSubcategoria AND Ativo = {SqlDialect.Current.BooleanTrue}";
 
     public static string ContarPorRegra(string t)
-        => $"SELECT COUNT(*) FROM {t} WHERE IdRegra = @IdRegra AND Ativo = 1";
+        => $"SELECT COUNT(*) FROM {t} WHERE IdRegra = @IdRegra AND Ativo = {SqlDialect.Current.BooleanTrue}";
 
     public static string ListarPorRegra(string t, string tabelaCategoria, string extras, string joinsExtras)
-        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdRegra = @IdRegra AND {t}.Ativo = 1 ORDER BY {t}.Data";
+        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdRegra = @IdRegra AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} ORDER BY {t}.Data";
 
     public static string ListarPorReceitaOrigem(string t, string tabelaCategoria, string extras, string joinsExtras)
-        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdReceitaOrigem = @IdReceitaOrigem AND {t}.Ativo = 1";
+        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdReceitaOrigem = @IdReceitaOrigem AND {t}.Ativo = {SqlDialect.Current.BooleanTrue}";
 
     public static string Inserir(string t, string colunas)
     {
@@ -68,17 +68,17 @@ internal static class LancamentoSql
         => $"UPDATE {t} SET {setColunas} WHERE Id = @Id";
 
     public static string Excluir(string t)
-        => $"UPDATE {t} SET Ativo = 0, DataAlteracao = GETUTCDATE() WHERE Id = @Id";
+        => $"UPDATE {t} SET Ativo = {SqlDialect.Current.BooleanFalse}, DataAlteracao = {SqlDialect.Current.UtcTimestamp} WHERE Id = @Id";
 
     public static string ResumoAnualPorMes(string t)
         => $@"
-        SELECT MONTH({t}.Data) AS Mes,
+        SELECT {SqlDialect.Current.MonthOf($"{t}.Data")} AS Mes,
                SUM({t}.Valor) AS Total,
                SUM(CASE WHEN {t}.Status = 2 THEN {t}.Valor ELSE 0 END) AS TotalRealizado
         FROM {t}
-        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = 1 AND YEAR({t}.Data) = @Ano
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {SqlDialect.Current.YearOf($"{t}.Data")} = @Ano
           AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
-        GROUP BY MONTH({t}.Data)";
+        GROUP BY {SqlDialect.Current.MonthOf($"{t}.Data")}";
 
     public static string ResumoAnualPorConta(string t)
         => $@"
@@ -87,7 +87,7 @@ internal static class LancamentoSql
                SUM(CASE WHEN {t}.Status = 2 THEN {t}.Valor ELSE 0 END) AS TotalRealizado
         FROM {t}
         LEFT JOIN {S}ContaBancaria cb ON {t}.IdConta = cb.Id
-        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = 1 AND YEAR({t}.Data) = @Ano
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {SqlDialect.Current.YearOf($"{t}.Data")} = @Ano
           AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
         GROUP BY cb.Nome, cb.Banco, cb.Tipo
         HAVING SUM({t}.Valor) > 0";
@@ -100,7 +100,7 @@ internal static class LancamentoSql
         FROM {t}
         LEFT JOIN {S}{tabelaCategoria} cat ON {t}.IdCategoria = cat.Id
         LEFT JOIN {S}{tabelaCategoria} sub ON {t}.IdSubcategoria = sub.Id
-        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = 1 AND YEAR({t}.Data) = @Ano
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {SqlDialect.Current.YearOf($"{t}.Data")} = @Ano
           AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
         GROUP BY cat.Nome, sub.Nome";
 }

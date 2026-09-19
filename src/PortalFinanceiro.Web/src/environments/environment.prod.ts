@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: '/api'
+  apiUrl: 'https://portal-financeiro-p57h.onrender.com/api'
 };

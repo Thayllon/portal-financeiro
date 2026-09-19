@@ -1,21 +1,18 @@
 using PortalFinanceiro.API.Configurations;
 using PortalFinanceiro.API.Middlewares;
 using PortalFinanceiro.Infrastructure.IoC;
-using PortalFinanceiro.Infrastructure.Sql;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.ConfigureSerilog();
-builder.Services.AddAppCors();
+builder.Services.AddAppCors(builder.Configuration);
 builder.Services.AddAppAuth(builder.Configuration);
 builder.Services.AddAppSwagger();
 builder.Services.AddAppControllers();
-builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection")!);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
-
-SqlDialect.Configure(new PortalFinanceiro.Infrastructure.Sql.Dialects.SqlServerDialect());
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
@@ -35,9 +32,8 @@ app.SeedDatabase();
 
 try
 {
-    var conexao = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
     Log.Information("=== Portal Financeiro API iniciando ===");
-    Log.Information("Ambiente: {Ambiente} | Conexao: {Conexao}", app.Environment.EnvironmentName, conexao);
+    Log.Information("Ambiente: {Ambiente}", app.Environment.EnvironmentName);
     Log.Information("Swagger: {Url}", "http://localhost:5178/swagger");
     app.Run();
 }
