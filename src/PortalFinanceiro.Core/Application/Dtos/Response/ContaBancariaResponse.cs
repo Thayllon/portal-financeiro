@@ -8,6 +8,7 @@ public class ContaBancariaResponse
     public string Nome { get; set; } = string.Empty;
     public string Banco { get; set; } = string.Empty;
     public string Tipo { get; set; } = string.Empty;
+    public bool EhPadrao { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
 }

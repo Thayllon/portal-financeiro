@@ -10,6 +10,7 @@ public class ContaBancaria
     public string Nome { get; private set; } = string.Empty;
     public string Banco { get; private set; } = string.Empty;
     public TipoConta Tipo { get; private set; }
+    public bool EhPadrao { get; private set; }
     public bool Ativo { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
@@ -55,6 +56,18 @@ public class ContaBancaria
     public void Desativar()
     {
         Ativo = false;
+        DataAlteracao = DateTime.UtcNow;
+    }
+
+    public void DefinirComoPadrao()
+    {
+        EhPadrao = true;
+        DataAlteracao = DateTime.UtcNow;
+    }
+
+    public void RemoverPadrao()
+    {
+        EhPadrao = false;
         DataAlteracao = DateTime.UtcNow;
     }
 }
