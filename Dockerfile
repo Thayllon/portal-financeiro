@@ -4,6 +4,7 @@ WORKDIR /src
 COPY src/PortalFinanceiro.Core/PortalFinanceiro.Core.csproj src/PortalFinanceiro.Core/
 COPY src/PortalFinanceiro.Infrastructure/PortalFinanceiro.Infrastructure.csproj src/PortalFinanceiro.Infrastructure/
 COPY src/PortalFinanceiro.API/PortalFinanceiro.API.csproj src/PortalFinanceiro.API/
+# bust cache 2026-09-19
 RUN dotnet restore src/PortalFinanceiro.API/PortalFinanceiro.API.csproj
 
 COPY . .
