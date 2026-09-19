@@ -11,4 +11,5 @@ public interface IContaBancariaAppService
     Task<Result<ContaBancariaResponse>> AdicionarAsync(Guid idUsuario, ContaBancariaRequest request);
     Task<Result<ContaBancariaResponse>> AtualizarAsync(Guid id, Guid idUsuario, ContaBancariaRequest request);
     Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario);
+    Task<Result<Unit>> DefinirPadraoAsync(Guid id, Guid idUsuario);
 }

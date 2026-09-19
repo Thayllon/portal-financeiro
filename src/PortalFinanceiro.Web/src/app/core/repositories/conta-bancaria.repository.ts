@@ -27,4 +27,8 @@ export class ContaBancariaRepository extends BaseHttpRepository {
   excluir(id: string): Observable<any> {
     return this.delete<any>(`/contas-bancarias/${id}`);
   }
+
+  definirPadrao(id: string): Observable<any> {
+    return this.put<any>(`/contas-bancarias/${id}/padrao`, {});
+  }
 }

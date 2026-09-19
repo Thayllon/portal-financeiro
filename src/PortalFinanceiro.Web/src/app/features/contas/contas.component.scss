@@ -83,6 +83,25 @@
 
 .action-btn {
   @include table.action-btn;
+
+  &.action-btn--active {
+    color: var(--color-warning);
+  }
+}
+
+.badge-padrao {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
 }
 
 .field {

@@ -18,16 +18,17 @@ CREATE TABLE Usuario (
 CREATE UNIQUE INDEX IX_Usuario_Email ON Usuario(Email) WHERE Ativo = TRUE;
 
 CREATE TABLE ContaBancaria (
-    Id UUID PRIMARY KEY,
-    IdUsuario UUID NOT NULL,
-    Nome VARCHAR(200) NOT NULL,
-    Banco VARCHAR(100) NOT NULL,
-    Tipo INT NOT NULL,
-    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    DataCadastro TIMESTAMP NOT NULL,
-    DataAlteracao TIMESTAMP NOT NULL,
+      Id UUID PRIMARY KEY,
+      IdUsuario UUID NOT NULL,
+      Nome VARCHAR(200) NOT NULL,
+      Banco VARCHAR(100) NOT NULL,
+      Tipo INT NOT NULL,
+      EhPadrao BOOLEAN NOT NULL DEFAULT FALSE,
+      Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+      DataCadastro TIMESTAMP NOT NULL,
+      DataAlteracao TIMESTAMP NOT NULL,
     CONSTRAINT FK_ContaBancaria_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
-);
+  );
 
 CREATE TABLE Pessoa (
     Id UUID PRIMARY KEY,
