@@ -333,17 +333,6 @@
                     }
                   </div>
                 </div>
-                @if (!fluxoAdicional() && parceriasOptions().length > 0) {
-                  <div class="field">
-                    <label>Parceria (opcional)</label>
-                    <app-custom-select
-                      placeholder="Nenhuma"
-                      [options]="parceriasOptions()"
-                      [value]="form().idParceria ?? ''"
-                      (valueChange)="updateFormField('idParceria', $event)"
-                    />
-                  </div>
-                }
               </div>
             </div>
           } @else {
@@ -455,7 +444,7 @@
               Voltar
             </button>
 
-            @if (passoAtual() === ultimoPasso() || editando()?.id) {
+            @if (passoAtual() === ultimoPasso() || editando()) {
               <button type="button" class="btn btn--primary" [disabled]="salvando()" (click)="salvar()">
                 {{ salvando() ? 'Salvando...' : 'Salvar' }}
               </button>

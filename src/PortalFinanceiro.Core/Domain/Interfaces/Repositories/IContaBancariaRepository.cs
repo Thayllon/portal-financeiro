@@ -10,4 +10,5 @@ public interface IContaBancariaRepository
     Task<int> ContarDespesasAsync(Guid idConta);
     Task InserirAsync(ContaBancaria entity);
     Task AtualizarAsync(ContaBancaria entity);
+    Task LimparPadraoAsync(Guid idUsuario);
 }

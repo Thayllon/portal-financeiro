@@ -45,6 +45,13 @@ public class ContasBancariasController : BaseController
         return ApiResponse(result);
     }
 
+    [HttpPut("{id}/padrao")]
+    public async Task<IActionResult> DefinirPadrao(Guid id)
+    {
+        var result = await _service.DefinirPadraoAsync(id, ObterIdUsuario());
+        return ApiResponse(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Excluir(Guid id)
     {

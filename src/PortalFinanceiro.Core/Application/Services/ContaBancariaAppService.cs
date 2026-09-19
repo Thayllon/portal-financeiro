@@ -39,8 +39,13 @@ public class ContaBancariaAppService : IContaBancariaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
-        await _repository.InserirAsync(result.Dado!);
-        return Mapear(result.Dado!);
+        var conta = result.Dado!;
+        var contas = await _repository.ListarPorUsuarioAsync(idUsuario);
+        if (!contas.Any())
+            conta.DefinirComoPadrao();
+
+        await _repository.InserirAsync(conta);
+        return Mapear(conta);
     }
 
     public async Task<Result<ContaBancariaResponse>> AtualizarAsync(Guid id, Guid idUsuario, ContaBancariaRequest request)
@@ -83,12 +88,27 @@ public class ContaBancariaAppService : IContaBancariaAppService
         return Resultado.Sucesso();
     }
 
+    public async Task<Result<Unit>> DefinirPadraoAsync(Guid id, Guid idUsuario)
+    {
+        var conta = await _repository.ObterPorIdAsync(id);
+        if (conta is null)
+            return Erro.NaoEncontrado("Conta bancária");
+        if (conta.IdUsuario != idUsuario)
+            return Erro.Permissao("CONTA_ACESSO_NEGADO", "Conta de outro usuário.");
+
+        await _repository.LimparPadraoAsync(idUsuario);
+        conta.DefinirComoPadrao();
+        await _repository.AtualizarAsync(conta);
+        return Resultado.Sucesso();
+    }
+
     private static ContaBancariaResponse Mapear(ContaBancaria c) => new()
     {
         Id = c.Id,
         Nome = c.Nome,
         Banco = c.Banco,
         Tipo = c.Tipo.ToString(),
+        EhPadrao = c.EhPadrao,
         Ativo = c.Ativo,
         DataCadastro = c.DataCadastro
     };

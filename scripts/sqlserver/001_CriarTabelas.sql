@@ -25,6 +25,7 @@ CREATE TABLE ContaBancaria (
     Nome NVARCHAR(200) NOT NULL,
     Banco NVARCHAR(100) NOT NULL,
     Tipo INT NOT NULL,
+    EhPadrao BIT NOT NULL DEFAULT 0,
     Ativo BIT NOT NULL DEFAULT 1,
     DataCadastro DATETIME2 NOT NULL,
     DataAlteracao DATETIME2 NOT NULL,
