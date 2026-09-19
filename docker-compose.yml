@@ -21,8 +21,10 @@ services:
       dockerfile: Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      Database__Provider: "Postgres"
       ConnectionStrings__DefaultConnection: "Host=db;Database=${POSTGRES_DB:-portal_financeiro};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
       Auth__Secret: "${JWT_SECRET}"
+      Cors__AllowedOrigins: "${CORS_ALLOWED_ORIGINS:-http://localhost:8080}"
     depends_on:
       db:
         condition: service_healthy

@@ -20,4 +20,5 @@ internal static class ReceitaSql
     public static string Excluir => LancamentoSql.Excluir(T);
     public static string ResumoAnualPorMes => LancamentoSql.ResumoAnualPorMes(T);
     public static string ResumoAnualPorConta => LancamentoSql.ResumoAnualPorConta(T);
+    public static string ResumoAnualPorCategoria => LancamentoSql.ResumoAnualPorCategoria(T, "CategoriaReceita");
 }

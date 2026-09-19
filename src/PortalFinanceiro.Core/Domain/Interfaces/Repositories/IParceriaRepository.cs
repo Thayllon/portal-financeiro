@@ -12,4 +12,5 @@ public interface IParceriaRepository
     Task AtualizarAsync(Parceria entity);
     Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status);
     Task<decimal> SomarDespesasPorStatusAsync(Guid idParceria, int status);
+    Task<ResumoParceriaAnual> ResumoAnualAsync(Guid idUsuario, int ano, Guid? idConta = null);
 }

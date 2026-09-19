@@ -103,7 +103,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | Rota | Feature | Descrição |
 |------|---------|-----------|
 | `/login` | login | Autenticação |
-| `/dashboard` | dashboard | Resumo por conta e categoria |
+| `/dashboard` | dashboard | Resumo mensal (por conta/categoria + previsão 3 meses) e visão anual (5 KPIs com variação vs ano anterior + média pró-rata, bar 12 meses, donut receitas/despesas por categoria/subcategoria, resumo mês a mês, previsão restante do ano via regras, por conta e card parcerias com link) |
 | `/receitas` | receitas | Lançamentos de receita (avulsas e recorrentes) |
 | `/despesas` | despesas | Lançamentos de despesa |
 | `/contas` | contas | Contas bancárias |

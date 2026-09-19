@@ -1,8 +1,11 @@
 import { Component, inject, signal, OnInit, computed, ViewChild } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardRepository } from '../../core/repositories/dashboard.repository';
-import { Dashboard, DashboardAnual } from '../../core/models/dashboard.model';
+import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
+import { Dashboard, DashboardAnual, DistribuicaoCategoriaAnual } from '../../core/models/dashboard.model';
+import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { SkeletonComponent } from '../../shared/components/skeleton.component';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
@@ -23,15 +26,18 @@ const COR_GRAFICO_RECEITA_BG = '#16a34acc';
 const COR_GRAFICO_DESPESA = '#dc2626';
 const COR_GRAFICO_DESPESA_BG = '#dc2626cc';
 
+const PALETA_DONUT = ['#0d9488', '#dc2626', '#5b8def', '#eab308', '#f97316', '#a855f7', '#64748b', '#16a34a', '#ec4899', '#14b8a6'];
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [SkeletonComponent, MonthNavComponent, StatusBadgeComponent, CurrencyBRLPipe, CustomSelectComponent, CollapsibleSectionComponent, LucideDynamicIcon, BaseChartDirective],
+  imports: [RouterLink, SkeletonComponent, MonthNavComponent, StatusBadgeComponent, CurrencyBRLPipe, CustomSelectComponent, CollapsibleSectionComponent, LucideDynamicIcon, BaseChartDirective],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   private repo = inject(DashboardRepository);
+  private contaRepo = inject(ContaBancariaRepository);
   private auth = inject(AuthService);
   private notify = inject(NotificationService);
 
@@ -42,6 +48,9 @@ export class DashboardComponent implements OnInit {
   ano = signal(new Date().getFullYear());
   visualizacao = signal<'mensal' | 'anual'>('mensal');
   filtroConta = signal<string>('');
+  contas = signal<ContaBancaria[]>([]);
+  tipoDistribuicao = signal<'receita' | 'despesa'>('despesa');
+  nivelDistribuicao = signal<'categoria' | 'subcategoria'>('categoria');
 
   readonly MESES = MESES;
 
@@ -80,16 +89,68 @@ export class DashboardComponent implements OnInit {
   };
 
     contasOptions = computed(() => {
-    const contas = this.dataAnual()?.resumoPorConta ?? [];
-    return contas.map(c => ({ value: c.nomeConta, label: `${c.nomeConta} (${c.banco})` }));
+    const contas = this.contas();
+    return contas.filter(c => c.ativo).map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` }));
   });
+
+  distribuicaoAtual = computed<DistribuicaoCategoriaAnual[]>(() => {
+    const anual = this.dataAnual();
+    if (!anual) return [];
+    const base = this.tipoDistribuicao() === 'receita' ? anual.distribuicaoReceitas : anual.distribuicaoDespesas;
+    if (this.nivelDistribuicao() === 'categoria') return base;
+    const flat: DistribuicaoCategoriaAnual[] = [];
+    for (const cat of base) {
+      for (const sub of cat.subcategorias ?? []) {
+        flat.push({ nome: `${cat.nome} • ${sub.nome}`, total: sub.total, percentual: sub.percentual, subcategorias: [] });
+      }
+    }
+    return flat.sort((a, b) => b.total - a.total);
+  });
+
+  totalDistribuicao = computed(() => this.distribuicaoAtual().reduce((s, i) => s + i.total, 0));
+
+  mesInicialPrevisao = computed(() => {
+    const anual = this.dataAnual();
+    if (!anual?.previsaoRestanteAno?.length) return '';
+    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    return meses[anual.previsaoRestanteAno[0].mes - 1];
+  });
+
+  doughnutChartData: ChartConfiguration<'doughnut'>['data'] = {
+    labels: [],
+    datasets: []
+  };
+
+  doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '68%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const value = context.parsed ?? 0;
+            return `${context.label}: R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+          }
+        }
+      }
+    }
+  };
 
   private requestSeq = 0;
   chartVersion = signal(0);
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
   private graficoMensal = signal<{ label: string; d: Dashboard }[]>([]);
 
-  ngOnInit() { this.carregar(); }
+  ngOnInit() { this.carregar(); this.carregarContas(); }
+
+  async carregarContas() {
+    try {
+      const contas = await firstValueFrom(this.contaRepo.listar());
+      this.contas.set(contas ?? []);
+    } catch { this.contas.set([]); }
+  }
 
   async carregar() {
     const seq = ++this.requestSeq;
@@ -118,6 +179,7 @@ if (seq !== this.requestSeq) return;
 if (seq !== this.requestSeq) return;
             this.dataAnual.set(anual);
             this.atualizarGraficoAnual();
+            this.atualizarDonut();
             this.chartVersion.update(v => v + 1);
             setTimeout(() => this.chart?.update(), 50);
       }
@@ -144,6 +206,7 @@ if (seq !== this.requestSeq) return;
     this.dataAnual.set(null);
     this.graficoMensal.set([]);
     this.barChartData = { labels: [], datasets: [] };
+    this.doughnutChartData = { labels: [], datasets: [] };
     this.carregar();
   }
 
@@ -152,6 +215,16 @@ if (seq !== this.requestSeq) return;
     if (this.visualizacao() === 'anual') {
       this.carregar();
     }
+  }
+
+  trocarTipoDistribuicao(tipo: 'receita' | 'despesa') {
+    this.tipoDistribuicao.set(tipo);
+    this.atualizarDonut();
+  }
+
+  trocarNivelDistribuicao(nivel: 'categoria' | 'subcategoria') {
+    this.nivelDistribuicao.set(nivel);
+    this.atualizarDonut();
   }
 
   private atualizarGraficoMensal() {
@@ -207,6 +280,21 @@ if (seq !== this.requestSeq) return;
           backgroundColor: COR_GRAFICO_DESPESA_BG,
           borderColor: COR_GRAFICO_DESPESA,
           borderWidth: 1
+        }
+      ]
+    };
+  }
+
+  private atualizarDonut() {
+    const itens = this.distribuicaoAtual();
+    this.doughnutChartData = {
+      labels: itens.map(i => i.nome),
+      datasets: [
+        {
+          data: itens.map(i => i.total),
+          backgroundColor: itens.map((_, idx) => PALETA_DONUT[idx % PALETA_DONUT.length]),
+          borderWidth: 2,
+          borderColor: '#ffffff'
         }
       ]
     };

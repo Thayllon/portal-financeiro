@@ -1,6 +1,8 @@
 using System.Data;
+using System.Data.Common;
 using Dapper;
 using Microsoft.Data.SqlClient;
+using Npgsql;
 using Polly;
 using PortalFinanceiro.Infrastructure.Data;
 
@@ -10,6 +12,7 @@ public abstract class SqlBaseRepository
 {
     private static readonly IAsyncPolicy _sharedRetryPolicy = Policy
         .Handle<SqlException>(ex => ex.Number is -2 or 4060 or 10928 or 10929 or 1205 or 40143 or 11001)
+        .Or<NpgsqlException>(ex => ex.SqlState is "08000" or "08001" or "08003" or "08006" or "53300" or "57P01" or "57P03" or "40001" or "40P01")
         .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromMilliseconds(Math.Pow(2, retryAttempt) * 100));
 
     protected static readonly int _commandTimeout = 60;
@@ -25,7 +28,7 @@ public abstract class SqlBaseRepository
         return await _sharedRetryPolicy.ExecuteAsync(async () =>
         {
             using var conn = _connectionFactory.CreateConnection();
-            await ((SqlConnection)conn).OpenAsync();
+            await ((DbConnection)conn).OpenAsync();
             return await operation(conn);
         });
     }

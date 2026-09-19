@@ -5,6 +5,8 @@ COPY PortalFinanceiro.API.slnx ./
 COPY src/PortalFinanceiro.Core/PortalFinanceiro.Core.csproj src/PortalFinanceiro.Core/
 COPY src/PortalFinanceiro.Infrastructure/PortalFinanceiro.Infrastructure.csproj src/PortalFinanceiro.Infrastructure/
 COPY src/PortalFinanceiro.API/PortalFinanceiro.API.csproj src/PortalFinanceiro.API/
+COPY test/PortalFinanceiro.API.Test/PortalFinanceiro.API.Test.csproj test/PortalFinanceiro.API.Test/
+COPY tools/DbSetup/DbSetup.csproj tools/DbSetup/
 RUN dotnet restore
 
 COPY . .
