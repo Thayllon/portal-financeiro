@@ -1,0 +1,7 @@
+{
+  "buildCommand": "cd src/PortalFinanceiro.Web && npm ci && npm run build",
+  "outputDirectory": "src/PortalFinanceiro.Web/dist/portal-financeiro/browser",
+  "installCommand": "echo 'skip root install'",
+  "framework": "angular",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
