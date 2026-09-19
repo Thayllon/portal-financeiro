@@ -98,6 +98,9 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
 
 - Push em `main` → alpha e bravo (front + back) fazem redeploy automático.
 - Push em `develop` → charlie faz redeploy automático.
+- **Só alteração nas branches REMOTAS `main`/`develop` dispara deploy** (push direto ou merge
+  de PR) — mudança em branch local não dispara nada; commit local só tem efeito após o push
+  para o GitHub.
 - Migração/seed em banco existente é **manual** (psql / SQL editor do Neon).
 
 ### Segurança
