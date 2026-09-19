@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://portal-financeiro-e0xw.onrender.com/api'
+  apiUrl: 'https://portal-financeiro-charlie.onrender.com/api'
 };
