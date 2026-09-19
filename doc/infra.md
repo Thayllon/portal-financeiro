@@ -12,12 +12,12 @@ Stack real em produção: **Neon** (banco) + **Render** (backend) + **Vercel** (
 | Ambiente | Front (Vercel) | Back (Render) | Banco (Neon) | Branch git | Uso |
 |----------|----------------|---------------|--------------|------------|-----|
 | **alpha** | portal-financeiro-alpha.vercel.app | portal-financeiro-alpha.onrender.com | **banco prod** | `main` | pessoal (thayllon e alana) |
-| **bravo** | portal-financeiro-bravo.vercel.app | portal-financeiro-bravo.onrender.com | **banco prod** (mesmo por enquanto) | `main` | portfólio (joão e maria) |
+| **bravo** | portal-financeiro-bravo.vercel.app | portal-financeiro-bravo.onrender.com | **banco separado** (isolado) | `main` | portfólio (joão e maria) |
 | **charlie** | portal-financeiro-charlie.vercel.app | portal-financeiro-charlie.onrender.com | **banco prod** | `develop` | dev |
 
-> Por enquanto **alpha e bravo apontam para o mesmo banco prod** (isolamento do bravo em um
-> projeto Neon separado fica como opção futura). Frontend: alpha/bravo usam o mesmo build de
-> produção (`environment.prod.ts` + `npm run build`); charlie usa `build:charlie`
+> **Banco:** alpha e charlie usam o **banco prod**; **bravo usa um projeto Neon separado**
+> (isolado, mais seguro para o portfólio). Frontend: alpha/bravo usam o mesmo build de produção
+> (`environment.prod.ts` + `npm run build`); charlie usa `build:charlie`
 > (`environment.charlie.ts`, config `charlie` no `angular.json`).
 
 ### Custo real (planos free, 2026)
@@ -56,14 +56,14 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
 
 #### Ambiente bravo (portfólio — joão e maria)
 
-> Igual ao alpha hoje, exceto: mesmo banco prod, **URLs e segredos próprios**.
+> Banco **separado** (isolado) — criar um projeto Neon próprio.
 
-1. **Banco (Neon):** usar o **mesmo banco prod** por enquanto (isolamento futuro: projeto Neon
-   separado; aí aplicar `001_CriarTabelas`, `099_SeedBase`, `100_SeedDemo`,
-   `101_AtualizarUsuariosDemo`).
+1. **Banco (Neon):** criar um **novo projeto Neon** (limite free: 100) → anotar a connection
+   string. Aplicar schema/seed nele: `001_CriarTabelas`, `099_SeedBase`, `100_SeedDemo`,
+   `101_AtualizarUsuariosDemo` (maria/joão com senha `123456`).
 2. **Backend (Render):** novo Web Service → branch **`main`** → Docker.
-   - Env vars iguais ao alpha, mas `Auth__Secret` = segredo 2 e
-     `Cors__AllowedOrigins` = `https://portal-financeiro-bravo.vercel.app`.
+   - Env vars: `ConnectionStrings__DefaultConnection` = conn do banco bravo,
+     `Auth__Secret` = segredo 2, `Cors__AllowedOrigins` = `https://portal-financeiro-bravo.vercel.app`.
 3. **Frontend (Vercel):** novo projeto **`portal-financeiro-bravo`** → Root Directory
    `src/PortalFinanceiro.Web` → Production Branch `main` → Build Command `npm run build`
    (mesmo `environment.prod.ts`).
@@ -71,9 +71,11 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
 
 #### Ambiente charlie (dev — espelha develop)
 
-1. **Banco (Neon):** usar o **mesmo banco prod** (ou criar um **branch** Neon p/ não poluir).
+1. **Banco (Neon):** usar o **mesmo banco prod** que o alpha (ou criar um **branch** Neon
+   p/ não poluir os dados pessoais).
 2. **Backend (Render):** novo Web Service → branch **`develop`** → Docker.
-   - `Auth__Secret` = segredo 3; `Cors__AllowedOrigins` = `https://portal-financeiro-charlie.vercel.app`.
+   - `ConnectionStrings__DefaultConnection` = conn prod; `Auth__Secret` = segredo 3;
+     `Cors__AllowedOrigins` = `https://portal-financeiro-charlie.vercel.app`.
 3. **Frontend (Vercel):** novo projeto **`portal-financeiro-charlie`** → Root Directory
    `src/PortalFinanceiro.Web` → Production Branch **`develop`** → Build Command
    **`npm run build:charlie`** (usa `environment.charlie.ts` — ajuste o `apiUrl` para o backend charlie).
@@ -83,7 +85,7 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
 | Chave | alpha | bravo | charlie |
 |-------|-------|-------|---------|
 | `Database__Provider` | `Postgres` | `Postgres` | `Postgres` |
-| `ConnectionStrings__DefaultConnection` | conn prod | conn prod (mesmo banco) | conn prod (ou branch própria) |
+| `ConnectionStrings__DefaultConnection` | conn prod | **conn bravo (separada)** | conn prod |
 | `Auth__Secret` | segredo 1 | segredo 2 | segredo 3 |
 | `Cors__AllowedOrigins` | `https://portal-financeiro-alpha.vercel.app` | `https://portal-financeiro-bravo.vercel.app` | `https://portal-financeiro-charlie.vercel.app` |
 
@@ -101,8 +103,8 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
 ### Segurança
 
 - Segredos (connection string, JWT) só em env vars das plataformas — nunca no repo.
-- alpha/bravo compartilham o banco prod por enquanto — se separar o bravo em um projeto Neon,
-  o portfólio fica isolado dos dados pessoais.
+- Banco **bravo isolado** garante que o portfólio não vaza dados pessoais (alpha/charlie
+  compartilham o banco prod; charlie pode usar um branch Neon se quiser isolar o dev).
 - CORS por ambiente restringe qual front pode chamar a API.
 - Vercel Hobby é **uso pessoal/não-comercial** — portfólio para clientes fica no limite da regra.
 
