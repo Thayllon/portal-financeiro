@@ -35,47 +35,52 @@ public class DashboardAppService : IDashboardAppService
         _logger = logger;
     }
 
-    public async Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano)
+    public async Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null)
     {
         try
         {
-            var receitas = await _receitaRepository.ListarAsync(idUsuario, mes, ano);
-            var despesas = await _despesaRepository.ListarAsync(idUsuario, mes, ano);
+            var receitas = await _receitaRepository.ListarAsync(idUsuario, mes, ano, idConta);
+            var despesas = await _despesaRepository.ListarAsync(idUsuario, mes, ano, idConta);
 
         var totalReceitas = receitas.Sum(r => r.Valor);
         var totalRecebido = receitas.Where(r => r.Status == StatusMensal.Realizado).Sum(r => r.Valor);
         var totalDespesas = despesas.Sum(d => d.Valor);
         var totalPago = despesas.Where(d => d.Status == StatusMensal.Realizado).Sum(d => d.Valor);
 
-        var regrasReceita = await _regraReceitaRepository.ListarPorUsuarioAsync(idUsuario);
-        var regrasDespesa = await _regraDespesaRepository.ListarPorUsuarioAsync(idUsuario);
-        var contas = (await _contaBancariaRepository.ListarPorUsuarioAsync(idUsuario)).Where(c => c.Ativo).ToList();
+        var regrasReceita = (await _regraReceitaRepository.ListarPorUsuarioAsync(idUsuario)).Where(r => idConta == null || r.IdConta == idConta).ToList();
+        var regrasDespesa = (await _regraDespesaRepository.ListarPorUsuarioAsync(idUsuario)).Where(d => idConta == null || d.IdConta == idConta).ToList();
+        var contas = (await _contaBancariaRepository.ListarPorUsuarioAsync(idUsuario)).Where(c => c.Ativo && (idConta == null || c.Id == idConta)).ToList();
+
+        var inicioMesAtual = new DateTime(ano, mes, 1);
+        var inicioMesSeguinteAtual = inicioMesAtual.AddMonths(1);
 
         var resumoPorConta = new List<ResumoPorConta>();
         foreach (var conta in contas)
         {
             var totalRec = receitas.Where(r => r.IdConta == conta.Id).Sum(r => r.Valor);
             var totalDesp = despesas.Where(d => d.IdConta == conta.Id).Sum(d => d.Valor);
+            var recPrevisto = regrasReceita
+                .Where(r => r.Ativo && r.IdConta == conta.Id && r.DataInicio < inicioMesSeguinteAtual && r.DataFim >= inicioMesAtual)
+                .Sum(r => Math.Max(0, r.Valor - receitas.Where(l => l.IdRegra == r.Id && l.IdConta == conta.Id).Sum(l => l.Valor)));
+            var despPrevisto = regrasDespesa
+                .Where(d => d.Ativo && d.IdConta == conta.Id && d.DataInicio < inicioMesSeguinteAtual && d.DataFim >= inicioMesAtual)
+                .Sum(d => Math.Max(0, d.Valor - despesas.Where(l => l.IdRegra == d.Id && l.IdConta == conta.Id).Sum(l => l.Valor)));
 
-            if (totalRec != 0 || totalDesp != 0)
+            resumoPorConta.Add(new ResumoPorConta
             {
-                resumoPorConta.Add(new ResumoPorConta
-                {
-                    NomeConta = conta.Nome,
-                    Banco = conta.Banco,
-                    Tipo = conta.Tipo.ToString(),
-                    TotalReceitas = totalRec,
-                    TotalDespesas = totalDesp,
-                    Saldo = totalRec - totalDesp
-                });
-            }
+                NomeConta = conta.Nome,
+                Banco = conta.Banco,
+                Tipo = conta.Tipo.ToString(),
+                TotalReceitas = totalRec,
+                TotalDespesas = totalDesp,
+                Saldo = totalRec - totalDesp,
+                TotalReceitasPrevisto = recPrevisto,
+                TotalDespesasPrevisto = despPrevisto
+            });
         }
 
-        var resumoPorCategoria = despesas
-            .GroupBy(d => d.Categoria == string.Empty ? "Sem categoria" : d.Categoria)
-            .Select(g => new ResumoPorCategoria { Nome = g.Key, Total = g.Sum(d => d.Valor) })
-            .OrderByDescending(r => r.Total)
-            .ToList();
+        var distribuicaoReceitas = MontarDistribuicao(receitas.Select(r => new Domain.Projections.ResumoAnualCategoriaItem { Categoria = r.Categoria, Subcategoria = r.Subcategoria, Total = r.Valor }));
+        var distribuicaoDespesas = MontarDistribuicao(despesas.Select(d => new Domain.Projections.ResumoAnualCategoriaItem { Categoria = d.Categoria, Subcategoria = d.Subcategoria, Total = d.Valor }));
 
         var previsao = new List<PrevisaoMensal>();
         for (int i = 1; i <= 3; i++)
@@ -104,6 +109,13 @@ public class DashboardAppService : IDashboardAppService
             });
         }
 
+        var totalReceitasPrevisto = regrasReceita
+            .Where(r => r.Ativo && r.DataInicio < inicioMesSeguinteAtual && r.DataFim >= inicioMesAtual)
+            .Sum(r => Math.Max(0, r.Valor - receitas.Where(l => l.IdRegra == r.Id).Sum(l => l.Valor)));
+        var totalDespesasPrevisto = regrasDespesa
+            .Where(d => d.Ativo && d.DataInicio < inicioMesSeguinteAtual && d.DataFim >= inicioMesAtual)
+            .Sum(d => Math.Max(0, d.Valor - despesas.Where(l => l.IdRegra == d.Id).Sum(l => l.Valor)));
+
         return new DashboardResponse
         {
             Mes = mes,
@@ -114,9 +126,14 @@ public class DashboardAppService : IDashboardAppService
             TotalPago = totalPago,
             Saldo = totalReceitas - totalDespesas,
             SaldoRealizado = totalRecebido - totalPago,
+            TotalReceitasPrevisto = totalReceitasPrevisto,
+            TotalDespesasPrevisto = totalDespesasPrevisto,
+            SaldoPrevisto = totalReceitas + totalReceitasPrevisto - totalDespesas - totalDespesasPrevisto,
             ResumoPorConta = resumoPorConta,
-            ResumoPorCategoria = resumoPorCategoria,
-            PrevisaoProximosMeses = previsao
+            DistribuicaoReceitas = distribuicaoReceitas,
+            DistribuicaoDespesas = distribuicaoDespesas,
+            PrevisaoProximosMeses = previsao,
+            ResumoParcerias = await MapearResumoParceriasMensalAsync(idUsuario, ano, mes, idConta)
         };
         }
         catch (Exception ex)
@@ -254,8 +271,20 @@ public class DashboardAppService : IDashboardAppService
         }
     }
 
-    private static decimal? CalcularVariacao(decimal atual, decimal anterior)
+    private async Task<ResumoParceriasAnual> MapearResumoParceriasMensalAsync(Guid idUsuario, int ano, int mes, Guid? idConta)
     {
+        var resumo = await _parceriaRepository.ResumoMensalAsync(idUsuario, ano, mes, idConta);
+        return new ResumoParceriasAnual
+        {
+            TotalRecebido = resumo.TotalRecebido,
+            TotalPago = resumo.TotalPago,
+            AReceber = resumo.AReceber,
+            APagar = resumo.APagar,
+            QtdParcerias = resumo.QtdParcerias
+        };
+    }
+
+    private static decimal? CalcularVariacao(decimal atual, decimal anterior)    {
         if (anterior == 0)
             return null;
         return Math.Round((atual - anterior) / Math.Abs(anterior) * 100, 1);

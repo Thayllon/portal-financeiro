@@ -4,6 +4,7 @@ using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Infrastructure.Data;
 using PortalFinanceiro.Infrastructure.Sql;
 using PortalFinanceiro.Infrastructure.Sql.Base;
+using System.Data;
 
 namespace PortalFinanceiro.Infrastructure.Repositories;
 
@@ -33,13 +34,28 @@ public class ParceriaRepository : SqlBaseRepository, IParceriaRepository
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarDespesas, new { IdParceria = idParceria, Status = status }));
 
     public async Task<ResumoParceriaAnual> ResumoAnualAsync(Guid idUsuario, int ano, Guid? idConta = null)
+        => await ResumoParceriaAsync(
+            (conn, status) => QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarReceitasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta, Status = status }),
+            (conn, status) => QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarDespesasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta, Status = status }),
+            conn => QueryFirstOrDefaultAsync<int>(conn, ParceriaSql.ContarParceriasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
+
+    public async Task<ResumoParceriaAnual> ResumoMensalAsync(Guid idUsuario, int ano, int mes, Guid? idConta = null)
+        => await ResumoParceriaAsync(
+            (conn, status) => QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarReceitasMensal, new { IdUsuario = idUsuario, Ano = ano, Mes = mes, IdConta = idConta, Status = status }),
+            (conn, status) => QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarDespesasMensal, new { IdUsuario = idUsuario, Ano = ano, Mes = mes, IdConta = idConta, Status = status }),
+            conn => QueryFirstOrDefaultAsync<int>(conn, ParceriaSql.ContarParceriasMensal, new { IdUsuario = idUsuario, Ano = ano, Mes = mes, IdConta = idConta }));
+
+    private async Task<ResumoParceriaAnual> ResumoParceriaAsync(
+        Func<IDbConnection, int, Task<decimal>> somarReceitas,
+        Func<IDbConnection, int, Task<decimal>> somarDespesas,
+        Func<IDbConnection, Task<int>> contar)
         => await ExecuteWithConnectionAsync(async conn =>
         {
-            var recebido = await QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarReceitasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta, Status = 2 });
-            var aReceber = await QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarReceitasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta, Status = 1 });
-            var pago = await QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarDespesasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta, Status = 2 });
-            var aPagar = await QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarDespesasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta, Status = 1 });
-            var qtd = await QueryFirstOrDefaultAsync<int>(conn, ParceriaSql.ContarParceriasAnual, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta });
+            var recebido = await somarReceitas(conn, 2);
+            var aReceber = await somarReceitas(conn, 1);
+            var pago = await somarDespesas(conn, 2);
+            var aPagar = await somarDespesas(conn, 1);
+            var qtd = await contar(conn);
             return new ResumoParceriaAnual
             {
                 TotalRecebido = recebido,

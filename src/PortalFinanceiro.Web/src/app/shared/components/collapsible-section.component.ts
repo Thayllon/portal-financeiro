@@ -12,7 +12,6 @@ export class CollapsibleSectionComponent {
   title = input.required<string>();
   icon = input.required<string>();
   iconVariant = input<'default' | 'green' | 'red' | 'primary' | 'info'>('default');
-  badge = input<string>('');
 
   collapsed = signal(true);
 

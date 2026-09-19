@@ -25,4 +25,11 @@ internal static class ParceriaSql
         UNION
         SELECT IdParceria FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND (@IdConta IS NULL OR IdConta = @IdConta)
     ) AS P";
+    public static string SomarReceitasMensal => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND MONTH(Data) = @Mes AND (@IdConta IS NULL OR IdConta = @IdConta) AND Status = @Status";
+    public static string SomarDespesasMensal => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND MONTH(Data) = @Mes AND (@IdConta IS NULL OR IdConta = @IdConta) AND Status = @Status";
+    public static string ContarParceriasMensal => $@"SELECT COUNT(DISTINCT IdParceria) FROM (
+        SELECT IdParceria FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND MONTH(Data) = @Mes AND (@IdConta IS NULL OR IdConta = @IdConta)
+        UNION
+        SELECT IdParceria FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @IdUsuario AND Ativo = 1 AND IdParceria IS NOT NULL AND YEAR(Data) = @Ano AND MONTH(Data) = @Mes AND (@IdConta IS NULL OR IdConta = @IdConta)
+    ) AS P";
 }

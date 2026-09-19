@@ -33,14 +33,14 @@ export class HomeComponent {
         {
           title: 'Receitas',
           description: 'Cadastro e acompanhamento de receitas, parcelas e recorrências.',
-          icon: 'banknote-arrow-up',
+          icon: 'trending-up',
           route: '/receitas',
           modulo: 'receitas'
         },
         {
           title: 'Despesas',
           description: 'Controle de despesas, vencimentos e pagamentos.',
-          icon: 'banknote-arrow-down',
+          icon: 'trending-down',
           route: '/despesas',
           modulo: 'despesas'
         }
@@ -73,7 +73,7 @@ export class HomeComponent {
         {
           title: 'Clientes',
           description: 'Cadastro de clientes vinculados às receitas.',
-          icon: 'building',
+          icon: 'hand-helping',
           route: '/clientes',
           modulo: 'clientes'
         },
@@ -87,7 +87,7 @@ export class HomeComponent {
         {
           title: 'Parcerias',
           description: 'Percentuais e vínculos de parcerias com receitas.',
-          icon: 'hand-coins',
+          icon: 'handshake',
           route: '/parcerias',
           modulo: 'parcerias'
         }
@@ -100,7 +100,7 @@ export class HomeComponent {
         {
           title: 'Usuários',
           description: 'Controle de usuários, permissões e acessos ao sistema.',
-          icon: 'shield-check',
+          icon: 'users',
           route: '/usuarios',
           modulo: 'usuarios'
         }

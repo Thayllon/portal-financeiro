@@ -103,7 +103,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | Rota | Feature | Descrição |
 |------|---------|-----------|
 | `/login` | login | Autenticação |
-| `/dashboard` | dashboard | Resumo mensal (por conta/categoria + previsão 3 meses) e visão anual (5 KPIs com variação vs ano anterior + média pró-rata, bar 12 meses, donut receitas/despesas por categoria/subcategoria, resumo mês a mês, previsão restante do ano via regras, por conta e card parcerias com link) |
+| `/dashboard` | dashboard | Cabeçalho com subtítulo + toggle Mensal/Anual + navegação de período + filtro Todas as contas (vale p/ mensal e anual). Resumo mensal: 4 KPIs (Receitas, Despesas, Lucro líquido, Fluxo de caixa) + seção Outros indicadores com ícone chart-network (Parcerias, Média diária, Margem líquida, Despesas sobre receitas, Ponto de equilíbrio — cards compactos sem gráficos, 5 por linha); gráfico alterna por nº de contas (1 = Receitas x Despesas com evolução e saldos; 2+ = por conta do mês) com filtro de série Receitas/Ambos/Despesas e recolher; previsão incorporada do mês corrente em diante (realizado + regras vigentes descontando o materializado); na ordem: gráfico, Distribuição por categoria e subcategoria (nova, vazia), Outros indicadores e Contas bancárias (lucro líquido e % do total). Ver glossário em [Indicadores do dashboard mensal](#indicadores-do-dashboard-mensal). Visão anual: 5 KPIs com variação vs ano anterior + média pró-rata, bar 12 meses, donut receitas/despesas por categoria/subcategoria, resumo mês a mês, previsão restante do ano via regras, por conta e card parcerias com link |
 | `/receitas` | receitas | Lançamentos de receita (avulsas e recorrentes) |
 | `/despesas` | despesas | Lançamentos de despesa |
 | `/contas` | contas | Contas bancárias |
@@ -113,6 +113,29 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/parcerias` | parcerias | Cadastro de parcerias (nome + parceiro + cliente + valor + % do parceiro) com visão de falta receber/pagar |
 | `/parcerias/:id` | parceria-detalhe | Detalhe da parceria: resumo (partes, recebido, pago, faltas) + entradas (receitas) + saídas (despesas) |
 | `/usuarios` | usuarios | Usuários e permissões (admin) |
+
+### Indicadores do dashboard mensal
+
+KPIs (fileira principal, com variação % vs mês anterior e sparkline):
+
+| KPI | O que responde | Cálculo |
+|-----|----------------|---------|
+| Receitas | Quanto faturou/recebeu | Realizado + previsto das regras vigentes no mês |
+| Despesas | Quanto consumiu | Realizado + previsto das regras vigentes no mês |
+| Lucro líquido | Resultado econômico (quanto sobrou) | Receitas − Despesas |
+| Fluxo de caixa | Movimentação efetiva de dinheiro (como terminou o caixa) | Recebido − Pago (só realizado, sem previsão) |
+
+Outros indicadores (seção expansível com ícone chart-network, cards compactos sem gráficos, 5 por linha):
+
+| Indicador | Cálculo |
+|-----------|---------|
+| Parcerias | Total pago a parcerias no mês (nota: valor já incluso na despesa) + variação %, contagem e falta pagar |
+| Média diária | Receitas do mês ÷ dias (dias decorridos no mês corrente, dias do mês nos demais) |
+| Margem líquida | Lucro líquido ÷ Receita (%) |
+| Despesas sobre receitas | Despesas ÷ Receitas (%) — quanto da receita é consumido |
+| Ponto de equilíbrio | Despesas do mês (= receita necessária para cobrir os gastos); distância % = (Receitas − Despesas) ÷ Despesas |
+
+Regras gerais: do mês corrente em diante os valores incorporam previsão (regras vigentes descontando o já materializado por `IdRegra`); meses passados mostram só o realizado. Variação % ancora no mês anterior (`—` sem base).
 
 ### Menu lateral
 

@@ -53,7 +53,7 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa (compartilhadas) |
 | `/api/categorias/servicos` | GET/POST/PUT/DELETE | Categorias de serviços (compartilhadas) |
 | `/api/usuarios` | GET/POST/PUT · PATCH /{id}/ativo | Gerenciamento de usuários (somente admin) |
-| `/api/dashboard` | GET | Dashboard mensal com resumo (`mes`, `ano`) |
+| `/api/dashboard` | GET | Dashboard mensal (`mes`, `ano`, `idConta?` Guid): realizado + previsto do mês (`totalReceitasPrevisto/totalDespesasPrevisto/saldoPrevisto` via regras vigentes — filtradas por conta quando `idConta` — descontando o já materializado por `IdRegra`, inclusive por conta em `resumoPorConta`) e `resumoParcerias` do mês (pago/recebido/a pagar/a receber + qtd) |
 | `/api/dashboard/anual` | GET | Dashboard anual (`ano`, `idConta?` Guid): totais + variação % vs ano anterior, média mensal pró-rata, `resumoPorMes[12]`, `resumoPorConta` (respeita `idConta`), `distribuicaoReceitas/Despesas` por categoria/subcategoria com %, `previsaoRestanteAno` (meses restantes via regras recorrentes) e `resumoParcerias` (recebido/pago/a receber/a pagar do ano + qtd) |
 
 **Autorização por posse:** operações por `{id}` (Obter, Atualizar, Excluir e marcar/estornar de receitas/despesas) validam que o recurso pertence ao usuário autenticado (via `IdUsuario` do registro). Recurso de outro usuário retorna `Erro.Permissao` → **HTTP 403**. Categorias compartilhadas: editar/excluir somente o dono ou admin → 403.
