@@ -16,9 +16,11 @@ Stack real em produção: **Neon** (banco) + **Render** (backend) + **Vercel** (
 | **charlie** | portal-financeiro-charlie.vercel.app | portal-financeiro-charlie.onrender.com | **banco prod** | `develop` | dev |
 
 > **Banco:** alpha e charlie usam o **banco prod**; **bravo usa um projeto Neon separado**
-> (isolado, mais seguro para o portfólio). Frontend: alpha/bravo usam o mesmo build de produção
-> (`environment.prod.ts` + `npm run build`); charlie usa `build:charlie`
-> (`environment.charlie.ts`, config `charlie` no `angular.json`).
+> (isolado, mais seguro para o portfólio). Frontend: **cada ambiente tem o próprio build**
+> (a URL do backend é embutida por arquivo de ambiente):
+> - alpha → `environment.prod.ts` (`npm run build`)
+> - bravo → `environment.bravo.ts` (`npm run build:bravo`)
+> - charlie → `environment.charlie.ts` (`npm run build:charlie`)
 
 ### Custo real (planos free, 2026)
 
@@ -65,8 +67,8 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
    - Env vars: `ConnectionStrings__DefaultConnection` = conn do banco bravo,
      `Auth__Secret` = segredo 2, `Cors__AllowedOrigins` = `https://portal-financeiro-bravo.vercel.app`.
 3. **Frontend (Vercel):** novo projeto **`portal-financeiro-bravo`** → Root Directory
-   `src/PortalFinanceiro.Web` → Production Branch `main` → Build Command `npm run build`
-   (mesmo `environment.prod.ts`).
+   `src/PortalFinanceiro.Web` → Production Branch `main` → Build Command
+   **`npm run build:bravo`** (usa `environment.bravo.ts` — ajuste o `apiUrl` para o backend bravo).
 4. Testar com as credenciais do portfólio (maria/joão).
 
 #### Ambiente charlie (dev — espelha develop)
@@ -89,10 +91,11 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
 | `Auth__Secret` | segredo 1 | segredo 2 | segredo 3 |
 | `Cors__AllowedOrigins` | `https://portal-financeiro-alpha.vercel.app` | `https://portal-financeiro-bravo.vercel.app` | `https://portal-financeiro-charlie.vercel.app` |
 
-> Frontend — `apiUrl` compilado no build:
-> - alpha/bravo → `src/environments/environment.prod.ts`
+> Frontend — `apiUrl` compilado no build (um arquivo por ambiente):
+> - alpha → `src/environments/environment.prod.ts`
+> - bravo → `src/environments/environment.bravo.ts`
 > - charlie → `src/environments/environment.charlie.ts`
-> Atualize o arquivo do ambiente antes de publicar cada projeto.
+> Atualize o arquivo do ambiente com a URL do backend antes de publicar cada projeto.
 
 ### Atualização (deploy por branch)
 
