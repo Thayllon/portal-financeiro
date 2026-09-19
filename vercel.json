@@ -1,3 +1,4 @@
 {
+  "outputDirectory": "src/PortalFinanceiro.Web/dist/portal-financeiro/browser",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
