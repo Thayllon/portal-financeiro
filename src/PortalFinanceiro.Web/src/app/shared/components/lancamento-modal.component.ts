@@ -1,4 +1,4 @@
-import { Component, input, output, signal, effect, inject, computed } from '@angular/core';
+import { Component, input, output, signal, effect, inject, computed, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -157,7 +157,9 @@ export class LancamentoModalComponent {
           });
         } else {
           const hoje = new Date().toISOString().split('T')[0];
-          this.form.set({ ...this.emptyForm(), data: hoje });
+          const contas = untracked(() => this.contas());
+          const contaPadrao = contas.find(c => c.ehPadrao)?.id ?? contas[0]?.id ?? '';
+          this.form.set({ ...this.emptyForm(), data: hoje, idConta: contaPadrao });
         }
       }
     });
