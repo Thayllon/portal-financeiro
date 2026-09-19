@@ -1,6 +1,7 @@
 <app-modal
       [visible]="visible()"
       [title]="title()"
+      [subtitle]="subtitleText()"
       [saving]="salvando()"
       [showFooter]="false"
       (visibleChange)="fechar()"
@@ -9,7 +10,6 @@
         <!-- STEPPER LATERAL -->
         <nav class="wizard__nav">
           @if (fluxoAdicional()) {
-            <!-- Passo 0: Categorização Receita -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 0"
               [class.wizard__step--done]="passoConcluido(0)"
@@ -17,7 +17,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>Categorização</strong><small>Categoria da receita</small></span>
+              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong><small>{{ dominioCategoria() === 'despesa' ? 'Categoria da despesa' : 'Categoria da receita' }}</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
@@ -29,7 +29,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(1) && passoAtual() !== 1) { <svg lucideIcon="check" [size]="16" /> } @else { <span>2</span> }
               </span>
-              <span class="wizard__meta"><strong>Parceria</strong><small>Parceiro opcional</small></span>
+              <span class="wizard__meta"><strong>Parceria</strong><small>Parceria opcional</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 1"></span>
 
@@ -41,7 +41,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(2) && passoAtual() !== 2) { <svg lucideIcon="check" [size]="16" /> } @else { <span>3</span> }
               </span>
-              <span class="wizard__meta"><strong>Serviço</strong><small>Categoria de serviço</small></span>
+              <span class="wizard__meta"><strong>Categoria de Serviço</strong><small>Categoria de serviço</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 2"></span>
 
@@ -80,7 +80,6 @@
               <span class="wizard__meta"><strong>Conta &amp; Recorrência</strong><small>Conta e repetição</small></span>
             </button>
           } @else {
-            <!-- Passo 0: Categorização -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 0"
               [class.wizard__step--done]="passoConcluido(0)"
@@ -88,7 +87,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>Categorização</strong><small>Categoria e subcategoria</small></span>
+              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong><small>Categoria e subcategoria</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
@@ -120,8 +119,19 @@
         <!-- CONTEÚDO -->
         <div class="wizard__panel">
           @if (passoAtual() === 0) {
-            <!-- PASSO: CATEGORIZAÇÃO RECEITA -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="tag" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong>
+                  <span>{{ dominioCategoria() === 'despesa' ? 'Selecione a categoria da despesa.' : 'Selecione a categoria da receita.' }}</span>
+                </div>
+                <button type="button" class="step-header__add" title="Nova categoria" (click)="abrirQuickAdd('categoria')">
+                  <svg lucideIcon="plus" [size]="20" />
+                </button>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Categoria<span class="required">*</span></label>
@@ -151,33 +161,42 @@
           } @else if (passoAtual() === 1 && fluxoAdicional()) {
             <!-- PASSO: PARCERIA -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="handshake" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Parceria</strong>
+                  <span>Selecione a parceria vinculada (opcional).</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
-                  <label class="checkbox-label">
-                    <input type="checkbox" [ngModel]="form().temParceiro" (ngModelChange)="onTemParceiroChange($event)" class="checkbox" />
-                    <svg lucideIcon="handshake" [size]="14" />
-                    <span>Possui parceiro?</span>
-                  </label>
+                  <label>Parceria</label>
+                  <app-custom-select
+                    placeholder="Nenhuma (opcional)"
+                    [options]="parceriasOptions()"
+                    [value]="form().idParceria ?? ''"
+                    (valueChange)="updateFormField('idParceria', $event)"
+                  />
                 </div>
-                @if (form().temParceiro) {
-                  <div class="field">
-                    <label>Parceiro<span class="required">*</span></label>
-                    <app-custom-select
-                      placeholder="Selecione o parceiro"
-                      [options]="parceirosOptions()"
-                      [value]="form().idParceiro ?? ''"
-                      (valueChange)="updateFormField('idParceiro', $event); clearError('idParceiro')"
-                    />
-                    @if (fieldErrors()['idParceiro']) {
-                      <span class="field-error">{{ fieldErrors()['idParceiro'] }}</span>
-                    }
-                  </div>
-                }
               </div>
             </div>
           } @else if (passoAtual() === 2 && fluxoAdicional()) {
             <!-- PASSO: CATEGORIZAÇÃO SERVIÇO (BLOCOS POR CATEGORIA) -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="briefcase-business" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Categoria de Serviço</strong>
+                  <span>Adicione as categorias de serviço.</span>
+                </div>
+                <button type="button" class="step-header__add" title="Nova categoria de serviço" (click)="abrirQuickAdd('servico')">
+                  <svg lucideIcon="plus" [size]="20" />
+                </button>
+              </div>
               <div class="section">
                 <div class="servico-blocos">
                   @for (bloco of form().categoriasServicoBloco; track bloco.categoriaServicoId; let i = $index) {
@@ -225,15 +244,28 @@
               </div>
             </div>
           } @else if (passoAtual() === 3 && fluxoAdicional()) {
-            <!-- PASSO: CLIENTE -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="user" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Cliente</strong>
+                  <span>{{ dominioCategoria() === 'despesa' ? 'Selecione o cliente vinculado a esta despesa.' : 'Selecione o cliente vinculado a esta receita.' }}</span>
+                </div>
+                <button type="button" class="step-header__add" title="Novo cliente" (click)="abrirQuickAdd('cliente')">
+                  <svg lucideIcon="plus" [size]="20" />
+                </button>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Cliente<span class="required">*</span></label>
                   <app-custom-select
                     placeholder="Selecione o cliente"
+                    searchPlaceholder="Buscar cliente..."
                     [options]="clientesOptions()"
                     [value]="form().idCliente ?? ''"
+                    [searchable]="true"
                     (valueChange)="updateFormField('idCliente', $event); clearError('idCliente')"
                   />
                   @if (fieldErrors()['idCliente']) {
@@ -245,6 +277,15 @@
           } @else if ((passoAtual() === 1 && !fluxoAdicional()) || (passoAtual() === 4 && fluxoAdicional())) {
             <!-- PASSO: DADOS GERAIS -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="file" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Dados Gerais</strong>
+                  <span>Informe a descrição, valor e data.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Descrição<span class="required">*</span></label>
@@ -297,6 +338,15 @@
           } @else {
             <!-- PASSO: CONTA & RECORRÊNCIA -->
             <div class="wizard__content">
+              <div class="step-header">
+                <div class="step-header__icon">
+                  <svg lucideIcon="repeat" [size]="20" />
+                </div>
+                <div class="step-header__text">
+                  <strong>Conta &amp; Recorrência</strong>
+                  <span>Selecione a conta e configure a repetição.</span>
+                </div>
+              </div>
               <div class="section">
                 <div class="field">
                   <label>Conta<span class="required">*</span></label>
@@ -394,7 +444,7 @@
               Voltar
             </button>
 
-            @if (passoAtual() === ultimoPasso()) {
+            @if (passoAtual() === ultimoPasso() || editando()) {
               <button type="button" class="btn btn--primary" [disabled]="salvando()" (click)="salvar()">
                 {{ salvando() ? 'Salvando...' : 'Salvar' }}
               </button>
@@ -407,4 +457,48 @@
           </div>
         </div>
       </div>
+    </app-modal>
+
+    <app-modal
+      [visible]="quickAdd() !== null"
+      [title]="quickTitulo()"
+      [saving]="quickSalvando()"
+      (visibleChange)="fecharQuickAdd()"
+      (save)="salvarQuickAdd()"
+    >
+      <div class="field">
+        <label>Nome<span class="required">*</span></label>
+        <input
+          [ngModel]="quickNome()"
+          (ngModelChange)="quickNome.set($event)"
+          placeholder="Digite o nome"
+          class="input"
+        />
+      </div>
+      @if (quickAdd() === 'categoria' || quickAdd() === 'servico') {
+        <div class="field">
+          <label>Categoria pai (opcional)</label>
+          <app-custom-select
+            placeholder="Nenhuma (criar categoria)"
+            [options]="quickPaisOptions()"
+            [value]="quickPaiId()"
+            (valueChange)="quickPaiId.set($event)"
+          />
+          <span class="field-hint">Selecione para criar como subcategoria</span>
+        </div>
+      }
+      @if (quickAdd() === 'cliente') {
+        <div class="field">
+          <label>Telefone</label>
+          <input
+            [ngModel]="quickTelefone()"
+            (ngModelChange)="quickTelefone.set($event)"
+            placeholder="(00) 00000-0000"
+            class="input"
+          />
+        </div>
+      }
+      @if (quickError()) {
+        <span class="field-error">{{ quickError() }}</span>
+      }
     </app-modal>

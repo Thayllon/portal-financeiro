@@ -35,6 +35,9 @@ cd src/PortalFinanceiro.Web && npm run build
 
 # Testes frontend
 cd src/PortalFinanceiro.Web && npm test
+
+# Lint frontend (ESLint, 0 erros; warnings = débito documentado)
+cd src/PortalFinanceiro.Web && npm run lint
 ```
 
 ## Login padrão (ambiente dev)
@@ -92,6 +95,7 @@ cd src/PortalFinanceiro.Web && npm test
 - **Async correto**: `async/await` em toda a cadeia; proibido `.Result`/`.Wait()` e `async void`.
 - **Sem código morto**: sem imports/`using` não usados, sem propriedades/métodos sem uso.
 - **Segredos e segurança**: nunca commitar senhas, tokens ou connection strings (usar `.env`/variáveis); não logar dados sensíveis.
+- **Banco/dados**: nunca apagar, limpar, truncar ou dropar bancos, tabelas ou dados sem confirmação explícita do usuário — vale para dev, teste e prod, inclusive bancos temporários criados na sessão.
 
 ### Linguagem e mensagens
 
@@ -168,6 +172,9 @@ Toda resposta de erro da API deve seguir o contrato único tipado `{ codigo, men
 - **Categoria/Regra repositories**: usar classe base com parâmetro `rota` para evitar duplicação
 - **LancamentoRepository**: usar `LancamentoFiltros` compartilhado (alias `ReceitaFiltros`/`DespesaFiltros`)
 - **Listas**: Usar `useListPagination` + `ListPaginationComponent` em toda listagem de dados
+- **Páginas parametrizadas**: `PessoaListagemComponent` (`features/pessoas`, `tipo` Cliente/Parceiro) e `LancamentoListagemComponent` (`features/lancamentos`, `tipo` receita/despesa) — `clientes`/`parceiros` e `receitas`/`despesas` são wrappers finos; não duplicar páginas
+- **SQL de lançamentos**: `LancamentoSql` (base parametrizada por tabela) — `ReceitaSql`/`DespesaSql` são wrappers finos
+- **Lint**: ESLint configurado (`eslint.config.mjs`); `npm run lint` deve passar com 0 erros
 - **Interceptor de erro**: `errorInterceptor` registrado em `app.config.ts` para tratar 401 → logout automático
 
 ### Design System
@@ -187,23 +194,32 @@ src/app/
 │   ├── models/          # Interfaces de domínio
 │   ├── repositories/    # Services HTTP
 │   ├── services/        # AuthService, NotificationService
-│   └── guards/          # authGuard
+│   ├── guards/          # authGuard, adminGuard, permissionGuard
+│   └── interceptors/    # authInterceptor, errorInterceptor
 ├── design-system/
 │   └── styles/          # Tokens, mixins, variáveis CSS
 ├── features/
 │   ├── dashboard/
-│   ├── receitas/
-│   ├── despesas/
+│   ├── home/
+│   ├── receitas/        # wrapper fino → LancamentoListagemComponent
+│   ├── despesas/        # wrapper fino → LancamentoListagemComponent
+│   ├── lancamentos/     # LancamentoListagemComponent (tipo receita/despesa)
 │   ├── contas/
-│   ├── pessoas/
+│   ├── pessoas/         # PessoaListagemComponent (tipo Cliente/Parceiro)
+│   ├── clientes/        # wrapper fino → PessoaListagemComponent
+│   ├── parceiros/       # wrapper fino → PessoaListagemComponent
+│   ├── parcerias/       # + parceria-detalhe/
 │   ├── categorias-receita/
+│   ├── usuarios/
 │   └── login/
 └── shared/
     ├── components/      # Componentes reutilizáveis
     ├── composables/     # useListPagination
     ├── constants/       # PAGE_SIZE_OPTIONS
+    ├── directives/      # currency-input
     ├── pipes/           # CurrencyBRLPipe
-    └── services/        # ConfirmService
+    ├── services/        # ConfirmService
+    └── utils/           # api-error
 ```
 
 ## Fluxo de Desenvolvimento
@@ -232,6 +248,7 @@ src/app/
 - [ ] Leitura usa projeção (nomes display via `*Projecao`, não na entidade)
 - [ ] Mutação re-busca projeção antes de mapear resposta
 - [ ] `dotnet test` passando (backend)
+- [ ] `npm run lint` com 0 erros (frontend)
 - [ ] Listas usam `useListPagination` + `ListPaginationComponent`
 - [ ] SCSS usa mixins do design system (sem duplicação entre features)
 - [ ] Ícones Lucide estão registrados em `provideLucideIcons()`

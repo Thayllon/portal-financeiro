@@ -16,7 +16,22 @@
   </button>
   @if (isOpen()) {
     <div class="cs__dropdown" role="listbox">
-      @for (opt of options(); track opt.value) {
+      @if (showSearch()) {
+        <div class="cs__search" (click)="$event.stopPropagation()">
+          <svg lucideIcon="search" [size]="14" class="cs__search-icon" />
+          <input
+            type="text"
+            class="cs__search-input"
+            [placeholder]="searchPlaceholder()"
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            (click)="$event.stopPropagation()"
+            (keydown)="$event.stopPropagation()"
+            autocomplete="off"
+          />
+        </div>
+      }
+      @for (opt of filteredOptions(); track opt.value) {
         <button
           type="button"
           class="cs__option"
@@ -28,8 +43,8 @@
           {{ opt.label }}
         </button>
       }
-      @if (options().length === 0) {
-        <div class="cs__empty">Nenhuma opção</div>
+      @if (filteredOptions().length === 0) {
+        <div class="cs__empty">{{ options().length === 0 ? 'Nenhuma opção' : 'Nenhum resultado' }}</div>
       }
     </div>
   }

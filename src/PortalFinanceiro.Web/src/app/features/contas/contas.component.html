@@ -22,7 +22,7 @@
             </div>
           }
         </div>
-      } @else if (contas().length === 0) {
+      } @else if (contasPaginacao.paginatedItems().length === 0) {
         <div class="empty-state">
           <svg lucideIcon="wallet" [size]="48" class="empty-icon" />
           <h3>Nenhuma conta cadastrada</h3>
@@ -44,12 +44,15 @@
               </tr>
             </thead>
             <tbody>
-              @for (c of contas(); track c.id) {
+              @for (c of contasPaginacao.paginatedItems(); track c.id) {
                 <tr>
-                  <td class="cell-name" data-label="Nome">{{ c.nome }}</td>
+                  <td class="cell-name" data-label="Nome">{{ c.nome }} @if (c.ehPadrao) { <span class="badge-padrao">Padrão</span> }</td>
                   <td data-label="Banco">{{ c.banco }}</td>
                   <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
                   <td class="cell-actions">
+                    <button class="action-btn" [class.action-btn--active]="c.ehPadrao" [title]="c.ehPadrao ? 'Conta padrão' : 'Definir como padrão'" (click)="definirPadrao(c)">
+                      <svg lucideIcon="star" [size]="16" />
+                    </button>
                     <button class="action-btn" title="Editar" (click)="abrirModal(c)">
                       <svg lucideIcon="pencil" [size]="16" />
                     </button>
@@ -61,6 +64,7 @@
               }
             </tbody>
           </table>
+          <app-list-pagination [pagination]="contasPaginacao" />
         </div>
       }
     </div>
@@ -82,5 +86,18 @@
       </div>
       <div class="field">
         <app-custom-select label="Tipo" placeholder="Selecione o tipo" [options]="tipoOptions" [value]="form.tipo" (valueChange)="form.tipo = $event" />
+      </div>
+      <div class="field field--checkbox">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="formEhPadrao" [disabled]="!!editando()?.ehPadrao || (!editando() && contas().length === 0)" class="checkbox" />
+          <span>Definir como conta padrão</span>
+        </label>
+        @if (editando()?.ehPadrao) {
+          <span class="field-hint">Esta já é a conta padrão. Para trocar, defina outra conta como padrão.</span>
+        } @else if (formEhPadrao && contaPadraoAtual()) {
+          <span class="field-hint field-hint--warning">A conta padrão atual é "{{ contaPadraoAtual()!.nome }}" — será substituída.</span>
+        } @else if (!editando() && contas().length === 0) {
+          <span class="field-hint">A primeira conta será definida como padrão automaticamente.</span>
+        }
       </div>
     </app-modal>

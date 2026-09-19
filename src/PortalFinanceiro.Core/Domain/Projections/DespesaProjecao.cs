@@ -19,6 +19,11 @@ public class DespesaProjecao
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }
     public Guid? IdReceitaOrigem { get; set; }
+    public Guid? IdParceria { get; set; }
+    public string Parceria { get; set; } = string.Empty;
+    public decimal? ParceriaValor { get; set; }
+    public Guid? IdCliente { get; set; }
+    public string Cliente { get; set; } = string.Empty;
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
     public bool EhRecorrente => IdRegra.HasValue;

@@ -1,6 +1,7 @@
 -- Portal Financeiro - Schema unificado (PostgreSQL).
 -- ATENÇÃO: executar somente em banco NOVO (from scratch).
 -- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 099_SeedBase.sql.
+-- Bancos já criados evoluem apenas via scripts incrementais (quando existirem).
 
 CREATE TABLE Usuario (
     Id UUID PRIMARY KEY,
@@ -9,6 +10,7 @@ CREATE TABLE Usuario (
     SenhaHash VARCHAR(500) NOT NULL,
     IsAdmin BOOLEAN NOT NULL DEFAULT FALSE,
     Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    PrimeiroAcesso BOOLEAN NOT NULL DEFAULT TRUE,
     DataCadastro TIMESTAMP NOT NULL,
     DataAlteracao TIMESTAMP NOT NULL
 );
@@ -16,16 +18,17 @@ CREATE TABLE Usuario (
 CREATE UNIQUE INDEX IX_Usuario_Email ON Usuario(Email) WHERE Ativo = TRUE;
 
 CREATE TABLE ContaBancaria (
-    Id UUID PRIMARY KEY,
-    IdUsuario UUID NOT NULL,
-    Nome VARCHAR(200) NOT NULL,
-    Banco VARCHAR(100) NOT NULL,
-    Tipo INT NOT NULL,
-    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    DataCadastro TIMESTAMP NOT NULL,
-    DataAlteracao TIMESTAMP NOT NULL,
+      Id UUID PRIMARY KEY,
+      IdUsuario UUID NOT NULL,
+      Nome VARCHAR(200) NOT NULL,
+      Banco VARCHAR(100) NOT NULL,
+      Tipo INT NOT NULL,
+      EhPadrao BOOLEAN NOT NULL DEFAULT FALSE,
+      Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+      DataCadastro TIMESTAMP NOT NULL,
+      DataAlteracao TIMESTAMP NOT NULL,
     CONSTRAINT FK_ContaBancaria_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
-);
+  );
 
 CREATE TABLE Pessoa (
     Id UUID PRIMARY KEY,
@@ -37,6 +40,33 @@ CREATE TABLE Pessoa (
     DataCadastro TIMESTAMP NOT NULL,
     DataAlteracao TIMESTAMP NOT NULL,
     CONSTRAINT FK_Pessoa_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id)
+);
+
+CREATE TABLE Parceria (
+    Id UUID PRIMARY KEY,
+    IdUsuario UUID NOT NULL,
+    Nome VARCHAR(150) NOT NULL,
+    IdParceiro UUID NOT NULL,
+    IdCliente UUID NOT NULL,
+    Valor NUMERIC(18,2) NOT NULL,
+    PercentualParceiro NUMERIC(5,2) NOT NULL DEFAULT 0,
+    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    DataCadastro TIMESTAMP NOT NULL,
+    DataAlteracao TIMESTAMP NOT NULL,
+    CONSTRAINT FK_Parceria_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
+    CONSTRAINT FK_Parceria_Parceiro FOREIGN KEY (IdParceiro) REFERENCES Pessoa(Id),
+    CONSTRAINT FK_Parceria_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id)
+);
+
+CREATE INDEX IX_Parceria_Usuario ON Parceria(IdUsuario);
+
+CREATE TABLE PermissaoUsuario (
+    Id UUID PRIMARY KEY,
+    UsuarioId UUID NOT NULL,
+    Modulo VARCHAR(50) NOT NULL,
+    Nivel INT NOT NULL DEFAULT 0,
+    CONSTRAINT FK_PermissaoUsuario_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+    CONSTRAINT UQ_PermissaoUsuario_UsuarioModulo UNIQUE (UsuarioId, Modulo)
 );
 
 CREATE TABLE CategoriaReceita (
@@ -122,6 +152,9 @@ CREATE TABLE Receita (
     IdConta UUID NOT NULL,
     IdCategoria UUID NOT NULL,
     IdSubcategoria UUID NULL,
+    IdParceiro UUID NULL,
+    IdCliente UUID NULL,
+    IdParceria UUID NULL,
     Status INT NOT NULL DEFAULT 1,
     DataRealizacao TIMESTAMP NULL,
     IdRegra UUID NULL,
@@ -132,8 +165,25 @@ CREATE TABLE Receita (
     CONSTRAINT FK_Receita_Categoria FOREIGN KEY (IdCategoria) REFERENCES CategoriaReceita(Id),
     CONSTRAINT FK_Receita_Subcategoria FOREIGN KEY (IdSubcategoria) REFERENCES CategoriaReceita(Id),
     CONSTRAINT FK_Receita_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id),
-    CONSTRAINT FK_Receita_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id)
+    CONSTRAINT FK_Receita_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id),
+    CONSTRAINT FK_Receita_Parceiro FOREIGN KEY (IdParceiro) REFERENCES Pessoa(Id),
+    CONSTRAINT FK_Receita_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id),
+    CONSTRAINT FK_Receita_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id)
 );
+
+CREATE INDEX IX_Receita_Parceria ON Receita(IdParceria);
+
+CREATE TABLE ReceitaServico (
+    Id              UUID PRIMARY KEY,
+    ReceitaId       UUID NOT NULL,
+    CategoriaServicoId UUID NOT NULL,
+    SubcategoriaServicoId UUID NULL,
+    CONSTRAINT FK_ReceitaServico_Receita FOREIGN KEY (ReceitaId) REFERENCES Receita(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_ReceitaServico_CategoriaServico FOREIGN KEY (CategoriaServicoId) REFERENCES CategoriaServico(Id),
+    CONSTRAINT FK_ReceitaServico_SubcategoriaServico FOREIGN KEY (SubcategoriaServicoId) REFERENCES CategoriaServico(Id)
+);
+
+CREATE INDEX IX_ReceitaServico_ReceitaId ON ReceitaServico(ReceitaId);
 
 CREATE TABLE Despesa (
     Id UUID PRIMARY KEY,
@@ -148,6 +198,8 @@ CREATE TABLE Despesa (
     DataRealizacao TIMESTAMP NULL,
     IdRegra UUID NULL,
     IdReceitaOrigem UUID NULL,
+    IdParceria UUID NULL,
+    IdCliente UUID NULL,
     Ativo BOOLEAN NOT NULL DEFAULT TRUE,
     DataCadastro TIMESTAMP NOT NULL,
     DataAlteracao TIMESTAMP NOT NULL,
@@ -156,8 +208,24 @@ CREATE TABLE Despesa (
     CONSTRAINT FK_Despesa_Subcategoria FOREIGN KEY (IdSubcategoria) REFERENCES CategoriaDespesa(Id),
     CONSTRAINT FK_Despesa_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id),
     CONSTRAINT FK_Despesa_Regra FOREIGN KEY (IdRegra) REFERENCES RegraDespesa(Id),
-    CONSTRAINT FK_Despesa_ReceitaOrigem FOREIGN KEY (IdReceitaOrigem) REFERENCES Receita(Id)
+    CONSTRAINT FK_Despesa_ReceitaOrigem FOREIGN KEY (IdReceitaOrigem) REFERENCES Receita(Id),
+    CONSTRAINT FK_Despesa_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id),
+    CONSTRAINT FK_Despesa_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id)
 );
+
+CREATE TABLE DespesaServico (
+    Id              UUID PRIMARY KEY,
+    DespesaId       UUID NOT NULL,
+    CategoriaServicoId UUID NOT NULL,
+    SubcategoriaServicoId UUID NULL,
+    CONSTRAINT FK_DespesaServico_Despesa FOREIGN KEY (DespesaId) REFERENCES Despesa(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_DespesaServico_CategoriaServico FOREIGN KEY (CategoriaServicoId) REFERENCES CategoriaServico(Id),
+    CONSTRAINT FK_DespesaServico_SubcategoriaServico FOREIGN KEY (SubcategoriaServicoId) REFERENCES CategoriaServico(Id)
+);
+
+CREATE INDEX IX_DespesaServico_DespesaId ON DespesaServico(DespesaId);
+
+CREATE INDEX IX_Despesa_Parceria ON Despesa(IdParceria);
 
 CREATE TABLE CategoriaHistorico (
     Id UUID PRIMARY KEY,

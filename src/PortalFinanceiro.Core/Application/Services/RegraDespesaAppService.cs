@@ -27,20 +27,24 @@ public class RegraDespesaAppService : IRegraDespesaAppService
         return regras.Select(Mapear).ToList();
     }
 
-    public async Task<Result<RegraDespesaResponse>> ObterPorIdAsync(Guid id)
+    public async Task<Result<RegraDespesaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario)
     {
         var regra = await _regraRepository.ObterProjecaoPorIdAsync(id);
         if (regra is null)
             return Erro.NaoEncontrado("Regra de despesa");
+        if (regra.IdUsuario != idUsuario)
+            return Erro.Permissao("REGRA_DESPESA_ACESSO_NEGADO", "Regra de despesa de outro usuário.");
 
         return Mapear(regra);
     }
 
-    public async Task<Result<RegraDespesaResponse>> AtualizarAsync(Guid id, RegraDespesaRequest request)
+    public async Task<Result<RegraDespesaResponse>> AtualizarAsync(Guid id, Guid idUsuario, RegraDespesaRequest request)
     {
         var regra = await _regraRepository.ObterPorIdAsync(id);
         if (regra is null)
             return Erro.NaoEncontrado("Regra de despesa");
+        if (regra.IdUsuario != idUsuario)
+            return Erro.Permissao("REGRA_DESPESA_ACESSO_NEGADO", "Regra de despesa de outro usuário.");
 
         var result = regra.Atualizar(request.Descricao, request.Valor, request.Dia, request.DiaUtil, request.IdCategoria, request.IdConta, request.DataInicio, request.DataFim);
         if (!result.EhSucesso)
@@ -63,11 +67,13 @@ public class RegraDespesaAppService : IRegraDespesaAppService
         return Mapear(projecao!);
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario)
     {
         var regra = await _regraRepository.ObterPorIdAsync(id);
         if (regra is null)
             return Erro.NaoEncontrado("Regra de despesa");
+        if (regra.IdUsuario != idUsuario)
+            return Erro.Permissao("REGRA_DESPESA_ACESSO_NEGADO", "Regra de despesa de outro usuário.");
 
         regra.Desativar();
         await _regraRepository.AtualizarAsync(regra);

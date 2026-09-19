@@ -1,0 +1,72 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Controllers;
+using PortalFinanceiro.Core.Application.Dtos.Request;
+using PortalFinanceiro.Core.Application.Interfaces;
+
+namespace PortalFinanceiro.API.Controllers.v1;
+
+[Route("api/parcerias")]
+[Authorize]
+public class ParceriasController : BaseController
+{
+    private readonly IParceriaAppService _service;
+    private readonly IReceitaAppService _receitaService;
+    private readonly IDespesaAppService _despesaService;
+
+    public ParceriasController(IParceriaAppService service, IReceitaAppService receitaService, IDespesaAppService despesaService)
+    {
+        _service = service;
+        _receitaService = receitaService;
+        _despesaService = despesaService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Listar()
+    {
+        var result = await _service.ListarAsync(ObterIdUsuario());
+        return ApiResponse(result);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Obter(Guid id)
+    {
+        var result = await _service.ObterPorIdAsync(id, ObterIdUsuario());
+        return ApiResponse(result);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Criar([FromBody] ParceriaRequest request)
+    {
+        var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
+        return ApiResponse(result, 201);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Atualizar(Guid id, [FromBody] ParceriaRequest request)
+    {
+        var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
+        return ApiResponse(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Excluir(Guid id)
+    {
+        var result = await _service.ExcluirAsync(id, ObterIdUsuario());
+        return ApiResponse(result);
+    }
+
+    [HttpGet("{id}/receitas")]
+    public async Task<IActionResult> ListarReceitas(Guid id)
+    {
+        var result = await _receitaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
+        return ApiResponse(result);
+    }
+
+    [HttpGet("{id}/despesas")]
+    public async Task<IActionResult> ListarDespesas(Guid id)
+    {
+        var result = await _despesaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
+        return ApiResponse(result);
+    }
+}

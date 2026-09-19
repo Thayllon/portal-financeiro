@@ -14,9 +14,6 @@ public class ReceitaServicoRepository : SqlBaseRepository, IReceitaServicoReposi
     public async Task<IEnumerable<ReceitaServico>> ListarPorReceitaAsync(Guid receitaId)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<ReceitaServico>(conn, ReceitaServicoSql.ListarPorReceitaId, new { ReceitaId = receitaId }));
 
-    public async Task InserirAsync(ReceitaServico entity)
-        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ReceitaServicoSql.Inserir, entity));
-
     public async Task InserirEmMassaAsync(IEnumerable<ReceitaServico> entities)
     {
         await ExecuteWithConnectionAsync(async conn =>

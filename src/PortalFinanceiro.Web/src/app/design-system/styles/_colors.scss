@@ -23,7 +23,7 @@
 
 @mixin button-primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--content-surface);
   border: none;
   &:hover:not(:disabled) { background: var(--color-primary-hover); }
 }

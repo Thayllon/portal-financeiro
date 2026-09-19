@@ -1,0 +1,80 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <span class="page__badge">
+        <svg [lucideIcon]="icone()" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">{{ rotulo() }}s</h1>
+    </div>
+    <button class="add-btn" (click)="abrirModal()">
+      <svg lucideIcon="plus" [size]="16" />
+      Novo {{ rotulo().toLowerCase() }}
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 40%"></div>
+          <div class="skeleton-line" style="width: 25%"></div>
+          <div class="skeleton-line" style="width: 10%"></div>
+        </div>
+      }
+    </div>
+  } @else if (paginacao.paginatedItems().length === 0) {
+    <div class="table-card">
+      <div class="empty-state">
+        <svg [lucideIcon]="icone()" [size]="36" class="empty-icon" />
+        <h3>Nenhum {{ rotulo().toLowerCase() }} cadastrado</h3>
+        <p>Cadastre seu primeiro {{ rotulo().toLowerCase() }}.</p>
+      </div>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th class="th-actions">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of paginacao.paginatedItems(); track p.id) {
+            <tr>
+              <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
+              <td data-label="Telefone">{{ p.telefone || '—' }}</td>
+              <td class="cell-actions">
+                <button class="action-btn" title="Editar" (click)="editar(p)">
+                  <svg lucideIcon="pencil" [size]="16" />
+                </button>
+                <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(p)">
+                  <svg lucideIcon="trash-2" [size]="16" />
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <app-list-pagination [pagination]="paginacao" />
+    </div>
+  }
+</div>
+
+<app-modal
+  [visible]="modalVisible()"
+  [title]="editando() ? 'Editar ' + rotulo().toLowerCase() : 'Novo ' + rotulo().toLowerCase()"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input [(ngModel)]="form.nome" [placeholder]="placeholderNome()" class="input" />
+  </div>
+  <div class="field">
+    <label>Telefone</label>
+    <input [(ngModel)]="form.telefone" placeholder="Ex: (11) 99999-9999" class="input" />
+  </div>
+</app-modal>

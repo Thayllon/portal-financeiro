@@ -27,4 +27,7 @@ public class ContaBancariaRepository : SqlBaseRepository, IContaBancariaReposito
 
     public async Task AtualizarAsync(ContaBancaria entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ContaBancariaSql.Atualizar, entity));
+
+    public async Task LimparPadraoAsync(Guid idUsuario)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ContaBancariaSql.LimparPadrao, new { IdUsuario = idUsuario }));
 }

@@ -17,6 +17,21 @@ public class DespesaResponse
     public Guid? IdRegra { get; set; }
     public bool EhRecorrente { get; set; }
     public Guid? IdReceitaOrigem { get; set; }
+    public Guid? IdParceria { get; set; }
+    public string Parceria { get; set; } = string.Empty;
+    public decimal? ParceriaValor { get; set; }
+    public Guid? IdCliente { get; set; }
+    public string Cliente { get; set; } = string.Empty;
+    public List<DespesaServicoResponse> Servicos { get; set; } = new();
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+}
+
+public class DespesaServicoResponse
+{
+    public Guid Id { get; set; }
+    public Guid CategoriaServicoId { get; set; }
+    public string CategoriaServico { get; set; } = string.Empty;
+    public Guid? SubcategoriaServicoId { get; set; }
+    public string SubcategoriaServico { get; set; } = string.Empty;
 }

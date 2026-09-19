@@ -15,6 +15,7 @@ public class Receita
     public Guid? IdSubcategoria { get; private set; }
     public Guid? IdParceiro { get; private set; }
     public Guid? IdCliente { get; private set; }
+    public Guid? IdParceria { get; private set; }
     public StatusMensal Status { get; private set; }
     public DateTime? DataRealizacao { get; private set; }
     public Guid? IdRegra { get; private set; }
@@ -27,7 +28,7 @@ public class Receita
     public Receita() { }
 
     public static Result<Receita> Criar(Guid idUsuario, string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria, Guid? idRegra = null,
-        Guid? idParceiro = null, Guid? idCliente = null)
+        Guid? idParceiro = null, Guid? idCliente = null, Guid? idParceria = null)
     {
         if (idUsuario == Guid.Empty)
             return Erro.Validacao("USUARIO_OBRIGATORIO", "Usuário é obrigatório.");
@@ -52,6 +53,7 @@ public class Receita
             IdSubcategoria = idSubcategoria,
             IdParceiro = idParceiro,
             IdCliente = idCliente,
+            IdParceria = idParceria,
             Status = StatusMensal.Pendente,
             IdRegra = idRegra,
             Ativo = true,
@@ -61,7 +63,7 @@ public class Receita
     }
 
     public Result<Unit> Atualizar(string descricao, decimal valor, DateTime data, Guid idConta, Guid idCategoria, Guid? idSubcategoria,
-        Guid? idParceiro = null, Guid? idCliente = null)
+        Guid? idParceiro = null, Guid? idCliente = null, Guid? idParceria = null)
     {
         if (string.IsNullOrWhiteSpace(descricao))
             return Erro.Validacao("DESCRICAO_OBRIGATORIA", "Descrição é obrigatória.");
@@ -76,6 +78,7 @@ public class Receita
         IdSubcategoria = idSubcategoria;
         IdParceiro = idParceiro;
         IdCliente = idCliente;
+        IdParceria = idParceria;
         DataAlteracao = DateTime.UtcNow;
         return Resultado.Sucesso();
     }

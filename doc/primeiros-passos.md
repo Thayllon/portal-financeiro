@@ -23,12 +23,17 @@ O seed cria o admin e as categorias base.
 
 ### 2. Backend (API)
 
-```bash
+Defina a chave secreta JWT antes de iniciar (não há segredo versionado no `appsettings.json`):
+
+```powershell
+$env:Auth__Secret = "um-segredo-aleatorio-forte"
 dotnet run --project src/PortalFinanceiro.API
 ```
 
 - API em `http://localhost:5178`
 - Swagger em `http://localhost:5178/swagger`
+
+> Em docker (`docker-compose*.yml`), a chave vem da variável `JWT_SECRET` do `.env` e é injetada como `Auth__Secret`. Para rodar via `dotnet run` (LocalDB), defina `Auth__Secret` no ambiente.
 
 ### 3. Frontend
 

@@ -7,8 +7,8 @@ namespace PortalFinanceiro.Core.Application.Interfaces;
 public interface IPessoaAppService
 {
     Task<Result<IEnumerable<PessoaResponse>>> ListarAsync(Guid idUsuario);
-    Task<Result<PessoaResponse>> ObterPorIdAsync(Guid id);
+    Task<Result<PessoaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario);
     Task<Result<PessoaResponse>> AdicionarAsync(Guid idUsuario, PessoaRequest request);
-    Task<Result<PessoaResponse>> AtualizarAsync(Guid id, PessoaRequest request);
-    Task<Result<Unit>> ExcluirAsync(Guid id);
+    Task<Result<PessoaResponse>> AtualizarAsync(Guid id, Guid idUsuario, PessoaRequest request);
+    Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario);
 }

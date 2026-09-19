@@ -1,5 +1,6 @@
-import { Component, input, output, signal, effect, inject, computed } from '@angular/core';
+import { Component, input, output, signal, effect, inject, computed, untracked } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { ModalComponent } from './modal.component';
 import { CustomSelectComponent, SelectOption } from './custom-select.component';
@@ -7,7 +8,11 @@ import { CurrencyInputDirective } from '../directives/currency-input.directive';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
+import { Parceria } from '../../core/models/parceria.model';
+import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
+import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { NotificationService } from '../../core/services/notification.service';
+import { mensagemErro } from '../../shared/utils/api-error.util';
 
 export interface CategoriaServicoBloco {
   categoriaServicoId: string;
@@ -26,8 +31,7 @@ export interface LancamentoForm {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
-  temParceiro: boolean;
-  idParceiro?: string;
+  idParceria?: string;
   categoriasServicoBloco: CategoriaServicoBloco[];
   servicos?: ServicoItem[];
   idCliente?: string;
@@ -46,6 +50,7 @@ interface LancamentoItem {
   idCategoria: string;
   idSubcategoria?: string;
   idParceiro?: string;
+  idParceria?: string;
   servicos?: { categoriaServicoId: string; subcategoriaServicoId?: string }[];
   idCliente?: string;
 }
@@ -59,20 +64,29 @@ interface LancamentoItem {
 })
 export class LancamentoModalComponent {
   private notify = inject(NotificationService);
+  private catReceitaRepo = inject(CategoriaReceitaRepository);
+  private catDespesaRepo = inject(CategoriaDespesaRepository);
+  private catServicoRepo = inject(CategoriaServicoRepository);
+  private pessoaRepo = inject(PessoaRepository);
 
   visible = input(false);
   editando = input<LancamentoItem | null>(null);
   tipoLabel = input('receita');
+  dominioCategoria = input<'receita' | 'despesa'>('receita');
   categorias = input<Categoria[]>([]);
   contas = input<ContaBancaria[]>([]);
   fluxoAdicional = input(false);
   parceiros = input<Pessoa[]>([]);
+  parcerias = input<Parceria[]>([]);
   clientes = input<Pessoa[]>([]);
   categoriasServico = input<Categoria[]>([]);
   salvando = input(false);
 
   visibleChange = output<boolean>();
   saved = output<LancamentoForm>();
+  categoriaCriada = output<Categoria>();
+  servicoCriado = output<Categoria>();
+  clienteCriado = output<Pessoa>();
 
   form = signal<LancamentoForm>(this.emptyForm());
   previewMeses = signal(0);
@@ -82,7 +96,7 @@ export class LancamentoModalComponent {
   contasOptions = signal<SelectOption[]>([]);
   categoriasOptions = signal<SelectOption[]>([]);
   subcategoriasOptions = signal<SelectOption[]>([]);
-  parceirosOptions = signal<SelectOption[]>([]);
+  parceriasOptions = signal<SelectOption[]>([]);
   clientesOptions = signal<SelectOption[]>([]);
   categoriasServicoPais = signal<SelectOption[]>([]);
   subcategoriasServicoMap = signal<Map<string, SelectOption[]>>(new Map());
@@ -109,8 +123,8 @@ export class LancamentoModalComponent {
     });
 
     effect(() => {
-      const p = this.parceiros();
-      this.parceirosOptions.set(p.map(x => ({ value: x.id, label: x.nome })));
+      const p = this.parcerias();
+      this.parceriasOptions.set(p.map(x => ({ value: x.id, label: `${x.nome} (${x.parceiro} - ${x.cliente})` })));
     });
 
     effect(() => {
@@ -133,8 +147,7 @@ export class LancamentoModalComponent {
             idConta: ini.idConta,
             idCategoria: ini.idCategoria,
             idSubcategoria: ini.idSubcategoria ?? undefined,
-            temParceiro: !!ini.idParceiro,
-            idParceiro: ini.idParceiro ?? undefined,
+            idParceria: ini.idParceria ?? undefined,
             categoriasServicoBloco: blocos,
             idCliente: ini.idCliente ?? undefined,
             repete: false,
@@ -144,7 +157,9 @@ export class LancamentoModalComponent {
           });
         } else {
           const hoje = new Date().toISOString().split('T')[0];
-          this.form.set({ ...this.emptyForm(), data: hoje });
+          const contas = untracked(() => this.contas());
+          const contaPadrao = contas.find(c => c.ehPadrao)?.id ?? contas[0]?.id ?? '';
+          this.form.set({ ...this.emptyForm(), data: hoje, idConta: contaPadrao });
         }
       }
     });
@@ -284,7 +299,6 @@ export class LancamentoModalComponent {
           if (!f.idCategoria) errors['idCategoria'] = 'Categoria é obrigatória';
           break;
         case 1:
-          if (f.temParceiro && !f.idParceiro) errors['idParceiro'] = 'Selecione um parceiro';
           break;
         case 2:
           if (f.categoriasServicoBloco.length === 0) {
@@ -365,7 +379,7 @@ export class LancamentoModalComponent {
     if (fluxo) {
       switch (indice) {
         case 0: return !!f.idCategoria;
-        case 1: return !!f.idParceiro;
+        case 1: return !!f.idParceria;
         case 2: return f.categoriasServicoBloco.length > 0;
         case 3: return !!f.idCliente;
         case 4: return !!(f.descricao?.trim() && f.data && f.valor > 0);
@@ -407,17 +421,6 @@ export class LancamentoModalComponent {
     }
   }
 
-  onTemParceiroChange(value: boolean) {
-    this.form.update(f => ({
-      ...f,
-      temParceiro: value,
-      idParceiro: value ? f.idParceiro : undefined
-    }));
-    if (!value) {
-      this.clearError('idParceiro');
-    }
-  }
-
   onDiaUtilChange() {
     const f = this.form();
     if (f.diaUtil && f.dia && f.dia > 5) {
@@ -437,7 +440,7 @@ export class LancamentoModalComponent {
         this.previewMeses.set(0);
         return;
       }
-      let meses = (final.getFullYear() - inicio.getFullYear()) * 12 + (final.getMonth() - inicio.getMonth());
+      const meses = (final.getFullYear() - inicio.getFullYear()) * 12 + (final.getMonth() - inicio.getMonth());
       this.previewMeses.set(meses > 0 ? meses : 1);
     } else {
       this.previewMeses.set(0);
@@ -452,6 +455,10 @@ export class LancamentoModalComponent {
 
   title() {
     return this.editando()?.id ? `Editar ${this.tipoLabel()}` : `Nova ${this.tipoLabel()}`;
+  }
+
+  subtitleText() {
+    return this.editando()?.id ? `Altere os dados da ${this.tipoLabel()}` : `Cadastre uma nova ${this.tipoLabel()} em poucos passos.`;
   }
 
   fechar() { this.visibleChange.emit(false); }
@@ -471,7 +478,6 @@ export class LancamentoModalComponent {
         errors['servicos'] = 'Adicione pelo menos um serviço';
       }
       if (!f.idCliente) errors['idCliente'] = 'Cliente é obrigatório';
-      if (f.temParceiro && !f.idParceiro) errors['idParceiro'] = 'Selecione um parceiro';
     }
 
     if (f.repete) {
@@ -501,10 +507,92 @@ export class LancamentoModalComponent {
     this.form.update(f => ({ ...f, [key]: value }));
   }
 
+  quickAdd = signal<'categoria' | 'servico' | 'cliente' | null>(null);
+  quickNome = signal('');
+  quickPaiId = signal('');
+  quickTelefone = signal('');
+  quickSalvando = signal(false);
+  quickError = signal('');
+
+  quickTitulo = computed(() => {
+    switch (this.quickAdd()) {
+      case 'categoria': return this.dominioCategoria() === 'despesa' ? 'Nova categoria de despesa' : 'Nova categoria de receita';
+      case 'servico': return 'Nova categoria de serviço';
+      case 'cliente': return 'Novo cliente';
+      default: return '';
+    }
+  });
+
+  quickPaisOptions = computed(() => {
+    if (this.quickAdd() === 'servico') return this.categoriasServicoPais();
+    return this.categoriasOptions();
+  });
+
+  abrirQuickAdd(tipo: 'categoria' | 'servico' | 'cliente') {
+    this.quickNome.set('');
+    this.quickPaiId.set('');
+    this.quickTelefone.set('');
+    this.quickError.set('');
+    this.quickAdd.set(tipo);
+  }
+
+  fecharQuickAdd() {
+    if (!this.quickSalvando()) this.quickAdd.set(null);
+  }
+
+  async salvarQuickAdd() {
+    const nome = this.quickNome().trim();
+    if (!nome) { this.quickError.set('Informe o nome'); return; }
+    const tipo = this.quickAdd();
+    if (!tipo) return;
+    this.quickError.set('');
+    this.quickSalvando.set(true);
+    try {
+      if (tipo === 'categoria') {
+        const repo = this.dominioCategoria() === 'despesa' ? this.catDespesaRepo : this.catReceitaRepo;
+        const paiId = this.quickPaiId() || undefined;
+        const criada = await firstValueFrom(repo.criar({ nome, ...(paiId ? { categoriaPaiId: paiId } : {}) }));
+        this.categoriaCriada.emit(criada);
+        if (paiId) {
+          this.form.update(f => ({ ...f, idCategoria: paiId, idSubcategoria: criada.id }));
+          this.atualizarCategorizacao();
+        } else {
+          this.onCategoriaChange(criada.id);
+        }
+        this.clearError('idCategoria');
+      } else if (tipo === 'servico') {
+        const paiId = this.quickPaiId() || undefined;
+        const criada = await firstValueFrom(this.catServicoRepo.criar({ nome, ...(paiId ? { categoriaPaiId: paiId } : {}) }));
+        this.servicoCriado.emit(criada);
+        if (paiId) {
+          this.form.update(f => ({
+            ...f,
+            categoriasServicoBloco: [...f.categoriasServicoBloco, { categoriaServicoId: paiId, subcategoriasSelecionadas: [criada.id] }]
+          }));
+          this.atualizarCategoriasServico();
+        } else {
+          this.atualizarCategoriasServico();
+          this.adicionarBlocoServico(criada.id);
+        }
+        this.clearError('servicos');
+      } else {
+        const criada = await firstValueFrom(this.pessoaRepo.criar({ nome, telefone: this.quickTelefone().trim(), tipo: 'Cliente' }));
+        this.clienteCriado.emit(criada);
+        this.updateFormField('idCliente', criada.id);
+        this.clearError('idCliente');
+      }
+      this.quickAdd.set(null);
+    } catch (e) {
+      this.quickError.set(mensagemErro(e, 'Erro ao salvar'));
+    } finally {
+      this.quickSalvando.set(false);
+    }
+  }
+
   private emptyForm(): LancamentoForm {
     return {
       descricao: '', valor: 0, data: '', idConta: '', idCategoria: '',
-      temParceiro: false, categoriasServicoBloco: [], repete: false, dia: 1, diaUtil: false, dataFim: ''
+      categoriasServicoBloco: [], repete: false, dia: 1, diaUtil: false, dataFim: ''
     };
   }
 }

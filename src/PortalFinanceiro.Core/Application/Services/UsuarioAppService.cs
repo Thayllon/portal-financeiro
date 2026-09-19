@@ -42,7 +42,7 @@ public class UsuarioAppService : IUsuarioAppService
 
         await _repository.InserirAsync(result.Dado!);
 
-        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros" };
+        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias" };
         foreach (var modulo in modulos)
         {
             var permissao = PermissaoUsuario.Criar(result.Dado!.Id, modulo, NivelPermissao.Nenhum);

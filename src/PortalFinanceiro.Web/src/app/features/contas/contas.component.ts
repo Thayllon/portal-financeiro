@@ -9,13 +9,15 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
+import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-contas',
   standalone: true,
-  imports: [FormsModule, ModalComponent, StatusBadgeComponent, CustomSelectComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, StatusBadgeComponent, CustomSelectComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './contas.component.html',
   styleUrl: './contas.component.scss'
 })
@@ -32,6 +34,13 @@ export class ContasComponent implements OnInit {
   salvando = signal(false);
 
   form: ContaBancariaRequest = { nome: '', banco: '', tipo: 'Pf' };
+  formEhPadrao = false;
+
+  contasPaginacao = useListPagination(this.contas, { initialPageSize: 10 });
+
+  contaPadraoAtual(): ContaBancaria | undefined {
+    return this.contas().find(c => c.ehPadrao);
+  }
 
   tipoOptions: SelectOption[] = [
     { value: 'Pf', label: 'Pessoa Física' },
@@ -52,9 +61,11 @@ export class ContasComponent implements OnInit {
   abrirModal(item?: ContaBancaria) {
     if (item) {
       this.form = { nome: item.nome, banco: item.banco, tipo: item.tipo };
+      this.formEhPadrao = !!item.ehPadrao;
       this.editando.set(item);
     } else {
       this.form = { nome: '', banco: '', tipo: 'Pf' };
+      this.formEhPadrao = this.contas().length === 0;
       this.editando.set(null);
     }
     this.modalVisible.set(true);
@@ -67,14 +78,27 @@ export class ContasComponent implements OnInit {
 
   async salvar() {
     if (!this.form.nome || !this.form.banco) { this.notify.error('Preencha todos os campos'); return; }
+    // aviso se vai substituir padrão existente
+    const padraoAtual = this.contaPadraoAtual();
+    const vaiSubstituir = this.formEhPadrao && padraoAtual && padraoAtual.id !== this.editando()?.id;
+    if (vaiSubstituir) {
+      const ok = await this.confirmService.confirm('Alterar conta padrão', `A conta padrão atual é "${padraoAtual!.nome}". Deseja substituir por "${this.form.nome}"?`);
+      if (!ok) return;
+    }
     this.salvando.set(true);
     try {
+      let idParaPadrao: string | null = null;
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, this.form));
+        if (this.formEhPadrao && !this.editando()!.ehPadrao) idParaPadrao = this.editando()!.id;
         this.notify.success('Conta atualizada');
       } else {
-        await firstValueFrom(this.repo.criar(this.form));
+        const criada = await firstValueFrom(this.repo.criar(this.form));
+        if (this.formEhPadrao) idParaPadrao = criada.id;
         this.notify.success('Conta criada');
+      }
+      if (idParaPadrao) {
+        try { await firstValueFrom(this.repo.definirPadrao(idParaPadrao)); } catch {}
       }
       this.fecharModal();
       await this.carregar();
@@ -90,5 +114,13 @@ export class ContasComponent implements OnInit {
       this.notify.success('Conta excluída');
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir conta')); }
+  }
+
+  async definirPadrao(conta: ContaBancaria) {
+    try {
+      await firstValueFrom(this.repo.definirPadrao(conta.id));
+      this.notify.success(`"${conta.nome}" definida como conta padrão`);
+      await this.carregar();
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao definir conta padrão')); }
   }
 }

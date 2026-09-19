@@ -9,6 +9,12 @@ export interface Despesa {
   categoria: string;
   idSubcategoria?: string;
   subcategoria: string;
+  idParceria?: string;
+  parceria: string;
+  parceriaValor?: number;
+  idCliente?: string;
+  cliente: string;
+  servicos?: DespesaServico[];
   status: number;
   dataRealizacao?: string;
   idRegra?: string;
@@ -18,6 +24,14 @@ export interface Despesa {
   dataCadastro: string;
 }
 
+export interface DespesaServico {
+  id: string;
+  categoriaServicoId: string;
+  categoriaServico: string;
+  subcategoriaServicoId?: string;
+  subcategoriaServico: string;
+}
+
 export interface DespesaRequest {
   descricao: string;
   valor: number;
@@ -25,6 +39,9 @@ export interface DespesaRequest {
   idConta: string;
   idCategoria: string;
   idSubcategoria?: string;
+  idParceria?: string;
+  idCliente?: string;
+  servicos?: { categoriaServicoId: string; subcategoriaServicoId?: string }[];
   repete: boolean;
   dia?: number;
   diaUtil?: boolean;

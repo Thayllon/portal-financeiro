@@ -3,13 +3,19 @@
     <div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
       <aside class="sidebar">
         <div class="sidebar-brand">
-          <svg lucideIcon="hand-coins" [size]="28" style="color: #fff" />
+          <svg lucideIcon="hand-coins" [size]="28" class="sidebar-brand-icon" />
           @if (!sidebarCollapsed()) {
             <span>Portal Financeiro</span>
           }
         </div>
         <nav class="sidebar-nav">
           <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+            <svg lucideIcon="home" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Home</span>
+            }
+          </a>
+          <a routerLink="/dashboard" routerLinkActive="active">
             <svg lucideIcon="chart-line" [size]="18" />
             @if (!sidebarCollapsed()) {
               <span>Dashboard</span>
@@ -28,6 +34,14 @@
             <svg lucideIcon="trending-down" [size]="18" />
             @if (!sidebarCollapsed()) {
               <span>Despesas</span>
+            }
+          </a>
+          }
+          @if (authService.temPermissao('parcerias')) {
+          <a routerLink="/parcerias" routerLinkActive="active">
+            <svg lucideIcon="handshake" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Parcerias</span>
             }
           </a>
           }

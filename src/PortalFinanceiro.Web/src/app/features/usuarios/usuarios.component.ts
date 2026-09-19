@@ -5,20 +5,22 @@ import { AuthService } from '../../core/services/auth.service';
 import { UsuarioRepository } from '../../core/repositories/usuario.repository';
 import { PermissaoRepository } from '../../core/repositories/permissao.repository';
 import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
-import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL } from '../../core/models/permissao.model';
+import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { SideDrawerComponent } from '../../shared/components/side-drawer.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
+import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
+import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.scss'
 })
@@ -28,14 +30,14 @@ export class UsuariosComponent implements OnInit {
   private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
-
   usuarios = signal<Usuario[]>([]);
   loading = signal(true);
+  usuariosPaginacao = useListPagination(this.usuarios, { initialPageSize: 10 });
   modalVisible = signal(false);
   drawerVisible = signal(false);
-  editando = signal<Usuario | null>(null);
-  salvando = signal(false);
+  editando = signal<Usuario | null>(null);  salvando = signal(false);
   fluxoAdicional = signal(false);
+  fluxoAdicionalDespesa = signal(false);
   buscaPermissao = signal('');
   dadosAberto = signal(false);
   permissoesAberto = signal(false);
@@ -51,6 +53,7 @@ export class UsuariosComponent implements OnInit {
     { id: 'categorias', nome: 'Categorias', descricao: 'Cadastro e organização de categorias.', icone: 'tag' },
     { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
     { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake' },
+    { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'handshake' },
     { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'users' },
   ];
 
@@ -123,6 +126,8 @@ export class UsuariosComponent implements OnInit {
       });
       const fluxoPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL);
       this.fluxoAdicional.set(!!fluxoPerm && fluxoPerm.nivel >= NivelPermissao.Leitura);
+      const fluxoDespesaPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL_DESPESA);
+      this.fluxoAdicionalDespesa.set(!!fluxoDespesaPerm && fluxoDespesaPerm.nivel >= NivelPermissao.Leitura);
     } catch {}
   }
 
@@ -143,6 +148,11 @@ export class UsuariosComponent implements OnInit {
   alternarFluxoAdicional(event: Event) {
     const ligado = (event.target as HTMLInputElement).checked;
     this.fluxoAdicional.set(ligado);
+  }
+
+  alternarFluxoAdicionalDespesa(event: Event) {
+    const ligado = (event.target as HTMLInputElement).checked;
+    this.fluxoAdicionalDespesa.set(ligado);
   }
 
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
@@ -205,7 +215,14 @@ export class UsuariosComponent implements OnInit {
           modulo: MODULO_FLUXO_ADICIONAL,
           nivel: this.fluxoAdicional() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
         });
+        permissoes.push({
+          modulo: MODULO_FLUXO_ADICIONAL_DESPESA,
+          nivel: this.fluxoAdicionalDespesa() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+        });
         await firstValueFrom(this.permissaoRepo.salvar(usuarioId, permissoes));
+        if (usuarioId === this.auth.user()?.usuarioId) {
+          this.auth.atualizarPermissoes(permissoes);
+        }
       }
       this.fecharDrawer();
       this.fecharModal();
@@ -224,7 +241,7 @@ export class UsuariosComponent implements OnInit {
     if (!ok) return;
     try {
       await firstValueFrom(this.repo.alterarAtivo(item.id, !item.ativo));
-      this.notify.success(`Usuário ${acao}do`);
+      this.notify.success(`Usuário ${acao === 'desativar' ? 'desativado' : 'ativado'}`);
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, `Erro ao ${acao} usuário`)); }
   }

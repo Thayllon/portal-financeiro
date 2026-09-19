@@ -15,7 +15,7 @@ public class CategoriaServicoAppService : CategoriaBaseAppService<CategoriaServi
         ICategoriaHistoricoRepository historicoRepository)
         : base(repository, historicoRepository, ETipoCategoria.Servicos) { }
 
-    public new async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario, bool isAdmin)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario, bool isAdmin)
         => await base.ExcluirAsync(id, idUsuario, isAdmin, _ => Task.FromResult(0));
 
     protected override Result<CategoriaServico> CriarEntidade(Guid idUsuario, CategoriaRequest request)
