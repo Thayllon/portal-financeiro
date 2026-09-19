@@ -11,7 +11,7 @@ internal static class RegraReceitaSql
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}ContaBancaria cb ON {T}.IdConta = cb.Id
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}CategoriaReceita cat ON {T}.IdCategoria = cat.Id";
     public static string ObterPorId => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.Id = @Id";
-    public static string ListarPorUsuario => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario AND {T}.Ativo = 1 ORDER BY {T}.Descricao";
+    public static string ListarPorUsuario => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario AND {T}.Ativo = {SqlDialect.Current.BooleanTrue} ORDER BY {T}.Descricao";
     public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Descricao, @Valor, @Dia, @DiaUtil, @IdCategoria, @IdConta, @DataInicio, @DataFim, @Ativo, @DataCadastro, @DataAlteracao)";
     public static string Atualizar => $"UPDATE {T} SET Descricao = @Descricao, Valor = @Valor, Dia = @Dia, DiaUtil = @DiaUtil, IdCategoria = @IdCategoria, IdConta = @IdConta, DataInicio = @DataInicio, DataFim = @DataFim, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
 }

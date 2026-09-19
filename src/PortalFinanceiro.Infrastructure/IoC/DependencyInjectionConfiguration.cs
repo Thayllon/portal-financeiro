@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Application.Services;
@@ -7,14 +8,31 @@ using PortalFinanceiro.Infrastructure.Data;
 using PortalFinanceiro.Infrastructure.Data.Providers;
 using PortalFinanceiro.Infrastructure.Repositories;
 using PortalFinanceiro.Infrastructure.Services;
+using PortalFinanceiro.Infrastructure.Sql;
+using PortalFinanceiro.Infrastructure.Sql.Dialects;
 
 namespace PortalFinanceiro.Infrastructure.IoC;
 
 public static class DependencyInjectionConfiguration
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string connectionString)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<IDatabaseConnectionFactory>(_ => new SqlServerConnectionFactory(connectionString));
+        var connectionString = configuration.GetConnectionString("DefaultConnection")!;
+        var provider = configuration["Database:Provider"] ?? configuration["Database__Provider"] ?? "SqlServer";
+        var isPostgres = provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)
+                      || provider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase)
+                      || provider.Equals("Npgsql", StringComparison.OrdinalIgnoreCase);
+
+        if (isPostgres)
+        {
+            services.AddSingleton<IDatabaseConnectionFactory>(_ => new PostgresConnectionFactory(connectionString));
+            SqlDialect.Configure(new PostgresDialect());
+        }
+        else
+        {
+            services.AddSingleton<IDatabaseConnectionFactory>(_ => new SqlServerConnectionFactory(connectionString));
+            SqlDialect.Configure(new SqlServerDialect());
+        }
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, TokenService>();
 

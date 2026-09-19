@@ -1,21 +1,18 @@
 using PortalFinanceiro.API.Configurations;
 using PortalFinanceiro.API.Middlewares;
 using PortalFinanceiro.Infrastructure.IoC;
-using PortalFinanceiro.Infrastructure.Sql;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.ConfigureSerilog();
-builder.Services.AddAppCors();
+builder.Services.AddAppCors(builder.Configuration);
 builder.Services.AddAppAuth(builder.Configuration);
 builder.Services.AddAppSwagger();
 builder.Services.AddAppControllers();
-builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("DefaultConnection")!);
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
-
-SqlDialect.Configure(new PortalFinanceiro.Infrastructure.Sql.Dialects.SqlServerDialect());
 
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
