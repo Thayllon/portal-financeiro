@@ -97,6 +97,18 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
 > - charlie → `src/environments/environment.charlie.ts`
 > Atualize o arquivo do ambiente com a URL do backend antes de publicar cada projeto.
 
+### Configuração Vercel (por projeto — resumo final)
+
+| Projeto | Root Directory | Build Command | Output Directory | Production Branch |
+|---------|----------------|---------------|------------------|-------------------|
+| **portal-financeiro-alpha** | `src/PortalFinanceiro.Web` | `npm run build` | `dist/portal-financeiro/browser` | `main` |
+| **portal-financeiro-bravo** | `src/PortalFinanceiro.Web` | `npm run build:bravo` | `dist/portal-financeiro/browser` | `main` |
+| **portal-financeiro-charlie** | `src/PortalFinanceiro.Web` | `npm run build:charlie` | `dist/portal-financeiro/browser` | `develop` |
+
+> O `vercel.json` da **raiz** foi removido — a config válida é a de `src/PortalFinanceiro.Web/vercel.json`
+> (output `dist/portal-financeiro/browser` + rewrite de SPA). Manter o Root Directory = `src/PortalFinanceiro.Web`
+> em todos os projetos; usar Root = repo raiz quebra o output/rewrite.
+
 ### Atualização (deploy por branch)
 
 - Push em `main` → alpha e bravo (front + back) fazem redeploy automático.
