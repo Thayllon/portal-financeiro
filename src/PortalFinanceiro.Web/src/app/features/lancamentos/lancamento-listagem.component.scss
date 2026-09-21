@@ -4,10 +4,6 @@
 
 .page {
   @include layout.page-wrapper;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
 }
 
 .page__header {
@@ -101,8 +97,7 @@
 
 .table-card {
   @include layout.card;
-  flex: 1;
-  min-height: 0;
+  max-height: calc(100vh - 200px);
   overflow-y: auto;
 
   thead th {
