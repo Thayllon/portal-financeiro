@@ -10,7 +10,9 @@ import { NotificationService } from '../../core/services/notification.service';
 import { SkeletonComponent } from '../../shared/components/skeleton.component';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
-import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
+import { ValorMascaradoPipe } from '../../shared/pipes/valor-mascarado.pipe';
+import { PrivacidadeToggleComponent } from '../../shared/components/privacidade-toggle.component';
+import { PrivacidadeService } from '../../core/services/privacidade.service';
 import { CustomSelectComponent } from '../../shared/components/custom-select.component';
 import { CollapsibleSectionComponent } from '../../shared/components/collapsible-section.component';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -92,7 +94,7 @@ const PALETA_DONUT = ['#0d9488', '#dc2626', '#5b8def', '#eab308', '#f97316', '#a
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, SkeletonComponent, MonthNavComponent, StatusBadgeComponent, CurrencyBRLPipe, CustomSelectComponent, CollapsibleSectionComponent, LucideDynamicIcon, BaseChartDirective],
+  imports: [RouterLink, SkeletonComponent, MonthNavComponent, StatusBadgeComponent, ValorMascaradoPipe, PrivacidadeToggleComponent, CustomSelectComponent, CollapsibleSectionComponent, LucideDynamicIcon, BaseChartDirective],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -101,6 +103,7 @@ export class DashboardComponent implements OnInit {
   private contaRepo = inject(ContaBancariaRepository);
   private auth = inject(AuthService);
   private notify = inject(NotificationService);
+  protected privacidade = inject(PrivacidadeService);
 
   data = signal<Dashboard | null>(null);
   dataAnual = signal<DashboardAnual | null>(null);
@@ -137,80 +140,89 @@ export class DashboardComponent implements OnInit {
     datasets: []
   };
 
-  barChartOptions: ChartConfiguration<'bar'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: 'top' },
-      tooltip: {
-        callbacks: {
-          label: (context) => {
-            const value = context.parsed.y ?? 0;
-            return `${context.dataset.label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  barChartOptions = computed<ChartConfiguration<'bar'>['options']>(() => {
+    const oculto = this.privacidade.valoresOcultos();
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              if (oculto) return '••••••';
+              const value = context.parsed.y ?? 0;
+              return `${context.dataset.label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) => oculto ? '••••••' : `R$ ${Number(value).toLocaleString('pt-BR')}`
           }
         }
       }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: (value) => `R$ ${Number(value).toLocaleString('pt-BR')}`
-        }
-      }
-    }
-  };
+    };
+  });
 
-  barChartMensalOptions: ChartConfiguration<'bar'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top',
-        align: 'center',
-        labels: {
-          usePointStyle: true,
-          pointStyle: 'circle',
-          boxWidth: 6,
-          boxHeight: 6,
-          padding: 16,
-          color: corTextoGrafico()
+  barChartMensalOptions = computed<ChartConfiguration<'bar'>['options']>(() => {
+    const oculto = this.privacidade.valoresOcultos();
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          align: 'center',
+          labels: {
+            usePointStyle: true,
+            pointStyle: 'circle',
+            boxWidth: 6,
+            boxHeight: 6,
+            padding: 16,
+            color: corTextoGrafico()
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              if (oculto) return '••••••';
+              const value = context.parsed.y ?? 0;
+              return `${context.dataset.label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            },
+            footer: (items) => {
+              if (oculto) return '';
+              const i = items[0]?.dataIndex ?? 0;
+              const info = this.valoresTooltip()[i];
+              if (!info || info.previsto <= 0) return '';
+              return `Inclui R$ ${info.previsto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} previstos`;
+            }
+          }
         }
       },
-      tooltip: {
-        callbacks: {
-          label: (context) => {
-            const value = context.parsed.y ?? 0;
-            return `${context.dataset.label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-          },
-          footer: (items) => {
-            const i = items[0]?.dataIndex ?? 0;
-            const info = this.valoresTooltip()[i];
-            if (!info || info.previsto <= 0) return '';
-            return `Inclui R$ ${info.previsto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} previstos`;
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: corTextoGrafico() }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: corGradeGrafico() },
+          border: { display: false },
+          ticks: {
+            color: corTextoGrafico(),
+            callback: (value) => oculto ? '••••••' : `R$ ${Number(value).toLocaleString('pt-BR')}`
           }
         }
       }
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { color: corTextoGrafico() }
-      },
-      y: {
-        beginAtZero: true,
-        grid: { color: corGradeGrafico() },
-        border: { display: false },
-        ticks: {
-          color: corTextoGrafico(),
-          callback: (value) => `R$ ${Number(value).toLocaleString('pt-BR')}`
-        }
-      }
-    }
-  };
+    };
+  });
 
-  barChartMensalPlugins = [criarRotuloValorBarras(0)];
-  barChartPorContaPlugins = [criarRotuloValorBarras(2)];
+  barChartMensalPlugins = computed(() => this.privacidade.valoresOcultos() ? [] : [criarRotuloValorBarras(0)]);
+  barChartPorContaPlugins = computed(() => this.privacidade.valoresOcultos() ? [] : [criarRotuloValorBarras(2)]);
 
     contasOptions = computed(() => {
     const contas = this.contas();
@@ -245,22 +257,26 @@ export class DashboardComponent implements OnInit {
     datasets: []
   };
 
-  doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: '68%',
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        callbacks: {
-          label: (context) => {
-            const value = context.parsed ?? 0;
-            return `${context.label}: R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  doughnutChartOptions = computed<ChartConfiguration<'doughnut'>['options']>(() => {
+    const oculto = this.privacidade.valoresOcultos();
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (context) => {
+              if (oculto) return '••••••';
+              const value = context.parsed ?? 0;
+              return `${context.label}: R$ ${Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            }
           }
         }
       }
-    }
-  };
+    };
+  });
 
   doughnutVazioOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
@@ -362,6 +378,16 @@ export class DashboardComponent implements OnInit {
   sparkDespesas: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
   sparkSaldo: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
   sparkFluxo: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
+
+  private sparkVazio: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
+  private sparkExibicao(dados: ChartConfiguration<'line'>['data']) {
+    this.chartVersion();
+    return this.privacidade.valoresOcultos() ? this.sparkVazio : dados;
+  }
+  sparkReceitasExibicao = computed(() => this.sparkExibicao(this.sparkReceitas));
+  sparkDespesasExibicao = computed(() => this.sparkExibicao(this.sparkDespesas));
+  sparkSaldoExibicao = computed(() => this.sparkExibicao(this.sparkSaldo));
+  sparkFluxoExibicao = computed(() => this.sparkExibicao(this.sparkFluxo));
 
   ngOnInit() { this.carregar(); this.carregarContas(); }
 

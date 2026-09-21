@@ -229,8 +229,8 @@
                 </div>
                 <div class="perm-module__actions" [class.perm-module__actions--center]="m.id === 'dashboard'">
                   <button
-                    class="perm-btn"
-                    [class.perm-btn--none]="permLevels[m.id] === 'none'"
+                    class="perm-btn perm-btn--opt-none"
+                    [class.perm-btn--none]="permLevels()[m.id] === 'none'"
                     [disabled]="u.isAdmin"
                     (click)="alternarPermissao(m.id, 'none')"
                   >
@@ -238,8 +238,8 @@
                     Não pode ver
                   </button>
                   <button
-                    class="perm-btn"
-                    [class.perm-btn--read]="permLevels[m.id] === 'read'"
+                    class="perm-btn perm-btn--opt-read"
+                    [class.perm-btn--read]="permLevels()[m.id] === 'read'"
                     [disabled]="u.isAdmin"
                     (click)="alternarPermissao(m.id, 'read')"
                   >
@@ -248,8 +248,8 @@
                   </button>
                   @if (m.id !== 'dashboard') {
                     <button
-                      class="perm-btn"
-                      [class.perm-btn--write]="permLevels[m.id] === 'write'"
+                      class="perm-btn perm-btn--opt-write"
+                      [class.perm-btn--write]="permLevels()[m.id] === 'write'"
                       [disabled]="u.isAdmin"
                       (click)="alternarPermissao(m.id, 'write')"
                     >

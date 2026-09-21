@@ -22,6 +22,9 @@ public class ReceitaProjecao
     public Guid? IdParceria { get; set; }
     public string Parceria { get; set; } = string.Empty;
     public decimal? ParceriaValor { get; set; }
+    public decimal? ParceriaPercentual { get; set; }
+    public Guid? IdContrato { get; set; }
+    public string Contrato { get; set; } = string.Empty;
     public StatusMensal Status { get; set; }
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }

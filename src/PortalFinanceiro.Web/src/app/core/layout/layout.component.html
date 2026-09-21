@@ -39,9 +39,17 @@
           }
           @if (authService.temPermissao('parcerias')) {
           <a routerLink="/parcerias" routerLinkActive="active">
-            <svg lucideIcon="handshake" [size]="18" />
+            <svg lucideIcon="users-round" [size]="18" />
             @if (!sidebarCollapsed()) {
               <span>Parcerias</span>
+            }
+          </a>
+          }
+          @if (authService.temPermissao('contratos')) {
+          <a routerLink="/contratos" routerLinkActive="active">
+            <svg lucideIcon="file-badge" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Contratos</span>
             }
           </a>
           }
@@ -66,7 +74,7 @@
                 }
                 @if (authService.temPermissao('categorias')) {
                 <a routerLink="/categorias" routerLinkActive="active">
-                  <svg lucideIcon="tag" [size]="18" />
+                  <svg lucideIcon="tags" [size]="18" />
                   <span>Categorias</span>
                 </a>
                 }

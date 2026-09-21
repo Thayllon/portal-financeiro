@@ -1,0 +1,161 @@
+@use '../../../design-system/styles/page-layout' as layout;
+@use '../../../design-system/styles/data-table' as table;
+
+.page {
+  @include layout.page-wrapper;
+}
+
+.page__header {
+  @include layout.page-header;
+}
+
+.page__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.back-btn {
+  background: none;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  padding: 0.375rem;
+  display: flex;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.page__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
+  border-radius: var(--radius-lg);
+}
+
+.page__icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.page__title {
+  @include layout.page-title;
+}
+
+.cards {
+  @include layout.grid-cards(220px);
+  margin-bottom: 1.5rem;
+}
+
+.table-card {
+  @include layout.card;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+}
+
+.card__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.card__value {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card__hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.section-title {
+  @include layout.section-title;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.table {
+  @include table.data-table;
+}
+
+.cell-name {
+  @include table.cell-name;
+}
+
+.table-footer {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--surface-border);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.empty-icon {
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.skeleton-line {
+  height: 1rem;
+  background: linear-gradient(90deg, var(--surface-border) 25%, var(--content-bg) 50%, var(--surface-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

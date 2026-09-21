@@ -13,6 +13,7 @@ public interface IReceitaRepository
     Task<int> ContarPorRegraAsync(Guid idRegra);
     Task<IEnumerable<Receita>> ListarPorRegraAsync(Guid idRegra);
     Task<IEnumerable<ReceitaProjecao>> ListarPorParceriaAsync(Guid idParceria);
+    Task<IEnumerable<ReceitaProjecao>> ListarPorContratoAsync(Guid idContrato);
     Task InserirAsync(Receita entity);
     Task InserirEmMassaAsync(IEnumerable<Receita> entities);
     Task AtualizarAsync(Receita entity);

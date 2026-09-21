@@ -62,6 +62,21 @@ CREATE TABLE Pessoa (
 
 CREATE INDEX IX_Parceria_Usuario ON Parceria(IdUsuario);
 
+CREATE TABLE Contrato (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    IdUsuario UNIQUEIDENTIFIER NOT NULL,
+    Nome NVARCHAR(150) NOT NULL,
+    IdCliente UNIQUEIDENTIFIER NOT NULL,
+    Valor DECIMAL(18,2) NOT NULL,
+    Ativo BIT NOT NULL DEFAULT 1,
+    DataCadastro DATETIME2 NOT NULL,
+    DataAlteracao DATETIME2 NOT NULL,
+    CONSTRAINT FK_Contrato_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
+    CONSTRAINT FK_Contrato_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id)
+);
+
+CREATE INDEX IX_Contrato_Usuario ON Contrato(IdUsuario);
+
 CREATE TABLE PermissaoUsuario (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
     UsuarioId UNIQUEIDENTIFIER NOT NULL,
@@ -157,6 +172,7 @@ CREATE TABLE Receita (
     IdParceiro UNIQUEIDENTIFIER NULL,
     IdCliente UNIQUEIDENTIFIER NULL,
     IdParceria UNIQUEIDENTIFIER NULL,
+    IdContrato UNIQUEIDENTIFIER NULL,
     Status INT NOT NULL DEFAULT 1,
     DataRealizacao DATETIME2 NULL,
     IdRegra UNIQUEIDENTIFIER NULL,
@@ -170,10 +186,12 @@ CREATE TABLE Receita (
     CONSTRAINT FK_Receita_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id),
     CONSTRAINT FK_Receita_Parceiro FOREIGN KEY (IdParceiro) REFERENCES Pessoa(Id),
     CONSTRAINT FK_Receita_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id),
-    CONSTRAINT FK_Receita_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id)
+    CONSTRAINT FK_Receita_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id),
+    CONSTRAINT FK_Receita_Contrato FOREIGN KEY (IdContrato) REFERENCES Contrato(Id)
 );
 
 CREATE INDEX IX_Receita_Parceria ON Receita(IdParceria);
+CREATE INDEX IX_Receita_Contrato ON Receita(IdContrato);
 
 CREATE TABLE ReceitaServico (
     Id              UNIQUEIDENTIFIER PRIMARY KEY,

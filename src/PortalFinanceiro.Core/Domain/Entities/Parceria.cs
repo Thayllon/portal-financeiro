@@ -74,4 +74,10 @@ public class Parceria
         Ativo = false;
         DataAlteracao = DateTime.UtcNow;
     }
+
+    public void Reativar()
+    {
+        Ativo = true;
+        DataAlteracao = DateTime.UtcNow;
+    }
 }

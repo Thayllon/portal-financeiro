@@ -524,6 +524,19 @@
     color: var(--color-primary);
   }
 
+  &.perm-btn--opt-none:hover:not(:disabled) {
+    border-color: var(--color-error);
+    background: var(--color-error-bg);
+    color: var(--color-error);
+  }
+
+  &.perm-btn--opt-read:hover:not(:disabled),
+  &.perm-btn--opt-write:hover:not(:disabled) {
+    border-color: var(--color-success);
+    background: var(--color-success-bg);
+    color: var(--color-success);
+  }
+
   &:disabled {
     cursor: not-allowed;
     opacity: 0.6;

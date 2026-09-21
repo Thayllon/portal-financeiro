@@ -6,7 +6,7 @@
 - **Design system** próprio em `src/app/design-system/styles/` (tokens, mixins, variáveis)
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes reutilizáveis** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, categorias-receita, usuarios, login)
+- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login)
 
 ## Como rodar / buildar / testar
 
@@ -54,6 +54,7 @@ src/app/
 │   ├── clientes/        # wrapper fino → PessoaListagemComponent
 │   ├── parceiros/       # wrapper fino → PessoaListagemComponent
 │   ├── parcerias/       # + parceria-detalhe/
+│   ├── contratos/       # + contrato-detalhe/
 │   ├── categorias-receita/
 │   ├── usuarios/
 │   └── login/
@@ -78,10 +79,13 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - **Busca no select**: `app-custom-select` aceita `[searchable]="true"` + `searchPlaceholder="..."`; o campo de busca aparece só quando há mais de 5 opções e filtra sem diferenciar acentos nem maiúsculas/minúsculas (ex.: Cliente na Nova Receita)
 - **Modal de lançamento (edição)**: com item em edição, o botão **Salvar** aparece em todos os passos (cópia sem id mantém o wizard)
 - **Cadastro rápido no wizard**: botões `+ Nova/Novo` ao lado do label criam categoria/subcategoria, categoria de serviço ou cliente sem sair do fluxo — o item criado é pré-selecionado e nada do digitado se perde (pais atualizam suas listas via `categoriaCriada`/`servicoCriado`/`clienteCriado`)
- - **Parceria no wizard**: passo dedicado só no fluxo adicional; em Dados Gerais o campo aparece só no fluxo simples (despesas)
- - **Seletor de fluxo**: quando `fluxo-adicional-receita`/`fluxo-adicional-despesa` está habilitado, o botão **Nova receita/despesa** abre `FluxoSelectorModal` com dois quadrados — `Fluxo receita` / `Fluxo receita (contrato)` (e análogo para despesa) com ícone `file` × `briefcase-business`; a escolha define se o wizard roda em 3 ou 6 passos; edição/cópia segue fluxo de origem (tem `idCliente`/`servicos`/`idParceria` → contrato)
+ - **Contrato ou Parceria no wizard**: passo 1 do fluxo adicional com checkboxes mutuamente exclusivos (só receita tem Contrato; despesa mantém só Parceria); em Dados Gerais o campo aparece só no fluxo simples (despesas)
+ - **Privacidade de valores**: `PrivacidadeService` (signal global + `localStorage portal-financeiro.privacidade`) + botão `app-privacidade-toggle` (olho) ao lado do título das telas com valores (dashboard, receitas, despesas, contratos, parcerias e detalhes); pipe impuro `valorMascarado` compõe `currencyBRL` e exibe `••••••` quando oculto; no dashboard, options dos gráficos viram `computed` (tooltips desligados, eixos com `••••••`, rótulos do canvas e sparklines zerados); inputs de edição nunca mascaram
+  - **Contrato ou Parceria no wizard**: passo 1 do fluxo adicional com checkboxes mutuamente exclusivos (só receita tem Contrato; despesa mantém só Parceria); o select lista apenas registros ativos; edição/cópia segue fluxo de origem (tem `idCliente`/`servicos`/`idParceria`/`idContrato` → contrato)
+  - **Seletor de fluxo**: quando `fluxo-adicional-receita`/`fluxo-adicional-despesa` está habilitado, o botão **Nova receita/despesa** abre `FluxoSelectorModal` com dois quadrados — `Fluxo receita` / `Fluxo receita (contrato)` (e análogo para despesa) com ícone `file` × `briefcase-business`; a escolha define se o wizard roda em 3 ou 6 passos
  - **Permissões em tempo real**: ao salvar permissões do próprio usuário logado, `AuthService.atualizarPermissoes` atualiza o `signal` sem exigir relogin
- - **Grid de receitas**: coluna `Conta` substituída por `Parceria` (`Sim` com vínculo, `—` sem); totais com `Parceria` (soma das receitas vinculadas) quando o fluxo adicional está ligado
+  - **Grid de receitas**: coluna `Conta` substituída por `Contrato/Parceria` (`Contrato` com vínculo de contrato, `Sim` com vínculo de parceria, `—` sem); coluna `Categoria` exibe a categoria de serviço (`Servico → Sub`, separadas por vírgula; sem serviços, mostra a categoria de receita); totais com `Parceria` (soma das receitas vinculadas) e `Receita líquida` (recebido menos repasse ao parceiro: Σ valor × % por receita recebida vinculada) quando o fluxo adicional está ligado
+  - **Grid de despesas**: sem botões Pagar/Estornar nas ações (só Copiar/Editar/Excluir); colunas Valor e Data com ordenação clicável (asc/desc)
 - **Inputs de texto**: classe `input` do design system
 - Forms: `ControlValueAccessor` para componentes reutilizáveis (CustomSelect)
 - **Páginas parametrizadas**: `PessoaListagemComponent` (`tipo` Cliente/Parceiro) e `LancamentoListagemComponent` (`tipo` receita/despesa) — não duplicar páginas de listagem
@@ -110,8 +114,10 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/categorias` | categorias-receita | Categorias compartilhadas (com subcategorias) |
 | `/clientes` | clientes | Cadastro de clientes (tipo Cliente) |
 | `/parceiros` | parceiros | Cadastro de parceiros (tipo Parceiro) |
-| `/parcerias` | parcerias | Cadastro de parcerias (nome + parceiro + cliente + valor + % do parceiro) com visão de falta receber/pagar |
+| `/parcerias` | parcerias | Cadastro de parcerias (nome + parceiro + cliente + valor + % do parceiro) com visão de falta receber/pagar; total pago no mês com navegação de período; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige faltas zeradas |
 | `/parcerias/:id` | parceria-detalhe | Detalhe da parceria: resumo (partes, recebido, pago, faltas) + entradas (receitas) + saídas (despesas) |
+| `/contratos` | contratos | Cadastro de contratos (nome + cliente + valor, sem parceiro) com falta receber; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige falta receber zerada |
+| `/contratos/:id` | contrato-detalhe | Detalhe do contrato: cliente + recebido/falta receber + entradas (receitas) |
 | `/usuarios` | usuarios | Usuários e permissões (admin) |
 
 ### Indicadores do dashboard mensal
@@ -139,6 +145,6 @@ Regras gerais: do mês corrente em diante os valores incorporam previsão (regra
 
 ### Menu lateral
 
-- **Dashboard**, **Receitas**, **Despesas** e **Parcerias** ficam no nível principal. **Parcerias** usa permissão regular (Leitura/Escrita) como Clientes e Parceiros. Parcerias são vinculadas em Receitas/Despesas via `IdParceria` e exibem saldo (falta receber/pagar).
+- **Dashboard**, **Receitas**, **Despesas**, **Parcerias** e **Contratos** ficam no nível principal. **Parcerias** e **Contratos** usam permissão regular (Leitura/Escrita) como Clientes e Parceiros. Parcerias são vinculadas em Receitas/Despesas via `IdParceria` e exibem saldo (falta receber/pagar); contratos são vinculados em Receitas via `IdContrato` (no máximo um vínculo por receita) e exibem falta receber.
 - **Configurações** é um grupo colapsável que reúne, nesta ordem: **Contas**, **Categorias**, **Cliente**, **Parceiro** e **Usuários** (admin).
 - O ícone `user-key` fica reservado para quando o item **Permissões** voltar.

@@ -13,6 +13,7 @@ internal static class LancamentoSql
         sub.Nome AS Subcategoria,
         cli.Nome AS Cliente,
         pa.Valor AS ParceriaValor,
+        pa.PercentualParceiro AS ParceriaPercentual,
         CASE WHEN pa.Id IS NULL THEN '' ELSE CONCAT(COALESCE(par2.Nome,''), ' - ', COALESCE(cli2.Nome,'')) END AS Parceria";
 
     static string Joins(string t, string tabelaCategoria, string joinsExtras)
@@ -45,6 +46,9 @@ internal static class LancamentoSql
 
     public static string ListarPorParceria(string t, string tabelaCategoria, string extras, string joinsExtras)
         => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdParceria = @IdParceria AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} ORDER BY {t}.Data";
+
+    public static string ListarPorContrato(string t, string tabelaCategoria, string extras, string joinsExtras)
+        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdContrato = @IdContrato AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} ORDER BY {t}.Data";
 
     public static string ContarPorSubcategoria(string t)
         => $"SELECT COUNT(*) FROM {t} WHERE IdSubcategoria = @IdSubcategoria AND Ativo = {SqlDialect.Current.BooleanTrue}";

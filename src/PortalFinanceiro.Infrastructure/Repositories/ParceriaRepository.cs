@@ -18,8 +18,8 @@ public class ParceriaRepository : SqlBaseRepository, IParceriaRepository
     public async Task<ParceriaProjecao?> ObterProjecaoPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<ParceriaProjecao>(conn, ParceriaSql.ObterProjecaoPorId, new { Id = id }));
 
-    public async Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<ParceriaProjecao>(conn, ParceriaSql.ListarPorUsuario, new { IdUsuario = idUsuario }));
+    public async Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ParceriaProjecao>(conn, ParceriaSql.ListarPorUsuario, new { IdUsuario = idUsuario, Ativo = ativo }));
 
     public async Task InserirAsync(Parceria entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ParceriaSql.Inserir, entity));

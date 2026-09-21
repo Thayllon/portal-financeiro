@@ -5,6 +5,7 @@
         <svg [lucideIcon]="config().icone" class="page__icon" [size]="22" />
       </span>
       <h1 class="page__title">{{ config().titulo }}</h1>
+      <app-privacidade-toggle />
     </div>
     <button class="add-btn" (click)="abrirModal()">
       <svg lucideIcon="plus" [size]="16" />
@@ -26,11 +27,12 @@
   </div>
 
   <div class="totals">
-    <span>Total: <strong>{{ total() | currencyBRL }}</strong></span>
-    <span>{{ config().rotuloRealizado }}: <strong style="color: var(--color-success)">{{ totalRealizado() | currencyBRL }}</strong></span>
-    <span>Pendente: <strong style="color: var(--color-warning)">{{ totalPendente() | currencyBRL }}</strong></span>
+    <span>Total: <strong>{{ total() | valorMascarado }}</strong></span>
+    <span>{{ config().rotuloRealizado }}: <strong style="color: var(--color-success)">{{ totalRealizado() | valorMascarado }}</strong></span>
+    <span>Pendente: <strong style="color: var(--color-warning)">{{ totalPendente() | valorMascarado }}</strong></span>
     @if (fluxoAdicional() && hasParceiro()) {
-      <span>Parceria: <strong>{{ totalParceria() | currencyBRL }}</strong></span>
+      <span>Parceria: <strong>{{ totalParceria() | valorMascarado }}</strong></span>
+      <span title="Repasse ao parceiro: {{ repasseParceiro() | valorMascarado }}">Receita líquida: <strong style="color: var(--color-success)">{{ receitaLiquida() | valorMascarado }}</strong></span>
     }
   </div>
 
@@ -60,11 +62,26 @@
         <thead>
           <tr>
             <th>Descrição</th>
-            <th>Valor</th>
-            <th>Data</th>
             @if (hasParceiro()) {
-              <th>Parceria</th>
+              <th>Valor</th>
+              <th>Data</th>
             } @else {
+              <th>
+                <button type="button" class="th-sort" (click)="alternarOrdenacao('valor')" title="Ordenar por valor">
+                  Valor
+                  <svg [lucideIcon]="ordenacao()?.coluna === 'valor' ? (ordenacao()?.direcao === 'asc' ? 'chevron-up' : 'chevron-down') : 'arrow-down-up'" [size]="14" />
+                </button>
+              </th>
+              <th>
+                <button type="button" class="th-sort" (click)="alternarOrdenacao('data')" title="Ordenar por data">
+                  Data
+                  <svg [lucideIcon]="ordenacao()?.coluna === 'data' ? (ordenacao()?.direcao === 'asc' ? 'chevron-up' : 'chevron-down') : 'arrow-down-up'" [size]="14" />
+                </button>
+              </th>
+            }
+              @if (hasParceiro()) {
+                <th>Contrato/Parceria</th>
+              } @else {
               <th>Conta</th>
             }
             <th>Categoria</th>
@@ -76,24 +93,26 @@
           @for (l of pagination.paginatedItems(); track l.id) {
             <tr>
               <td class="cell-name" data-label="Descrição">{{ l.descricao }}</td>
-              <td class="cell-value" data-label="Valor">{{ l.valor | currencyBRL }}</td>
+              <td class="cell-value" data-label="Valor">{{ l.valor | valorMascarado }}</td>
               <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
               @if (hasParceiro()) {
-                <td class="cell-meta" data-label="Parceria" [title]="l.parceria">{{ l.idParceria ? 'Sim' : '—' }}</td>
+                <td class="cell-meta" data-label="Contrato/Parceria" [title]="l.idContrato ? l.contrato : l.parceria">{{ l.idContrato ? 'Contrato' : l.idParceria ? 'Sim' : '—' }}</td>
               } @else {
                 <td class="cell-meta" data-label="Conta">{{ l.conta }}</td>
               }
-              <td class="cell-meta" data-label="Categoria">{{ l.categoria }}{{ l.subcategoria ? ' → ' + l.subcategoria : '' }}</td>
+              <td class="cell-meta" data-label="Categoria" [title]="rotuloCategoria(l)">{{ rotuloCategoria(l) }}</td>
               <td data-label="Status"><app-status-badge [type]="l.status === statusRealizado ? 'realizado' : 'pendente'" [label]="l.status === statusRealizado ? config().statusRealizadoLabel : 'Pendente'" /></td>
               <td class="cell-actions">
-                @if (l.status !== statusRealizado) {
-                  <button class="action-btn action-btn--success" [title]="config().acaoRealizar" (click)="realizar(l)">
-                    <svg lucideIcon="check" [size]="16" />
-                  </button>
-                } @else {
-                  <button class="action-btn" title="Estornar" (click)="estornar(l)">
-                    <svg lucideIcon="arrow-left" [size]="16" />
-                  </button>
+                @if (hasParceiro()) {
+                  @if (l.status !== statusRealizado) {
+                    <button class="action-btn action-btn--success" [title]="config().acaoRealizar" (click)="realizar(l)">
+                      <svg lucideIcon="check" [size]="16" />
+                    </button>
+                  } @else {
+                    <button class="action-btn" title="Estornar" (click)="estornar(l)">
+                      <svg lucideIcon="arrow-left" [size]="16" />
+                    </button>
+                  }
                 }
                 <button class="action-btn" title="Copiar" (click)="copiar(l)">
                   <svg lucideIcon="copy" [size]="16" />
@@ -131,6 +150,7 @@
   [fluxoAdicional]="fluxoEfetivo()"
   [parceiros]="parceiros()"
   [parcerias]="parcerias()"
+  [contratos]="contratos()"
   [clientes]="clientes()"
   [categoriasServico]="categoriasServico()"
   [salvando]="salvando()"

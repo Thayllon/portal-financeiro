@@ -19,6 +19,9 @@ public class ReceitaResponse
     public Guid? IdParceria { get; set; }
     public string Parceria { get; set; } = string.Empty;
     public decimal? ParceriaValor { get; set; }
+    public decimal? ParceriaPercentual { get; set; }
+    public Guid? IdContrato { get; set; }
+    public string Contrato { get; set; } = string.Empty;
     public List<ReceitaServicoResponse> Servicos { get; set; } = new();
     public int Status { get; set; }
     public DateTime? DataRealizacao { get; set; }

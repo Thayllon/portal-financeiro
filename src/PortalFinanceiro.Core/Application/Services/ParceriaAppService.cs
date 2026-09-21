@@ -20,9 +20,9 @@ public class ParceriaAppService : IParceriaAppService
         _pessoaRepository = pessoaRepository;
     }
 
-    public async Task<Result<IEnumerable<ParceriaResponse>>> ListarAsync(Guid idUsuario)
+    public async Task<Result<IEnumerable<ParceriaResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null)
     {
-        var parcerias = await _repository.ListarAsync(idUsuario);
+        var parcerias = await _repository.ListarAsync(idUsuario, ativo);
         var responses = new List<ParceriaResponse>();
         foreach (var p in parcerias)
             responses.Add(await MapearComResumoAsync(p));
@@ -75,6 +75,42 @@ public class ParceriaAppService : IParceriaAppService
         return await MapearComResumoAsync(projecao!);
     }
 
+    public async Task<Result<Unit>> EncerrarAsync(Guid id, Guid idUsuario)
+    {
+        var parceria = await _repository.ObterPorIdAsync(id);
+        if (parceria is null)
+            return Erro.NaoEncontrado("Parceria");
+        if (parceria.IdUsuario != idUsuario)
+            return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
+        if (!parceria.Ativo)
+            return Erro.Negocio("PARCERIA_JA_ENCERRADA", "Esta parceria já está encerrada.");
+
+        var totalRecebido = await _repository.SomarReceitasPorStatusAsync(id, 2);
+        var totalPago = await _repository.SomarDespesasPorStatusAsync(id, 2);
+        var valorParceiro = Math.Round(parceria.Valor * parceria.PercentualParceiro / 100, 2);
+        if (parceria.Valor - totalRecebido > 0 || valorParceiro - totalPago > 0)
+            return Erro.Negocio("PARCERIA_COM_PENDENCIAS", "Só é possível encerrar parceria sem valores a receber e a pagar.");
+
+        parceria.Desativar();
+        await _repository.AtualizarAsync(parceria);
+        return Resultado.Sucesso();
+    }
+
+    public async Task<Result<Unit>> ReativarAsync(Guid id, Guid idUsuario)
+    {
+        var parceria = await _repository.ObterPorIdAsync(id);
+        if (parceria is null)
+            return Erro.NaoEncontrado("Parceria");
+        if (parceria.IdUsuario != idUsuario)
+            return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
+        if (parceria.Ativo)
+            return Erro.Negocio("PARCERIA_JA_ATIVA", "Esta parceria já está ativa.");
+
+        parceria.Reativar();
+        await _repository.AtualizarAsync(parceria);
+        return Resultado.Sucesso();
+    }
+
     public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario)
     {
         var parceria = await _repository.ObterPorIdAsync(id);
@@ -91,6 +127,12 @@ public class ParceriaAppService : IParceriaAppService
         parceria.Desativar();
         await _repository.AtualizarAsync(parceria);
         return Resultado.Sucesso();
+    }
+
+    public async Task<Result<ResumoParceriaAnual>> ResumoMensalAsync(Guid idUsuario, int ano, int mes)
+    {
+        var resumo = await _repository.ResumoMensalAsync(idUsuario, ano, mes);
+        return resumo;
     }
 
     private async Task<Result<Unit>> ValidarPessoasAsync(Guid idUsuario, Guid idParceiro, Guid idCliente)

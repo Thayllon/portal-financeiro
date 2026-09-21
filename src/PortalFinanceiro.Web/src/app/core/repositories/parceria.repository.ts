@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseHttpRepository } from './base-http.repository';
-import { Parceria, ParceriaRequest } from '../models/parceria.model';
+import { Parceria, ParceriaRequest, ResumoParceriaMensal } from '../models/parceria.model';
 import { Receita } from '../models/receita.model';
 import { Despesa } from '../models/despesa.model';
 
@@ -10,8 +10,8 @@ import { Despesa } from '../models/despesa.model';
 export class ParceriaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(): Observable<Parceria[]> {
-    return this.get<Parceria[]>('/parcerias');
+  listar(ativo?: boolean): Observable<Parceria[]> {
+    return this.get<Parceria[]>('/parcerias', { ...(ativo !== undefined ? { ativo } : {}) });
   }
 
   obter(id: string): Observable<Parceria> {
@@ -30,8 +30,20 @@ export class ParceriaRepository extends BaseHttpRepository {
     return this.delete<any>(`/parcerias/${id}`);
   }
 
+  encerrar(id: string): Observable<any> {
+    return this.put<any>(`/parcerias/${id}/encerrar`);
+  }
+
+  reativar(id: string): Observable<any> {
+    return this.put<any>(`/parcerias/${id}/reativar`);
+  }
+
   listarReceitas(id: string): Observable<Receita[]> {
     return this.get<Receita[]>(`/parcerias/${id}/receitas`);
+  }
+
+  resumoMensal(ano: number, mes: number): Observable<ResumoParceriaMensal> {
+    return this.get<ResumoParceriaMensal>('/parcerias/resumo', { ano, mes });
   }
 
   listarDespesas(id: string): Observable<Despesa[]> {

@@ -8,6 +8,7 @@ public interface IReceitaAppService
 {
     Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null);
     Task<Result<IEnumerable<ReceitaResponse>>> ListarPorParceriaAsync(Guid idUsuario, Guid idParceria);
+    Task<Result<IEnumerable<ReceitaResponse>>> ListarPorContratoAsync(Guid idUsuario, Guid idContrato);
     Task<Result<ReceitaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario);
     Task<Result<ReceitaResponse>> AdicionarAsync(Guid idUsuario, ReceitaRequest request);
     Task<Result<ReceitaResponse>> AtualizarAsync(Guid id, Guid idUsuario, ReceitaRequest request);
