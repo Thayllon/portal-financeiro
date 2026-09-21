@@ -651,27 +651,6 @@
             </app-collapsible-section>
           }
 
-          @if (dataAnual()?.previsaoRestanteAno?.length) {
-            <app-collapsible-section title="Previsão dos próximos meses" icon="calendar-days" iconVariant="primary">
-              <p class="info-banner">Exibindo apenas os meses a partir de {{ mesInicialPrevisao() }}.</p>
-              <div class="table-card">
-                <table class="table">
-                  <thead><tr><th>Mês</th><th>Receitas (previsto)</th><th>Despesas (previsto)</th><th>Saldo (previsto)</th></tr></thead>
-                  <tbody>
-                    @for (p of dataAnual()!.previsaoRestanteAno; track p.mes) {
-                      <tr>
-                        <td class="cell-name" data-label="Mês">{{ MESES[p.mes - 1] }}</td>
-                        <td class="cell-value green" data-label="Receitas (previsto)">{{ p.totalReceitas | valorMascarado }}</td>
-                        <td class="cell-value red" data-label="Despesas (previsto)">{{ p.totalDespesas | valorMascarado }}</td>
-                        <td class="cell-value" [class.green]="p.saldoPrevisto >= 0" [class.red]="p.saldoPrevisto < 0" data-label="Saldo (previsto)">{{ p.saldoPrevisto | valorMascarado }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </app-collapsible-section>
-          }
-
           @if (dataAnual()?.resumoPorConta?.length) {
             <app-collapsible-section title="Por conta" icon="wallet" iconVariant="info">
               <div class="table-card">

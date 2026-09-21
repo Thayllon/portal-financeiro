@@ -97,6 +97,7 @@
 
 .table-card {
   @include layout.card;
+  @include table.table-card-scroll;
 }
 
 .table {
