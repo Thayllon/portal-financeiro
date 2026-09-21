@@ -39,7 +39,9 @@ public class ReceitaAppService : IReceitaAppService
             {
                 Id = s.Id,
                 CategoriaServicoId = s.CategoriaServicoId,
-                SubcategoriaServicoId = s.SubcategoriaServicoId
+                CategoriaServico = s.CategoriaServico,
+                SubcategoriaServicoId = s.SubcategoriaServicoId,
+                SubcategoriaServico = s.SubcategoriaServico
             }).ToList();
             responses.Add(response);
         }
@@ -90,7 +92,9 @@ public class ReceitaAppService : IReceitaAppService
         {
             Id = s.Id,
             CategoriaServicoId = s.CategoriaServicoId,
-            SubcategoriaServicoId = s.SubcategoriaServicoId
+            CategoriaServico = s.CategoriaServico,
+            SubcategoriaServicoId = s.SubcategoriaServicoId,
+            SubcategoriaServico = s.SubcategoriaServico
         }).ToList();
 
         return response;

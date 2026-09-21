@@ -1,5 +1,6 @@
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
+using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 
 namespace PortalFinanceiro.Core.Application.Interfaces;
@@ -13,4 +14,5 @@ public interface IParceriaAppService
     Task<Result<Unit>> EncerrarAsync(Guid id, Guid idUsuario);
     Task<Result<Unit>> ReativarAsync(Guid id, Guid idUsuario);
     Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuario);
+    Task<Result<ResumoParceriaAnual>> ResumoMensalAsync(Guid idUsuario, int ano, int mes);
 }

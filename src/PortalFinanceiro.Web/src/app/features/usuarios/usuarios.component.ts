@@ -43,7 +43,7 @@ export class UsuariosComponent implements OnInit {
   permissoesAberto = signal(false);
   especiaisAberto = signal(false);
 
-  permLevels: Record<string, 'none' | 'read' | 'write'> = {};
+  permLevels = signal<Record<string, 'none' | 'read' | 'write'>>({});
 
   modulosPermissao = [
     { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line' },
@@ -114,16 +114,21 @@ export class UsuariosComponent implements OnInit {
     this.modalVisible.set(false);
     this.drawerVisible.set(true);
     this.buscaPermissao.set('');
-    this.permLevels = {};
+    const niveis: Record<string, 'none' | 'read' | 'write'> = {};
     this.modulosPermissao.forEach(m => {
-      this.permLevels[m.id] = item.isAdmin ? 'write' : 'none';
+      niveis[m.id] = item.isAdmin ? 'write' : 'none';
     });
+    this.permLevels.set(niveis);
     try {
       const permissoes = await firstValueFrom(this.permissaoRepo.listar(item.id));
-      permissoes.forEach(p => {
-        if (p.modulo in this.permLevels) {
-          this.permLevels[p.modulo] = p.nivel === NivelPermissao.Escrita ? 'write' : p.nivel === NivelPermissao.Leitura ? 'read' : 'none';
-        }
+      this.permLevels.update(atual => {
+        const copia = { ...atual };
+        permissoes.forEach(p => {
+          if (p.modulo in copia) {
+            copia[p.modulo] = p.nivel === NivelPermissao.Escrita ? 'write' : p.nivel === NivelPermissao.Leitura ? 'read' : 'none';
+          }
+        });
+        return copia;
       });
       const fluxoPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL);
       this.fluxoAdicional.set(!!fluxoPerm && fluxoPerm.nivel >= NivelPermissao.Leitura);
@@ -159,7 +164,7 @@ export class UsuariosComponent implements OnInit {
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
     const u = this.editando();
     if (u?.isAdmin) return;
-    this.permLevels[moduloId] = nivel;
+    this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
   }
 
   async excluirAtual() {
@@ -208,7 +213,7 @@ export class UsuariosComponent implements OnInit {
         this.notify.success('Usuário criado');
       }
       if (!this.form.isAdmin) {
-        const permissoes: Permissao[] = Object.entries(this.permLevels).map(([modulo, nivel]) => ({
+        const permissoes: Permissao[] = Object.entries(this.permLevels()).map(([modulo, nivel]) => ({
           modulo,
           nivel: nivel === 'write' ? NivelPermissao.Escrita : nivel === 'read' ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
         }));

@@ -8,6 +8,7 @@
         <svg lucideIcon="file-badge" class="page__icon" [size]="22" />
       </span>
       <h1 class="page__title">Detalhes contrato - {{ contrato()?.nome ?? '...' }}</h1>
+      <app-privacidade-toggle />
     </div>
   </header>
 
@@ -26,12 +27,12 @@
       <div class="table-card card">
         <span class="card__label">Cliente</span>
         <strong class="card__value">{{ c.cliente }}</strong>
-        <span class="card__hint">Valor do contrato {{ c.valor | currencyBRL }}</span>
+        <span class="card__hint">Valor do contrato {{ c.valor | valorMascarado }}</span>
       </div>
       <div class="table-card card">
         <span class="card__label">Recebido do cliente</span>
-        <strong class="card__value" style="color: var(--color-success)">{{ c.totalRecebido | currencyBRL }}</strong>
-        <span class="card__hint">Falta receber {{ c.faltaReceber | currencyBRL }}</span>
+        <strong class="card__value" style="color: var(--color-success)">{{ c.totalRecebido | valorMascarado }}</strong>
+        <span class="card__hint">Falta receber {{ c.faltaReceber | valorMascarado }}</span>
       </div>
     </div>
 
@@ -55,7 +56,7 @@
             @for (r of receitasPaginacao.paginatedItems(); track r.id) {
               <tr>
                 <td class="cell-name" data-label="Descrição">{{ r.descricao }}</td>
-                <td class="cell-value" data-label="Valor">{{ r.valor | currencyBRL }}</td>
+                <td class="cell-value" data-label="Valor">{{ r.valor | valorMascarado }}</td>
                 <td class="cell-meta" data-label="Data">{{ r.data | date:'dd/MM/yyyy' }}</td>
                 <td data-label="Status"><app-status-badge [type]="r.status === statusRealizado ? 'realizado' : 'pendente'" [label]="r.status === statusRealizado ? 'Recebido' : 'Pendente'" /></td>
               </tr>
@@ -64,8 +65,8 @@
         </table>
         <app-list-pagination [pagination]="receitasPaginacao" />
         <div class="table-footer">
-          <span>Recebido: <strong style="color: var(--color-success)">{{ entradasRecebidas() | currencyBRL }}</strong></span>
-          <span>Pendente: <strong style="color: var(--color-warning)">{{ entradasPendentes() | currencyBRL }}</strong></span>
+          <span>Recebido: <strong style="color: var(--color-success)">{{ entradasRecebidas() | valorMascarado }}</strong></span>
+          <span>Pendente: <strong style="color: var(--color-warning)">{{ entradasPendentes() | valorMascarado }}</strong></span>
         </div>
       </div>
     }

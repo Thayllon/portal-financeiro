@@ -7,7 +7,8 @@ import { Contrato } from '../../../core/models/contrato.model';
 import { Receita } from '../../../core/models/receita.model';
 import { STATUS_REALIZADO } from '../../../core/models/status.model';
 import { NotificationService } from '../../../core/services/notification.service';
-import { CurrencyBRLPipe } from '../../../shared/pipes/currency-brl.pipe';
+import { ValorMascaradoPipe } from '../../../shared/pipes/valor-mascarado.pipe';
+import { PrivacidadeToggleComponent } from '../../../shared/components/privacidade-toggle.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
 import { ListPaginationComponent } from '../../../shared/components/list-pagination.component';
 import { useListPagination } from '../../../shared/composables/use-list-pagination.composable';
@@ -17,7 +18,7 @@ import { mensagemErro } from '../../../shared/utils/api-error.util';
 @Component({
   selector: 'app-contrato-detalhe',
   standalone: true,
-  imports: [DatePipe, CurrencyBRLPipe, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
+  imports: [DatePipe, ValorMascaradoPipe, PrivacidadeToggleComponent, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './contrato-detalhe.component.html',
   styleUrl: './contrato-detalhe.component.scss'
 })

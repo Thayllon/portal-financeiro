@@ -46,10 +46,11 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/regras-despesas` | GET/PUT/DELETE | Regras recorrentes de despesa |
 | `/api/contas-bancarias` | GET/POST/PUT/DELETE | Contas bancárias |
 | `/api/pessoas` | GET/POST/PUT/DELETE | Clientes/parceiros (`Tipo`: 1=Cliente, 2=Parceiro) |
-| `/api/parcerias` | GET (`ativo?`)/POST/PUT/DELETE · PUT /{id}/encerrar|reativar | Parcerias (nome + parceiro + cliente + valor + % do parceiro) — `ValorParceiro`/`MinhaParte` calculados; saldo via `TotalRecebido/Pago` e `FaltaReceber/Pagar` (a receber sobre o valor cheio, a pagar sobre a parte do parceiro) |
+| `/api/parcerias` | GET (`ativo?`)/POST/PUT/DELETE · PUT /{id}/encerrar\|reativar | Parcerias (nome + parceiro + cliente + valor + % do parceiro) — `ValorParceiro`/`MinhaParte` calculados; saldo via `TotalRecebido/Pago` e `FaltaReceber/Pagar` (a receber sobre o valor cheio, a pagar sobre a parte do parceiro); encerrar exige falta receber e falta pagar zerados (`PARCERIA_COM_PENDENCIAS` → 422) |
 | `/api/parcerias/{id}/receitas` | GET | Receitas vinculadas à parceria (dono validado) |
 | `/api/parcerias/{id}/despesas` | GET | Despesas vinculadas à parceria (dono validado) |
-| `/api/contratos` | GET (`ativo?`)/POST/PUT/DELETE · PUT /{id}/encerrar|reativar | Contratos (nome + cliente + valor, sem parceiro) — saldo via `TotalRecebido` e `FaltaReceber`; receita vinculada via `IdContrato` (no máximo um vínculo por receita: parceria ou contrato) |
+| `/api/parcerias/resumo` | GET (`ano`, `mes`) | Resumo do mês (recebido/pago/a receber/a pagar + qtd) |
+| `/api/contratos` | GET (`ativo?`)/POST/PUT/DELETE · PUT /{id}/encerrar\|reativar | Contratos (nome + cliente + valor, sem parceiro) — saldo via `TotalRecebido` e `FaltaReceber`; encerrar exige falta receber zerada (`CONTRATO_COM_PENDENCIAS` → 422); receita vinculada via `IdContrato` (no máximo um vínculo por receita: parceria ou contrato) |
 | `/api/contratos/{id}/receitas` | GET | Receitas vinculadas ao contrato (dono validado) |
 | `/api/categorias/receita` | GET/POST/PUT/DELETE | Categorias de receita (compartilhadas) |
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa (compartilhadas) |

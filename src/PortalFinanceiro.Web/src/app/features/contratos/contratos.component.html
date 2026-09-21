@@ -5,6 +5,7 @@
         <svg lucideIcon="file-badge" class="page__icon" [size]="22" />
       </span>
       <h1 class="page__title">Contratos</h1>
+      <app-privacidade-toggle />
     </div>
     <button class="add-btn" (click)="abrirModal()">
       <svg lucideIcon="plus" [size]="16" />
@@ -56,8 +57,8 @@
             <tr>
               <td class="cell-name" data-label="Nome">{{ c.nome }}</td>
               <td data-label="Cliente">{{ c.cliente }}</td>
-              <td data-label="Valor">{{ c.valor | currencyBRL }}</td>
-              <td data-label="Falta receber" [class.negative]="c.faltaReceber > 0">{{ c.faltaReceber | currencyBRL }}</td>
+              <td data-label="Valor">{{ c.valor | valorMascarado }}</td>
+              <td data-label="Falta receber" [class.negative]="c.faltaReceber > 0">{{ c.faltaReceber | valorMascarado }}</td>
               <td data-label="Status"><app-status-badge [type]="c.ativo ? 'ativo' : 'inativo'" [label]="c.ativo ? 'Ativo' : 'Encerrado'" /></td>
               <td class="cell-actions">
                 <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(c)">

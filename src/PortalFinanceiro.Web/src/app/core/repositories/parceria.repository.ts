@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { BaseHttpRepository } from './base-http.repository';
-import { Parceria, ParceriaRequest } from '../models/parceria.model';
+import { Parceria, ParceriaRequest, ResumoParceriaMensal } from '../models/parceria.model';
 import { Receita } from '../models/receita.model';
 import { Despesa } from '../models/despesa.model';
 
@@ -40,6 +40,10 @@ export class ParceriaRepository extends BaseHttpRepository {
 
   listarReceitas(id: string): Observable<Receita[]> {
     return this.get<Receita[]>(`/parcerias/${id}/receitas`);
+  }
+
+  resumoMensal(ano: number, mes: number): Observable<ResumoParceriaMensal> {
+    return this.get<ResumoParceriaMensal>('/parcerias/resumo', { ano, mes });
   }
 
   listarDespesas(id: string): Observable<Despesa[]> {

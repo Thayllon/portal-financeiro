@@ -83,4 +83,11 @@ public class ParceriasController : BaseController
         var result = await _despesaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
         return ApiResponse(result);
     }
+
+    [HttpGet("resumo")]
+    public async Task<IActionResult> ResumoMensal([FromQuery] int ano, [FromQuery] int mes)
+    {
+        var result = await _service.ResumoMensalAsync(ObterIdUsuario(), ano, mes);
+        return ApiResponse(result);
+    }
 }

@@ -24,3 +24,11 @@ export interface ParceriaRequest {
   valor: number;
   percentualParceiro: number;
 }
+
+export interface ResumoParceriaMensal {
+  totalRecebido: number;
+  totalPago: number;
+  aReceber: number;
+  aPagar: number;
+  qtdParcerias: number;
+}

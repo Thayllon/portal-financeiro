@@ -5,6 +5,7 @@
         <svg lucideIcon="handshake" class="page__icon" [size]="22" />
       </span>
       <h1 class="page__title">Parcerias</h1>
+      <app-privacidade-toggle />
     </div>
     <button class="add-btn" (click)="abrirModal()">
       <svg lucideIcon="plus" [size]="16" />
@@ -13,9 +14,14 @@
   </header>
 
   <div class="toolbar">
+    <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
     <div class="filtros">
       <app-custom-select placeholder="Todas" [options]="situacaoOptions" (valueChange)="mudarSituacao($event)" />
     </div>
+  </div>
+
+  <div class="totals">
+    <span>Pago no mês: <strong style="color: var(--color-success)">{{ (resumoMensal()?.totalPago ?? 0) | valorMascarado }}</strong></span>
   </div>
 
   @if (loading()) {
@@ -59,9 +65,9 @@
               <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
               <td data-label="Parceiro">{{ p.parceiro }}</td>
               <td data-label="Cliente">{{ p.cliente }}</td>
-              <td data-label="Valor">{{ p.valor | currencyBRL }}</td>
-              <td data-label="Falta receber" [class.negative]="p.faltaReceber > 0">{{ p.faltaReceber | currencyBRL }}</td>
-              <td data-label="Falta pagar" [class.negative]="p.faltaPagar > 0">{{ p.faltaPagar | currencyBRL }}</td>
+              <td data-label="Valor">{{ p.valor | valorMascarado }}</td>
+              <td data-label="Falta receber" [class.negative]="p.faltaReceber > 0">{{ p.faltaReceber | valorMascarado }}</td>
+              <td data-label="Falta pagar" [class.negative]="p.faltaPagar > 0">{{ p.faltaPagar | valorMascarado }}</td>
               <td data-label="Status"><app-status-badge [type]="p.ativo ? 'ativo' : 'inativo'" [label]="p.ativo ? 'Ativa' : 'Encerrada'" /></td>
               <td class="cell-actions">
                 <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(p)">

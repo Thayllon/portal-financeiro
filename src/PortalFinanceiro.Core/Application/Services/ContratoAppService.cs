@@ -85,6 +85,10 @@ public class ContratoAppService : IContratoAppService
         if (!contrato.Ativo)
             return Erro.Negocio("CONTRATO_JA_ENCERRADO", "Este contrato já está encerrado.");
 
+        var totalRecebido = await _repository.SomarReceitasPorStatusAsync(id, 2);
+        if (contrato.Valor - totalRecebido > 0)
+            return Erro.Negocio("CONTRATO_COM_PENDENCIAS", "Só é possível encerrar contrato sem valores a receber.");
+
         contrato.Desativar();
         await _repository.AtualizarAsync(contrato);
         return Resultado.Sucesso();

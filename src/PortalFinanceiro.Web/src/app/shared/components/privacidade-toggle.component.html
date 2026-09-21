@@ -1,0 +1,9 @@
+<button
+  type="button"
+  class="privacidade-toggle"
+  [title]="privacidade.valoresOcultos() ? 'Exibir valores' : 'Ocultar valores'"
+  [attr.aria-label]="privacidade.valoresOcultos() ? 'Exibir valores' : 'Ocultar valores'"
+  (click)="privacidade.toggle()"
+>
+  <svg [lucideIcon]="privacidade.valoresOcultos() ? 'eye-off' : 'eye'" [size]="18" />
+</button>

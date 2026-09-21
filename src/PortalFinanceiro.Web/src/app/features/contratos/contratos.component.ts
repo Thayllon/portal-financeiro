@@ -11,7 +11,8 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { CurrencyInputDirective } from '../../shared/directives/currency-input.directive';
-import { CurrencyBRLPipe } from '../../shared/pipes/currency-brl.pipe';
+import { ValorMascaradoPipe } from '../../shared/pipes/valor-mascarado.pipe';
+import { PrivacidadeToggleComponent } from '../../shared/components/privacidade-toggle.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
@@ -21,7 +22,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 @Component({
   selector: 'app-contratos',
   standalone: true,
-  imports: [FormsModule, ModalComponent, CustomSelectComponent, CurrencyInputDirective, CurrencyBRLPipe, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, CustomSelectComponent, CurrencyInputDirective, ValorMascaradoPipe, PrivacidadeToggleComponent, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './contratos.component.html',
   styleUrl: './contratos.component.scss'
 })
@@ -115,6 +116,10 @@ export class ContratosComponent implements OnInit {
   }
 
   async alternarSituacao(item: Contrato) {
+    if (item.ativo && item.faltaReceber > 0) {
+      this.notify.error('Só é possível encerrar contrato sem valores a receber');
+      return;
+    }
     try {
       if (item.ativo) {
         await firstValueFrom(this.repo.encerrar(item.id));

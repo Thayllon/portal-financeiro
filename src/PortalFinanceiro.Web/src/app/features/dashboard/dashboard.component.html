@@ -8,6 +8,7 @@
             <h1 class="page__title">Dashboard</h1>
             <p class="page__subtitle">Acompanhe suas finanças de forma simples e visual.</p>
           </div>
+          <app-privacidade-toggle />
         </div>
         <div class="page__header-actions">
           <div class="view-toggle">
@@ -56,7 +57,7 @@
                 <span class="card-label">Receitas</span>
               </div>
               <div class="kpi-main">
-                <div class="card-value green">{{ kpiMensal()?.receitas | currencyBRL }}</div>
+                <div class="card-value green">{{ kpiMensal()?.receitas | valorMascarado }}</div>
                 @if (kpiMensal()?.varReceitas !== null && kpiMensal()?.varReceitas !== undefined) {
                   <span class="pill" [class.pill--green]="(kpiMensal()!.varReceitas!) >= 0" [class.pill--red]="(kpiMensal()!.varReceitas!) < 0">
                     @if ((kpiMensal()!.varReceitas!) >= 0) { ↑ } @else { ↓ }
@@ -68,7 +69,7 @@
               </div>
               <div class="kpi-foot">
                 <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
-                <span class="spark"><canvas baseChart [data]="sparkReceitas" [options]="sparkOptions" type="line"></canvas></span>
+                <span class="spark"><canvas baseChart [data]="sparkReceitasExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
@@ -79,7 +80,7 @@
                 <span class="card-label">Despesas</span>
               </div>
               <div class="kpi-main">
-                <div class="card-value red">{{ kpiMensal()?.despesas | currencyBRL }}</div>
+                <div class="card-value red">{{ kpiMensal()?.despesas | valorMascarado }}</div>
                 @if (kpiMensal()?.varDespesas !== null && kpiMensal()?.varDespesas !== undefined) {
                   <span class="pill pill--red">
                     @if ((kpiMensal()!.varDespesas!) >= 0) { ↑ } @else { ↓ }
@@ -91,7 +92,7 @@
               </div>
               <div class="kpi-foot">
                 <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
-                <span class="spark"><canvas baseChart [data]="sparkDespesas" [options]="sparkOptions" type="line"></canvas></span>
+                <span class="spark"><canvas baseChart [data]="sparkDespesasExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
@@ -102,7 +103,7 @@
                 <span class="card-label">Lucro líquido</span>
               </div>
               <div class="kpi-main">
-                <div class="card-value">{{ kpiMensal()?.saldo | currencyBRL }}</div>
+                <div class="card-value">{{ kpiMensal()?.saldo | valorMascarado }}</div>
                 @if (kpiMensal()?.varSaldo !== null && kpiMensal()?.varSaldo !== undefined) {
                   <span class="pill" [class.pill--green]="(kpiMensal()!.varSaldo!) >= 0" [class.pill--red]="(kpiMensal()!.varSaldo!) < 0">
                     @if ((kpiMensal()!.varSaldo!) >= 0) { ↑ } @else { ↓ }
@@ -114,7 +115,7 @@
               </div>
               <div class="kpi-foot">
                 <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
-                <span class="spark"><canvas baseChart [data]="sparkSaldo" [options]="sparkOptions" type="line"></canvas></span>
+                <span class="spark"><canvas baseChart [data]="sparkSaldoExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
@@ -125,7 +126,7 @@
                 <span class="card-label">Fluxo de caixa</span>
               </div>
               <div class="kpi-main">
-                <div class="card-value" [class.green]="(kpiMensal()?.fluxo ?? 0) >= 0" [class.red]="(kpiMensal()?.fluxo ?? 0) < 0">{{ kpiMensal()?.fluxo | currencyBRL }}</div>
+                <div class="card-value" [class.green]="(kpiMensal()?.fluxo ?? 0) >= 0" [class.red]="(kpiMensal()?.fluxo ?? 0) < 0">{{ kpiMensal()?.fluxo | valorMascarado }}</div>
                 @if (kpiMensal()?.varFluxo !== null && kpiMensal()?.varFluxo !== undefined) {
                   <span class="pill" [class.pill--green]="(kpiMensal()!.varFluxo!) >= 0" [class.pill--red]="(kpiMensal()!.varFluxo!) < 0">
                     @if ((kpiMensal()!.varFluxo!) >= 0) { ↑ } @else { ↓ }
@@ -137,7 +138,7 @@
               </div>
               <div class="kpi-foot">
                 <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
-                <span class="spark"><canvas baseChart [data]="sparkFluxo" [options]="sparkOptions" type="line"></canvas></span>
+                <span class="spark"><canvas baseChart [data]="sparkFluxoExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
           </div>
@@ -168,8 +169,8 @@
               <div class="chart-container">
                 <canvas baseChart
                   [data]="barChartData"
-                  [options]="barChartMensalOptions"
-                  [plugins]="barChartPorContaPlugins"
+                  [options]="barChartMensalOptions()"
+                  [plugins]="barChartPorContaPlugins()"
                   type="bar">
                 </canvas>
               </div>
@@ -202,8 +203,8 @@
             <div class="chart-container">
               <canvas baseChart
                 [data]="barChartData"
-                [options]="barChartMensalOptions"
-                [plugins]="barChartMensalPlugins"
+                [options]="barChartMensalOptions()"
+                [plugins]="barChartMensalPlugins()"
                 type="bar">
               </canvas>
             </div>
@@ -213,7 +214,7 @@
                   <div class="saldo-card">
                     <span class="saldo-card__label">Saldo {{ s.label }}</span>
                     <div class="saldo-card__values">
-                      <strong class="saldo-card__value" [class.green]="s.saldo >= 0" [class.red]="s.saldo < 0">{{ s.saldo | currencyBRL }}</strong>
+                      <strong class="saldo-card__value" [class.green]="s.saldo >= 0" [class.red]="s.saldo < 0">{{ s.saldo | valorMascarado }}</strong>
                       <span class="saldo-card__var" [class.green]="(s.variacao ?? 0) >= 0" [class.red]="(s.variacao ?? 0) < 0">
                         @if (s.variacao !== null && s.variacao !== undefined) {
                           @if (s.variacao >= 0) { ↑ } @else { ↓ }
@@ -246,15 +247,15 @@
               @if (distRecAtual().length) {
                 <div class="donut-wrap">
                   <div class="donut-chart">
-                    <canvas baseChart [data]="donutDistRecData" [options]="doughnutChartOptions" type="doughnut"></canvas>
-                    <div class="donut-center"><strong>{{ totalDistRec() | currencyBRL }}</strong><span>Total</span></div>
+                    <canvas baseChart [data]="donutDistRecData" [options]="doughnutChartOptions()" type="doughnut"></canvas>
+                    <div class="donut-center"><strong>{{ totalDistRec() | valorMascarado }}</strong><span>Total</span></div>
                   </div>
                   <ul class="donut-legend">
                     @for (item of distRecAtual(); track item.nome) {
                       <li>
                         <span class="donut-legend__label">{{ item.nome }}</span>
                         <span class="donut-legend__pct">{{ item.percentual }}%</span>
-                        <span class="donut-legend__value">{{ item.total | currencyBRL }}</span>
+                        <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
                       </li>
                     }
                   </ul>
@@ -263,7 +264,7 @@
                 <div class="donut-wrap">
                   <div class="donut-chart">
                     <canvas baseChart [data]="donutVazioData" [options]="doughnutVazioOptions" type="doughnut"></canvas>
-                    <div class="donut-center"><strong>{{ 0 | currencyBRL }}</strong><span>Total</span></div>
+                    <div class="donut-center"><strong>{{ 0 | valorMascarado }}</strong><span>Total</span></div>
                   </div>
                   <div class="dist-empty">
                     <span class="dist-empty__icon"><svg lucideIcon="wallet" [size]="22"></svg></span>
@@ -284,15 +285,15 @@
               @if (distDespAtual().length) {
                 <div class="donut-wrap">
                   <div class="donut-chart">
-                    <canvas baseChart [data]="donutDistDespData" [options]="doughnutChartOptions" type="doughnut"></canvas>
-                    <div class="donut-center"><strong>{{ totalDistDesp() | currencyBRL }}</strong><span>Total</span></div>
+                    <canvas baseChart [data]="donutDistDespData" [options]="doughnutChartOptions()" type="doughnut"></canvas>
+                    <div class="donut-center"><strong>{{ totalDistDesp() | valorMascarado }}</strong><span>Total</span></div>
                   </div>
                   <ul class="donut-legend">
                     @for (item of distDespAtual(); track item.nome) {
                       <li>
                         <span class="donut-legend__label">{{ item.nome }}</span>
                         <span class="donut-legend__pct">{{ item.percentual }}%</span>
-                        <span class="donut-legend__value">{{ item.total | currencyBRL }}</span>
+                        <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
                       </li>
                     }
                   </ul>
@@ -301,7 +302,7 @@
                 <div class="donut-wrap">
                   <div class="donut-chart">
                     <canvas baseChart [data]="donutVazioData" [options]="doughnutVazioOptions" type="doughnut"></canvas>
-                    <div class="donut-center"><strong>{{ 0 | currencyBRL }}</strong><span>Total</span></div>
+                    <div class="donut-center"><strong>{{ 0 | valorMascarado }}</strong><span>Total</span></div>
                   </div>
                   <div class="dist-empty">
                     <span class="dist-empty__icon"><svg lucideIcon="wallet" [size]="22"></svg></span>
@@ -324,7 +325,7 @@
                 <span class="card-label">Parcerias</span>
               </div>
               <div class="kpi-main">
-                <div class="card-value">{{ data()?.resumoParcerias?.totalPago | currencyBRL }}</div>
+                <div class="card-value">{{ data()?.resumoParcerias?.totalPago | valorMascarado }}</div>
                 @if (kpiMensal()?.varParcerias !== null && kpiMensal()?.varParcerias !== undefined) {
                   <span class="pill" [class.pill--green]="(kpiMensal()!.varParcerias!) >= 0" [class.pill--red]="(kpiMensal()!.varParcerias!) < 0">
                     @if ((kpiMensal()!.varParcerias!) >= 0) { ↑ } @else { ↓ }
@@ -341,7 +342,7 @@
                   <span class="card-sub">Sem parcerias no mês</span>
                 }
               </div>
-              <p class="kpi-note">Pago incluído na despesa@if ((data()?.resumoParcerias?.aPagar ?? 0) > 0) { · Falta pagar {{ data()?.resumoParcerias?.aPagar | currencyBRL }} }</p>
+              <p class="kpi-note">Pago incluído na despesa@if ((data()?.resumoParcerias?.aPagar ?? 0) > 0) { · Falta pagar {{ data()?.resumoParcerias?.aPagar | valorMascarado }} }</p>
             </div>
             <div class="card">
               <div class="card-header">
@@ -351,7 +352,7 @@
                 <span class="card-label">Média diária</span>
               </div>
               <div class="kpi-main">
-                <div class="card-value">{{ kpiMensal()?.mediaDiaria | currencyBRL }}</div>
+                <div class="card-value">{{ kpiMensal()?.mediaDiaria | valorMascarado }}</div>
                 @if (kpiMensal()?.varMediaDiaria !== null && kpiMensal()?.varMediaDiaria !== undefined) {
                   <span class="pill" [class.pill--green]="(kpiMensal()!.varMediaDiaria!) >= 0" [class.pill--red]="(kpiMensal()!.varMediaDiaria!) < 0">
                     @if ((kpiMensal()!.varMediaDiaria!) >= 0) { ↑ } @else { ↓ }
@@ -413,7 +414,7 @@
                 <span class="card-label">Ponto de equilíbrio</span>
               </div>
               <div class="kpi-main">
-                <div class="card-value">{{ kpiMensal()?.pontoEquilibrio | currencyBRL }}</div>
+                <div class="card-value">{{ kpiMensal()?.pontoEquilibrio | valorMascarado }}</div>
                 @if (kpiMensal()?.distanciaPonto !== null && kpiMensal()?.distanciaPonto !== undefined) {
                   <span class="pill" [class.pill--green]="(kpiMensal()!.distanciaPonto!) >= 0" [class.pill--red]="(kpiMensal()!.distanciaPonto!) < 0">
                     @if ((kpiMensal()!.distanciaPonto!) >= 0) { ↑ } @else { ↓ }
@@ -424,7 +425,7 @@
                 }
               </div>
               <div class="kpi-foot">
-                <span class="card-sub">Receita atual: {{ kpiMensal()?.receitas | currencyBRL }}</span>
+                <span class="card-sub">Receita atual: {{ kpiMensal()?.receitas | valorMascarado }}</span>
               </div>
             </div>
           </div>
@@ -446,9 +447,9 @@
                         </span>
                       </td>
                       <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                      <td class="cell-value" data-label="Receitas">{{ c.totalReceitas | currencyBRL }}</td>
-                      <td class="cell-value" data-label="Despesas">{{ c.totalDespesas | currencyBRL }}</td>
-                      <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Lucro líquido">{{ c.saldo | currencyBRL }}</td>
+                      <td class="cell-value" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
+                      <td class="cell-value" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
+                      <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Lucro líquido">{{ c.saldo | valorMascarado }}</td>
                       <td data-label="% do total (receitas)">
                         <span class="pct-cell">
                           <span class="pct-bar"><span class="pct-bar__fill" [style.width.%]="c.percentual"></span></span>
@@ -460,9 +461,9 @@
                   <tr class="row-total">
                     <td class="cell-name" data-label="Conta">Total</td>
                     <td data-label="Tipo">—</td>
-                    <td class="cell-value" data-label="Receitas">{{ contasTabela().totalReceitas | currencyBRL }}</td>
-                    <td class="cell-value" data-label="Despesas">{{ contasTabela().totalDespesas | currencyBRL }}</td>
-                    <td class="cell-value" [class.green]="contasTabela().totalLucro >= 0" [class.red]="contasTabela().totalLucro < 0" data-label="Lucro líquido">{{ contasTabela().totalLucro | currencyBRL }}</td>
+                    <td class="cell-value" data-label="Receitas">{{ contasTabela().totalReceitas | valorMascarado }}</td>
+                    <td class="cell-value" data-label="Despesas">{{ contasTabela().totalDespesas | valorMascarado }}</td>
+                    <td class="cell-value" [class.green]="contasTabela().totalLucro >= 0" [class.red]="contasTabela().totalLucro < 0" data-label="Lucro líquido">{{ contasTabela().totalLucro | valorMascarado }}</td>
                     <td data-label="% do total (receitas)">
                       <span class="pct-cell">
                         <span class="pct-bar"><span class="pct-bar__fill pct-bar__fill--total" [style.width.%]="100"></span></span>
@@ -492,7 +493,7 @@
                 </span>
                 <span class="card-label">Receitas</span>
               </div>
-              <div class="card-value green">{{ dataAnual()?.totalReceitas | currencyBRL }}</div>
+              <div class="card-value green">{{ dataAnual()?.totalReceitas | valorMascarado }}</div>
               <div class="card-sub">
                 @if (dataAnual()?.variacaoReceitasPercentual !== null && dataAnual()?.variacaoReceitasPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoReceitasPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoReceitasPercentual!) < 0">
@@ -501,7 +502,7 @@
                   </span>
                   <span>Em relação a {{ ano() - 1 }}</span>
                 } @else {
-                  <span class="pill pill--green">{{ dataAnual()?.totalRecebido | currencyBRL }} recebido</span>
+                  <span class="pill pill--green">{{ dataAnual()?.totalRecebido | valorMascarado }} recebido</span>
                 }
               </div>
             </div>
@@ -512,7 +513,7 @@
                 </span>
                 <span class="card-label">Despesas</span>
               </div>
-              <div class="card-value red">{{ dataAnual()?.totalDespesas | currencyBRL }}</div>
+              <div class="card-value red">{{ dataAnual()?.totalDespesas | valorMascarado }}</div>
               <div class="card-sub">
                 @if (dataAnual()?.variacaoDespesasPercentual !== null && dataAnual()?.variacaoDespesasPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoDespesasPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoDespesasPercentual!) < 0">
@@ -521,7 +522,7 @@
                   </span>
                   <span>Em relação a {{ ano() - 1 }}</span>
                 } @else {
-                  <span class="pill pill--green">{{ dataAnual()?.totalPago | currencyBRL }} pago</span>
+                  <span class="pill pill--green">{{ dataAnual()?.totalPago | valorMascarado }} pago</span>
                 }
               </div>
             </div>
@@ -533,7 +534,7 @@
                 <span class="card-label">Saldo do ano</span>
               </div>
               <div class="card-value" [class.green]="(dataAnual()?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.saldo ?? 0) < 0">
-                {{ dataAnual()?.saldo | currencyBRL }}
+                {{ dataAnual()?.saldo | valorMascarado }}
               </div>
               <div class="card-sub">
                 @if (dataAnual()?.variacaoSaldoPercentual !== null && dataAnual()?.variacaoSaldoPercentual !== undefined) {
@@ -554,7 +555,7 @@
                 </span>
                 <span class="card-label">Média mensal (saldo)</span>
               </div>
-              <div class="card-value">{{ dataAnual()?.mediaMensalSaldo | currencyBRL }}</div>
+              <div class="card-value">{{ dataAnual()?.mediaMensalSaldo | valorMascarado }}</div>
               <div class="card-sub">Baseado em {{ dataAnual()?.mesesConsiderados }} meses</div>
             </div>
             <div class="card">
@@ -565,11 +566,11 @@
                 <span class="card-label">Parcerias</span>
               </div>
               <div class="card-value" [class.green]="(dataAnual()?.resumoParcerias?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.resumoParcerias?.saldo ?? 0) < 0">
-                {{ dataAnual()?.resumoParcerias?.saldo | currencyBRL }}
+                {{ dataAnual()?.resumoParcerias?.saldo | valorMascarado }}
               </div>
               <div class="card-sub">
-                <span class="pill pill--green">{{ dataAnual()?.resumoParcerias?.totalRecebido | currencyBRL }} recebido</span>
-                <span class="pill pill--red">{{ dataAnual()?.resumoParcerias?.totalPago | currencyBRL }} pago</span>
+                <span class="pill pill--green">{{ dataAnual()?.resumoParcerias?.totalRecebido | valorMascarado }} recebido</span>
+                <span class="pill pill--red">{{ dataAnual()?.resumoParcerias?.totalPago | valorMascarado }} pago</span>
               </div>
               <div class="card-sub card-sub--link">
                 <a routerLink="/parcerias">{{ dataAnual()?.resumoParcerias?.qtdParcerias }} parcerias movimentadas · Ver parcerias</a>
@@ -582,7 +583,7 @@
               <div class="chart-container">
                 <canvas baseChart
                   [data]="barChartData"
-                  [options]="barChartOptions"
+                  [options]="barChartOptions()"
                   type="bar">
                 </canvas>
               </div>
@@ -606,11 +607,11 @@
                   <div class="donut-chart">
                     <canvas baseChart
                       [data]="doughnutChartData"
-                      [options]="doughnutChartOptions"
+                      [options]="doughnutChartOptions()"
                       type="doughnut">
                     </canvas>
                     <div class="donut-center">
-                      <strong>{{ totalDistribuicao() | currencyBRL }}</strong>
+                      <strong>{{ totalDistribuicao() | valorMascarado }}</strong>
                       <span>Total</span>
                     </div>
                   </div>
@@ -619,7 +620,7 @@
                       <li>
                         <span class="donut-legend__label">{{ item.nome }}</span>
                         <span class="donut-legend__pct">{{ item.percentual }}%</span>
-                        <span class="donut-legend__value">{{ item.total | currencyBRL }}</span>
+                        <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
                       </li>
                     }
                   </ul>
@@ -639,9 +640,9 @@
                     @for (m of dataAnual()!.resumoPorMes; track m.mes) {
                       <tr>
                         <td class="cell-name" data-label="Mês">{{ MESES[m.mes - 1] }}</td>
-                        <td class="cell-value green" data-label="Receitas">{{ m.totalReceitas | currencyBRL }}</td>
-                        <td class="cell-value red" data-label="Despesas">{{ m.totalDespesas | currencyBRL }}</td>
-                        <td class="cell-value" [class.green]="m.saldo >= 0" [class.red]="m.saldo < 0" data-label="Saldo">{{ m.saldo | currencyBRL }}</td>
+                        <td class="cell-value green" data-label="Receitas">{{ m.totalReceitas | valorMascarado }}</td>
+                        <td class="cell-value red" data-label="Despesas">{{ m.totalDespesas | valorMascarado }}</td>
+                        <td class="cell-value" [class.green]="m.saldo >= 0" [class.red]="m.saldo < 0" data-label="Saldo">{{ m.saldo | valorMascarado }}</td>
                       </tr>
                     }
                   </tbody>
@@ -660,9 +661,9 @@
                     @for (p of dataAnual()!.previsaoRestanteAno; track p.mes) {
                       <tr>
                         <td class="cell-name" data-label="Mês">{{ MESES[p.mes - 1] }}</td>
-                        <td class="cell-value green" data-label="Receitas (previsto)">{{ p.totalReceitas | currencyBRL }}</td>
-                        <td class="cell-value red" data-label="Despesas (previsto)">{{ p.totalDespesas | currencyBRL }}</td>
-                        <td class="cell-value" [class.green]="p.saldoPrevisto >= 0" [class.red]="p.saldoPrevisto < 0" data-label="Saldo (previsto)">{{ p.saldoPrevisto | currencyBRL }}</td>
+                        <td class="cell-value green" data-label="Receitas (previsto)">{{ p.totalReceitas | valorMascarado }}</td>
+                        <td class="cell-value red" data-label="Despesas (previsto)">{{ p.totalDespesas | valorMascarado }}</td>
+                        <td class="cell-value" [class.green]="p.saldoPrevisto >= 0" [class.red]="p.saldoPrevisto < 0" data-label="Saldo (previsto)">{{ p.saldoPrevisto | valorMascarado }}</td>
                       </tr>
                     }
                   </tbody>
@@ -681,9 +682,9 @@
                       <tr>
                         <td class="cell-name" data-label="Conta">{{ c.nomeConta }} <span class="cell-meta">{{ c.banco }}</span></td>
                         <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                        <td class="cell-value green" data-label="Receitas">{{ c.totalReceitas | currencyBRL }}</td>
-                        <td class="cell-value red" data-label="Despesas">{{ c.totalDespesas | currencyBRL }}</td>
-                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo">{{ c.saldo | currencyBRL }}</td>
+                        <td class="cell-value green" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
+                        <td class="cell-value red" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
+                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo">{{ c.saldo | valorMascarado }}</td>
                       </tr>
                     }
                   </tbody>
