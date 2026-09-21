@@ -318,6 +318,8 @@
   text-align: center;
   font-size: 0.8125rem;
   color: var(--text-muted);
+  margin-left: calc(12px + var(--sidebar-width) + 12px);
+  width: calc(100% - var(--sidebar-width) - 36px);
 }
 
 .app-footer a {
@@ -331,7 +333,18 @@
   color: var(--text-primary);
 }
 
+.layout--collapsed + .app-footer {
+  margin-left: calc(12px + 84px + 12px);
+  width: calc(100% - 84px - 36px);
+}
+
 @include r.mobile {
+  .app-footer,
+  .layout--collapsed + .app-footer {
+    margin-left: 0;
+    width: 100%;
+  }
+
   .layout {
     margin: 0;
     height: 100vh;
