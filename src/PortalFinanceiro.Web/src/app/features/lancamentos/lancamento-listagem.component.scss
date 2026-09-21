@@ -4,6 +4,10 @@
 
 .page {
   @include layout.page-wrapper;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .page__header {
@@ -97,6 +101,24 @@
 
 .table-card {
   @include layout.card;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--content-surface);
+  }
+
+  app-list-pagination {
+    display: block;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: var(--content-surface);
+  }
 }
 
 .table {
