@@ -17,7 +17,7 @@
     <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
     <div class="filtros">
       <app-custom-select placeholder="Todas as contas" [options]="contasOptions()" (valueChange)="filtroConta = $event; carregar()" />
-      <app-custom-select placeholder="Todos os status" [options]="statusOptions" (valueChange)="filtroStatus = $event; carregar()" />
+      <app-custom-select placeholder="Todos os status" [options]="statusOptions()" (valueChange)="filtroStatus = $event; carregar()" />
       <app-custom-select placeholder="Todas as categorias" [options]="categoriasOptions()" (valueChange)="filtroCategoria = $event; carregar()" />
       <div class="search-wrapper">
         <svg lucideIcon="search" [size]="16" class="search-icon" />
@@ -30,9 +30,13 @@
     <span>Total: <strong>{{ total() | valorMascarado }}</strong></span>
     <span>{{ config().rotuloRealizado }}: <strong style="color: var(--color-success)">{{ totalRealizado() | valorMascarado }}</strong></span>
     <span>Pendente: <strong style="color: var(--color-warning)">{{ totalPendente() | valorMascarado }}</strong></span>
-    @if (fluxoAdicional() && hasParceiro()) {
-      <span>Parceria: <strong>{{ totalParceria() | valorMascarado }}</strong></span>
-      <span title="Repasse ao parceiro: {{ repasseParceiro() | valorMascarado }}">Receita líquida: <strong style="color: var(--color-success)">{{ receitaLiquida() | valorMascarado }}</strong></span>
+    @if (fluxoAdicional()) {
+      @if (hasParceiro()) {
+        <span>Parceria: <strong>{{ totalParceria() | valorMascarado }}</strong></span>
+        <span title="Repasse ao parceiro: {{ repasseParceiro() | valorMascarado }}">Receita líquida: <strong style="color: var(--color-success)">{{ receitaLiquida() | valorMascarado }}</strong></span>
+      } @else {
+        <span>Parceria: <strong>{{ totalParceria() | valorMascarado }}</strong></span>
+      }
     }
   </div>
 
@@ -103,16 +107,14 @@
               <td class="cell-meta" data-label="Categoria" [title]="rotuloCategoria(l)">{{ rotuloCategoria(l) }}</td>
               <td data-label="Status"><app-status-badge [type]="l.status === statusRealizado ? 'realizado' : 'pendente'" [label]="l.status === statusRealizado ? config().statusRealizadoLabel : 'Pendente'" /></td>
               <td class="cell-actions">
-                @if (hasParceiro()) {
-                  @if (l.status !== statusRealizado) {
-                    <button class="action-btn action-btn--success" [title]="config().acaoRealizar" (click)="realizar(l)">
-                      <svg lucideIcon="check" [size]="16" />
-                    </button>
-                  } @else {
-                    <button class="action-btn" title="Estornar" (click)="estornar(l)">
-                      <svg lucideIcon="arrow-left" [size]="16" />
-                    </button>
-                  }
+                @if (l.status !== statusRealizado) {
+                  <button class="action-btn action-btn--success" [title]="config().acaoRealizar" (click)="realizar(l)">
+                    <svg lucideIcon="check" [size]="16" />
+                  </button>
+                } @else {
+                  <button class="action-btn" title="Estornar" (click)="estornar(l)">
+                    <svg lucideIcon="arrow-left" [size]="16" />
+                  </button>
                 }
                 <button class="action-btn" title="Copiar" (click)="copiar(l)">
                   <svg lucideIcon="copy" [size]="16" />

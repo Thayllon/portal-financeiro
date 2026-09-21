@@ -303,7 +303,7 @@
                     [options]="clientesOptions()"
                     [value]="form().idCliente ?? ''"
                     [searchable]="true"
-                    (valueChange)="updateFormField('idCliente', $event); clearError('idCliente')"
+                    (valueChange)="onClienteChange($event); clearError('idCliente')"
                   />
                   @if (fieldErrors()['idCliente']) {
                     <span class="field-error">{{ fieldErrors()['idCliente'] }}</span>

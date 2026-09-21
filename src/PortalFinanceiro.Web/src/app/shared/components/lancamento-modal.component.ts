@@ -445,6 +445,28 @@ export class LancamentoModalComponent {
     }
   }
 
+  onClienteChange(value: string) {
+    const id = value || undefined;
+    const label = this.clientesOptions().find(o => o.value === value)?.label;
+    let descricaoSet = false;
+    this.form.update(f => {
+      const shouldSetDescricao = this.devePuxarDescricaoCliente(f.descricao) && !!label;
+      if (shouldSetDescricao) descricaoSet = true;
+      return {
+        ...f,
+        idCliente: id,
+        descricao: shouldSetDescricao && label ? label : f.descricao
+      };
+    });
+    if (descricaoSet) {
+      this.clearError('descricao');
+    }
+  }
+
+  private devePuxarDescricaoCliente(descricaoAtual: string): boolean {
+    return this.fluxoAdicional() && this.dominioCategoria() === 'receita' && !descricaoAtual?.trim();
+  }
+
   onDiaUtilChange() {
     const f = this.form();
     if (f.diaUtil && f.dia && f.dia > 5) {
@@ -602,8 +624,20 @@ export class LancamentoModalComponent {
       } else {
         const criada = await firstValueFrom(this.pessoaRepo.criar({ nome, telefone: this.quickTelefone().trim(), tipo: 'Cliente' }));
         this.clienteCriado.emit(criada);
-        this.updateFormField('idCliente', criada.id);
+        let descricaoSet = false;
+        this.form.update(f => {
+          const shouldSetDescricao = this.devePuxarDescricaoCliente(f.descricao);
+          if (shouldSetDescricao) descricaoSet = true;
+          return {
+            ...f,
+            idCliente: criada.id,
+            descricao: shouldSetDescricao ? nome : f.descricao
+          };
+        });
         this.clearError('idCliente');
+        if (descricaoSet) {
+          this.clearError('descricao');
+        }
       }
       this.quickAdd.set(null);
     } catch (e) {
