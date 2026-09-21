@@ -21,7 +21,7 @@
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
-            <!-- Passo 1: Parceria -->
+            <!-- Passo 1: Contrato ou Parceria -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 1"
               [class.wizard__step--done]="passoConcluido(1)"
@@ -29,7 +29,7 @@
               <span class="wizard__indicator">
                 @if (passoConcluido(1) && passoAtual() !== 1) { <svg lucideIcon="check" [size]="16" /> } @else { <span>2</span> }
               </span>
-              <span class="wizard__meta"><strong>Parceria</strong><small>Parceria opcional</small></span>
+              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'receita' ? 'Contrato ou Parceria' : 'Parceria' }}</strong><small>Vínculo opcional</small></span>
             </button>
             <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 1"></span>
 
@@ -159,27 +159,64 @@
               </div>
             </div>
           } @else if (passoAtual() === 1 && fluxoAdicional()) {
-            <!-- PASSO: PARCERIA -->
+            <!-- PASSO: CONTRATO OU PARCERIA -->
             <div class="wizard__content">
               <div class="step-header">
                 <div class="step-header__icon">
-                  <svg lucideIcon="handshake" [size]="20" />
+                  <svg [lucideIcon]="dominioCategoria() === 'receita' ? 'file-badge' : 'handshake'" [size]="20" />
                 </div>
                 <div class="step-header__text">
-                  <strong>Parceria</strong>
-                  <span>Selecione a parceria vinculada (opcional).</span>
+                  <strong>{{ dominioCategoria() === 'receita' ? 'Contrato ou Parceria' : 'Parceria' }}</strong>
+                  <span>Selecione o vínculo (opcional).</span>
                 </div>
               </div>
               <div class="section">
-                <div class="field">
-                  <label>Parceria</label>
-                  <app-custom-select
-                    placeholder="Nenhuma (opcional)"
-                    [options]="parceriasOptions()"
-                    [value]="form().idParceria ?? ''"
-                    (valueChange)="updateFormField('idParceria', $event)"
-                  />
-                </div>
+                @if (dominioCategoria() === 'receita') {
+                  <div class="field">
+                    <label class="vinculo-check">
+                      <input
+                        type="checkbox"
+                        class="checkbox"
+                        [checked]="vinculoSelecionado() === 'contrato'"
+                        (change)="selecionarVinculo('contrato')"
+                      />
+                      Contrato
+                    </label>
+                  </div>
+                  @if (vinculoSelecionado() === 'contrato') {
+                    <div class="field">
+                      <label>Contrato</label>
+                      <app-custom-select
+                        placeholder="Selecione o contrato"
+                        [options]="contratosOptions()"
+                        [value]="form().idContrato ?? ''"
+                        (valueChange)="updateFormField('idContrato', $event)"
+                      />
+                    </div>
+                  }
+                  <div class="field">
+                    <label class="vinculo-check">
+                      <input
+                        type="checkbox"
+                        class="checkbox"
+                        [checked]="vinculoSelecionado() === 'parceria'"
+                        (change)="selecionarVinculo('parceria')"
+                      />
+                      Parceria
+                    </label>
+                  </div>
+                }
+                @if (vinculoSelecionado() === 'parceria' || dominioCategoria() !== 'receita') {
+                  <div class="field">
+                    <label>Parceria</label>
+                    <app-custom-select
+                      placeholder="Nenhuma (opcional)"
+                      [options]="parceriasOptions()"
+                      [value]="form().idParceria ?? ''"
+                      (valueChange)="updateFormField('idParceria', $event)"
+                    />
+                  </div>
+                }
               </div>
             </div>
           } @else if (passoAtual() === 2 && fluxoAdicional()) {

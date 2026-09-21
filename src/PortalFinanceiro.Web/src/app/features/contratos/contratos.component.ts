@@ -2,9 +2,9 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { ParceriaRepository } from '../../core/repositories/parceria.repository';
+import { ContratoRepository } from '../../core/repositories/contrato.repository';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
-import { Parceria, ParceriaRequest } from '../../core/models/parceria.model';
+import { Contrato, ContratoRequest } from '../../core/models/contrato.model';
 import { Pessoa } from '../../core/models/pessoa.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
@@ -19,31 +19,29 @@ import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
-  selector: 'app-parcerias',
+  selector: 'app-contratos',
   standalone: true,
   imports: [FormsModule, ModalComponent, CustomSelectComponent, CurrencyInputDirective, CurrencyBRLPipe, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
-  templateUrl: './parcerias.component.html',
-  styleUrl: './parcerias.component.scss'
+  templateUrl: './contratos.component.html',
+  styleUrl: './contratos.component.scss'
 })
-export class ParceriasComponent implements OnInit {
-  private repo = inject(ParceriaRepository);
+export class ContratosComponent implements OnInit {
+  private repo = inject(ContratoRepository);
   private pessoaRepo = inject(PessoaRepository);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private router = inject(Router);
 
-  parcerias = signal<Parceria[]>([]);
-  parceiros = signal<Pessoa[]>([]);
+  contratos = signal<Contrato[]>([]);
   clientes = signal<Pessoa[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
-  editando = signal<Parceria | null>(null);
+  editando = signal<Contrato | null>(null);
   salvando = signal(false);
   filtroSituacao: boolean | undefined = undefined;
 
-  form: ParceriaRequest = { nome: '', idParceiro: '', idCliente: '', valor: 0, percentualParceiro: 50 };
+  form: ContratoRequest = { nome: '', idCliente: '', valor: 0 };
 
-  parceirosOptions = computed<SelectOption[]>(() => this.parceiros().map(p => ({ value: p.id, label: p.nome })));
   clientesOptions = computed<SelectOption[]>(() => this.clientes().map(p => ({ value: p.id, label: p.nome })));
   situacaoOptions: SelectOption[] = [
     { value: 'todas', label: 'Todas' },
@@ -51,16 +49,16 @@ export class ParceriasComponent implements OnInit {
     { value: 'encerradas', label: 'Encerradas' }
   ];
 
-  paginacao = useListPagination(this.parcerias, { initialPageSize: 10 });
+  paginacao = useListPagination(this.contratos, { initialPageSize: 10 });
 
-  ngOnInit() { this.carregarPessoas(); this.carregar(); }
+  ngOnInit() { this.carregarClientes(); this.carregar(); }
 
   async carregar() {
     this.loading.set(true);
     try {
       const data = await firstValueFrom(this.repo.listar(this.filtroSituacao));
-      this.parcerias.set(data);
-    } catch { this.notify.error('Erro ao carregar parcerias'); }
+      this.contratos.set(data);
+    } catch { this.notify.error('Erro ao carregar contratos'); }
     finally { this.loading.set(false); }
   }
 
@@ -69,28 +67,27 @@ export class ParceriasComponent implements OnInit {
     this.carregar();
   }
 
-  async carregarPessoas() {
+  async carregarClientes() {
     try {
       const todas = await firstValueFrom(this.pessoaRepo.listar());
-      this.parceiros.set(todas.filter(p => p.tipo === 'Parceiro'));
       this.clientes.set(todas.filter(p => p.tipo === 'Cliente'));
     } catch {}
   }
 
   abrirModal() {
-    this.form = { nome: '', idParceiro: '', idCliente: '', valor: 0, percentualParceiro: 50 };
+    this.form = { nome: '', idCliente: '', valor: 0 };
     this.editando.set(null);
     this.modalVisible.set(true);
   }
 
-  editar(item: Parceria) {
-    this.form = { nome: item.nome, idParceiro: item.idParceiro, idCliente: item.idCliente, valor: item.valor, percentualParceiro: item.percentualParceiro };
+  editar(item: Contrato) {
+    this.form = { nome: item.nome, idCliente: item.idCliente, valor: item.valor };
     this.editando.set(item);
     this.modalVisible.set(true);
   }
 
-  verDetalhes(item: Parceria) {
-    this.router.navigate(['/parcerias', item.id]);
+  verDetalhes(item: Contrato) {
+    this.router.navigate(['/contratos', item.id]);
   }
 
   fecharModal() {
@@ -100,45 +97,43 @@ export class ParceriasComponent implements OnInit {
 
   async salvar() {
     if (!this.form.nome?.trim()) { this.notify.error('Informe o nome'); return; }
-    if (!this.form.idParceiro) { this.notify.error('Selecione o parceiro'); return; }
     if (!this.form.idCliente) { this.notify.error('Selecione o cliente'); return; }
     if (!this.form.valor || this.form.valor <= 0) { this.notify.error('Informe um valor válido'); return; }
-    if (this.form.percentualParceiro == null || this.form.percentualParceiro < 0 || this.form.percentualParceiro > 100) { this.notify.error('Informe um percentual entre 0 e 100'); return; }
     this.salvando.set(true);
     try {
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, this.form));
-        this.notify.success('Parceria atualizada');
+        this.notify.success('Contrato atualizado');
       } else {
         await firstValueFrom(this.repo.criar(this.form));
-        this.notify.success('Parceria criada');
+        this.notify.success('Contrato criado');
       }
       this.fecharModal();
       await this.carregar();
-    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar parceria')); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar contrato')); }
     finally { this.salvando.set(false); }
   }
 
-  async alternarSituacao(item: Parceria) {
+  async alternarSituacao(item: Contrato) {
     try {
       if (item.ativo) {
         await firstValueFrom(this.repo.encerrar(item.id));
-        this.notify.success('Parceria encerrada');
+        this.notify.success('Contrato encerrado');
       } else {
         await firstValueFrom(this.repo.reativar(item.id));
-        this.notify.success('Parceria reativada');
+        this.notify.success('Contrato reativado');
       }
       await this.carregar();
-    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao alterar situação da parceria')); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao alterar situação do contrato')); }
   }
 
-  async excluir(item: Parceria) {
-    const ok = await this.confirmService.confirm('Excluir parceria', `Deseja excluir a parceria "${item.nome}"?`);
+  async excluir(item: Contrato) {
+    const ok = await this.confirmService.confirm('Excluir contrato', `Deseja excluir o contrato "${item.nome}"?`);
     if (!ok) return;
     try {
       await firstValueFrom(this.repo.excluir(item.id));
-      this.notify.success('Parceria excluída');
+      this.notify.success('Contrato excluído');
       await this.carregar();
-    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir parceria')); }
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir contrato')); }
   }
 }

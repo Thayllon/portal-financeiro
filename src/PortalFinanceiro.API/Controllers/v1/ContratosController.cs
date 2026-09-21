@@ -6,19 +6,17 @@ using PortalFinanceiro.Core.Application.Interfaces;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
-[Route("api/parcerias")]
+[Route("api/contratos")]
 [Authorize]
-public class ParceriasController : BaseController
+public class ContratosController : BaseController
 {
-    private readonly IParceriaAppService _service;
+    private readonly IContratoAppService _service;
     private readonly IReceitaAppService _receitaService;
-    private readonly IDespesaAppService _despesaService;
 
-    public ParceriasController(IParceriaAppService service, IReceitaAppService receitaService, IDespesaAppService despesaService)
+    public ContratosController(IContratoAppService service, IReceitaAppService receitaService)
     {
         _service = service;
         _receitaService = receitaService;
-        _despesaService = despesaService;
     }
 
     [HttpGet]
@@ -36,14 +34,14 @@ public class ParceriasController : BaseController
     }
 
     [HttpPost]
-    public async Task<IActionResult> Criar([FromBody] ParceriaRequest request)
+    public async Task<IActionResult> Criar([FromBody] ContratoRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
         return ApiResponse(result, 201);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Atualizar(Guid id, [FromBody] ParceriaRequest request)
+    public async Task<IActionResult> Atualizar(Guid id, [FromBody] ContratoRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
         return ApiResponse(result);
@@ -73,14 +71,7 @@ public class ParceriasController : BaseController
     [HttpGet("{id}/receitas")]
     public async Task<IActionResult> ListarReceitas(Guid id)
     {
-        var result = await _receitaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
-        return ApiResponse(result);
-    }
-
-    [HttpGet("{id}/despesas")]
-    public async Task<IActionResult> ListarDespesas(Guid id)
-    {
-        var result = await _despesaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
+        var result = await _receitaService.ListarPorContratoAsync(ObterIdUsuario(), id);
         return ApiResponse(result);
     }
 }

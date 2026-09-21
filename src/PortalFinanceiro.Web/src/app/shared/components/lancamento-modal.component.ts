@@ -9,6 +9,7 @@ import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
 import { Parceria } from '../../core/models/parceria.model';
+import { Contrato } from '../../core/models/contrato.model';
 import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { NotificationService } from '../../core/services/notification.service';
@@ -32,6 +33,7 @@ export interface LancamentoForm {
   idCategoria: string;
   idSubcategoria?: string;
   idParceria?: string;
+  idContrato?: string;
   categoriasServicoBloco: CategoriaServicoBloco[];
   servicos?: ServicoItem[];
   idCliente?: string;
@@ -51,6 +53,7 @@ interface LancamentoItem {
   idSubcategoria?: string;
   idParceiro?: string;
   idParceria?: string;
+  idContrato?: string;
   servicos?: { categoriaServicoId: string; subcategoriaServicoId?: string }[];
   idCliente?: string;
 }
@@ -78,6 +81,7 @@ export class LancamentoModalComponent {
   fluxoAdicional = input(false);
   parceiros = input<Pessoa[]>([]);
   parcerias = input<Parceria[]>([]);
+  contratos = input<Contrato[]>([]);
   clientes = input<Pessoa[]>([]);
   categoriasServico = input<Categoria[]>([]);
   salvando = input(false);
@@ -92,11 +96,13 @@ export class LancamentoModalComponent {
   previewMeses = signal(0);
   fieldErrors = signal<Record<string, string>>({});
   passoAtual = signal(0);
+  vinculoSelecionado = signal<'contrato' | 'parceria' | null>(null);
 
   contasOptions = signal<SelectOption[]>([]);
   categoriasOptions = signal<SelectOption[]>([]);
   subcategoriasOptions = signal<SelectOption[]>([]);
   parceriasOptions = signal<SelectOption[]>([]);
+  contratosOptions = signal<SelectOption[]>([]);
   clientesOptions = signal<SelectOption[]>([]);
   categoriasServicoPais = signal<SelectOption[]>([]);
   subcategoriasServicoMap = signal<Map<string, SelectOption[]>>(new Map());
@@ -128,6 +134,11 @@ export class LancamentoModalComponent {
     });
 
     effect(() => {
+      const c = this.contratos();
+      this.contratosOptions.set(c.map(x => ({ value: x.id, label: `${x.nome} (${x.cliente})` })));
+    });
+
+    effect(() => {
       const c = this.clientes();
       this.clientesOptions.set(c.map(x => ({ value: x.id, label: x.nome })));
     });
@@ -140,6 +151,7 @@ export class LancamentoModalComponent {
         this.passoAtual.set(0);
         if (ini) {
           const blocos = this.agruparServicosEmBlocos(ini.servicos ?? []);
+          this.vinculoSelecionado.set(ini.idContrato ? 'contrato' : ini.idParceria ? 'parceria' : null);
           this.form.set({
             descricao: ini.descricao,
             valor: ini.valor,
@@ -148,6 +160,7 @@ export class LancamentoModalComponent {
             idCategoria: ini.idCategoria,
             idSubcategoria: ini.idSubcategoria ?? undefined,
             idParceria: ini.idParceria ?? undefined,
+            idContrato: ini.idContrato ?? undefined,
             categoriasServicoBloco: blocos,
             idCliente: ini.idCliente ?? undefined,
             repete: false,
@@ -159,6 +172,7 @@ export class LancamentoModalComponent {
           const hoje = new Date().toISOString().split('T')[0];
           const contas = untracked(() => this.contas());
           const contaPadrao = contas.find(c => c.ehPadrao)?.id ?? contas[0]?.id ?? '';
+          this.vinculoSelecionado.set(null);
           this.form.set({ ...this.emptyForm(), data: hoje, idConta: contaPadrao });
         }
       }
@@ -262,6 +276,16 @@ export class LancamentoModalComponent {
       }
     }
     return result;
+  }
+
+  selecionarVinculo(tipo: 'contrato' | 'parceria') {
+    if (this.vinculoSelecionado() === tipo) {
+      this.vinculoSelecionado.set(null);
+      this.form.update(f => ({ ...f, idParceria: undefined, idContrato: undefined }));
+      return;
+    }
+    this.vinculoSelecionado.set(tipo);
+    this.form.update(f => ({ ...f, idParceria: undefined, idContrato: undefined }));
   }
 
   irPara(indice: number) {
@@ -379,7 +403,7 @@ export class LancamentoModalComponent {
     if (fluxo) {
       switch (indice) {
         case 0: return !!f.idCategoria;
-        case 1: return !!f.idParceria;
+        case 1: return !!f.idParceria || !!f.idContrato;
         case 2: return f.categoriasServicoBloco.length > 0;
         case 3: return !!f.idCliente;
         case 4: return !!(f.descricao?.trim() && f.data && f.valor > 0);

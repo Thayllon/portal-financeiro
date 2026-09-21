@@ -90,6 +90,13 @@ export class HomeComponent {
           icon: 'handshake',
           route: '/parcerias',
           modulo: 'parcerias'
+        },
+        {
+          title: 'Contratos',
+          description: 'Contratos com clientes e receitas vinculadas.',
+          icon: 'file-badge',
+          route: '/contratos',
+          modulo: 'contratos'
         }
       ]
     },

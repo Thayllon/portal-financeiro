@@ -16,13 +16,15 @@ public class ReceitaAppService : IReceitaAppService
     private readonly IRegraReceitaRepository _regraRepository;
     private readonly IReceitaServicoRepository _receitaServicoRepository;
     private readonly IParceriaRepository? _parceriaRepository;
+    private readonly IContratoRepository? _contratoRepository;
 
-    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IReceitaServicoRepository receitaServicoRepository, IParceriaRepository? parceriaRepository = null)
+    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IReceitaServicoRepository receitaServicoRepository, IParceriaRepository? parceriaRepository = null, IContratoRepository? contratoRepository = null)
     {
         _repository = repository;
         _regraRepository = regraRepository;
         _receitaServicoRepository = receitaServicoRepository;
         _parceriaRepository = parceriaRepository;
+        _contratoRepository = contratoRepository;
     }
 
     public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
@@ -59,6 +61,21 @@ public class ReceitaAppService : IReceitaAppService
         return receitas.Select(Mapear).ToList();
     }
 
+    public async Task<Result<IEnumerable<ReceitaResponse>>> ListarPorContratoAsync(Guid idUsuario, Guid idContrato)
+    {
+        if (_contratoRepository is null)
+            return Erro.Infraestrutura("Repositório de contratos não configurado.");
+
+        var contrato = await _contratoRepository.ObterPorIdAsync(idContrato);
+        if (contrato is null)
+            return Erro.NaoEncontrado("Contrato");
+        if (contrato.IdUsuario != idUsuario)
+            return Erro.Permissao("CONTRATO_ACESSO_NEGADO", "Contrato de outro usuário.");
+
+        var receitas = await _repository.ListarPorContratoAsync(idContrato);
+        return receitas.Select(Mapear).ToList();
+    }
+
     public async Task<Result<ReceitaResponse>> ObterPorIdAsync(Guid id, Guid idUsuario)
     {
         var receita = await _repository.ObterProjecaoPorIdAsync(id);
@@ -81,6 +98,9 @@ public class ReceitaAppService : IReceitaAppService
 
     public async Task<Result<ReceitaResponse>> AdicionarAsync(Guid idUsuario, ReceitaRequest request)
     {
+        if (request.IdParceria.HasValue && request.IdContrato.HasValue)
+            return Erro.Validacao("RECEITA_VINCULO_DUPLO", "Informe parceria ou contrato, nunca os dois.");
+
         if (request.IdParceria.HasValue && _parceriaRepository is not null)
         {
             var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
@@ -88,10 +108,19 @@ public class ReceitaAppService : IReceitaAppService
                 return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
         }
 
+        if (request.IdContrato.HasValue)
+        {
+            if (_contratoRepository is null)
+                return Erro.Infraestrutura("Repositório de contratos não configurado.");
+            var contrato = await _contratoRepository.ObterPorIdAsync(request.IdContrato.Value);
+            if (contrato is null || contrato.IdUsuario != idUsuario || !contrato.Ativo)
+                return Erro.Validacao("CONTRATO_INVALIDO", "Contrato não encontrado.");
+        }
+
         if (!request.Repete)
         {
             var result = Receita.Criar(idUsuario, request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria,
-                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria);
+                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria, idContrato: request.IdContrato);
             if (!result.EhSucesso)
                 return result.Erro!;
 
@@ -116,7 +145,7 @@ public class ReceitaAppService : IReceitaAppService
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
         var receitas = meses.Select(m => Receita.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id,
-                                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria))
+                                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria, idContrato: request.IdContrato))
                             .Where(r => r.EhSucesso)
                             .Select(r => r.Dado!)
                             .ToList();
@@ -148,6 +177,9 @@ public class ReceitaAppService : IReceitaAppService
         if (receita.IdUsuario != idUsuario)
             return Erro.Permissao("RECEITA_ACESSO_NEGADO", "Receita de outro usuário.");
 
+        if (request.IdParceria.HasValue && request.IdContrato.HasValue)
+            return Erro.Validacao("RECEITA_VINCULO_DUPLO", "Informe parceria ou contrato, nunca os dois.");
+
         if (request.IdParceria.HasValue && _parceriaRepository is not null)
         {
             var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
@@ -155,8 +187,17 @@ public class ReceitaAppService : IReceitaAppService
                 return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
         }
 
+        if (request.IdContrato.HasValue)
+        {
+            if (_contratoRepository is null)
+                return Erro.Infraestrutura("Repositório de contratos não configurado.");
+            var contrato = await _contratoRepository.ObterPorIdAsync(request.IdContrato.Value);
+            if (contrato is null || contrato.IdUsuario != receita.IdUsuario || !contrato.Ativo)
+                return Erro.Validacao("CONTRATO_INVALIDO", "Contrato não encontrado.");
+        }
+
         var result = receita.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria,
-            idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria);
+            idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria, idContrato: request.IdContrato);
         if (!result.EhSucesso)
             return result.Erro!;
 
@@ -262,6 +303,9 @@ public class ReceitaAppService : IReceitaAppService
         IdParceria = p.IdParceria,
         Parceria = p.Parceria,
         ParceriaValor = p.ParceriaValor,
+        ParceriaPercentual = p.ParceriaPercentual,
+        IdContrato = p.IdContrato,
+        Contrato = p.Contrato,
         Status = (int)p.Status,
         DataRealizacao = p.DataRealizacao,
         IdRegra = p.IdRegra,

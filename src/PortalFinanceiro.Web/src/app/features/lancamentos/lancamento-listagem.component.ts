@@ -7,6 +7,7 @@ import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServic
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { ParceriaRepository } from '../../core/repositories/parceria.repository';
+import { ContratoRepository } from '../../core/repositories/contrato.repository';
 import { AuthService } from '../../core/services/auth.service';
 import { ReceitaRequest } from '../../core/models/receita.model';
 import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
@@ -14,6 +15,7 @@ import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
 import { Parceria } from '../../core/models/parceria.model';
+import { Contrato } from '../../core/models/contrato.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { MonthNavComponent } from '../../shared/components/month-nav.component';
@@ -53,6 +55,9 @@ interface LancamentoItem {
   idParceria?: string;
   parceria: string;
   parceriaValor?: number;
+  parceriaPercentual?: number;
+  idContrato?: string;
+  contrato?: string;
   idCliente?: string;
   cliente: string;
   servicos?: ServicoItem[];
@@ -81,6 +86,7 @@ export class LancamentoListagemComponent implements OnInit {
   private contaRepo = inject(ContaBancariaRepository);
   private pessoaRepo = inject(PessoaRepository);
   private parceriaRepo = inject(ParceriaRepository);
+  private contratoRepo = inject(ContratoRepository);
   private catServicoRepo = inject(CategoriaServicoRepository);
   private auth = inject(AuthService);
 
@@ -106,6 +112,7 @@ export class LancamentoListagemComponent implements OnInit {
   contas = signal<ContaBancaria[]>([]);
   parceiros = signal<Pessoa[]>([]);
   parcerias = signal<Parceria[]>([]);
+  contratos = signal<Contrato[]>([]);
   clientes = signal<Pessoa[]>([]);
   categoriasServico = signal<Categoria[]>([]);
   loading = signal(true);
@@ -154,7 +161,7 @@ export class LancamentoListagemComponent implements OnInit {
       this.carregarClientes(),
       this.carregarCategoriasServico()
     ];
-    if (this.hasParceiro()) cargas.push(this.carregarParceiros());
+    if (this.hasParceiro()) cargas.push(this.carregarParceiros(), this.carregarContratos());
     await Promise.all(cargas);
     await this.carregar();
   }
@@ -199,7 +206,11 @@ export class LancamentoListagemComponent implements OnInit {
   }
 
   async carregarParcerias() {
-    try { this.parcerias.set(await firstValueFrom(this.parceriaRepo.listar())); } catch {}
+    try { this.parcerias.set(await firstValueFrom(this.parceriaRepo.listar(true))); } catch {}
+  }
+
+  async carregarContratos() {
+    try { this.contratos.set(await firstValueFrom(this.contratoRepo.listar(true))); } catch {}
   }
 
   async carregarClientes() {
@@ -262,7 +273,7 @@ export class LancamentoListagemComponent implements OnInit {
   }
 
   private inferirFluxoContrato(item: LancamentoItem): boolean {
-    return !!(item.idCliente || (item.servicos && item.servicos.length > 0) || item.idParceria);
+    return !!(item.idCliente || (item.servicos && item.servicos.length > 0) || item.idParceria || item.idContrato);
   }
 
   onCategoriaCriada(categoria: Categoria) {
@@ -293,6 +304,9 @@ export class LancamentoListagemComponent implements OnInit {
       idParceria: item.idParceria,
       parceria: item.parceria,
       parceriaValor: item.parceriaValor,
+      parceriaPercentual: item.parceriaPercentual,
+      idContrato: item.idContrato,
+      contrato: item.contrato,
       idCliente: item.idCliente,
       cliente: item.cliente,
       servicos: item.servicos?.map(s => ({
@@ -323,6 +337,7 @@ export class LancamentoListagemComponent implements OnInit {
         idCategoria: data.idCategoria,
         idSubcategoria: data.idSubcategoria || undefined,
         idParceria: data.idParceria || undefined,
+        idContrato: this.ehReceita() ? data.idContrato || undefined : undefined,
         servicos: data.servicos?.map(s => ({
           categoriaServicoId: s.categoriaServicoId,
           subcategoriaServicoId: s.subcategoriaServicoId
@@ -400,4 +415,8 @@ export class LancamentoListagemComponent implements OnInit {
   totalRealizado = computed(() => this.items().filter(l => l.status === STATUS_REALIZADO).reduce((s, l) => s + l.valor, 0));
   totalPendente = computed(() => this.total() - this.totalRealizado());
   totalParceria = computed(() => this.items().filter(l => !!l.idParceria).reduce((s, l) => s + l.valor, 0));
+  repasseParceiro = computed(() => this.items()
+    .filter(l => !!l.idParceria && l.status === STATUS_REALIZADO)
+    .reduce((s, l) => s + l.valor * (l.parceriaPercentual ?? 0) / 100, 0));
+  receitaLiquida = computed(() => this.totalRealizado() - this.repasseParceiro());
 }

@@ -31,6 +31,7 @@
     <span>Pendente: <strong style="color: var(--color-warning)">{{ totalPendente() | currencyBRL }}</strong></span>
     @if (fluxoAdicional() && hasParceiro()) {
       <span>Parceria: <strong>{{ totalParceria() | currencyBRL }}</strong></span>
+      <span title="Repasse ao parceiro: {{ repasseParceiro() | currencyBRL }}">Receita líquida: <strong style="color: var(--color-success)">{{ receitaLiquida() | currencyBRL }}</strong></span>
     }
   </div>
 
@@ -62,9 +63,9 @@
             <th>Descrição</th>
             <th>Valor</th>
             <th>Data</th>
-            @if (hasParceiro()) {
-              <th>Parceria</th>
-            } @else {
+              @if (hasParceiro()) {
+                <th>Contrato/Parceria</th>
+              } @else {
               <th>Conta</th>
             }
             <th>Categoria</th>
@@ -79,7 +80,7 @@
               <td class="cell-value" data-label="Valor">{{ l.valor | currencyBRL }}</td>
               <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
               @if (hasParceiro()) {
-                <td class="cell-meta" data-label="Parceria" [title]="l.parceria">{{ l.idParceria ? 'Sim' : '—' }}</td>
+                <td class="cell-meta" data-label="Contrato/Parceria" [title]="l.idContrato ? l.contrato : l.parceria">{{ l.idContrato ? 'Contrato' : l.idParceria ? 'Sim' : '—' }}</td>
               } @else {
                 <td class="cell-meta" data-label="Conta">{{ l.conta }}</td>
               }
@@ -131,6 +132,7 @@
   [fluxoAdicional]="fluxoEfetivo()"
   [parceiros]="parceiros()"
   [parcerias]="parcerias()"
+  [contratos]="contratos()"
   [clientes]="clientes()"
   [categoriasServico]="categoriasServico()"
   [salvando]="salvando()"

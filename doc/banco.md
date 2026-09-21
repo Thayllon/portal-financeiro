@@ -13,8 +13,9 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 
 | Script | Conteúdo |
 |--------|----------|
-| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro` e `PermissaoUsuario`) |
+| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro`, `Contrato` + `Receita.IdContrato` e `PermissaoUsuario`) |
 | `003_FluxoAdicionalDespesa.sql` | Incremental idempotente para bancos criados antes do refactor: adiciona `Despesa.IdCliente` e tabela `DespesaServico` se ainda não existirem |
+| `005_Contratos.sql` | Incremental idempotente: cria `Contrato`, adiciona `Receita.IdContrato` (FK + índice) e garante o módulo `contratos` em `PermissaoUsuario` |
 | `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
 | `100_SeedDemo.sql` | Dados fake de demonstração (Maria/João) — 2024-01 a 2026-09 |
 | `101_AtualizarUsuariosDemo.sql` | Troca e-mail/senha dos usuários demo para produção: `maria@portal.com` / `joao@portal.com`, senha `123456` (idempotente) |
@@ -56,11 +57,12 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `ContaBancaria` | Contas PF/PJ |
 | `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
 | `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuário |
+| `Contrato` | Contratos (nome + cliente + valor, sem parceiro) por usuário |
 | `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
-| `Receita` | Receitas (avulsas e recorrentes) — `IdParceria` opcional para vínculo com Parceria |
+| `Receita` | Receitas (avulsas e recorrentes) — `IdParceria`/`IdContrato` opcionais e mutuamente exclusivos para vínculo |
 | `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
-| `PermissaoUsuario` | Nível por módulo por usuário (`parcerias` garantido via seed) |
+| `PermissaoUsuario` | Nível por módulo por usuário (`parcerias`, `contratos` garantidos via seed) |
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
 
 ### Categorias compartilhadas

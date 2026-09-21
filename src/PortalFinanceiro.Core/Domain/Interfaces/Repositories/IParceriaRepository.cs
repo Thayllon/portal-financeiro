@@ -7,7 +7,7 @@ public interface IParceriaRepository
 {
     Task<Parceria?> ObterPorIdAsync(Guid id);
     Task<ParceriaProjecao?> ObterProjecaoPorIdAsync(Guid id);
-    Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario);
+    Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null);
     Task InserirAsync(Parceria entity);
     Task AtualizarAsync(Parceria entity);
     Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status);

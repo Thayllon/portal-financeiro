@@ -75,12 +75,12 @@ $saidaPath = Join-Path (Get-Location) $saida
 $writer = [System.IO.StreamWriter]::new($saidaPath, $false, [System.Text.Encoding]::UTF8)
 
 $writer.WriteLine("-- Backup gerado em $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') a partir do LocalDB")
-$writer.WriteLine("-- Restaure no Neon com: psql ""$env:DATABASE_URL"" -f $saida")
-$writer.WriteLine("-- ATENÇÃO: faz TRUNCATE CASCADE — apaga todos os dados de prod antes de inserir")
+$writer.WriteLine("-- Restaure no Neon com: psql DATABASE_URL -f $saida")
+$writer.WriteLine("-- ATENCAO: faz TRUNCATE CASCADE - apaga todos os dados de prod antes de inserir")
 $writer.WriteLine("BEGIN;")
 $writer.WriteLine("")
 
-$writer.WriteLine("-- Desativa FKs temporariamente (TRUNCATE CASCADE já resolve, mas garantimos)")
+$writer.WriteLine("-- TRUNCATE em ordem reversa (CASCADE ja resolve FKs)")
 foreach ($t in $ordemTruncate) {
     $writer.WriteLine("TRUNCATE TABLE ""$t"" CASCADE;")
 }

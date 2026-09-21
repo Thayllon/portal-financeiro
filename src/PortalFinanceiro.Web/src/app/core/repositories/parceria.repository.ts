@@ -10,8 +10,8 @@ import { Despesa } from '../models/despesa.model';
 export class ParceriaRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(): Observable<Parceria[]> {
-    return this.get<Parceria[]>('/parcerias');
+  listar(ativo?: boolean): Observable<Parceria[]> {
+    return this.get<Parceria[]>('/parcerias', { ...(ativo !== undefined ? { ativo } : {}) });
   }
 
   obter(id: string): Observable<Parceria> {
@@ -28,6 +28,14 @@ export class ParceriaRepository extends BaseHttpRepository {
 
   excluir(id: string): Observable<any> {
     return this.delete<any>(`/parcerias/${id}`);
+  }
+
+  encerrar(id: string): Observable<any> {
+    return this.put<any>(`/parcerias/${id}/encerrar`);
+  }
+
+  reativar(id: string): Observable<any> {
+    return this.put<any>(`/parcerias/${id}/reativar`);
   }
 
   listarReceitas(id: string): Observable<Receita[]> {
