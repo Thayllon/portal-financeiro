@@ -101,7 +101,7 @@ export class LancamentoListagemComponent implements OnInit {
       singular: receita ? 'receita' : 'despesa',
       rotuloRealizado: receita ? 'Recebido' : 'Pago',
       acaoRealizar: receita ? 'Receber' : 'Pagar',
-      statusRealizadoLabel: receita ? 'Recebida' : 'Pagas',
+      statusRealizadoLabel: receita ? 'Recebida' : 'Paga',
       hasParceiro: receita
     };
   });
@@ -129,10 +129,10 @@ export class LancamentoListagemComponent implements OnInit {
   busca = '';
   private _buscaTimer: ReturnType<typeof setTimeout> | null = null;
 
-  statusOptions: SelectOption[] = [
+  statusOptions = computed<SelectOption[]>(() => [
     { value: '1', label: 'Pendentes' },
-    { value: '2', label: 'Recebidas' },
-  ];
+    { value: '2', label: this.ehReceita() ? 'Recebidas' : 'Pagas' },
+  ]);
 
   ordenacao = signal<{ coluna: 'valor' | 'data'; direcao: 'asc' | 'desc' } | null>(null);
 
