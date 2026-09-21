@@ -13,7 +13,6 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     border-bottom: 1px solid var(--surface-border);
-    background: var(--content-surface);
   }
 
   td {
@@ -57,41 +56,6 @@
         font-size: 0.75rem;
         color: var(--text-muted);
       }
-    }
-  }
-}
-
-@mixin table-card-scroll($max-height: 60vh) {
-  max-height: $max-height;
-  overflow-y: auto;
-
-  .table thead th {
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-
-  app-list-pagination {
-    display: block;
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
-  }
-
-  .table-footer {
-    position: sticky;
-    bottom: 0;
-    z-index: 2;
-    background: var(--content-surface);
-  }
-
-  @include r.mobile {
-    max-height: none;
-    overflow-y: visible;
-
-    app-list-pagination,
-    .table-footer {
-      position: static;
     }
   }
 }
