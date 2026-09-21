@@ -245,13 +245,6 @@ export class DashboardComponent implements OnInit {
 
   totalDistribuicao = computed(() => this.distribuicaoAtual().reduce((s, i) => s + i.total, 0));
 
-  mesInicialPrevisao = computed(() => {
-    const anual = this.dataAnual();
-    if (!anual?.previsaoRestanteAno?.length) return '';
-    const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-    return meses[anual.previsaoRestanteAno[0].mes - 1];
-  });
-
   doughnutChartData: ChartConfiguration<'doughnut'>['data'] = {
     labels: [],
     datasets: []
