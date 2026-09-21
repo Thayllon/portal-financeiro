@@ -432,7 +432,7 @@ export class LancamentoModalComponent {
     const label = this.subcategoriasOptions().find(o => o.value === value)?.label;
     let descricaoSet = false;
     this.form.update(f => {
-      const shouldSetDescricao = !!(label && !f.descricao?.trim());
+      const shouldSetDescricao = this.devePuxarDescricaoSubcategoria(f.descricao) && !!label;
       if (shouldSetDescricao) descricaoSet = true;
       return {
         ...f,
@@ -443,6 +443,13 @@ export class LancamentoModalComponent {
     if (descricaoSet) {
       this.clearError('descricao');
     }
+  }
+
+  private devePuxarDescricaoSubcategoria(descricaoAtual: string): boolean {
+    if (!descricaoAtual?.trim()) {
+      return !(this.fluxoAdicional() && this.dominioCategoria() === 'receita');
+    }
+    return false;
   }
 
   onClienteChange(value: string) {
