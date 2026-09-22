@@ -71,7 +71,7 @@
               <td data-label="Status"><app-status-badge [type]="p.ativo ? 'ativo' : 'inativo'" [label]="p.ativo ? 'Ativa' : 'Encerrada'" /></td>
               <td class="cell-actions">
                 <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(p)">
-                  <svg lucideIcon="eye" [size]="16" />
+                  <svg lucideIcon="clipboard-list" [size]="16" />
                 </button>
                 @if (p.ativo) {
                   <button class="action-btn" title="Encerrar" (click)="alternarSituacao(p)">
