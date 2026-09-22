@@ -39,7 +39,13 @@
       } @else {
         <div class="cat-grid">
           @for (c of paginatedPais(); track c.id) {
-            <article class="cat-card">
+            <article
+              class="cat-card"
+              [class.cat-card--drop-target]="cardAlvoId() === c.id"
+              (dragover)="sobreCard($event, c.id)"
+              (dragleave)="sairCard()"
+              (drop)="soltarNoCard($event, c)"
+            >
               <header class="cat-card__header">
                 <span class="cat-card__icon">
                   @if (tabAtiva() === 'receita') {
@@ -58,7 +64,7 @@
                   <button class="action-btn" title="Nova subcategoria" (click)="abrirModal(undefined, c.id)">
                     <svg lucideIcon="plus" [size]="16" />
                   </button>
-                  <button class="action-btn" title="Editar" (click)="abrirModal(c)">
+                  <button class="action-btn" title="Renomear categoria" (click)="abrirModal(c)">
                     <svg lucideIcon="pencil" [size]="16" />
                   </button>
                   <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
@@ -69,17 +75,32 @@
 
               @if (subcategoriasDe(c.id).length > 0) {
                 <div class="cat-card__subs">
-                  @for (sub of subcategoriasDe(c.id); track sub.id) {
+                  @for (sub of subsVisiveisDe(c.id); track sub.id) {
                     <div class="sub-chip">
+                      <span
+                        class="drag-handle"
+                        title="Arrastar para mover"
+                        draggable="true"
+                        (dragstart)="iniciarArrasto($event, sub)"
+                        (dragend)="finalizarArrasto()"
+                      >
+                        <svg lucideIcon="move" [size]="13" />
+                      </span>
                       <svg lucideIcon="file" [size]="13" />
                       <span class="sub-chip__name">{{ sub.nome }}</span>
-                      <button class="action-btn action-btn--tiny" title="Editar" (click)="abrirModal(sub)">
+                      <button class="action-btn action-btn--tiny" title="Renomear" (click)="abrirModal(sub)">
                         <svg lucideIcon="pencil" [size]="13" />
                       </button>
                       <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
                         <svg lucideIcon="trash-2" [size]="13" />
                       </button>
                     </div>
+                  }
+                  @if (subsRestantesDe(c.id) > 0) {
+                    <button class="ver-mais-btn" title="Ver todas as subcategorias" (click)="abrirDrawerSubs(c)">
+                      <svg lucideIcon="ellipsis" [size]="14" />
+                      +{{ subsRestantesDe(c.id) }} ver mais
+                    </button>
                   }
                 </div>
               } @else {
@@ -96,24 +117,67 @@
 
     <app-modal
       [visible]="modalVisible()"
-      [title]="editando() ? 'Editar categoria de ' + tabAtiva() : 'Nova categoria de ' + tabAtiva()"
+      [title]="tituloModal()"
+      [subtitle]="subtituloModal()"
       [saving]="salvando()"
       (visibleChange)="fecharModal()"
       (save)="salvar()"
     >
+      @if (modalModo() === 'nova-sub' && categoriaAlvo()) {
+        <p class="contexto-pai">Subcategoria de <strong>{{ categoriaAlvo()!.nome }}</strong></p>
+      }
+      @if (modalModo() === 'editar' && editando()?.categoriaPaiId) {
+        <p class="contexto-pai">Apenas o nome pode ser alterado aqui.</p>
+      }
       <div class="field">
         <label>Nome<span class="required">*</span></label>
         <input [(ngModel)]="form.nome" placeholder="Ex: Lazer" class="input" />
       </div>
-      @if (!form.categoriaPaiId) {
-        <div class="field">
-          <label>Categoria pai (opcional)</label>
-          <select [(ngModel)]="form.categoriaPaiId" class="select">
-            <option value="">— Nenhuma (categoria principal)</option>
-            @for (c of categoriasPai(); track c.id) {
-              <option [value]="c.id">{{ c.nome }}</option>
-            }
-          </select>
+    </app-modal>
+
+    <app-side-drawer
+      [visible]="drawerSubsVisible()"
+      [title]="categoriaAlvo() ? 'Subcategorias de ' + categoriaAlvo()!.nome : 'Subcategorias'"
+      icon="tags"
+      [showFooter]="false"
+      (visibleChange)="fecharDrawerSubs()"
+    >
+      @if (categoriaAlvo()) {
+        <div class="drawer-search">
+          <svg lucideIcon="search" [size]="16" class="drawer-search__icon" />
+          <input
+            type="text"
+            class="drawer-search__input"
+            placeholder="Buscar subcategoria..."
+            [value]="buscaSub()"
+            (input)="buscaSub.set($any($event.target).value)"
+          />
+        </div>
+        <p class="drawer-count">{{ subcategoriasDe(categoriaAlvo()!.id).length }} subcategoria(s) — arraste pelo ícone para mover de categoria</p>
+        <div class="drawer-sub-list">
+          @for (sub of subsFiltradasDrawer(); track sub.id) {
+            <div class="drawer-sub-item">
+              <span
+                class="drag-handle"
+                title="Arrastar para mover"
+                draggable="true"
+                (dragstart)="iniciarArrasto($event, sub)"
+                (dragend)="finalizarArrasto()"
+              >
+                <svg lucideIcon="move" [size]="14" />
+              </span>
+              <svg lucideIcon="file" [size]="14" />
+              <span class="drawer-sub-item__name">{{ sub.nome }}</span>
+              <button class="action-btn action-btn--tiny" title="Renomear" (click)="abrirModal(sub)">
+                <svg lucideIcon="pencil" [size]="13" />
+              </button>
+              <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
+                <svg lucideIcon="trash-2" [size]="13" />
+              </button>
+            </div>
+          } @empty {
+            <p class="drawer-empty">Nenhuma subcategoria encontrada.</p>
+          }
         </div>
       }
-    </app-modal>
+    </app-side-drawer>
