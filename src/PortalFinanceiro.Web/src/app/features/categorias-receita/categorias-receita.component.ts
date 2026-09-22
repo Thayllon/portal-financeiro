@@ -143,6 +143,16 @@ export class CategoriasComponent implements OnInit {
     return this.categoriasPai().filter(c => c.id !== sub.categoriaPaiId);
   }
 
+  destinoDe(sub: Categoria) {
+    return this.destinoMover[sub.id] ?? '';
+  }
+
+  aoTrocarDestino(sub: Categoria, destinoId: string) {
+    if (!destinoId || destinoId === sub.categoriaPaiId) return;
+    this.destinoMover[sub.id] = '';
+    this.moverSub(sub.id, sub.nome, sub.categoriaPaiId!, destinoId);
+  }
+
   async salvarNomeCategoriaDrawer() {
     const foco = this.categoriaAlvo();
     const nome = this.nomeCategoriaDrawer?.trim();
@@ -197,13 +207,6 @@ export class CategoriasComponent implements OnInit {
       if (focoId) this.categoriaAlvo.set(this.items().find(c => c.id === focoId) ?? null);
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar subcategoria')); }
     finally { this.salvando.set(false); }
-  }
-
-  async moverParaDestino(sub: Categoria) {
-    const destinoId = this.destinoMover[sub.id];
-    if (!destinoId || destinoId === sub.categoriaPaiId) return;
-    this.destinoMover[sub.id] = '';
-    await this.moverSub(sub.id, sub.nome, sub.categoriaPaiId!, destinoId);
   }
 
   iniciarArrasto(event: DragEvent, sub: Categoria) {
