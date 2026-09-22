@@ -66,27 +66,20 @@
         <thead>
           <tr>
             <th>Descrição</th>
+            <th>
+              <button type="button" class="th-sort" (click)="alternarOrdenacao('valor')" title="Ordenar por valor">
+                Valor
+                <svg [lucideIcon]="ordenacao()?.coluna === 'valor' ? (ordenacao()?.direcao === 'asc' ? 'chevron-up' : 'chevron-down') : 'arrow-down-up'" [size]="14" />
+              </button>
+            </th>
+            <th>
+              <button type="button" class="th-sort" (click)="alternarOrdenacao('data')" title="Ordenar por data">
+                Data
+                <svg [lucideIcon]="ordenacao()?.coluna === 'data' ? (ordenacao()?.direcao === 'asc' ? 'chevron-up' : 'chevron-down') : 'arrow-down-up'" [size]="14" />
+              </button>
+            </th>
             @if (hasParceiro()) {
-              <th>Valor</th>
-              <th>Data</th>
-            } @else {
-              <th>
-                <button type="button" class="th-sort" (click)="alternarOrdenacao('valor')" title="Ordenar por valor">
-                  Valor
-                  <svg [lucideIcon]="ordenacao()?.coluna === 'valor' ? (ordenacao()?.direcao === 'asc' ? 'chevron-up' : 'chevron-down') : 'arrow-down-up'" [size]="14" />
-                </button>
-              </th>
-              <th>
-                <button type="button" class="th-sort" (click)="alternarOrdenacao('data')" title="Ordenar por data">
-                  Data
-                  <svg [lucideIcon]="ordenacao()?.coluna === 'data' ? (ordenacao()?.direcao === 'asc' ? 'chevron-up' : 'chevron-down') : 'arrow-down-up'" [size]="14" />
-                </button>
-              </th>
-            }
-              @if (hasParceiro()) {
-                <th>Contrato/Parceria</th>
-              } @else {
-              <th>Conta</th>
+              <th>Contrato/Parceria</th>
             }
             <th>Categoria</th>
             <th>Status</th>
@@ -101,8 +94,6 @@
               <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
               @if (hasParceiro()) {
                 <td class="cell-meta" data-label="Contrato/Parceria" [title]="l.idContrato ? l.contrato : l.parceria">{{ l.idContrato ? 'Contrato' : l.idParceria ? 'Sim' : '—' }}</td>
-              } @else {
-                <td class="cell-meta" data-label="Conta">{{ l.conta }}</td>
               }
               <td class="cell-meta" data-label="Categoria" [title]="rotuloCategoria(l)">{{ rotuloCategoria(l) }}</td>
               <td data-label="Status"><app-status-badge [type]="l.status === statusRealizado ? 'realizado' : 'pendente'" [label]="l.status === statusRealizado ? config().statusRealizadoLabel : 'Pendente'" /></td>

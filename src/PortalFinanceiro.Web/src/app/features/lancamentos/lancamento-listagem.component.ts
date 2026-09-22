@@ -138,7 +138,7 @@ export class LancamentoListagemComponent implements OnInit {
 
   itensOrdenados = computed(() => {
     const ord = this.ordenacao();
-    if (!ord || this.ehReceita()) return this.items();
+    if (!ord) return this.items();
     const fator = ord.direcao === 'asc' ? 1 : -1;
     return [...this.items()].sort((a, b) =>
       ord.coluna === 'valor' ? (a.valor - b.valor) * fator : a.data.localeCompare(b.data) * fator
