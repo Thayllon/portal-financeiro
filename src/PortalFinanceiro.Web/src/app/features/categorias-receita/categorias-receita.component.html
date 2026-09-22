@@ -128,8 +128,8 @@
       (visibleChange)="fecharDrawerSubs()"
     >
       @if (categoriaAlvo()) {
-        <section class="drawer-cat">
-          <label class="drawer-label">Nome da categoria</label>
+        <div class="field">
+          <label>Nome da categoria</label>
           <div class="drawer-row">
             <input
               class="input"
@@ -137,13 +137,13 @@
               placeholder="Nome da categoria"
               (keyup.enter)="salvarNomeCategoriaDrawer()"
             />
-            <button class="action-btn" title="Salvar nome" (click)="salvarNomeCategoriaDrawer()" [disabled]="salvando()">
+            <button class="drawer-action" title="Salvar nome" (click)="salvarNomeCategoriaDrawer()" [disabled]="salvando()">
               <svg lucideIcon="check" [size]="16" />
             </button>
           </div>
-        </section>
-        <section class="drawer-cat">
-          <label class="drawer-label">Nova subcategoria</label>
+        </div>
+        <div class="field">
+          <label>Nova subcategoria</label>
           <div class="drawer-row">
             <input
               class="input"
@@ -151,11 +151,11 @@
               placeholder="Ex: Academia"
               (keyup.enter)="criarSubDrawer()"
             />
-            <button class="action-btn" title="Adicionar subcategoria" (click)="criarSubDrawer()" [disabled]="salvando()">
+            <button class="drawer-action" title="Adicionar subcategoria" (click)="criarSubDrawer()" [disabled]="salvando()">
               <svg lucideIcon="plus" [size]="16" />
             </button>
           </div>
-        </section>
+        </div>
         <div class="drawer-search">
           <svg lucideIcon="search" [size]="16" class="drawer-search__icon" />
           <input
@@ -181,7 +181,7 @@
               </span>
               @if (subEmEdicaoId() === sub.id) {
                 <input
-                  class="input input--inline"
+                  class="input"
                   [(ngModel)]="nomeSubEdicao"
                   (keyup.enter)="salvarEdicaoSub(sub)"
                   (keyup.escape)="cancelarEdicaoSub()"
@@ -196,11 +196,11 @@
                 <span class="drawer-sub-item__name">{{ sub.nome }}</span>
                 <select
                   class="mover-select"
-                  [(ngModel)]="destinoMover[sub.id]"
-                  (change)="moverParaDestino(sub)"
+                  [ngModel]="destinoDe(sub)"
+                  (ngModelChange)="aoTrocarDestino(sub, $event)"
                   title="Mover para outra categoria"
                 >
-                  <option value="">Mover para...</option>
+                  <option value="" disabled>Mover para...</option>
                   @for (d of destinosMoverDe(sub); track d.id) {
                     <option [value]="d.id">{{ d.nome }}</option>
                   }
