@@ -137,6 +137,7 @@
                   <label>Categoria<span class="required">*</span></label>
                   <app-custom-select
                     placeholder="Selecione a categoria"
+                    searchPlaceholder="Buscar categoria..."
                     [options]="categoriasOptions()"
                     [value]="form().idCategoria"
                     (valueChange)="onCategoriaChange($event); clearError('idCategoria')"
@@ -150,9 +151,10 @@
                     <label>Subcategoria</label>
                     <app-custom-select
                       placeholder="Nenhuma"
-                      [options]="subcategoriasOptions()"
-                      [value]="form().idSubcategoria ?? ''"
-                      (valueChange)="selecionarSubcategoria($event)"
+                      searchPlaceholder="Buscar parceria..."
+                      [options]="parceriasOptions()"
+                      [value]="form().idParceria ?? ''"
+                      (valueChange)="updateFormField('idParceria', $event)"
                     />
                   </div>
                 }
@@ -209,12 +211,13 @@
                 @if (vinculoSelecionado() === 'parceria' || dominioCategoria() !== 'receita') {
                   <div class="field">
                     <label>Parceria</label>
-                    <app-custom-select
-                      placeholder="Nenhuma (opcional)"
-                      [options]="parceriasOptions()"
-                      [value]="form().idParceria ?? ''"
-                      (valueChange)="updateFormField('idParceria', $event)"
-                    />
+                  <app-custom-select
+                    placeholder="Nenhuma (opcional)"
+                    searchPlaceholder="Buscar parceria..."
+                    [options]="parceriasOptions()"
+                    [value]="form().idParceria ?? ''"
+                    (valueChange)="updateFormField('idParceria', $event)"
+                  />
                   </div>
                 }
               </div>
@@ -268,6 +271,7 @@
                       <label>Adicionar serviço</label>
                       <app-custom-select
                         placeholder="Selecione a categoria"
+                        searchPlaceholder="Buscar serviço..."
                         [options]="categoriasServicoDisponiveis()"
                         [value]="''"
                         (valueChange)="adicionarBlocoServico($event)"
@@ -302,8 +306,7 @@
                     searchPlaceholder="Buscar cliente..."
                     [options]="clientesOptions()"
                     [value]="form().idCliente ?? ''"
-                    [searchable]="true"
-                    (valueChange)="onClienteChange($event); clearError('idCliente')"
+                    (valueChange)="updateFormField('idCliente', $event); clearError('idCliente')"
                   />
                   @if (fieldErrors()['idCliente']) {
                     <span class="field-error">{{ fieldErrors()['idCliente'] }}</span>
@@ -389,6 +392,7 @@
                   <label>Conta<span class="required">*</span></label>
                   <app-custom-select
                     placeholder="Selecione a conta"
+                    searchPlaceholder="Buscar conta..."
                     [options]="contasOptions()"
                     [value]="form().idConta"
                     (valueChange)="updateFormField('idConta', $event); clearError('idConta')"

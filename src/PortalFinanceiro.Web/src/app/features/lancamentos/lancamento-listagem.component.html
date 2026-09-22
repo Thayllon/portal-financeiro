@@ -16,9 +16,9 @@
   <div class="toolbar">
     <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
     <div class="filtros">
-      <app-custom-select placeholder="Todas as contas" [options]="contasOptions()" (valueChange)="filtroConta = $event; carregar()" />
+      <app-custom-select placeholder="Todas as contas" searchPlaceholder="Buscar conta..." [options]="contasOptions()" (valueChange)="filtroConta = $event; carregar()" />
       <app-custom-select placeholder="Todos os status" [options]="statusOptions()" (valueChange)="filtroStatus = $event; carregar()" />
-      <app-custom-select placeholder="Todas as categorias" [options]="categoriasOptions()" (valueChange)="filtroCategoria = $event; carregar()" />
+      <app-custom-select placeholder="Todas as categorias" searchPlaceholder="Buscar categoria..." [options]="categoriasOptions()" (valueChange)="filtroCategoria = $event; carregar()" />
       <div class="search-wrapper">
         <svg lucideIcon="search" [size]="16" class="search-icon" />
         <input [(ngModel)]="busca" (ngModelChange)="onBuscaChange()" placeholder="Buscar..." class="search-input" />

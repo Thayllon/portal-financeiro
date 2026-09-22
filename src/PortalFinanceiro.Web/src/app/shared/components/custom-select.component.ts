@@ -28,8 +28,9 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   options = input<SelectOption[]>([]);
   value = input('');
   disabled = input(false);
-  searchable = input(false);
+  searchable = input(true);
   searchPlaceholder = input('Buscar...');
+  searchThreshold = input(5);
   valueChange = output<string>();
 
   private _disabled = signal(false);
@@ -40,7 +41,7 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   openUp = signal(false);
   selectedLabel = signal('');
   searchTerm = signal('');
-  showSearch = computed(() => this.searchable() && this.options().length > 5);
+  showSearch = computed(() => this.searchable() && this.options().length > this.searchThreshold());
   filteredOptions = computed(() => {
     const termo = this.normalizar(this.searchTerm());
     if (!termo) return this.options();

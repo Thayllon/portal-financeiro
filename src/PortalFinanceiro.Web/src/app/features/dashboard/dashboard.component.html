@@ -35,6 +35,7 @@
           <app-custom-select
             class="page__header-conta"
             placeholder="Todas as contas"
+            searchPlaceholder="Buscar conta..."
             [value]="filtroConta()"
             [options]="contasOptions()"
             (valueChange)="onFiltroContaChange($event)"
