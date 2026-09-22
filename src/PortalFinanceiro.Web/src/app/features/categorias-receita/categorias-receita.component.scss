@@ -356,10 +356,8 @@
 }
 
 .mover-select {
-  @include forms.select;
-  max-width: 8.5rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  flex: 0 1 9rem;
+  min-width: 0;
 }
 
 .drawer-sub-list {

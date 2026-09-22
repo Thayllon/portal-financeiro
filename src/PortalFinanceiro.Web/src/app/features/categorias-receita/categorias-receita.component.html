@@ -194,17 +194,13 @@
                 </button>
               } @else {
                 <span class="drawer-sub-item__name">{{ sub.nome }}</span>
-                <select
+                <app-custom-select
                   class="mover-select"
-                  [ngModel]="destinoDe(sub)"
-                  (ngModelChange)="aoTrocarDestino(sub, $event)"
-                  title="Mover para outra categoria"
-                >
-                  <option value="" disabled>Mover para...</option>
-                  @for (d of destinosMoverDe(sub); track d.id) {
-                    <option [value]="d.id">{{ d.nome }}</option>
-                  }
-                </select>
+                  placeholder="Mover para..."
+                  [options]="opcoesDestino(sub)"
+                  [value]="destinoDe(sub)"
+                  (valueChange)="aoTrocarDestino(sub, $event)"
+                />
                 <button class="action-btn action-btn--tiny" title="Renomear" (click)="iniciarEdicaoSub(sub)">
                   <svg lucideIcon="pencil" [size]="12" />
                 </button>
