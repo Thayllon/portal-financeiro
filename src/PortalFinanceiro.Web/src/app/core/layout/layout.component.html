@@ -55,10 +55,10 @@
           }
           @if (authService.temPermissao('contas') || authService.temPermissao('categorias') || authService.temPermissao('clientes') || authService.temPermissao('parceiros') || authService.isAdmin()) {
           <div class="nav-group">
-            <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Configurações' : ''">
+            <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Cadastros' : ''">
               <svg lucideIcon="monitor-cog" [size]="18" />
               @if (!sidebarCollapsed()) {
-                <span>Configurações</span>
+                <span>Cadastros</span>
               }
               @if (!sidebarCollapsed()) {
                 <svg [lucideIcon]="configuracoesOpen() ? 'chevron-down' : 'chevron-right'" class="nav-group__chevron" [size]="16" />
@@ -69,7 +69,7 @@
                 @if (authService.temPermissao('contas')) {
                 <a routerLink="/contas" routerLinkActive="active">
                   <svg lucideIcon="wallet" [size]="18" />
-                  <span>Contas bancárias</span>
+                  <span>Contas Bancárias</span>
                 </a>
                 }
                 @if (authService.temPermissao('categorias')) {
