@@ -179,32 +179,6 @@
   line-height: 0;
 }
 
-.hover-actions {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.125rem;
-  max-width: 0;
-  opacity: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  transition: max-width var(--transition-fast), opacity var(--transition-fast);
-}
-
-.sub-chip:hover .hover-actions,
-.sub-chip:focus-within .hover-actions,
-.drawer-sub-item:hover .hover-actions,
-.drawer-sub-item:focus-within .hover-actions {
-  max-width: 4rem;
-  opacity: 1;
-}
-
-@media (pointer: coarse) {
-  .hover-actions {
-    max-width: none;
-    opacity: 1;
-  }
-}
-
 .empty-state {
   display: flex;
   flex-direction: column;
