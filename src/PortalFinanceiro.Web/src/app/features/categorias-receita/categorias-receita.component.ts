@@ -7,6 +7,7 @@ import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { SideDrawerComponent } from '../../shared/components/side-drawer.component';
+import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { TabsComponent, Tab } from '../../shared/components/tabs.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
@@ -24,7 +25,7 @@ interface DragSub {
 @Component({
   selector: 'app-categorias',
   standalone: true,
-  imports: [FormsModule, ModalComponent, SideDrawerComponent, TabsComponent, ListPaginationComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, SideDrawerComponent, CustomSelectComponent, TabsComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './categorias-receita.component.html',
   styleUrl: './categorias-receita.component.scss'
 })
@@ -141,6 +142,10 @@ export class CategoriasComponent implements OnInit {
 
   destinosMoverDe(sub: Categoria) {
     return this.categoriasPai().filter(c => c.id !== sub.categoriaPaiId);
+  }
+
+  opcoesDestino(sub: Categoria): SelectOption[] {
+    return this.destinosMoverDe(sub).map(c => ({ value: c.id, label: c.nome }));
   }
 
   destinoDe(sub: Categoria) {
