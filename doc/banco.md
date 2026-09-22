@@ -72,7 +72,13 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) — `IdParceria`/`IdContrato` opcionais e mutuamente exclusivos para vínculo |
 | `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
-| `PermissaoUsuario` | Nível por módulo por usuário (`parcerias`, `contratos` garantidos via seed) |
+| `PermissaoUsuario` | Nível por módulo por usuário (`dashboard`, `receitas`, `despesas`, `contas`, `categorias`, `clientes`, `parceiros`, `parcerias`, `contratos` garantidos via seed; admin com `Escrita` em todos) |
+
+### Exclusão de usuário
+
+- `Usuario` é referenciado por 12 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
+- `DELETE /api/usuarios/{id}` conta vínculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` → 422 com mensagem orientando desativar em vez de excluir
+- Auto-exclusão é bloqueada (`AUTO_EXCLUSAO` → 422) no backend além do frontend
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
 
 ### Categorias compartilhadas

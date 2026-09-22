@@ -37,7 +37,7 @@
             }
           </a>
           }
-          @if (authService.temPermissao('parcerias')) {
+          @if (authService.temPermissao('parcerias') || authService.isAdmin()) {
           <a routerLink="/parcerias" routerLinkActive="active">
             <svg lucideIcon="user-round-group" [size]="18" />
             @if (!sidebarCollapsed()) {
@@ -45,7 +45,7 @@
             }
           </a>
           }
-          @if (authService.temPermissao('contratos')) {
+          @if (authService.temPermissao('contratos') || authService.isAdmin()) {
           <a routerLink="/contratos" routerLinkActive="active">
             <svg lucideIcon="file-badge" [size]="18" />
             @if (!sidebarCollapsed()) {
