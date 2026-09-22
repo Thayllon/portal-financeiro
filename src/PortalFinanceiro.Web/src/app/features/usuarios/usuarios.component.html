@@ -61,11 +61,14 @@
                     <app-status-badge [type]="u.ativo ? 'ativo' : 'inativo'" [label]="u.ativo ? 'Ativo' : 'Inativo'" />
                   </td>
                   <td class="cell-actions">
-<button class="action-btn" title="Editar" (click)="abrirDrawer(u)">
-                      <svg lucideIcon="user-pen" [size]="16" />
+<button class="action-btn" title="Editar usuário" (click)="abrirDrawer(u)">
+                      <svg lucideIcon="user-round-pen" [size]="16" />
                     </button>
-                    <button class="action-btn" [class.action-btn--danger]="u.ativo" [title]="u.ativo ? 'Desativar' : 'Ativar'" (click)="alterarAtivo(u)">
-                      <svg [lucideIcon]="u.ativo ? 'user-x' : 'user-check'" [size]="16" />
+                    <button class="action-btn" [class.action-btn--danger]="u.ativo" [title]="u.ativo ? 'Desativar usuário' : 'Ativar usuário'" (click)="alterarAtivo(u)">
+                      <svg [lucideIcon]="u.ativo ? 'user-round-minus' : 'user-round-check'" [size]="16" />
+                    </button>
+                    <button class="action-btn action-btn--danger" title="Excluir usuário" (click)="excluirUsuario(u)">
+                      <svg lucideIcon="user-round-x" [size]="16" />
                     </button>
                   </td>
                 </tr>

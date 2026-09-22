@@ -170,16 +170,20 @@ export class UsuariosComponent implements OnInit {
   async excluirAtual() {
     const u = this.editando();
     if (!u) return;
+    await this.excluirUsuario(u, true);
+  }
+
+  async excluirUsuario(u: Usuario, doDrawer = false) {
     if (this.ehUsuarioAtual(u)) {
       this.notify.error('Você não pode excluir o próprio usuário');
       return;
     }
-    const ok = await this.confirmService.confirm('Excluir usuário', `Deseja excluir "${u.nome}"?`);
+    const ok = await this.confirmService.confirm('Excluir usuário', `Deseja excluir "${u.nome}"? Ele perderá o acesso ao portal.`);
     if (!ok) return;
     try {
       await firstValueFrom(this.repo.excluir(u.id));
       this.notify.success('Usuário excluído');
-      this.fecharDrawer();
+      if (doDrawer) this.fecharDrawer();
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir usuário')); }
   }
