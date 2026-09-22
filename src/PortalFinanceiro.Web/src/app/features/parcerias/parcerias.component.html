@@ -118,6 +118,7 @@
     <label>Parceiro<span class="required">*</span></label>
     <app-custom-select
       placeholder="Selecione o parceiro"
+      searchPlaceholder="Buscar parceiro..."
       [options]="parceirosOptions()"
       [value]="form.idParceiro"
       (valueChange)="form.idParceiro = $event"
@@ -127,6 +128,7 @@
     <label>Cliente<span class="required">*</span></label>
     <app-custom-select
       placeholder="Selecione o cliente"
+      searchPlaceholder="Buscar cliente..."
       [options]="clientesOptions()"
       [value]="form.idCliente"
       (valueChange)="form.idCliente = $event"

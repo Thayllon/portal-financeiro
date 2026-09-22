@@ -76,7 +76,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Componentes standalone com `imports` explícitos
 - Ícones Lucide: `<svg lucideIcon="nome" [size]="16" />`
 - **Selects/Dropdowns**: SEMPRE `app-custom-select` (padrão reutilizável) — proibido `<select>` nativo
-- **Busca no select**: `app-custom-select` aceita `[searchable]="true"` + `searchPlaceholder="..."`; o campo de busca aparece só quando há mais de 5 opções e filtra sem diferenciar acentos nem maiúsculas/minúsculas (ex.: Cliente na Nova Receita)
+- **Busca no select**: `app-custom-select` já vem pesquisável por padrão (`searchable`, default `true`) + `searchPlaceholder="..."` e `searchThreshold` (default `5`); o campo de busca aparece só acima do limite e filtra sem diferenciar acentos nem maiúsculas/minúsculas. Desligue com `[searchable]="false"` nas listas fixas se precisar
 - **Modal de lançamento (edição)**: com item em edição, o botão **Salvar** aparece em todos os passos (cópia sem id mantém o wizard)
 - **Cadastro rápido no wizard**: botões `+ Nova/Novo` ao lado do label criam categoria/subcategoria, categoria de serviço ou cliente sem sair do fluxo — o item criado é pré-selecionado e nada do digitado se perde (pais atualizam suas listas via `categoriaCriada`/`servicoCriado`/`clienteCriado`)
 - **Descrição padrão no wizard**: no fluxo adicional de receita, ao selecionar o cliente (ou criar via `+`), a descrição é preenchida com o nome do cliente quando vazia; texto já digitado nunca é sobrescrito

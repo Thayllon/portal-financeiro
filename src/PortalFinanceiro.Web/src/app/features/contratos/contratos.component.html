@@ -109,6 +109,7 @@
     <label>Cliente<span class="required">*</span></label>
     <app-custom-select
       placeholder="Selecione o cliente"
+      searchPlaceholder="Buscar cliente..."
       [options]="clientesOptions()"
       [value]="form.idCliente"
       (valueChange)="form.idCliente = $event"
