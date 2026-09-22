@@ -21,7 +21,7 @@ export class HomeComponent {
   private sections = signal<Secao[]>([
     {
       titulo: 'FINANCEIRO',
-      subtitulo: 'Gestão principal das movimentações financeiras',
+      subtitulo: 'Receitas, despesas, contratos e parcerias',
       cards: [
         {
           title: 'Dashboard',
@@ -43,51 +43,11 @@ export class HomeComponent {
           icon: 'trending-down',
           route: '/despesas',
           modulo: 'despesas'
-        }
-      ]
-    },
-    {
-      titulo: 'CONTAS E ORGANIZAÇÃO',
-      subtitulo: 'Gerencie suas contas bancárias e organize suas categorias',
-      cards: [
-        {
-          title: 'Contas Bancárias',
-          description: 'Gerencie suas contas PF e PJ vinculadas aos lançamentos.',
-          icon: 'wallet',
-          route: '/contas',
-          modulo: 'contas'
-        },
-        {
-          title: 'Categorias',
-          description: 'Organize receitas e despesas por categorias e subcategorias.',
-          icon: 'tag',
-          route: '/categorias',
-          modulo: 'categorias'
-        }
-      ]
-    },
-    {
-      titulo: 'CADASTROS',
-      subtitulo: 'Mantenha suas informações sempre atualizadas',
-      cards: [
-        {
-          title: 'Clientes',
-          description: 'Cadastro de clientes vinculados às receitas.',
-          icon: 'hand-helping',
-          route: '/clientes',
-          modulo: 'clientes'
-        },
-        {
-          title: 'Parceiros',
-          description: 'Gestão de parceiros e suas informações.',
-          icon: 'handshake',
-          route: '/parceiros',
-          modulo: 'parceiros'
         },
         {
           title: 'Parcerias',
           description: 'Percentuais e vínculos de parcerias com receitas.',
-          icon: 'handshake',
+          icon: 'user-round-group',
           route: '/parcerias',
           modulo: 'parcerias'
         },
@@ -101,7 +61,41 @@ export class HomeComponent {
       ]
     },
     {
-      titulo: 'ADMINISTRAÇÃO',
+      titulo: 'CADASTROS',
+      subtitulo: 'Contas, categorias e pessoas que estruturam a operação',
+      cards: [
+        {
+          title: 'Contas Bancárias',
+          description: 'Gerencie suas contas PF e PJ vinculadas aos lançamentos.',
+          icon: 'wallet',
+          route: '/contas',
+          modulo: 'contas'
+        },
+        {
+          title: 'Categorias',
+          description: 'Organize receitas e despesas por categorias e subcategorias.',
+          icon: 'tags',
+          route: '/categorias',
+          modulo: 'categorias'
+        },
+        {
+          title: 'Clientes',
+          description: 'Cadastro de clientes vinculados às receitas.',
+          icon: 'hand-helping',
+          route: '/clientes',
+          modulo: 'clientes'
+        },
+        {
+          title: 'Parceiros',
+          description: 'Gestão de parceiros e suas informações.',
+          icon: 'handshake',
+          route: '/parceiros',
+          modulo: 'parceiros'
+        }
+      ]
+    },
+    {
+      titulo: 'ACESSO',
       subtitulo: 'Controle de acessos e permissões',
       cards: [
         {
