@@ -11,6 +11,9 @@ export const MODULOS = [
   { id: 'categorias', nome: 'Categorias' },
   { id: 'clientes', nome: 'Clientes' },
   { id: 'parceiros', nome: 'Parceiros' },
+  { id: 'parcerias', nome: 'Parcerias' },
+  { id: 'contratos', nome: 'Contratos' },
+  { id: 'usuarios', nome: 'Usuários' },
 ] as const;
 
 export const NivelPermissao = {

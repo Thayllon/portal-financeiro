@@ -277,12 +277,21 @@
           </header>
 
           @if (especiaisAberto()) {
+            @if (u.isAdmin) {
+              <div class="perm-banner">
+                <svg lucideIcon="lock" [size]="16" />
+                <div>
+                  <strong>Acesso total</strong>
+                  <span>Administradores já possuem acesso aos fluxos adicionais.</span>
+                </div>
+              </div>
+            }
             <div class="perm-list">
               <div class="perm-item">
                 <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
                 <span class="perm-item__label">Fluxo de receita adicional</span>
                 <label class="switch">
-                  <input type="checkbox" [checked]="fluxoAdicional()" (change)="alternarFluxoAdicional($event)" />
+                  <input type="checkbox" [checked]="fluxoAdicional()" [disabled]="u.isAdmin" (change)="alternarFluxoAdicional($event)" />
                   <span class="switch__slider"></span>
                 </label>
               </div>
@@ -290,7 +299,7 @@
                 <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
                 <span class="perm-item__label">Fluxo de despesa adicional</span>
                 <label class="switch">
-                  <input type="checkbox" [checked]="fluxoAdicionalDespesa()" (change)="alternarFluxoAdicionalDespesa($event)" />
+                  <input type="checkbox" [checked]="fluxoAdicionalDespesa()" [disabled]="u.isAdmin" (change)="alternarFluxoAdicionalDespesa($event)" />
                   <span class="switch__slider"></span>
                 </label>
               </div>

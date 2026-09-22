@@ -120,7 +120,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/parcerias/:id` | parceria-detalhe | Detalhe da parceria: resumo (partes, recebido, pago, faltas) + entradas (receitas) + saídas (despesas) |
 | `/contratos` | contratos | Cadastro de contratos (nome + cliente + valor, sem parceiro) com falta receber; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige falta receber zerada |
 | `/contratos/:id` | contrato-detalhe | Detalhe do contrato: cliente + recebido/falta receber + entradas (receitas) |
-| `/usuarios` | usuarios | Usuários e permissões (admin) |
+| `/usuarios` | usuarios | Usuários e permissões (admin). Admin possui acesso total fixo a parcerias, contratos e demais telas: toggles de permissão e fluxos ficam desabilitados com banner "Acesso total" e o salvamento exibe aviso informativo |
 
 ### Indicadores do dashboard mensal
 
@@ -147,6 +147,6 @@ Regras gerais: do mês corrente em diante os valores incorporam previsão (regra
 
 ### Menu lateral
 
-- **Dashboard**, **Receitas**, **Despesas**, **Parcerias** e **Contratos** ficam no nível principal. **Parcerias** e **Contratos** usam permissão regular (Leitura/Escrita) como Clientes e Parceiros. Parcerias são vinculadas em Receitas/Despesas via `IdParceria` e exibem saldo (falta receber/pagar); contratos são vinculados em Receitas via `IdContrato` (no máximo um vínculo por receita) e exibem falta receber.
+- **Dashboard**, **Receitas**, **Despesas**, **Parcerias** e **Contratos** ficam no nível principal. **Parcerias** e **Contratos** usam permissão regular (Leitura/Escrita) como Clientes e Parceiros, com bypass explícito para admin (`temPermissao(...) || isAdmin()` na sidebar e `temPermissao` com `isAdmin => true` no guard). Parcerias são vinculadas em Receitas/Despesas via `IdParceria` e exibem saldo (falta receber/pagar); contratos são vinculados em Receitas via `IdContrato` (no máximo um vínculo por receita) e exibem falta receber.
 - **Configurações** é um grupo colapsável que reúne, nesta ordem: **Contas**, **Categorias**, **Cliente**, **Parceiro** e **Usuários** (admin).
 - O ícone `user-key` fica reservado para quando o item **Permissões** voltar.

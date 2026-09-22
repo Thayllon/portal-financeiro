@@ -27,4 +27,7 @@ public class UsuarioRepository : SqlBaseRepository, IUsuarioRepository
 
     public async Task ExcluirAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, UsuarioSql.Excluir, new { Id = id }));
+
+    public async Task<int> ContarVinculosAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, UsuarioSql.ContarVinculos, new { Id = id }));
 }

@@ -130,6 +130,11 @@ export class UsuariosComponent implements OnInit {
         });
         return copia;
       });
+      if (item.isAdmin) {
+        this.fluxoAdicional.set(true);
+        this.fluxoAdicionalDespesa.set(true);
+        return;
+      }
       const fluxoPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL);
       this.fluxoAdicional.set(!!fluxoPerm && fluxoPerm.nivel >= NivelPermissao.Leitura);
       const fluxoDespesaPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL_DESPESA);
@@ -152,18 +157,29 @@ export class UsuariosComponent implements OnInit {
   }
 
   alternarFluxoAdicional(event: Event) {
+    if (this.editando()?.isAdmin) {
+      this.notify.info('Administradores já possuem acesso total, incluindo fluxos adicionais');
+      return;
+    }
     const ligado = (event.target as HTMLInputElement).checked;
     this.fluxoAdicional.set(ligado);
   }
 
   alternarFluxoAdicionalDespesa(event: Event) {
+    if (this.editando()?.isAdmin) {
+      this.notify.info('Administradores já possuem acesso total, incluindo fluxos adicionais');
+      return;
+    }
     const ligado = (event.target as HTMLInputElement).checked;
     this.fluxoAdicionalDespesa.set(ligado);
   }
 
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
     const u = this.editando();
-    if (u?.isAdmin) return;
+    if (u?.isAdmin) {
+      this.notify.info('Administradores possuem acesso total a todos os módulos, incluindo parcerias e contratos');
+      return;
+    }
     this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
   }
 
@@ -233,6 +249,8 @@ export class UsuariosComponent implements OnInit {
         if (usuarioId === this.auth.user()?.usuarioId) {
           this.auth.atualizarPermissoes(permissoes);
         }
+      } else {
+        this.notify.info('Administrador possui acesso total a parcerias, contratos e demais telas');
       }
       this.fecharDrawer();
       this.fecharModal();
