@@ -19,6 +19,16 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 | `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
 | `100_SeedDemo.sql` | Dados fake de demonstração (Maria/João) — 2024-01 a 2026-09 |
 | `101_AtualizarUsuariosDemo.sql` | Troca e-mail/senha dos usuários demo para produção: `maria@portal.com` / `joao@portal.com`, senha `123456` (idempotente) |
+| `102_DDL_AtualizarEstrutura.sql` | **DDL idempotente p/ Neon desatualizado**: sincroniza schema (cria tabelas/colunas/índices/FKs faltantes) |
+| `103_DML_Limpar_E_Copiar_Dados.sql` | **DML idempotente**: `TRUNCATE CASCADE` — esvazia o banco (rodar antes de copiar) |
+
+> **Copiar Local → Prod (Neon):** DDL e DML separados, conforme solicitado:
+> 1. **DDL — estrutura:** `psql "$DATABASE_URL" -f scripts/postgres/102_DDL_AtualizarEstrutura.sql`
+> 2. **DML — dados:** gere o arquivo com seu LocalDB: `powershell -ExecutionPolicy Bypass -File scripts/CopiarLocalParaProd.ps1`
+>    → cria `portal-financeiro-prod-restore.sql` na **raiz do projeto** (o Explorer abre sozinho).
+>    Depois: `psql "$DATABASE_URL" -f portal-financeiro-prod-restore.sql` ou cole no SQL Editor do Neon.
+>    O gerado já contém `TRUNCATE CASCADE` + `INSERTs` convertidos p/ Postgres (`::uuid`, `TRUE`/`FALSE`).
+>    Alternativa rápida: `psql "$DATABASE_URL" -f scripts/postgres/103_DML_Limpar_E_Copiar_Dados.sql` só para esvaziar.
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
 > migrado **não** deve recebê-los novamente (DbUp rastreia por nome).

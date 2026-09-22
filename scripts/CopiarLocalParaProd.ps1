@@ -11,7 +11,7 @@
 
 param(
     [string]$localConnectionString = "Server=(localdb)\mssqllocaldb;Database=PortalFinanceiro;Trusted_Connection=True;TrustServerCertificate=True;",
-    [string]$saida = "portal-financeiro-prod-restore.sql"
+    [string]$saida = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -51,6 +51,7 @@ $tabelas = @(
     "CategoriaServico",
     "PermissaoUsuario",
     "Parceria",
+    "Contrato",
     "RegraReceita",
     "RegraDespesa",
     "Receita",
@@ -62,16 +63,27 @@ $tabelas = @(
 
 $ordemTruncate = @(
     "CategoriaHistorico","ReceitaServico","DespesaServico","Receita","Despesa",
-    "RegraReceita","RegraDespesa","Parceria","PermissaoUsuario",
+    "RegraReceita","RegraDespesa","Contrato","Parceria","PermissaoUsuario",
     "CategoriaServico","CategoriaDespesa","CategoriaReceita",
     "Pessoa","ContaBancaria","Usuario"
 )
 
+$projectRoot = Split-Path -Parent $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($saida)) {
+    $saida = "portal-financeiro-prod-restore.sql"
+}
+if (-not [System.IO.Path]::IsPathRooted($saida)) {
+    $saidaPath = Join-Path $projectRoot $saida
+} else {
+    $saidaPath = $saida
+}
+
+Write-Host "Projeto: $projectRoot" -ForegroundColor DarkGray
+Write-Host "Saida:   $saidaPath" -ForegroundColor DarkGray
 Write-Host "Conectando no LocalDB..." -ForegroundColor Cyan
 $conn = New-Object System.Data.SqlClient.SqlConnection($localConnectionString)
 $conn.Open()
 
-$saidaPath = Join-Path (Get-Location) $saida
 $writer = [System.IO.StreamWriter]::new($saidaPath, $false, [System.Text.Encoding]::UTF8)
 
 $writer.WriteLine("-- Backup gerado em $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') a partir do LocalDB")
@@ -132,6 +144,12 @@ $conn.Close()
 
 Write-Host ""
 Write-Host "Arquivo gerado: $saidaPath" -ForegroundColor Green
-Write-Host "Execute no prod (Neon):" -ForegroundColor Yellow
-Write-Host '  psql "postgresql://USER:PASS@HOST/neondb?sslmode=require" -f portal-financeiro-prod-restore.sql'
-Write-Host "Ou cole o conteúdo no SQL Editor do Neon (https://console.neon.tech)" -ForegroundColor Yellow
+Write-Host "Tamanho: $([math]::Round((Get-Item $saidaPath).Length / 1KB, 1)) KB" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "PASSO 1 (DDL) ja deve ter sido rodado no Neon:" -ForegroundColor Yellow
+Write-Host "  psql ""`$DATABASE_URL"" -f scripts/postgres/102_DDL_AtualizarEstrutura.sql" -ForegroundColor Gray
+Write-Host "PASSO 2 (DML) execute o arquivo gerado no prod (Neon):" -ForegroundColor Yellow
+Write-Host '  psql "postgresql://USER:PASS@HOST/neondb?sslmode=require" -f portal-financeiro-prod-restore.sql' -ForegroundColor Gray
+Write-Host "  ou cole o conteudo no SQL Editor do Neon (https://console.neon.tech)" -ForegroundColor Gray
+Write-Host ""
+try { explorer.exe /select,"$saidaPath" } catch {}
