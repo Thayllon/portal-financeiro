@@ -15,8 +15,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
 
 export const LIMITE_SUBS_VISIVEIS = 5;
 
-type ModalModo = 'nova-categoria' | 'nova-sub' | 'editar';
-
 interface DragSub {
   id: string;
   nome: string;
@@ -46,15 +44,18 @@ export class CategoriasComponent implements OnInit {
   items = signal<Categoria[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
-  modalModo = signal<ModalModo>('nova-categoria');
   categoriaAlvo = signal<Categoria | null>(null);
-  editando = signal<Categoria | null>(null);
   salvando = signal(false);
   movendo = signal(false);
-  form: CategoriaRequest = { nome: '', categoriaPaiId: undefined };
+  form: CategoriaRequest = { nome: '' };
 
   drawerSubsVisible = signal(false);
   buscaSub = signal('');
+  nomeCategoriaDrawer = '';
+  novaSubDrawer = '';
+  subEmEdicaoId = signal<string | null>(null);
+  nomeSubEdicao = '';
+  destinoMover: Record<string, string> = {};
 
   private dragSub: DragSub | null = null;
   cardAlvoId = signal<string | null>(null);
@@ -100,69 +101,21 @@ export class CategoriasComponent implements OnInit {
     return todas.filter(s => s.nome.toLowerCase().includes(busca));
   });
 
-  tituloModal(): string {
-    const aba = this.tabAtiva();
-    if (this.modalModo() === 'nova-sub') return `Nova subcategoria em ${this.categoriaAlvo()?.nome ?? ''}`;
-    if (this.modalModo() === 'editar') {
-      const item = this.editando();
-      const ehSub = !!item?.categoriaPaiId;
-      return ehSub ? 'Renomear subcategoria' : `Renomear categoria de ${aba}`;
-    }
-    return `Nova categoria de ${aba}`;
-  }
-
-  subtituloModal(): string {
-    if (this.modalModo() === 'nova-sub') return 'Ela será vinculada à categoria selecionada.';
-    if (this.modalModo() === 'editar' && this.editando()?.categoriaPaiId) {
-      const pai = this.items().find(c => c.id === this.editando()!.categoriaPaiId);
-      return pai ? `Subcategoria de ${pai.nome}. Para trocar de categoria, arraste pelo ícone de mover.` : '';
-    }
-    return '';
-  }
-
-  abrirModal(item?: Categoria, paiId?: string) {
-    if (item) {
-      this.modalModo.set('editar');
-      this.editando.set(item);
-      this.categoriaAlvo.set(item.categoriaPaiId ? (this.items().find(c => c.id === item.categoriaPaiId) ?? null) : null);
-      this.form = { nome: item.nome, categoriaPaiId: item.categoriaPaiId };
-    } else if (paiId) {
-      const pai = this.items().find(c => c.id === paiId) ?? null;
-      this.modalModo.set('nova-sub');
-      this.editando.set(null);
-      this.categoriaAlvo.set(pai);
-      this.form = { nome: '', categoriaPaiId: paiId };
-    } else {
-      this.modalModo.set('nova-categoria');
-      this.editando.set(null);
-      this.categoriaAlvo.set(null);
-      this.form = { nome: '', categoriaPaiId: undefined };
-    }
+  abrirModal() {
+    this.form = { nome: '' };
     this.modalVisible.set(true);
   }
 
   fecharModal() {
     this.modalVisible.set(false);
-    this.editando.set(null);
-    this.categoriaAlvo.set(null);
   }
 
   async salvar() {
     if (!this.form.nome?.trim()) { this.notify.error('Informe o nome da categoria'); return; }
     this.salvando.set(true);
     try {
-      if (this.editando()) {
-        const payload: CategoriaRequest = { nome: this.form.nome.trim(), ...(this.editando()!.categoriaPaiId ? { categoriaPaiId: this.editando()!.categoriaPaiId } : {}) };
-        await firstValueFrom(this.repo.atualizar(this.editando()!.id, payload));
-        this.notify.success('Categoria atualizada');
-      } else {
-        const payload: CategoriaRequest = {
-          nome: this.form.nome.trim(),
-          ...(this.form.categoriaPaiId ? { categoriaPaiId: this.form.categoriaPaiId } : {})
-        };
-        await firstValueFrom(this.repo.criar(payload));
-        this.notify.success(this.modalModo() === 'nova-sub' ? 'Subcategoria criada' : 'Categoria criada');
-      }
+      await firstValueFrom(this.repo.criar({ nome: this.form.nome.trim() }));
+      this.notify.success('Categoria criada');
       this.fecharModal();
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar categoria')); }
@@ -172,12 +125,85 @@ export class CategoriasComponent implements OnInit {
   abrirDrawerSubs(categoria: Categoria) {
     this.categoriaAlvo.set(categoria);
     this.buscaSub.set('');
+    this.nomeCategoriaDrawer = categoria.nome;
+    this.novaSubDrawer = '';
+    this.subEmEdicaoId.set(null);
+    this.nomeSubEdicao = '';
+    this.destinoMover = {};
     this.drawerSubsVisible.set(true);
   }
 
   fecharDrawerSubs() {
     this.drawerSubsVisible.set(false);
     this.buscaSub.set('');
+    this.subEmEdicaoId.set(null);
+  }
+
+  destinosMoverDe(sub: Categoria) {
+    return this.categoriasPai().filter(c => c.id !== sub.categoriaPaiId);
+  }
+
+  async salvarNomeCategoriaDrawer() {
+    const foco = this.categoriaAlvo();
+    const nome = this.nomeCategoriaDrawer?.trim();
+    if (!foco || !nome) { this.notify.error('Informe o nome da categoria'); return; }
+    if (nome === foco.nome) return;
+    this.salvando.set(true);
+    try {
+      await firstValueFrom(this.repo.atualizar(foco.id, { nome }));
+      this.notify.success('Categoria atualizada');
+      await this.carregar();
+      this.categoriaAlvo.set(this.items().find(c => c.id === foco.id) ?? null);
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar categoria')); }
+    finally { this.salvando.set(false); }
+  }
+
+  async criarSubDrawer() {
+    const foco = this.categoriaAlvo();
+    const nome = this.novaSubDrawer?.trim();
+    if (!foco || !nome) { this.notify.error('Informe o nome da subcategoria'); return; }
+    this.salvando.set(true);
+    try {
+      await firstValueFrom(this.repo.criar({ nome, categoriaPaiId: foco.id }));
+      this.notify.success('Subcategoria criada');
+      this.novaSubDrawer = '';
+      await this.carregar();
+      this.categoriaAlvo.set(this.items().find(c => c.id === foco.id) ?? null);
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao criar subcategoria')); }
+    finally { this.salvando.set(false); }
+  }
+
+  iniciarEdicaoSub(sub: Categoria) {
+    this.subEmEdicaoId.set(sub.id);
+    this.nomeSubEdicao = sub.nome;
+  }
+
+  cancelarEdicaoSub() {
+    this.subEmEdicaoId.set(null);
+    this.nomeSubEdicao = '';
+  }
+
+  async salvarEdicaoSub(sub: Categoria) {
+    const nome = this.nomeSubEdicao?.trim();
+    if (!nome) { this.notify.error('Informe o nome da subcategoria'); return; }
+    if (nome === sub.nome) { this.cancelarEdicaoSub(); return; }
+    this.salvando.set(true);
+    try {
+      await firstValueFrom(this.repo.atualizar(sub.id, { nome, ...(sub.categoriaPaiId ? { categoriaPaiId: sub.categoriaPaiId } : {}) }));
+      this.notify.success('Subcategoria atualizada');
+      this.cancelarEdicaoSub();
+      const focoId = this.categoriaAlvo()?.id;
+      await this.carregar();
+      if (focoId) this.categoriaAlvo.set(this.items().find(c => c.id === focoId) ?? null);
+    } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao salvar subcategoria')); }
+    finally { this.salvando.set(false); }
+  }
+
+  async moverParaDestino(sub: Categoria) {
+    const destinoId = this.destinoMover[sub.id];
+    if (!destinoId || destinoId === sub.categoriaPaiId) return;
+    this.destinoMover[sub.id] = '';
+    await this.moverSub(sub.id, sub.nome, sub.categoriaPaiId!, destinoId);
   }
 
   iniciarArrasto(event: DragEvent, sub: Categoria) {
