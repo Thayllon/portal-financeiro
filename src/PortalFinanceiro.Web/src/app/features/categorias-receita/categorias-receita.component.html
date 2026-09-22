@@ -84,18 +84,16 @@
                         (dragstart)="iniciarArrasto($event, sub)"
                         (dragend)="finalizarArrasto()"
                       >
-                        <svg [lucideIcon]="arrastandoId() === sub.id ? 'hand' : 'hand-grab'" [size]="12" />
+                        <svg lucideIcon="move" [size]="13" />
                       </span>
                       <svg lucideIcon="file" [size]="13" />
                       <span class="sub-chip__name">{{ sub.nome }}</span>
-                      <span class="hover-actions">
-                        <button class="action-btn action-btn--tiny" title="Renomear" (click)="abrirModal(sub)">
-                          <svg lucideIcon="pencil" [size]="12" />
-                        </button>
-                        <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
-                          <svg lucideIcon="trash-2" [size]="12" />
-                        </button>
-                      </span>
+                      <button class="action-btn action-btn--tiny" title="Renomear" (click)="abrirModal(sub)">
+                        <svg lucideIcon="pencil" [size]="12" />
+                      </button>
+                      <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
+                        <svg lucideIcon="trash-2" [size]="12" />
+                      </button>
                     </div>
                   }
                   @if (subsRestantesDe(c.id) > 0) {
@@ -166,18 +164,16 @@
                 (dragstart)="iniciarArrasto($event, sub)"
                 (dragend)="finalizarArrasto()"
               >
-                <svg [lucideIcon]="arrastandoId() === sub.id ? 'hand' : 'hand-grab'" [size]="13" />
+                <svg lucideIcon="move" [size]="14" />
               </span>
               <svg lucideIcon="file" [size]="14" />
               <span class="drawer-sub-item__name">{{ sub.nome }}</span>
-              <span class="hover-actions">
-                <button class="action-btn action-btn--tiny" title="Renomear" (click)="abrirModal(sub)">
-                  <svg lucideIcon="pencil" [size]="12" />
-                </button>
-                <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
-                  <svg lucideIcon="trash-2" [size]="12" />
-                </button>
-              </span>
+              <button class="action-btn action-btn--tiny" title="Renomear" (click)="abrirModal(sub)">
+                <svg lucideIcon="pencil" [size]="12" />
+              </button>
+              <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
+                <svg lucideIcon="trash-2" [size]="12" />
+              </button>
             </div>
           } @empty {
             <p class="drawer-empty">Nenhuma subcategoria encontrada.</p>

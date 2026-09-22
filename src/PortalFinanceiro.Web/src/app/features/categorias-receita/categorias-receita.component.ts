@@ -58,7 +58,6 @@ export class CategoriasComponent implements OnInit {
 
   private dragSub: DragSub | null = null;
   cardAlvoId = signal<string | null>(null);
-  arrastandoId = signal<string | null>(null);
 
   ngOnInit() { this.carregar(); }
 
@@ -184,14 +183,12 @@ export class CategoriasComponent implements OnInit {
   iniciarArrasto(event: DragEvent, sub: Categoria) {
     if (!sub.categoriaPaiId) return;
     this.dragSub = { id: sub.id, nome: sub.nome, origemId: sub.categoriaPaiId };
-    this.arrastandoId.set(sub.id);
     event.dataTransfer?.setData('text/plain', sub.id);
     if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
   }
 
   finalizarArrasto() {
     this.dragSub = null;
-    this.arrastandoId.set(null);
     this.cardAlvoId.set(null);
   }
 
