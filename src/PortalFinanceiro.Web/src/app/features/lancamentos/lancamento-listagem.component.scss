@@ -97,7 +97,7 @@
 
 .table-card {
   @include layout.card;
-  max-height: calc(100vh - 200px);
+  max-height: calc(100vh - 212px);
   overflow-y: auto;
 
   thead th {
