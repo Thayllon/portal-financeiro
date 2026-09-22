@@ -16,7 +16,7 @@ import {
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
   LucideBarChart3, LucideCalendarRange, LucideChartNetwork, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
 LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar, LucideTrendingUpDown,
-LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideHardHat, LucideChevronUp, LucideHome, LucideStar, LucideFileBadge, LucideArchive, LucideArchiveRestore, LucideUsersRound, LucideUserRoundGroup, LucideArrowDownUp, LucideClipboardList,
+LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideHardHat, LucideChevronUp, LucideHome, LucideStar, LucideFileBadge, LucideArchive, LucideArchiveRestore, LucideUsersRound, LucideUserRoundGroup, LucideArrowDownUp, LucideClipboardList, LucideMove, LucideEllipsis, LucideUserRoundPen, LucideUserRoundMinus, LucideUserRoundCheck, LucideUserRoundX,
   } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -41,7 +41,7 @@ export const appConfig: ApplicationConfig = {
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
   LucideBarChart3, LucideCalendarRange, LucideChartNetwork, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
 LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar, LucideTrendingUpDown,
-LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideHardHat, LucideChevronUp, LucideHome, LucideStar, LucideFileBadge, LucideArchive, LucideArchiveRestore, LucideUsersRound, LucideUserRoundGroup, LucideArrowDownUp, LucideClipboardList,
+LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideHardHat, LucideChevronUp, LucideHome, LucideStar, LucideFileBadge, LucideArchive, LucideArchiveRestore, LucideUsersRound, LucideUserRoundGroup, LucideArrowDownUp, LucideClipboardList, LucideMove, LucideEllipsis, LucideUserRoundPen, LucideUserRoundMinus, LucideUserRoundCheck, LucideUserRoundX,
     ),
   ],
 };
