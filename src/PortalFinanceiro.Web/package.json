@@ -6,6 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "build:bravo": "ng build --configuration bravo",
+    "build:charlie": "ng build --configuration charlie",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "eslint \"src/**/*.ts\" \"src/**/*.html\""
@@ -19,7 +20,7 @@
     "@angular/forms": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
-    "@lucide/angular": "^1.28.0",
+    "@lucide/angular": "^1.45.0",
     "chart.js": "^4.5.1",
     "ng2-charts": "^10.0.0",
     "rxjs": "~7.8.0",

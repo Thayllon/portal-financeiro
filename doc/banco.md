@@ -13,9 +13,20 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 
 | Script | Conteúdo |
 |--------|----------|
-| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro` e `PermissaoUsuario`) |
+| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro`, `Contrato` + `Receita.IdContrato` e `PermissaoUsuario`) |
 | `003_FluxoAdicionalDespesa.sql` | Incremental idempotente para bancos criados antes do refactor: adiciona `Despesa.IdCliente` e tabela `DespesaServico` se ainda não existirem |
+| `005_Contratos.sql` | Incremental idempotente: cria `Contrato`, adiciona `Receita.IdContrato` (FK + índice) e garante o módulo `contratos` em `PermissaoUsuario` |
 | `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
+| `102_DDL_AtualizarEstrutura.sql` | **DDL idempotente p/ Neon desatualizado**: sincroniza schema (cria tabelas/colunas/índices/FKs faltantes) |
+| `103_DML_Limpar_E_Copiar_Dados.sql` | **DML idempotente**: `TRUNCATE CASCADE` — esvazia o banco (rodar antes de copiar) |
+
+> **Copiar Local → Prod (Neon):** DDL e DML separados, conforme solicitado:
+> 1. **DDL — estrutura:** `psql "$DATABASE_URL" -f scripts/postgres/102_DDL_AtualizarEstrutura.sql`
+> 2. **DML — dados:** gere o arquivo com seu LocalDB: `powershell -ExecutionPolicy Bypass -File scripts/CopiarLocalParaProd.ps1`
+>    → cria `portal-financeiro-prod-restore.sql` na **raiz do projeto** (o Explorer abre sozinho).
+>    Depois: `psql "$DATABASE_URL" -f portal-financeiro-prod-restore.sql` ou cole no SQL Editor do Neon.
+>    O gerado já contém `TRUNCATE CASCADE` + `INSERTs` convertidos p/ Postgres (`::uuid`, `TRUE`/`FALSE`).
+>    Alternativa rápida: `psql "$DATABASE_URL" -f scripts/postgres/103_DML_Limpar_E_Copiar_Dados.sql` só para esvaziar.
 
 > **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento já
 > migrado **não** deve recebê-los novamente (DbUp rastreia por nome).
@@ -54,11 +65,18 @@ dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 | `ContaBancaria` | Contas PF/PJ |
 | `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
 | `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuário |
+| `Contrato` | Contratos (nome + cliente + valor, sem parceiro) por usuário |
 | `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
-| `Receita` | Receitas (avulsas e recorrentes) — `IdParceria` opcional para vínculo com Parceria |
+| `Receita` | Receitas (avulsas e recorrentes) — `IdParceria`/`IdContrato` opcionais e mutuamente exclusivos para vínculo |
 | `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
-| `PermissaoUsuario` | Nível por módulo por usuário (`parcerias` garantido via seed) |
+| `PermissaoUsuario` | Nível por módulo por usuário (`dashboard`, `receitas`, `despesas`, `contas`, `categorias`, `clientes`, `parceiros`, `parcerias`, `contratos` garantidos via seed; admin com `Escrita` em todos) |
+
+### Exclusão de usuário
+
+- `Usuario` é referenciado por 12 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
+- `DELETE /api/usuarios/{id}` conta vínculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` → 422 com mensagem orientando desativar em vez de excluir
+- Auto-exclusão é bloqueada (`AUTO_EXCLUSAO` → 422) no backend além do frontend
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
 
 ### Categorias compartilhadas

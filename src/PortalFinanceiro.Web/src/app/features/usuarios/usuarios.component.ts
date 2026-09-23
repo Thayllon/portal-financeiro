@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { UsuarioRepository } from '../../core/repositories/usuario.repository';
 import { PermissaoRepository } from '../../core/repositories/permissao.repository';
 import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
-import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA } from '../../core/models/permissao.model';
+import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_QA } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -38,12 +38,13 @@ export class UsuariosComponent implements OnInit {
   editando = signal<Usuario | null>(null);  salvando = signal(false);
   fluxoAdicional = signal(false);
   fluxoAdicionalDespesa = signal(false);
+  qaLiberado = signal(false);
   buscaPermissao = signal('');
   dadosAberto = signal(false);
   permissoesAberto = signal(false);
   especiaisAberto = signal(false);
 
-  permLevels: Record<string, 'none' | 'read' | 'write'> = {};
+  permLevels = signal<Record<string, 'none' | 'read' | 'write'>>({});
 
   modulosPermissao = [
     { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line' },
@@ -54,6 +55,7 @@ export class UsuariosComponent implements OnInit {
     { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
     { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake' },
     { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'handshake' },
+    { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'briefcase-business' },
     { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'users' },
   ];
 
@@ -113,21 +115,28 @@ export class UsuariosComponent implements OnInit {
     this.modalVisible.set(false);
     this.drawerVisible.set(true);
     this.buscaPermissao.set('');
-    this.permLevels = {};
+    const niveis: Record<string, 'none' | 'read' | 'write'> = {};
     this.modulosPermissao.forEach(m => {
-      this.permLevels[m.id] = item.isAdmin ? 'write' : 'none';
+      niveis[m.id] = item.isAdmin ? 'write' : 'none';
     });
+    this.permLevels.set(niveis);
     try {
       const permissoes = await firstValueFrom(this.permissaoRepo.listar(item.id));
-      permissoes.forEach(p => {
-        if (p.modulo in this.permLevels) {
-          this.permLevels[p.modulo] = p.nivel === NivelPermissao.Escrita ? 'write' : p.nivel === NivelPermissao.Leitura ? 'read' : 'none';
-        }
+      this.permLevels.update(atual => {
+        const copia = { ...atual };
+        permissoes.forEach(p => {
+          if (p.modulo in copia) {
+            copia[p.modulo] = p.nivel === NivelPermissao.Escrita ? 'write' : p.nivel === NivelPermissao.Leitura ? 'read' : 'none';
+          }
+        });
+        return copia;
       });
       const fluxoPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL);
       this.fluxoAdicional.set(!!fluxoPerm && fluxoPerm.nivel >= NivelPermissao.Leitura);
       const fluxoDespesaPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL_DESPESA);
       this.fluxoAdicionalDespesa.set(!!fluxoDespesaPerm && fluxoDespesaPerm.nivel >= NivelPermissao.Leitura);
+      const qaPerm = permissoes.find(p => p.modulo === MODULO_QA);
+      this.qaLiberado.set(!!qaPerm && qaPerm.nivel >= NivelPermissao.Leitura);
     } catch {}
   }
 
@@ -155,25 +164,32 @@ export class UsuariosComponent implements OnInit {
     this.fluxoAdicionalDespesa.set(ligado);
   }
 
+  alternarQa(event: Event) {
+    const ligado = (event.target as HTMLInputElement).checked;
+    this.qaLiberado.set(ligado);
+  }
+
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
-    const u = this.editando();
-    if (u?.isAdmin) return;
-    this.permLevels[moduloId] = nivel;
+    this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
   }
 
   async excluirAtual() {
     const u = this.editando();
     if (!u) return;
+    await this.excluirUsuario(u, true);
+  }
+
+  async excluirUsuario(u: Usuario, doDrawer = false) {
     if (this.ehUsuarioAtual(u)) {
       this.notify.error('Você não pode excluir o próprio usuário');
       return;
     }
-    const ok = await this.confirmService.confirm('Excluir usuário', `Deseja excluir "${u.nome}"?`);
+    const ok = await this.confirmService.confirm('Excluir usuário', `Deseja excluir "${u.nome}"? Ele perderá o acesso ao portal.`);
     if (!ok) return;
     try {
       await firstValueFrom(this.repo.excluir(u.id));
       this.notify.success('Usuário excluído');
-      this.fecharDrawer();
+      if (doDrawer) this.fecharDrawer();
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir usuário')); }
   }
@@ -206,23 +222,28 @@ export class UsuariosComponent implements OnInit {
         usuarioId = novo.id;
         this.notify.success('Usuário criado');
       }
-      if (!this.form.isAdmin) {
-        const permissoes: Permissao[] = Object.entries(this.permLevels).map(([modulo, nivel]) => ({
-          modulo,
-          nivel: nivel === 'write' ? NivelPermissao.Escrita : nivel === 'read' ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
-        }));
-        permissoes.push({
-          modulo: MODULO_FLUXO_ADICIONAL,
-          nivel: this.fluxoAdicional() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
-        });
-        permissoes.push({
-          modulo: MODULO_FLUXO_ADICIONAL_DESPESA,
-          nivel: this.fluxoAdicionalDespesa() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
-        });
-        await firstValueFrom(this.permissaoRepo.salvar(usuarioId, permissoes));
-        if (usuarioId === this.auth.user()?.usuarioId) {
-          this.auth.atualizarPermissoes(permissoes);
-        }
+      const permissoes: Permissao[] = Object.entries(this.permLevels()).map(([modulo, nivel]) => ({
+        modulo,
+        nivel: nivel === 'write' ? NivelPermissao.Escrita : nivel === 'read' ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+      }));
+      permissoes.push({
+        modulo: MODULO_FLUXO_ADICIONAL,
+        nivel: this.fluxoAdicional() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+      });
+      permissoes.push({
+        modulo: MODULO_FLUXO_ADICIONAL_DESPESA,
+        nivel: this.fluxoAdicionalDespesa() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+      });
+      permissoes.push({
+        modulo: MODULO_QA,
+        nivel: this.qaLiberado() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+      });
+      await firstValueFrom(this.permissaoRepo.salvar(usuarioId, permissoes));
+      if (usuarioId === this.auth.user()?.usuarioId) {
+        this.auth.atualizarPermissoes(permissoes);
+      }
+      if (this.form.isAdmin) {
+        this.notify.info('Administrador possui acesso total, independente dos níveis registrados');
       }
       this.fecharDrawer();
       this.fecharModal();

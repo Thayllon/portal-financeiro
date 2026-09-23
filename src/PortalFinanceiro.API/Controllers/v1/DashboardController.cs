@@ -17,9 +17,9 @@ public class DashboardController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Obter([FromQuery] int mes, [FromQuery] int ano)
+    public async Task<IActionResult> Obter([FromQuery] int mes, [FromQuery] int ano, [FromQuery] Guid? idConta = null)
     {
-        var result = await _service.ObterDashboardAsync(ObterIdUsuario(), mes, ano);
+        var result = await _service.ObterDashboardAsync(ObterIdUsuario(), mes, ano, idConta);
         return ApiResponse(result);
     }
 

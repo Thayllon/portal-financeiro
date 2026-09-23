@@ -21,7 +21,7 @@ export class HomeComponent {
   private sections = signal<Secao[]>([
     {
       titulo: 'FINANCEIRO',
-      subtitulo: 'Gestão principal das movimentações financeiras',
+      subtitulo: 'Receitas, despesas, contratos e parcerias',
       cards: [
         {
           title: 'Dashboard',
@@ -33,22 +33,36 @@ export class HomeComponent {
         {
           title: 'Receitas',
           description: 'Cadastro e acompanhamento de receitas, parcelas e recorrências.',
-          icon: 'banknote-arrow-up',
+          icon: 'trending-up',
           route: '/receitas',
           modulo: 'receitas'
         },
         {
           title: 'Despesas',
           description: 'Controle de despesas, vencimentos e pagamentos.',
-          icon: 'banknote-arrow-down',
+          icon: 'trending-down',
           route: '/despesas',
           modulo: 'despesas'
+        },
+        {
+          title: 'Parcerias',
+          description: 'Percentuais e vínculos de parcerias com receitas.',
+          icon: 'user-round-group',
+          route: '/parcerias',
+          modulo: 'parcerias'
+        },
+        {
+          title: 'Contratos',
+          description: 'Contratos com clientes e receitas vinculadas.',
+          icon: 'briefcase-business',
+          route: '/contratos',
+          modulo: 'contratos'
         }
       ]
     },
     {
-      titulo: 'CONTAS E ORGANIZAÇÃO',
-      subtitulo: 'Gerencie suas contas bancárias e organize suas categorias',
+      titulo: 'CADASTROS',
+      subtitulo: 'Contas, categorias e pessoas que estruturam a operação',
       cards: [
         {
           title: 'Contas Bancárias',
@@ -60,20 +74,14 @@ export class HomeComponent {
         {
           title: 'Categorias',
           description: 'Organize receitas e despesas por categorias e subcategorias.',
-          icon: 'tag',
+          icon: 'tags',
           route: '/categorias',
           modulo: 'categorias'
-        }
-      ]
-    },
-    {
-      titulo: 'CADASTROS',
-      subtitulo: 'Mantenha suas informações sempre atualizadas',
-      cards: [
+        },
         {
           title: 'Clientes',
           description: 'Cadastro de clientes vinculados às receitas.',
-          icon: 'building',
+          icon: 'hand-helping',
           route: '/clientes',
           modulo: 'clientes'
         },
@@ -83,26 +91,26 @@ export class HomeComponent {
           icon: 'handshake',
           route: '/parceiros',
           modulo: 'parceiros'
-        },
-        {
-          title: 'Parcerias',
-          description: 'Percentuais e vínculos de parcerias com receitas.',
-          icon: 'hand-coins',
-          route: '/parcerias',
-          modulo: 'parcerias'
         }
       ]
     },
     {
-      titulo: 'ADMINISTRAÇÃO',
+      titulo: 'ACESSO',
       subtitulo: 'Controle de acessos e permissões',
       cards: [
         {
           title: 'Usuários',
           description: 'Controle de usuários, permissões e acessos ao sistema.',
-          icon: 'shield-check',
+          icon: 'users',
           route: '/usuarios',
           modulo: 'usuarios'
+        },
+        {
+          title: 'Testes e QA',
+          description: 'Diagnóstico técnico das regras de negócio e débitos.',
+          icon: 'flask-conical',
+          route: '/testes',
+          modulo: 'qa'
         }
       ]
     }
@@ -115,6 +123,7 @@ export class HomeComponent {
         ...secao,
         cards: secao.cards.filter(card => {
           if (card.modulo === 'usuarios') return isAdmin;
+          if (card.modulo === 'qa') return isAdmin && this.auth.temQA();
           if (card.modulo === 'dashboard') return true;
           if (!card.modulo) return true;
           return this.auth.temPermissao(card.modulo);

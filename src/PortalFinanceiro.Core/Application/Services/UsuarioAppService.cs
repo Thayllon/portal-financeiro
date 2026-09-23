@@ -42,7 +42,7 @@ public class UsuarioAppService : IUsuarioAppService
 
         await _repository.InserirAsync(result.Dado!);
 
-        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias" };
+        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos" };
         foreach (var modulo in modulos)
         {
             var permissao = PermissaoUsuario.Criar(result.Dado!.Id, modulo, NivelPermissao.Nenhum);
@@ -102,11 +102,18 @@ public class UsuarioAppService : IUsuarioAppService
         return Resultado.Sucesso();
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuarioLogado)
     {
+        if (id == idUsuarioLogado)
+            return Erro.Negocio("AUTO_EXCLUSAO", "Você não pode excluir o próprio usuário.");
+
         var usuario = await _repository.ObterPorIdAsync(id);
         if (usuario is null)
             return Erro.NaoEncontrado("Usuário");
+
+        var vinculos = await _repository.ContarVinculosAsync(id);
+        if (vinculos > 0)
+            return Erro.Negocio("USUARIO_COM_VINCULOS", $"Não é possível excluir \"{usuario.Nome}\": há {vinculos} registro(s) vinculado(s). Desative o usuário em vez de excluir.");
 
         await _permissaoRepository.ExcluirPorUsuarioIdAsync(id);
         await _repository.ExcluirAsync(id);

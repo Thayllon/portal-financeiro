@@ -1,9 +1,21 @@
 @use '../../design-system/styles/page-layout' as layout;
 @use '../../design-system/styles/data-table' as table;
 @use '../../design-system/styles/forms' as forms;
+@use '../../design-system/styles/responsive' as r;
+@use '../../design-system/styles/scrollbar' as scrollbar;
 
 .page {
   @include layout.page-wrapper;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page__header,
+.toolbar,
+.totals {
+  flex-shrink: 0;
 }
 
 .page__header {
@@ -97,6 +109,25 @@
 
 .table-card {
   @include layout.card;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  @include scrollbar.scroll-thin;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--content-surface);
+  }
+
+  app-list-pagination {
+    display: block;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    background: var(--content-surface);
+  }
 }
 
 .table {
@@ -104,6 +135,22 @@
 
   th.th-actions {
     text-align: right;
+  }
+}
+
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-primary);
   }
 }
 
@@ -172,4 +219,15 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@include r.mobile {
+  .page {
+    height: auto;
+  }
+
+  .table-card {
+    flex: none;
+    overflow: visible;
+  }
 }

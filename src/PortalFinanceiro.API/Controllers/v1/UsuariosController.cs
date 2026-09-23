@@ -55,7 +55,7 @@ public class UsuariosController : BaseController
     [HttpDelete("{id}")]
     public async Task<IActionResult> Excluir(Guid id)
     {
-        var result = await _service.ExcluirAsync(id);
+        var result = await _service.ExcluirAsync(id, ObterIdUsuario());
         return ApiResponse(result);
     }
 }

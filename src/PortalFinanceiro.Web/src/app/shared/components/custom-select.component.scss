@@ -1,3 +1,5 @@
+@use '../../design-system/styles/scrollbar' as scrollbar;
+
 .cs { position: relative; width: 100%; }
 .cs__label {
   display: block;
@@ -49,6 +51,7 @@
   z-index: 99999;
   max-height: 240px;
   overflow-y: auto;
+  @include scrollbar.scroll-thin;
   animation: csSlideDown 0.15s ease;
 }
 .cs--up .cs__dropdown {

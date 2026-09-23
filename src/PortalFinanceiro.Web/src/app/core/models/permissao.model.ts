@@ -11,6 +11,9 @@ export const MODULOS = [
   { id: 'categorias', nome: 'Categorias' },
   { id: 'clientes', nome: 'Clientes' },
   { id: 'parceiros', nome: 'Parceiros' },
+  { id: 'parcerias', nome: 'Parcerias' },
+  { id: 'contratos', nome: 'Contratos' },
+  { id: 'usuarios', nome: 'Usuários' },
 ] as const;
 
 export const NivelPermissao = {
@@ -21,3 +24,4 @@ export const NivelPermissao = {
 
 export const MODULO_FLUXO_ADICIONAL = 'fluxo-adicional-receita';
 export const MODULO_FLUXO_ADICIONAL_DESPESA = 'fluxo-adicional-despesa';
+export const MODULO_QA = 'qa';

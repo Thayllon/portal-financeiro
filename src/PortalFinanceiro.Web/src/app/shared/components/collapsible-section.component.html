@@ -1,21 +1,22 @@
 <section class="collapsible" [class.collapsible--collapsed]="collapsed()">
-  <button
-    type="button"
+  <div
     class="collapsible__header"
     (click)="toggle()"
+    tabindex="0"
+    role="button"
     [attr.aria-expanded]="!collapsed()"
+    (keydown.enter)="toggle()"
+    (keydown.space)="$event.preventDefault(); toggle()"
   >
     <span class="collapsible__icon collapsible__icon--{{ iconVariant() }}">
       <svg [lucideIcon]="icon()" [size]="18"></svg>
     </span>
     <span class="collapsible__title">{{ title() }}</span>
-    @if (badge()) {
-      <span class="collapsible__badge">{{ badge() }}</span>
-    }
+    <span class="collapsible__actions" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"><ng-content select="[slot=actions]" /></span>
     <span class="collapsible__chevron">
       <svg lucideIcon="chevron-down" [size]="18"></svg>
     </span>
-  </button>
+  </div>
   <div class="collapsible__body">
     <div class="collapsible__content">
       <ng-content />

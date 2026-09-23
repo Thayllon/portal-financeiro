@@ -1,0 +1,353 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <span class="page__badge">
+        <svg lucideIcon="briefcase-business" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">Contratos</h1>
+      <app-privacidade-toggle />
+    </div>
+    <div class="header-actions">
+      <button class="add-btn add-btn--ghost" (click)="abrirModalRecorrente()">
+        <svg lucideIcon="repeat" [size]="16" />
+        Novo recorrente
+      </button>
+      <button class="add-btn" (click)="abrirModal()">
+        <svg lucideIcon="plus" [size]="16" />
+        Novo contrato
+      </button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="filtros">
+      <app-custom-select placeholder="Todas" [options]="situacaoOptions" (valueChange)="mudarSituacao($event)" />
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 25%"></div>
+          <div class="skeleton-line" style="width: 25%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+          <div class="skeleton-line" style="width: 10%"></div>
+        </div>
+      }
+    </div>
+  } @else {
+    <section class="collapse-section">
+      <header class="collapse-section__header collapse-section__header--toggle" (click)="contratoAberto.set(!contratoAberto())">
+        <div class="collapse-section__header-left">
+          <svg lucideIcon="briefcase-business" [size]="16" />
+          <span>Contrato</span>
+          <span class="collapse-section__count">({{ contratosNormais().length }})</span>
+        </div>
+        <svg [lucideIcon]="contratoAberto() ? 'chevron-up' : 'chevron-down'" [size]="16" class="collapse-section__chevron" />
+      </header>
+      @if (contratoAberto()) {
+        @if (contratosNormais().length === 0) {
+          <div class="table-card">
+            <div class="empty-state">
+              <svg lucideIcon="briefcase-business" [size]="36" class="empty-icon" />
+              <h3>Nenhum contrato</h3>
+              <p>Contratos avulsos sem recorrência. Pode ter múltiplas entradas para compor o valor.</p>
+            </div>
+          </div>
+        } @else {
+          <div class="table-card">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Cliente</th>
+                  <th>Valor</th>
+                  <th>Falta receber</th>
+                  <th>Status</th>
+                  <th class="th-actions">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of paginacaoContrato.paginatedItems(); track c.id) {
+                  <tr>
+                    <td class="cell-name" data-label="Nome">{{ c.nome }}</td>
+                    <td data-label="Cliente">{{ c.cliente }}</td>
+                    <td data-label="Valor">{{ c.valor | valorMascarado }}</td>
+                    <td data-label="Falta receber" [class.negative]="c.faltaReceber > 0">{{ c.faltaReceber | valorMascarado }}</td>
+                    <td data-label="Status"><app-status-badge [type]="c.ativo ? 'ativo' : 'inativo'" [label]="c.ativo ? 'Ativo' : 'Encerrado'" /></td>
+                    <td class="cell-actions">
+                      <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(c)">
+                        <svg lucideIcon="clipboard-list" [size]="16" />
+                      </button>
+                      @if (c.ativo) {
+                        <button class="action-btn" title="Encerrar" (click)="alternarSituacao(c)">
+                          <svg lucideIcon="archive" [size]="16" />
+                        </button>
+                      } @else {
+                        <button class="action-btn" title="Reativar" (click)="alternarSituacao(c)">
+                          <svg lucideIcon="archive-restore" [size]="16" />
+                        </button>
+                      }
+                      <button class="action-btn" title="Editar" (click)="editar(c)">
+                        <svg lucideIcon="pencil" [size]="16" />
+                      </button>
+                      <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
+                        <svg lucideIcon="trash-2" [size]="16" />
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <app-list-pagination [pagination]="paginacaoContrato" />
+          </div>
+        }
+      }
+    </section>
+
+    <section class="collapse-section">
+      <header class="collapse-section__header collapse-section__header--toggle" (click)="recorrenteAberto.set(!recorrenteAberto())">
+        <div class="collapse-section__header-left">
+          <svg lucideIcon="repeat" [size]="16" />
+          <span>Contrato recorrente</span>
+          <span class="collapse-section__count">({{ contratosRecorrentes().length }})</span>
+        </div>
+        <svg [lucideIcon]="recorrenteAberto() ? 'chevron-up' : 'chevron-down'" [size]="16" class="collapse-section__chevron" />
+      </header>
+      @if (recorrenteAberto()) {
+        @if (contratosRecorrentes().length === 0) {
+          <div class="table-card">
+            <div class="empty-state">
+              <svg lucideIcon="repeat" [size]="36" class="empty-icon" />
+              <h3>Nenhum contrato recorrente</h3>
+              <p>Contratos que repetem todo mês. Ao criar, as receitas são geradas automaticamente.</p>
+            </div>
+          </div>
+        } @else {
+          <div class="table-card">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Cliente</th>
+                  <th>Valor mensal</th>
+                  <th>Falta receber</th>
+                  <th>Status</th>
+                  <th class="th-actions">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of paginacaoRecorrente.paginatedItems(); track c.id) {
+                  <tr>
+                    <td class="cell-name" data-label="Nome">{{ c.nome }}</td>
+                    <td data-label="Cliente">{{ c.cliente }}</td>
+                    <td data-label="Valor mensal">{{ c.valor | valorMascarado }}</td>
+                    <td data-label="Falta receber" [class.negative]="c.faltaReceber > 0">{{ c.faltaReceber | valorMascarado }}</td>
+                    <td data-label="Status"><app-status-badge [type]="c.ativo ? 'ativo' : 'inativo'" [label]="c.ativo ? 'Ativo' : 'Encerrado'" /></td>
+                    <td class="cell-actions">
+                      <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(c)">
+                        <svg lucideIcon="clipboard-list" [size]="16" />
+                      </button>
+                      @if (c.ativo) {
+                        <button class="action-btn" title="Encerrar" (click)="alternarSituacao(c)">
+                          <svg lucideIcon="archive" [size]="16" />
+                        </button>
+                      } @else {
+                        <button class="action-btn" title="Reativar" (click)="alternarSituacao(c)">
+                          <svg lucideIcon="archive-restore" [size]="16" />
+                        </button>
+                      }
+                      <button class="action-btn" title="Editar" (click)="editar(c)">
+                        <svg lucideIcon="pencil" [size]="16" />
+                      </button>
+                      <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
+                        <svg lucideIcon="trash-2" [size]="16" />
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <app-list-pagination [pagination]="paginacaoRecorrente" />
+          </div>
+        }
+      }
+    </section>
+  }
+</div>
+
+<app-modal
+  [visible]="modalVisible()"
+  [title]="editando() ? 'Editar contrato' : 'Novo contrato'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input
+      type="text"
+      [(ngModel)]="form.nome"
+      placeholder="Ex: Contrato Beta"
+      class="input"
+    />
+  </div>
+  <div class="field">
+    <label>Cliente<span class="required">*</span></label>
+    <app-custom-select
+      placeholder="Selecione o cliente"
+      searchPlaceholder="Buscar cliente..."
+      [options]="clientesOptions()"
+      [value]="form.idCliente"
+      (valueChange)="form.idCliente = $event"
+    />
+  </div>
+  <div class="field">
+    <label>Valor do contrato (R$)<span class="required">*</span></label>
+    <input
+      type="text"
+      currencyInput
+      [(ngModel)]="form.valor"
+      placeholder="0,00"
+      class="input"
+      inputmode="decimal"
+    />
+  </div>
+</app-modal>
+
+<app-modal
+  [visible]="modalRecorrenteVisible()"
+  [title]="editando() ? 'Editar contrato recorrente' : 'Novo contrato recorrente'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModalRecorrente()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input
+      type="text"
+      [(ngModel)]="form.nome"
+      placeholder="Ex: Mensalidade SaaS"
+      class="input"
+    />
+  </div>
+  <div class="field">
+    <label>Cliente<span class="required">*</span></label>
+    <app-custom-select
+      placeholder="Selecione o cliente"
+      searchPlaceholder="Buscar cliente..."
+      [options]="clientesOptions()"
+      [value]="form.idCliente"
+      (valueChange)="form.idCliente = $event"
+    />
+  </div>
+  <div class="field">
+    <label>Valor mensal (R$)<span class="required">*</span></label>
+    <input
+      type="text"
+      currencyInput
+      [(ngModel)]="form.valor"
+      placeholder="0,00"
+      class="input"
+      inputmode="decimal"
+    />
+  </div>
+
+  @if (!editando()) {
+    <div class="field">
+      <label>Categoria<span class="required">*</span></label>
+      <app-custom-select
+        placeholder="Selecione a categoria"
+        searchPlaceholder="Buscar categoria..."
+        [options]="categoriasOptions()"
+        [value]="form.idCategoria ?? ''"
+        (valueChange)="onCategoriaChange($event)"
+      />
+    </div>
+    @if (getSubcategoriasOptions().length > 0) {
+      <div class="field">
+        <label>Subcategoria</label>
+        <app-custom-select
+          placeholder="Nenhuma"
+          searchPlaceholder="Buscar subcategoria..."
+          [options]="getSubcategoriasOptions()"
+          [value]="form.idSubcategoria ?? ''"
+          (valueChange)="form.idSubcategoria = $event || undefined"
+        />
+        <span class="field-hint">Para recorrente, use a subcategoria <strong>contrato recorrente</strong> quando existir.</span>
+      </div>
+    }
+    <div class="field">
+      <label>Conta<span class="required">*</span></label>
+      <app-custom-select
+        placeholder="Selecione a conta"
+        searchPlaceholder="Buscar conta..."
+        [options]="contasOptions()"
+        [value]="form.idConta ?? ''"
+        (valueChange)="form.idConta = $event || undefined"
+      />
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Dia do mês<span class="required">*</span></label>
+        <input
+          type="number"
+          [min]="1"
+          [max]="form.diaUtil ? 5 : 31"
+          [(ngModel)]="form.dia"
+          (ngModelChange)="calcularPreview()"
+          placeholder="1-31"
+          class="input"
+        />
+      </div>
+      <div class="field field--checkbox">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [(ngModel)]="form.diaUtil"
+            (change)="onDiaUtilChange()"
+            class="checkbox"
+          />
+          <span>Dia útil</span>
+        </label>
+        <span class="field-hint">Limita ao 1º dia útil</span>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label>Data início<span class="required">*</span></label>
+        <input
+          type="date"
+          lang="pt-BR"
+          [(ngModel)]="form.dataInicio"
+          (ngModelChange)="calcularPreview()"
+          class="input"
+        />
+        <span class="field-hint">DD/MM/AAAA</span>
+      </div>
+      <div class="field">
+        <label>Data fim<span class="required">*</span></label>
+        <input
+          type="date"
+          lang="pt-BR"
+          [(ngModel)]="form.dataFim"
+          (ngModelChange)="calcularPreview()"
+          class="input"
+        />
+        <span class="field-hint">DD/MM/AAAA</span>
+      </div>
+    </div>
+    @if (previewMeses() > 0) {
+      <div class="preview">
+        <svg lucideIcon="info" [size]="14" />
+        Serão geradas <strong>{{ previewMeses() }}</strong> receitas mensais vinculadas a este contrato
+      </div>
+    }
+  } @else {
+    <span class="field-hint" style="display:block; margin-top: 0.75rem;">
+      <svg lucideIcon="info" [size]="12" /> Contrato recorrente já possui receitas geradas. Edição altera apenas nome, cliente e valor mensal.
+    </span>
+  }
+</app-modal>

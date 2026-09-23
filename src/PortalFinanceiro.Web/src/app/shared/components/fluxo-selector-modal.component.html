@@ -9,7 +9,7 @@
     <div class="fluxo-grid">
       <button type="button" class="fluxo-card" (click)="selecionar(false)">
         <span class="fluxo-card__icon">
-          <svg lucideIcon="file" [size]="28" />
+          <svg [lucideIcon]="tipo() === 'receita' ? 'trending-up' : 'trending-down'" [size]="28" />
         </span>
         <strong class="fluxo-card__title">{{ tipo() === 'despesa' ? 'Fluxo despesa' : 'Fluxo receita' }}</strong>
         <span class="fluxo-card__desc">Lançamento simples</span>
@@ -17,7 +17,7 @@
 
       <button type="button" class="fluxo-card fluxo-card--contrato" (click)="selecionar(true)">
         <span class="fluxo-card__icon fluxo-card__icon--contrato">
-          <svg lucideIcon="briefcase-business" [size]="28" />
+          <svg lucideIcon="trending-up-down" [size]="28" />
         </span>
         <strong class="fluxo-card__title">{{ tipo() === 'despesa' ? 'Fluxo despesa (contrato)' : 'Fluxo receita (contrato)' }}</strong>
         <span class="fluxo-card__desc">Com cliente, parceria e categoria de serviço</span>

@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthRepository } from '../repositories/auth.repository';
 import { User } from '../models/user.model';
 import { LoginResponse } from '../models/login-response.model';
-import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA } from '../models/permissao.model';
+import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_QA } from '../models/permissao.model';
 import { tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -57,6 +57,13 @@ export class AuthService {
     if (!u) return false;
     if (u.isAdmin) return true;
     const p = u.permissoes.find(x => x.modulo === MODULO_FLUXO_ADICIONAL_DESPESA);
+    return !!p && p.nivel >= NivelPermissao.Leitura;
+  }
+
+  temQA(): boolean {
+    const u = this.userSignal();
+    if (!u) return false;
+    const p = u.permissoes.find(x => x.modulo === MODULO_QA);
     return !!p && p.nivel >= NivelPermissao.Leitura;
   }
 

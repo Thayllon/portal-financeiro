@@ -62,13 +62,17 @@
   flex: 1;
 }
 
-.collapsible__badge {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  background: var(--surface-muted);
-  padding: 0.125rem 0.5rem;
-  border-radius: var(--radius-pill);
+.collapsible__actions {
+  display: inline-flex;
+  align-items: center;
+}
+
+.collapsible__actions:empty {
+  display: none;
+}
+
+.collapsible--collapsed .collapsible__actions {
+  display: none;
 }
 
 .collapsible__chevron {

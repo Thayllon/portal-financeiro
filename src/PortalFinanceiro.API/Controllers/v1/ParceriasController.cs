@@ -22,9 +22,9 @@ public class ParceriasController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar()
+    public async Task<IActionResult> Listar([FromQuery] bool? ativo)
     {
-        var result = await _service.ListarAsync(ObterIdUsuario());
+        var result = await _service.ListarAsync(ObterIdUsuario(), ativo);
         return ApiResponse(result);
     }
 
@@ -49,6 +49,20 @@ public class ParceriasController : BaseController
         return ApiResponse(result);
     }
 
+    [HttpPut("{id}/encerrar")]
+    public async Task<IActionResult> Encerrar(Guid id)
+    {
+        var result = await _service.EncerrarAsync(id, ObterIdUsuario());
+        return ApiResponse(result);
+    }
+
+    [HttpPut("{id}/reativar")]
+    public async Task<IActionResult> Reativar(Guid id)
+    {
+        var result = await _service.ReativarAsync(id, ObterIdUsuario());
+        return ApiResponse(result);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> Excluir(Guid id)
     {
@@ -67,6 +81,13 @@ public class ParceriasController : BaseController
     public async Task<IActionResult> ListarDespesas(Guid id)
     {
         var result = await _despesaService.ListarPorParceriaAsync(ObterIdUsuario(), id);
+        return ApiResponse(result);
+    }
+
+    [HttpGet("resumo")]
+    public async Task<IActionResult> ResumoMensal([FromQuery] int ano, [FromQuery] int mes)
+    {
+        var result = await _service.ResumoMensalAsync(ObterIdUsuario(), ano, mes);
         return ApiResponse(result);
     }
 }

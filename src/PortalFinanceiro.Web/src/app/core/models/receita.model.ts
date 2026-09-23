@@ -24,6 +24,9 @@ export interface Receita {
   idParceria?: string;
   parceria: string;
   parceriaValor?: number;
+  parceriaPercentual?: number;
+  idContrato?: string;
+  contrato: string;
   servicos: ReceitaServico[];
   status: number;
   dataRealizacao?: string;
@@ -49,6 +52,7 @@ export interface ReceitaRequest {
   idCliente?: string;
   idParceria?: string;
   servicos?: ReceitaServicoRequest[];
+  idContrato?: string;
   repete: boolean;
   dia?: number;
   diaUtil?: boolean;

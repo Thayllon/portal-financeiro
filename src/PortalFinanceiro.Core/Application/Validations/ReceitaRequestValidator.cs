@@ -13,6 +13,9 @@ public class ReceitaRequestValidator : AbstractValidator<ReceitaRequest>
         RuleFor(x => x.IdConta).NotEmpty();
         RuleFor(x => x.IdCategoria).NotEmpty();
 
+        RuleFor(x => x).Must(x => !(x.IdParceria.HasValue && x.IdContrato.HasValue))
+            .WithMessage("Informe parceria ou contrato, nunca os dois.");
+
         When(x => x.Repete, () =>
         {
             RuleFor(x => x.DataFim).NotNull();

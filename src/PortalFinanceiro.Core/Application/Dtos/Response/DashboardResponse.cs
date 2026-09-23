@@ -10,9 +10,16 @@ public class DashboardResponse
     public decimal TotalPago { get; set; }
     public decimal Saldo { get; set; }
     public decimal SaldoRealizado { get; set; }
+    public decimal TotalReceitasPrevisto { get; set; }
+    public decimal TotalDespesasPrevisto { get; set; }
+    public decimal TotalReceitasRecorrentes { get; set; }
+    public decimal TotalDespesasRecorrentes { get; set; }
+    public decimal SaldoPrevisto { get; set; }
     public List<ResumoPorConta> ResumoPorConta { get; set; } = [];
-    public List<ResumoPorCategoria> ResumoPorCategoria { get; set; } = [];
+    public List<DistribuicaoCategoriaAnual> DistribuicaoReceitas { get; set; } = [];
+    public List<DistribuicaoCategoriaAnual> DistribuicaoDespesas { get; set; } = [];
     public List<PrevisaoMensal> PrevisaoProximosMeses { get; set; } = [];
+    public ResumoParceriasAnual ResumoParcerias { get; set; } = new();
 }
 
 public class DashboardAnualResponse
@@ -61,12 +68,6 @@ public class ResumoPorContaAnual
     public decimal SaldoRealizado { get; set; }
 }
 
-public class ResumoPorCategoria
-{
-    public string Nome { get; set; } = string.Empty;
-    public decimal Total { get; set; }
-}
-
 public class ResumoPorConta
 {
     public string NomeConta { get; set; } = string.Empty;
@@ -75,6 +76,8 @@ public class ResumoPorConta
     public decimal TotalReceitas { get; set; }
     public decimal TotalDespesas { get; set; }
     public decimal Saldo { get; set; }
+    public decimal TotalReceitasPrevisto { get; set; }
+    public decimal TotalDespesasPrevisto { get; set; }
 }
 
 public class PrevisaoMensal

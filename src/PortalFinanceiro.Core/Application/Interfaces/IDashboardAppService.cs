@@ -5,6 +5,6 @@ namespace PortalFinanceiro.Core.Application.Interfaces;
 
 public interface IDashboardAppService
 {
-    Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano);
+    Task<Result<DashboardResponse>> ObterDashboardAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null);
     Task<Result<DashboardAnualResponse>> ObterDashboardAnualAsync(Guid idUsuario, int ano, Guid? idConta = null);
 }

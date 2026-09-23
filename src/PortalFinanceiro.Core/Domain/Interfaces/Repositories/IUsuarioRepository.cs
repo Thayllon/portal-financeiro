@@ -10,4 +10,5 @@ public interface IUsuarioRepository
     Task InserirAsync(Usuario entity);
     Task AtualizarAsync(Usuario entity);
     Task ExcluirAsync(Guid id);
+    Task<int> ContarVinculosAsync(Guid id);
 }

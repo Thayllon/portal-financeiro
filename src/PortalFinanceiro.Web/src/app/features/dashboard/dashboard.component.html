@@ -4,41 +4,74 @@
           <span class="page__badge">
             <svg lucideIcon="chart-line" class="page__icon" [size]="22" />
           </span>
-          <h1 class="page__title">Dashboard</h1>
+          <div class="page__titles">
+            <h1 class="page__title">Dashboard</h1>
+            <p class="page__subtitle">Acompanhe suas finanças de forma simples e visual.</p>
+          </div>
+          <app-privacidade-toggle />
         </div>
-        <div class="view-toggle">
-          <button class="toggle-btn" [class.active]="visualizacao() === 'mensal'" (click)="trocarVisualizacao('mensal')">
-            <svg lucideIcon="calendar-1" [size]="16" />
-            Mensal
-          </button>
-          <button class="toggle-btn" [class.active]="visualizacao() === 'anual'" (click)="trocarVisualizacao('anual')">
-            <svg lucideIcon="calendar-days" [size]="16" />
-            Anual
-          </button>
+        <div class="page__header-actions">
+          <div class="view-toggle">
+            <button class="toggle-btn" [class.active]="visualizacao() === 'mensal'" (click)="trocarVisualizacao('mensal')">
+              Mensal
+            </button>
+            <button class="toggle-btn" [class.active]="visualizacao() === 'anual'" (click)="trocarVisualizacao('anual')">
+              Anual
+            </button>
+          </div>
+          @if (visualizacao() === 'mensal') {
+            <app-month-nav class="page__header-nav" [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
+          } @else {
+            <div class="view-toggle view-toggle--year">
+              <button class="nav-btn nav-btn--inline" (click)="navegarAno(-1)" aria-label="Ano anterior">
+                <svg lucideIcon="chevron-left" [size]="18" />
+              </button>
+              <span class="year-label">{{ ano() }}</span>
+              <button class="nav-btn nav-btn--inline" (click)="navegarAno(1)" aria-label="Próximo ano">
+                <svg lucideIcon="chevron-right" [size]="18" />
+              </button>
+            </div>
+          }
+          <app-custom-select
+            class="page__header-conta"
+            placeholder="Todas as contas"
+            searchPlaceholder="Buscar conta..."
+            [value]="filtroConta()"
+            [options]="contasOptions()"
+            (valueChange)="onFiltroContaChange($event)"
+          />
         </div>
       </header>
 
       @if (visualizacao() === 'mensal') {
-        <div class="month-area">
-          <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
-        </div>
-
         @if (loading()) {
           <div class="cards">
             <app-skeleton type="card" [count]="4" />
           </div>
         } @else {
-          <div class="cards">
+          <div class="cards cards--kpi">
             <div class="card">
               <div class="card-header">
                 <span class="card-icon card-icon--green">
                   <svg lucideIcon="trending-up" [size]="22"></svg>
                 </span>
                 <span class="card-label">Receitas</span>
+                <span class="ind-tile__help" data-tip="Quanto faturou/recebeu no mês: valores realizados + previstos das regras vigentes" tabindex="0" role="img" aria-label="Quanto faturou/recebeu no mês: valores realizados + previstos das regras vigentes"><svg lucideIcon="info" [size]="14" /></span>
               </div>
-              <div class="card-value green">{{ data()?.totalReceitas | currencyBRL }}</div>
-              <div class="card-sub">
-                <span class="pill pill--green">{{ data()?.totalRecebido | currencyBRL }} recebido</span>
+              <div class="kpi-main">
+                <div class="card-value green">{{ kpiMensal()?.receitas | valorMascarado }}</div>
+                @if (kpiMensal()?.varReceitas !== null && kpiMensal()?.varReceitas !== undefined) {
+                  <span class="pill" [class.pill--green]="(kpiMensal()!.varReceitas!) >= 0" [class.pill--red]="(kpiMensal()!.varReceitas!) < 0">
+                    @if ((kpiMensal()!.varReceitas!) >= 0) { ↑ } @else { ↓ }
+                    {{ kpiMensal()!.varReceitas }}%
+                  </span>
+                } @else {
+                  <span class="pill pill--muted">—</span>
+                }
+              </div>
+              <div class="kpi-foot">
+                <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
+                <span class="spark"><canvas baseChart [data]="sparkReceitasExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
@@ -47,114 +80,415 @@
                   <svg lucideIcon="trending-down" [size]="22"></svg>
                 </span>
                 <span class="card-label">Despesas</span>
+                <span class="ind-tile__help" data-tip="Quanto consumiu no mês: valores realizados + previstos das regras vigentes" tabindex="0" role="img" aria-label="Quanto consumiu no mês: valores realizados + previstos das regras vigentes"><svg lucideIcon="info" [size]="14" /></span>
               </div>
-              <div class="card-value red">{{ data()?.totalDespesas | currencyBRL }}</div>
-              <div class="card-sub">
-                <span class="pill pill--green">{{ data()?.totalPago | currencyBRL }} pago</span>
+              <div class="kpi-main">
+                <div class="card-value red">{{ kpiMensal()?.despesas | valorMascarado }}</div>
+                @if (kpiMensal()?.varDespesas !== null && kpiMensal()?.varDespesas !== undefined) {
+                  <span class="pill pill--red">
+                    @if ((kpiMensal()!.varDespesas!) >= 0) { ↑ } @else { ↓ }
+                    {{ kpiMensal()!.varDespesas }}%
+                  </span>
+                } @else {
+                  <span class="pill pill--muted">—</span>
+                }
+              </div>
+              <div class="kpi-foot">
+                <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
+                <span class="spark"><canvas baseChart [data]="sparkDespesasExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
               <div class="card-header">
-                <span class="card-icon card-icon--primary">
+                <span class="card-icon card-icon--info">
                   <svg lucideIcon="wallet" [size]="22"></svg>
                 </span>
-                <span class="card-label">Saldo previsto</span>
+                <span class="card-label">Lucro líquido</span>
+                <span class="ind-tile__help" data-tip="Resultado econômico do mês: receitas menos despesas" tabindex="0" role="img" aria-label="Resultado econômico do mês: receitas menos despesas"><svg lucideIcon="info" [size]="14" /></span>
               </div>
-              <div class="card-value" [class.green]="(data()?.saldo ?? 0) >= 0" [class.red]="(data()?.saldo ?? 0) < 0">
-                {{ data()?.saldo | currencyBRL }}
+              <div class="kpi-main">
+                <div class="card-value">{{ kpiMensal()?.saldo | valorMascarado }}</div>
+                @if (kpiMensal()?.varSaldo !== null && kpiMensal()?.varSaldo !== undefined) {
+                  <span class="pill" [class.pill--green]="(kpiMensal()!.varSaldo!) >= 0" [class.pill--red]="(kpiMensal()!.varSaldo!) < 0">
+                    @if ((kpiMensal()!.varSaldo!) >= 0) { ↑ } @else { ↓ }
+                    {{ kpiMensal()!.varSaldo }}%
+                  </span>
+                } @else {
+                  <span class="pill pill--muted">—</span>
+                }
               </div>
-              <div class="card-sub">receitas - despesas</div>
+              <div class="kpi-foot">
+                <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
+                <span class="spark"><canvas baseChart [data]="sparkSaldoExibicao()" [options]="sparkOptions" type="line"></canvas></span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <span class="card-icon card-icon--purple">
+                  <svg lucideIcon="arrow-down-up" [size]="22"></svg>
+                </span>
+                <span class="card-label">Fluxo de caixa</span>
+                <span class="ind-tile__help" data-tip="Movimentação efetiva de dinheiro: recebido menos pago (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Movimentação efetiva de dinheiro: recebido menos pago (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+              </div>
+              <div class="kpi-main">
+                <div class="card-value" [class.green]="(kpiMensal()?.fluxo ?? 0) >= 0" [class.red]="(kpiMensal()?.fluxo ?? 0) < 0">{{ kpiMensal()?.fluxo | valorMascarado }}</div>
+                @if (kpiMensal()?.varFluxo !== null && kpiMensal()?.varFluxo !== undefined) {
+                  <span class="pill" [class.pill--green]="(kpiMensal()!.varFluxo!) >= 0" [class.pill--red]="(kpiMensal()!.varFluxo!) < 0">
+                    @if ((kpiMensal()!.varFluxo!) >= 0) { ↑ } @else { ↓ }
+                    {{ kpiMensal()!.varFluxo }}%
+                  </span>
+                } @else {
+                  <span class="pill pill--muted">—</span>
+                }
+              </div>
+              <div class="kpi-foot">
+                <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
+                <span class="spark"><canvas baseChart [data]="sparkFluxoExibicao()" [options]="sparkOptions" type="line"></canvas></span>
+              </div>
             </div>
           </div>
 
-          <app-collapsible-section title="Receitas x Despesas" icon="bar-chart-3" iconVariant="primary">
-            <div class="chart-container">
-              <canvas baseChart
-                [data]="barChartData"
-                [options]="barChartOptions"
-                type="bar">
-              </canvas>
-            </div>
-          </app-collapsible-section>
-        }
-
-        @if (data()?.resumoPorConta?.length) {
-          <app-collapsible-section title="Por conta" icon="wallet" iconVariant="info" [badge]="data()!.resumoPorConta.length + ''">
-            <div class="table-card">
-              <table class="table">
-                <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
-                <tbody>
-                  @for (c of data()!.resumoPorConta; track c.nomeConta) {
-                    <tr>
-                      <td class="cell-name" data-label="Conta">{{ c.nomeConta }} <span class="cell-meta">{{ c.banco }}</span></td>
-                      <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                      <td class="cell-value green" data-label="Receitas">{{ c.totalReceitas | currencyBRL }}</td>
-                      <td class="cell-value red" data-label="Despesas">{{ c.totalDespesas | currencyBRL }}</td>
-                      <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo">{{ c.saldo | currencyBRL }}</td>
-                    </tr>
+          <section class="chart-card" [class.chart-card--collapsed]="graficoColapsado()">
+            @if (graficoColapsado()) {
+              <div class="chart-card__header" (click)="alternarGrafico()" tabindex="0" role="button" [attr.aria-expanded]="!graficoColapsado()" (keydown.enter)="alternarGrafico()" (keydown.space)="$event.preventDefault(); alternarGrafico()">
+                <span class="card-icon card-icon--green">
+                  <svg lucideIcon="bar-chart-3" [size]="22"></svg>
+                </span>
+                <div class="chart-card__titles">
+                  <h2 class="chart-card__title">Receitas x Despesas</h2>
+                  @if (modoPorConta()) {
+                    <p class="chart-card__subtitle">Visão do mês de {{ MESES[mes() - 1] }} de {{ ano() }}</p>
+                  } @else {
+                    <p class="chart-card__subtitle">Acompanhe a evolução financeira do seu negócio</p>
                   }
-                </tbody>
-              </table>
-            </div>
-          </app-collapsible-section>
-        }
-
-        @if (data()?.resumoPorCategoria?.length) {
-          <app-collapsible-section title="Por categoria" icon="tag" iconVariant="info" [badge]="data()!.resumoPorCategoria.length + ''">
-            <div class="table-card">
-              <table class="table">
-                <thead><tr><th>Categoria</th><th>Total</th></tr></thead>
-                <tbody>
-                  @for (c of data()!.resumoPorCategoria; track c.nome) {
-                    <tr>
-                      <td class="cell-name" data-label="Categoria">{{ c.nome }}</td>
-                      <td class="cell-value red" data-label="Total">{{ c.total | currencyBRL }}</td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
-          </app-collapsible-section>
-        }
-
-        @if (data()?.previsaoProximosMeses?.length && exibirPrevisao()) {
-          <app-collapsible-section title="Previsão próximos meses" icon="calendar-days" iconVariant="primary" [badge]="data()!.previsaoProximosMeses.length + ''">
-            <div class="previsao-cards">
-              @for (p of data()!.previsaoProximosMeses; track p.mes + '' + p.ano) {
-                <div class="card card--compact">
-                  <div class="card-label">{{ MESES[p.mes - 1] }}/{{ p.ano }}</div>
-                  <div class="card-value" [class.green]="p.saldoPrevisto >= 0" [class.red]="p.saldoPrevisto < 0">
-                    {{ p.saldoPrevisto | currencyBRL }}
+                </div>
+                <span class="title-sep">|</span>
+                <span class="card-icon card-icon--primary">
+                  <svg lucideIcon="chart-network" [size]="22"></svg>
+                </span>
+                <div class="chart-card__titles">
+                  <h2 class="chart-card__title">Outros indicadores</h2>
+                  <p class="chart-card__subtitle">Visão estratégica do mês</p>
+                </div>
+                <span class="chart-card__chevron">
+                  <svg lucideIcon="chevron-down" [size]="18"></svg>
+                </span>
+              </div>
+            }
+            <div class="chart-card__body">
+              <div class="chart-card__content">
+                <div class="chart-ind-grid">
+                  <div class="inner-card">
+                    <div class="inner-card__head">
+                      <span class="card-icon card-icon--green">
+                        <svg lucideIcon="bar-chart-3" [size]="22"></svg>
+                      </span>
+                      <div class="chart-card__titles">
+                        <h2 class="chart-card__title">Receitas x Despesas</h2>
+                        @if (modoPorConta()) {
+                          <p class="chart-card__subtitle">Visão do mês de {{ MESES[mes() - 1] }} de {{ ano() }}</p>
+                        } @else {
+                          <p class="chart-card__subtitle">Acompanhe a evolução financeira do seu negócio</p>
+                        }
+                      </div>
+                      <div class="view-toggle view-toggle--sm">
+                        <button class="toggle-btn" [class.active]="filtroSerie() === 'receitas'" (click)="trocarFiltroSerie('receitas', $event)">Receitas</button>
+                        <button class="toggle-btn" [class.active]="filtroSerie() === 'ambos'" (click)="trocarFiltroSerie('ambos', $event)">Ambos</button>
+                        <button class="toggle-btn" [class.active]="filtroSerie() === 'despesas'" (click)="trocarFiltroSerie('despesas', $event)">Despesas</button>
+                      </div>
+                    </div>
+                    <div class="chart-container">
+                      @if (modoPorConta()) {
+                        <canvas baseChart
+                          [data]="barChartData"
+                          [options]="barChartMensalOptions()"
+                          [plugins]="barChartPorContaPlugins()"
+                          type="bar">
+                        </canvas>
+                      } @else {
+                        <canvas baseChart
+                          [data]="barChartData"
+                          [options]="barChartMensalOptions()"
+                          [plugins]="barChartMensalPlugins()"
+                          type="bar">
+                        </canvas>
+                      }
+                    </div>
                   </div>
-                  <div class="card-sub">
-                    {{ p.totalReceitas | currencyBRL }} / {{ p.totalDespesas | currencyBRL }}
+                  <div class="inner-card" aria-label="Outros indicadores">
+                    <div class="inner-card__head">
+                      <span class="card-icon card-icon--primary">
+                        <svg lucideIcon="chart-network" [size]="22"></svg>
+                      </span>
+                      <div class="chart-card__titles">
+                        <h2 class="chart-card__title">Outros indicadores</h2>
+                        <p class="chart-card__subtitle">Visão estratégica do mês</p>
+                      </div>
+                      <button type="button" class="inner-collapse-btn" (click)="alternarGrafico()" aria-label="Recolher painel">
+                        <svg lucideIcon="chevron-down" [size]="18"></svg>
+                      </button>
+                    </div>
+                    <div class="indicadores-grid">
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--primary">
+                    <svg lucideIcon="briefcase-business" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Contratos ativos</span>
+                  <span class="ind-tile__help" data-tip="Contratos com status ativo e quanto ainda falta receber" tabindex="0" role="img" aria-label="Contratos com status ativo e quanto ainda falta receber"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value">{{ resumoContratos().qtd }}</div>
+                <div class="card-sub">
+                  @if (resumoContratos().qtd > 0) {
+                    Falta receber {{ resumoContratos().faltaReceber | valorMascarado }}
+                  } @else {
+                    Sem contratos ativos
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="banknote-arrow-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Receita recorrente</span>
+                  <span class="ind-tile__help" data-tip="Receitas do mês geradas por regras de repetição" tabindex="0" role="img" aria-label="Receitas do mês geradas por regras de repetição"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value green">{{ recRecorrente().valor | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (recRecorrente().percentual !== null && recRecorrente().percentual !== undefined) {
+                    {{ recRecorrente().percentual!.toLocaleString('pt-BR') }}% da receita
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--red">
+                    <svg lucideIcon="banknote-arrow-down" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Despesas recorrentes</span>
+                  <span class="ind-tile__help" data-tip="Despesas do mês geradas por regras de repetição (custo fixo)" tabindex="0" role="img" aria-label="Despesas do mês geradas por regras de repetição (custo fixo)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value red">{{ despRecorrente().valor | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (despRecorrente().percentual !== null && despRecorrente().percentual !== undefined) {
+                    {{ despRecorrente().percentual!.toLocaleString('pt-BR') }}% das despesas
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--warning">
+                    <svg lucideIcon="handshake" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Parcerias</span>
+                  <span class="ind-tile__help" data-tip="Total pago a parcerias no mês, já incluso na despesa" tabindex="0" role="img" aria-label="Total pago a parcerias no mês, já incluso na despesa"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="kpi-main">
+                  <div class="card-value">{{ data()?.resumoParcerias?.totalPago | valorMascarado }}</div>
+                  @if (kpiMensal()?.varParcerias !== null && kpiMensal()?.varParcerias !== undefined) {
+                    <span class="pill" [class.pill--green]="(kpiMensal()!.varParcerias!) >= 0" [class.pill--red]="(kpiMensal()!.varParcerias!) < 0">
+                      @if ((kpiMensal()!.varParcerias!) >= 0) { ↑ } @else { ↓ }
+                      {{ kpiMensal()!.varParcerias }}%
+                    </span>
+                  } @else {
+                    <span class="pill pill--muted">—</span>
+                  }
+                </div>
+                <div class="card-sub">
+                  @if ((data()?.resumoParcerias?.qtdParcerias ?? 0) > 0) {
+                    {{ data()?.resumoParcerias?.qtdParcerias }} parcerias no mês
+                  } @else {
+                    Sem parcerias no mês
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="chart-line" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Margem líquida</span>
+                  <span class="ind-tile__help" data-tip="Lucro líquido dividido pela receita" tabindex="0" role="img" aria-label="Lucro líquido dividido pela receita"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value">
+                  @if (kpiMensal()?.margem !== null && kpiMensal()?.margem !== undefined) {
+                    {{ kpiMensal()!.margem!.toLocaleString('pt-BR') }}%
+                  } @else {
+                    —
+                  }
+                </div>
+                <div class="card-sub">Lucro líquido ÷ receita</div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--primary">
+                    <svg lucideIcon="coins" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Ponto de equilíbrio</span>
+                  <span class="ind-tile__help" data-tip="Receita necessária para cobrir as despesas do mês" tabindex="0" role="img" aria-label="Receita necessária para cobrir as despesas do mês"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="kpi-main">
+                  <div class="card-value">{{ kpiMensal()?.pontoEquilibrio | valorMascarado }}</div>
+                  @if (kpiMensal()?.distanciaPonto !== null && kpiMensal()?.distanciaPonto !== undefined) {
+                    <span class="pill" [class.pill--green]="(kpiMensal()!.distanciaPonto!) >= 0" [class.pill--red]="(kpiMensal()!.distanciaPonto!) < 0">
+                      @if ((kpiMensal()!.distanciaPonto!) >= 0) { ↑ } @else { ↓ }
+                      {{ kpiMensal()!.distanciaPonto }}%
+                    </span>
+                  } @else {
+                    <span class="pill pill--muted">—</span>
+                  }
+                </div>
+                <div class="card-sub">Receita atual: {{ kpiMensal()?.receitas | valorMascarado }}</div>
+              </div>
+            </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        }
+
+        <app-collapsible-section title="Distribuição por categoria e subcategoria" icon="tags" iconVariant="primary">
+          <div slot="actions" class="view-toggle view-toggle--sm">
+            <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'receita'" (click)="trocarTipoDistMensal('receita')">Receitas</button>
+            <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'despesa'" (click)="trocarTipoDistMensal('despesa')">Despesas</button>
+          </div>
+          <div class="dist-grid">
+            <div class="dist-block">
+              <div class="dist-block__head">
+                <h3 class="dist-block__title">Categorias</h3>
+              </div>
+              @if (distMensalCategorias().length) {
+                <div class="donut-wrap">
+                  <div class="donut-chart">
+                    <canvas baseChart [data]="donutDistCatData" [options]="doughnutChartOptions()" type="doughnut"></canvas>
+                    <div class="donut-center"><strong>{{ totalDistCat() | valorMascarado }}</strong><span>Total</span></div>
+                  </div>
+                  <ul class="donut-legend">
+                    @for (item of distMensalCategorias(); track item.nome) {
+                      <li>
+                        <span class="donut-legend__label">{{ item.nome }}</span>
+                        <span class="donut-legend__pct">{{ item.percentual }}%</span>
+                        <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              } @else {
+                <div class="donut-wrap">
+                  <div class="donut-chart">
+                    <canvas baseChart [data]="donutVazioData" [options]="doughnutVazioOptions" type="doughnut"></canvas>
+                    <div class="donut-center"><strong>{{ 0 | valorMascarado }}</strong><span>Total</span></div>
+                  </div>
+                  <div class="dist-empty">
+                    <span class="dist-empty__icon"><svg lucideIcon="wallet" [size]="22"></svg></span>
+                    @if (tipoDistribuicao() === 'receita') {
+                      <strong>Ainda não há receitas</strong>
+                      <p>Registre suas receitas para visualizar a distribuição por categoria.</p>
+                    } @else {
+                      <strong>Ainda não há despesas</strong>
+                      <p>Registre suas despesas para visualizar a distribuição por categoria.</p>
+                    }
                   </div>
                 </div>
               }
             </div>
+            <div class="dist-block">
+              <div class="dist-block__head">
+                <h3 class="dist-block__title">Subcategorias</h3>
+              </div>
+              @if (distMensalSubcategorias().length) {
+                <div class="donut-wrap">
+                  <div class="donut-chart">
+                    <canvas baseChart [data]="donutDistSubData" [options]="doughnutChartOptions()" type="doughnut"></canvas>
+                    <div class="donut-center"><strong>{{ totalDistSub() | valorMascarado }}</strong><span>Total</span></div>
+                  </div>
+                  <ul class="donut-legend">
+                    @for (item of distMensalSubcategorias(); track $index) {
+                      <li>
+                        <span class="donut-legend__label">{{ item.nome }}</span>
+                        <span class="donut-legend__pct">{{ item.percentual }}%</span>
+                        <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              } @else {
+                <div class="donut-wrap">
+                  <div class="donut-chart">
+                    <canvas baseChart [data]="donutVazioData" [options]="doughnutVazioOptions" type="doughnut"></canvas>
+                    <div class="donut-center"><strong>{{ 0 | valorMascarado }}</strong><span>Total</span></div>
+                  </div>
+                  <div class="dist-empty">
+                    <span class="dist-empty__icon"><svg lucideIcon="wallet" [size]="22"></svg></span>
+                    @if (tipoDistribuicao() === 'receita') {
+                      <strong>Ainda não há receitas</strong>
+                      <p>Registre suas receitas para visualizar a distribuição por subcategoria.</p>
+                    } @else {
+                      <strong>Ainda não há despesas</strong>
+                      <p>Registre suas despesas para visualizar a distribuição por subcategoria.</p>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </app-collapsible-section>
+
+        @if (data()) {
+          <app-collapsible-section title="Contas bancárias" icon="wallet" iconVariant="info">
+            @if (contasTabela().linhas.length) {
+            <div class="table-card">
+              <table class="table">
+                <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Lucro líquido</th><th>% do total (receitas)</th></tr></thead>
+                <tbody>
+                  @for (c of contasTabela().linhas; track c.nomeConta) {
+                    <tr>
+                      <td class="cell-name" data-label="Conta">
+                        <span class="conta-cell">
+                          <span class="bank-avatar bank-avatar--{{ varianteAvatarBanco(c.banco) }}">{{ iniciaisBanco(c.banco) }}</span>
+                          <span class="conta-text">{{ c.nomeConta }}<span class="cell-meta">{{ c.banco }}</span></span>
+                        </span>
+                      </td>
+                      <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
+                      <td class="cell-value" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
+                      <td class="cell-value" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
+                      <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Lucro líquido">{{ c.saldo | valorMascarado }}</td>
+                      <td data-label="% do total (receitas)">
+                        <span class="pct-cell">
+                          <span class="pct-bar"><span class="pct-bar__fill" [style.width.%]="c.percentual"></span></span>
+                          <span class="pct-value">{{ c.percentual.toLocaleString('pt-BR') }}%</span>
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                  <tr class="row-total">
+                    <td class="cell-name" data-label="Conta">Total</td>
+                    <td data-label="Tipo">—</td>
+                    <td class="cell-value" data-label="Receitas">{{ contasTabela().totalReceitas | valorMascarado }}</td>
+                    <td class="cell-value" data-label="Despesas">{{ contasTabela().totalDespesas | valorMascarado }}</td>
+                    <td class="cell-value" [class.green]="contasTabela().totalLucro >= 0" [class.red]="contasTabela().totalLucro < 0" data-label="Lucro líquido">{{ contasTabela().totalLucro | valorMascarado }}</td>
+                    <td data-label="% do total (receitas)">
+                      <span class="pct-cell">
+                        <span class="pct-bar"><span class="pct-bar__fill pct-bar__fill--total" [style.width.%]="100"></span></span>
+                        <span class="pct-value">100%</span>
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            } @else {
+              <p class="empty-text">Nenhuma conta ativa para exibir.</p>
+            }
           </app-collapsible-section>
         }
       } @else {
-        <div class="anual-toolbar">
-          <div class="view-toggle view-toggle--year">
-            <button class="nav-btn nav-btn--inline" (click)="navegarAno(-1)" aria-label="Ano anterior">
-              <svg lucideIcon="chevron-left" [size]="18" />
-            </button>
-            <span class="year-label">{{ ano() }}</span>
-            <button class="nav-btn nav-btn--inline" (click)="navegarAno(1)" aria-label="Próximo ano">
-              <svg lucideIcon="chevron-right" [size]="18" />
-            </button>
-          </div>
-          <div class="anual-filtros anual-filtros--inline">
-            <app-custom-select
-              placeholder="Todas as contas"
-              [value]="filtroConta()"
-              [options]="contasOptions()"
-              (valueChange)="onFiltroContaChange($event)"
-            />
-          </div>
-        </div>
-
         @if (loading()) {
           <div class="cards cards--kpi">
             <app-skeleton type="card" [count]="5" />
@@ -168,7 +502,7 @@
                 </span>
                 <span class="card-label">Receitas</span>
               </div>
-              <div class="card-value green">{{ dataAnual()?.totalReceitas | currencyBRL }}</div>
+              <div class="card-value green">{{ dataAnual()?.totalReceitas | valorMascarado }}</div>
               <div class="card-sub">
                 @if (dataAnual()?.variacaoReceitasPercentual !== null && dataAnual()?.variacaoReceitasPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoReceitasPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoReceitasPercentual!) < 0">
@@ -177,7 +511,7 @@
                   </span>
                   <span>Em relação a {{ ano() - 1 }}</span>
                 } @else {
-                  <span class="pill pill--green">{{ dataAnual()?.totalRecebido | currencyBRL }} recebido</span>
+                  <span class="pill pill--green">{{ dataAnual()?.totalRecebido | valorMascarado }} recebido</span>
                 }
               </div>
             </div>
@@ -188,7 +522,7 @@
                 </span>
                 <span class="card-label">Despesas</span>
               </div>
-              <div class="card-value red">{{ dataAnual()?.totalDespesas | currencyBRL }}</div>
+              <div class="card-value red">{{ dataAnual()?.totalDespesas | valorMascarado }}</div>
               <div class="card-sub">
                 @if (dataAnual()?.variacaoDespesasPercentual !== null && dataAnual()?.variacaoDespesasPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoDespesasPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoDespesasPercentual!) < 0">
@@ -197,7 +531,7 @@
                   </span>
                   <span>Em relação a {{ ano() - 1 }}</span>
                 } @else {
-                  <span class="pill pill--green">{{ dataAnual()?.totalPago | currencyBRL }} pago</span>
+                  <span class="pill pill--green">{{ dataAnual()?.totalPago | valorMascarado }} pago</span>
                 }
               </div>
             </div>
@@ -209,7 +543,7 @@
                 <span class="card-label">Saldo do ano</span>
               </div>
               <div class="card-value" [class.green]="(dataAnual()?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.saldo ?? 0) < 0">
-                {{ dataAnual()?.saldo | currencyBRL }}
+                {{ dataAnual()?.saldo | valorMascarado }}
               </div>
               <div class="card-sub">
                 @if (dataAnual()?.variacaoSaldoPercentual !== null && dataAnual()?.variacaoSaldoPercentual !== undefined) {
@@ -230,7 +564,7 @@
                 </span>
                 <span class="card-label">Média mensal (saldo)</span>
               </div>
-              <div class="card-value">{{ dataAnual()?.mediaMensalSaldo | currencyBRL }}</div>
+              <div class="card-value">{{ dataAnual()?.mediaMensalSaldo | valorMascarado }}</div>
               <div class="card-sub">Baseado em {{ dataAnual()?.mesesConsiderados }} meses</div>
             </div>
             <div class="card">
@@ -241,11 +575,11 @@
                 <span class="card-label">Parcerias</span>
               </div>
               <div class="card-value" [class.green]="(dataAnual()?.resumoParcerias?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.resumoParcerias?.saldo ?? 0) < 0">
-                {{ dataAnual()?.resumoParcerias?.saldo | currencyBRL }}
+                {{ dataAnual()?.resumoParcerias?.saldo | valorMascarado }}
               </div>
               <div class="card-sub">
-                <span class="pill pill--green">{{ dataAnual()?.resumoParcerias?.totalRecebido | currencyBRL }} recebido</span>
-                <span class="pill pill--red">{{ dataAnual()?.resumoParcerias?.totalPago | currencyBRL }} pago</span>
+                <span class="pill pill--green">{{ dataAnual()?.resumoParcerias?.totalRecebido | valorMascarado }} recebido</span>
+                <span class="pill pill--red">{{ dataAnual()?.resumoParcerias?.totalPago | valorMascarado }} pago</span>
               </div>
               <div class="card-sub card-sub--link">
                 <a routerLink="/parcerias">{{ dataAnual()?.resumoParcerias?.qtdParcerias }} parcerias movimentadas · Ver parcerias</a>
@@ -258,7 +592,7 @@
               <div class="chart-container">
                 <canvas baseChart
                   [data]="barChartData"
-                  [options]="barChartOptions"
+                  [options]="barChartOptions()"
                   type="bar">
                 </canvas>
               </div>
@@ -266,7 +600,7 @@
 
             <app-collapsible-section
               [title]="tipoDistribuicao() === 'receita' ? 'Distribuição das receitas' : 'Distribuição das despesas'"
-              icon="tag" iconVariant="primary" [badge]="distribuicaoAtual().length + ''">
+              icon="tag" iconVariant="primary">
               <div class="dist-toggles">
                 <div class="view-toggle view-toggle--sm">
                   <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'receita'" (click)="trocarTipoDistribuicao('receita')">Receitas</button>
@@ -282,11 +616,11 @@
                   <div class="donut-chart">
                     <canvas baseChart
                       [data]="doughnutChartData"
-                      [options]="doughnutChartOptions"
+                      [options]="doughnutChartOptions()"
                       type="doughnut">
                     </canvas>
                     <div class="donut-center">
-                      <strong>{{ totalDistribuicao() | currencyBRL }}</strong>
+                      <strong>{{ totalDistribuicao() | valorMascarado }}</strong>
                       <span>Total</span>
                     </div>
                   </div>
@@ -295,7 +629,7 @@
                       <li>
                         <span class="donut-legend__label">{{ item.nome }}</span>
                         <span class="donut-legend__pct">{{ item.percentual }}%</span>
-                        <span class="donut-legend__value">{{ item.total | currencyBRL }}</span>
+                        <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
                       </li>
                     }
                   </ul>
@@ -307,7 +641,7 @@
           </div>
 
           @if (dataAnual()?.resumoPorMes?.length) {
-            <app-collapsible-section title="Resumo mês a mês" icon="calendar-range" iconVariant="info" [badge]="dataAnual()!.resumoPorMes.length + ''">
+            <app-collapsible-section title="Resumo mês a mês" icon="calendar-range" iconVariant="info">
               <div class="table-card">
                 <table class="table">
                   <thead><tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
@@ -315,30 +649,9 @@
                     @for (m of dataAnual()!.resumoPorMes; track m.mes) {
                       <tr>
                         <td class="cell-name" data-label="Mês">{{ MESES[m.mes - 1] }}</td>
-                        <td class="cell-value green" data-label="Receitas">{{ m.totalReceitas | currencyBRL }}</td>
-                        <td class="cell-value red" data-label="Despesas">{{ m.totalDespesas | currencyBRL }}</td>
-                        <td class="cell-value" [class.green]="m.saldo >= 0" [class.red]="m.saldo < 0" data-label="Saldo">{{ m.saldo | currencyBRL }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </app-collapsible-section>
-          }
-
-          @if (dataAnual()?.previsaoRestanteAno?.length) {
-            <app-collapsible-section title="Previsão dos próximos meses" icon="calendar-days" iconVariant="primary" [badge]="dataAnual()!.previsaoRestanteAno.length + ''">
-              <p class="info-banner">Exibindo apenas os meses a partir de {{ mesInicialPrevisao() }}.</p>
-              <div class="table-card">
-                <table class="table">
-                  <thead><tr><th>Mês</th><th>Receitas (previsto)</th><th>Despesas (previsto)</th><th>Saldo (previsto)</th></tr></thead>
-                  <tbody>
-                    @for (p of dataAnual()!.previsaoRestanteAno; track p.mes) {
-                      <tr>
-                        <td class="cell-name" data-label="Mês">{{ MESES[p.mes - 1] }}</td>
-                        <td class="cell-value green" data-label="Receitas (previsto)">{{ p.totalReceitas | currencyBRL }}</td>
-                        <td class="cell-value red" data-label="Despesas (previsto)">{{ p.totalDespesas | currencyBRL }}</td>
-                        <td class="cell-value" [class.green]="p.saldoPrevisto >= 0" [class.red]="p.saldoPrevisto < 0" data-label="Saldo (previsto)">{{ p.saldoPrevisto | currencyBRL }}</td>
+                        <td class="cell-value green" data-label="Receitas">{{ m.totalReceitas | valorMascarado }}</td>
+                        <td class="cell-value red" data-label="Despesas">{{ m.totalDespesas | valorMascarado }}</td>
+                        <td class="cell-value" [class.green]="m.saldo >= 0" [class.red]="m.saldo < 0" data-label="Saldo">{{ m.saldo | valorMascarado }}</td>
                       </tr>
                     }
                   </tbody>
@@ -348,7 +661,7 @@
           }
 
           @if (dataAnual()?.resumoPorConta?.length) {
-            <app-collapsible-section title="Por conta" icon="wallet" iconVariant="info" [badge]="dataAnual()!.resumoPorConta.length + ''">
+            <app-collapsible-section title="Por conta" icon="wallet" iconVariant="info">
               <div class="table-card">
                 <table class="table">
                   <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
@@ -357,9 +670,9 @@
                       <tr>
                         <td class="cell-name" data-label="Conta">{{ c.nomeConta }} <span class="cell-meta">{{ c.banco }}</span></td>
                         <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                        <td class="cell-value green" data-label="Receitas">{{ c.totalReceitas | currencyBRL }}</td>
-                        <td class="cell-value red" data-label="Despesas">{{ c.totalDespesas | currencyBRL }}</td>
-                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo">{{ c.saldo | currencyBRL }}</td>
+                        <td class="cell-value green" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
+                        <td class="cell-value red" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
+                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo">{{ c.saldo | valorMascarado }}</td>
                       </tr>
                     }
                   </tbody>

@@ -9,6 +9,7 @@ import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
 import { Parceria } from '../../core/models/parceria.model';
+import { Contrato } from '../../core/models/contrato.model';
 import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { NotificationService } from '../../core/services/notification.service';
@@ -32,6 +33,7 @@ export interface LancamentoForm {
   idCategoria: string;
   idSubcategoria?: string;
   idParceria?: string;
+  idContrato?: string;
   categoriasServicoBloco: CategoriaServicoBloco[];
   servicos?: ServicoItem[];
   idCliente?: string;
@@ -51,6 +53,7 @@ interface LancamentoItem {
   idSubcategoria?: string;
   idParceiro?: string;
   idParceria?: string;
+  idContrato?: string;
   servicos?: { categoriaServicoId: string; subcategoriaServicoId?: string }[];
   idCliente?: string;
 }
@@ -78,6 +81,7 @@ export class LancamentoModalComponent {
   fluxoAdicional = input(false);
   parceiros = input<Pessoa[]>([]);
   parcerias = input<Parceria[]>([]);
+  contratos = input<Contrato[]>([]);
   clientes = input<Pessoa[]>([]);
   categoriasServico = input<Categoria[]>([]);
   salvando = input(false);
@@ -97,6 +101,7 @@ export class LancamentoModalComponent {
   categoriasOptions = signal<SelectOption[]>([]);
   subcategoriasOptions = signal<SelectOption[]>([]);
   parceriasOptions = signal<SelectOption[]>([]);
+  contratosOptions = signal<SelectOption[]>([]);
   clientesOptions = signal<SelectOption[]>([]);
   categoriasServicoPais = signal<SelectOption[]>([]);
   subcategoriasServicoMap = signal<Map<string, SelectOption[]>>(new Map());
@@ -107,6 +112,13 @@ export class LancamentoModalComponent {
   });
 
   ultimoPasso = computed(() => this.fluxoAdicional() ? 5 : 2);
+
+  tudoConcluido = computed(() => {
+    for (let i = 0; i <= this.ultimoPasso(); i++) {
+      if (!this.passoConcluido(i)) return false;
+    }
+    return true;
+  });
 
   constructor() {
     effect(() => {
@@ -125,6 +137,11 @@ export class LancamentoModalComponent {
     effect(() => {
       const p = this.parcerias();
       this.parceriasOptions.set(p.map(x => ({ value: x.id, label: `${x.nome} (${x.parceiro} - ${x.cliente})` })));
+    });
+
+    effect(() => {
+      const c = this.contratos();
+      this.contratosOptions.set(c.map(x => ({ value: x.id, label: `${x.nome} (${x.cliente})` })));
     });
 
     effect(() => {
@@ -148,6 +165,7 @@ export class LancamentoModalComponent {
             idCategoria: ini.idCategoria,
             idSubcategoria: ini.idSubcategoria ?? undefined,
             idParceria: ini.idParceria ?? undefined,
+            idContrato: ini.idContrato ?? undefined,
             categoriasServicoBloco: blocos,
             idCliente: ini.idCliente ?? undefined,
             repete: false,
@@ -155,6 +173,7 @@ export class LancamentoModalComponent {
             diaUtil: false,
             dataFim: ''
           });
+          this.reconciliarPaisComEstruturaAtual();
         } else {
           const hoje = new Date().toISOString().split('T')[0];
           const contas = untracked(() => this.contas());
@@ -175,6 +194,45 @@ export class LancamentoModalComponent {
       categoriaServicoId: catId,
       subcategoriasSelecionadas: Array.from(subs)
     }));
+  }
+
+  private reconciliarPaisComEstruturaAtual() {
+    const cats = untracked(() => this.categorias());
+    const catServ = untracked(() => this.categoriasServico());
+    if (cats.length === 0 && catServ.length === 0) return;
+    const avisos: string[] = [];
+    this.form.update(f => {
+      let idCategoria = f.idCategoria;
+      if (f.idSubcategoria) {
+        const sub = cats.find(c => c.id === f.idSubcategoria);
+        const paiAtual = sub?.categoriaPaiId;
+        if (paiAtual && paiAtual !== idCategoria) {
+          const paiNome = cats.find(c => c.id === paiAtual)?.nome ?? 'nova categoria';
+          avisos.push(`"${sub?.nome}" agora pertence a "${paiNome}" — ajustado automaticamente`);
+          idCategoria = paiAtual;
+        }
+      }
+      const pares: { categoriaServicoId: string; subcategoriaServicoId?: string }[] = [];
+      for (const b of f.categoriasServicoBloco) {
+        if (b.subcategoriasSelecionadas.length === 0) {
+          pares.push({ categoriaServicoId: b.categoriaServicoId });
+          continue;
+        }
+        for (const subId of b.subcategoriasSelecionadas) {
+          const sub = catServ.find(c => c.id === subId);
+          const paiAtual = sub?.categoriaPaiId;
+          if (paiAtual && paiAtual !== b.categoriaServicoId) {
+            const paiNome = catServ.find(c => c.id === paiAtual)?.nome ?? 'nova categoria';
+            avisos.push(`"${sub?.nome}" agora pertence a "${paiNome}" — ajustado automaticamente`);
+          }
+          pares.push({ categoriaServicoId: paiAtual ?? b.categoriaServicoId, subcategoriaServicoId: subId });
+        }
+      }
+      return { ...f, idCategoria, categoriasServicoBloco: this.agruparServicosEmBlocos(pares) };
+    });
+    this.atualizarCategorizacao();
+    this.atualizarCategoriasServico();
+    avisos.slice(0, 2).forEach(a => this.notify.info(a));
   }
 
   private atualizarCategorizacao() {
@@ -262,6 +320,15 @@ export class LancamentoModalComponent {
       }
     }
     return result;
+  }
+
+  onVinculoChange(tipo: 'contrato' | 'parceria', value: string) {
+    const id = value || undefined;
+    if (tipo === 'contrato') {
+      this.form.update(f => ({ ...f, idContrato: id, ...(id ? { idParceria: undefined } : {}) }));
+    } else {
+      this.form.update(f => ({ ...f, idParceria: id, ...(id ? { idContrato: undefined } : {}) }));
+    }
   }
 
   irPara(indice: number) {
@@ -379,7 +446,7 @@ export class LancamentoModalComponent {
     if (fluxo) {
       switch (indice) {
         case 0: return !!f.idCategoria;
-        case 1: return !!f.idParceria;
+        case 1: return true;
         case 2: return f.categoriasServicoBloco.length > 0;
         case 3: return !!f.idCliente;
         case 4: return !!(f.descricao?.trim() && f.data && f.valor > 0);
@@ -408,7 +475,7 @@ export class LancamentoModalComponent {
     const label = this.subcategoriasOptions().find(o => o.value === value)?.label;
     let descricaoSet = false;
     this.form.update(f => {
-      const shouldSetDescricao = !!(label && !f.descricao?.trim());
+      const shouldSetDescricao = this.devePuxarDescricaoSubcategoria(f.descricao) && !!label;
       if (shouldSetDescricao) descricaoSet = true;
       return {
         ...f,
@@ -419,6 +486,35 @@ export class LancamentoModalComponent {
     if (descricaoSet) {
       this.clearError('descricao');
     }
+  }
+
+  private devePuxarDescricaoSubcategoria(descricaoAtual: string): boolean {
+    if (!descricaoAtual?.trim()) {
+      return !(this.fluxoAdicional() && this.dominioCategoria() === 'receita');
+    }
+    return false;
+  }
+
+  onClienteChange(value: string) {
+    const id = value || undefined;
+    const label = this.clientesOptions().find(o => o.value === value)?.label;
+    let descricaoSet = false;
+    this.form.update(f => {
+      const shouldSetDescricao = this.devePuxarDescricaoCliente(f.descricao) && !!label;
+      if (shouldSetDescricao) descricaoSet = true;
+      return {
+        ...f,
+        idCliente: id,
+        descricao: shouldSetDescricao && label ? label : f.descricao
+      };
+    });
+    if (descricaoSet) {
+      this.clearError('descricao');
+    }
+  }
+
+  private devePuxarDescricaoCliente(descricaoAtual: string): boolean {
+    return this.fluxoAdicional() && this.dominioCategoria() === 'receita' && !descricaoAtual?.trim();
   }
 
   onDiaUtilChange() {
@@ -578,8 +674,20 @@ export class LancamentoModalComponent {
       } else {
         const criada = await firstValueFrom(this.pessoaRepo.criar({ nome, telefone: this.quickTelefone().trim(), tipo: 'Cliente' }));
         this.clienteCriado.emit(criada);
-        this.updateFormField('idCliente', criada.id);
+        let descricaoSet = false;
+        this.form.update(f => {
+          const shouldSetDescricao = this.devePuxarDescricaoCliente(f.descricao);
+          if (shouldSetDescricao) descricaoSet = true;
+          return {
+            ...f,
+            idCliente: criada.id,
+            descricao: shouldSetDescricao ? nome : f.descricao
+          };
+        });
         this.clearError('idCliente');
+        if (descricaoSet) {
+          this.clearError('descricao');
+        }
       }
       this.quickAdd.set(null);
     } catch (e) {

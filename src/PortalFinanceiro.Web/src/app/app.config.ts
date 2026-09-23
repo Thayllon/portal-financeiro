@@ -4,19 +4,19 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideLucideIcons } from '@lucide/angular';
 import {
   LucideLayoutDashboard, LucideTrendingUp, LucideTrendingDown,
-  LucideWallet, LucideCreditCard, LucideTag, LucidePlus,
+      LucideWallet, LucideCreditCard, LucideTag, LucideTags, LucidePlus,
   LucideChevronLeft, LucideChevronRight, LucideCheck,
   LucidePencil, LucideTrash2, LucideX, LucideSearch,
-  LucideCalendar, LucideDollarSign, LucideLogOut,
+      LucideCalendar, LucideDollarSign, LucideLogOut, LucideClock,
   LucideChevronDown, LucideArrowLeft, LucideArrowRight,
   LucideLoader, LucideInbox,
   LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
   LucideHandCoins, LucideCalendar1, LucideCalendarDays,
   LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
     LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
-  LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
+  LucideBarChart3, LucideCalendarRange, LucideChartNetwork, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
 LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar, LucideTrendingUpDown,
-LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideChevronUp, LucideHome, LucideStar,
+LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideHardHat, LucideChevronUp, LucideHome, LucideStar, LucideFileBadge, LucideArchive, LucideArchiveRestore, LucideUsersRound, LucideUserRoundGroup, LucideArrowDownUp, LucideClipboardList, LucideMove, LucideEllipsis, LucideUserRoundPen, LucideUserRoundMinus, LucideUserRoundCheck, LucideUserRoundX, LucideRefreshCw, LucideFlaskConical, LucideDatabase,
   } from '@lucide/angular';
 
 import { routes } from './app.routes';
@@ -29,19 +29,19 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideLucideIcons(
       LucideLayoutDashboard, LucideTrendingUp, LucideTrendingDown,
-      LucideWallet, LucideCreditCard, LucideTag, LucidePlus,
+  LucideWallet, LucideCreditCard, LucideTag, LucideTags, LucidePlus,
       LucideChevronLeft, LucideChevronRight, LucideCheck,
       LucidePencil, LucideTrash2, LucideX, LucideSearch,
-      LucideCalendar, LucideDollarSign, LucideLogOut,
+  LucideCalendar, LucideDollarSign, LucideLogOut, LucideClock,
       LucideChevronDown, LucideArrowLeft, LucideArrowRight,
   LucideLoader, LucideInbox,
       LucideInfo, LucideChevronsLeft, LucideChevronsRight, LucideDoorOpen,
       LucideHandCoins, LucideCalendar1, LucideCalendarDays,
       LucideFolder, LucideFile, LucideReceipt, LucideRepeat,
       LucideCalendarClock, LucideEye, LucideEyeOff, LucideCopy,
-      LucideBarChart3, LucideCalendarRange, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
+  LucideBarChart3, LucideCalendarRange, LucideChartNetwork, LucideUsers, LucideUserX, LucideUserCheck, LucideCoins,
 LucideHandshake, LucideUserKey, LucideMonitorCog, LucideChartLine, LucideCircleAlert, LucideCircleCheck, LucideUser, LucideLock, LucideShieldCheck, LucideUserCog, LucideRotateCcwKey, LucideUserStar, LucideTrendingUpDown,
-LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideChevronUp, LucideHome, LucideStar,
+LucideBuilding, LucideMinus, LucideUserPen, LucideHandHelping, LucideBanknoteArrowUp, LucideBanknoteArrowDown, LucideBriefcaseBusiness, LucideHardHat, LucideChevronUp, LucideHome, LucideStar, LucideFileBadge, LucideArchive, LucideArchiveRestore, LucideUsersRound, LucideUserRoundGroup, LucideArrowDownUp, LucideClipboardList, LucideMove, LucideEllipsis, LucideUserRoundPen, LucideUserRoundMinus, LucideUserRoundCheck, LucideUserRoundX, LucideRefreshCw, LucideFlaskConical, LucideDatabase,
     ),
   ],
 };

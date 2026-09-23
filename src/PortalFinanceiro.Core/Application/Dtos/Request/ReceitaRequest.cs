@@ -11,6 +11,7 @@ public class ReceitaRequest
     public Guid? IdParceiro { get; set; }
     public Guid? IdCliente { get; set; }
     public Guid? IdParceria { get; set; }
+    public Guid? IdContrato { get; set; }
     public List<ReceitaServicoRequest>? Servicos { get; set; }
     public bool Repete { get; set; }
     public int? Dia { get; set; }

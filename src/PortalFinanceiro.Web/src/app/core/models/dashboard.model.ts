@@ -7,8 +7,15 @@ export interface Dashboard {
   totalPago: number;
   saldo: number;
   saldoRealizado: number;
+  totalReceitasPrevisto: number;
+  totalDespesasPrevisto: number;
+  totalReceitasRecorrentes: number;
+  totalDespesasRecorrentes: number;
+  saldoPrevisto: number;
+  resumoParcerias: ResumoParceriasAnual;
   resumoPorConta: ResumoPorConta[];
-  resumoPorCategoria: ResumoPorCategoria[];
+  distribuicaoReceitas: DistribuicaoCategoriaAnual[];
+  distribuicaoDespesas: DistribuicaoCategoriaAnual[];
   previsaoProximosMeses: PrevisaoMensal[];
 }
 
@@ -78,11 +85,8 @@ export interface ResumoPorConta {
   totalReceitas: number;
   totalDespesas: number;
   saldo: number;
-}
-
-export interface ResumoPorCategoria {
-  nome: string;
-  total: number;
+  totalReceitasPrevisto: number;
+  totalDespesasPrevisto: number;
 }
 
 export interface PrevisaoMensal {

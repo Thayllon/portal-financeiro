@@ -46,14 +46,18 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/regras-despesas` | GET/PUT/DELETE | Regras recorrentes de despesa |
 | `/api/contas-bancarias` | GET/POST/PUT/DELETE | Contas bancárias |
 | `/api/pessoas` | GET/POST/PUT/DELETE | Clientes/parceiros (`Tipo`: 1=Cliente, 2=Parceiro) |
-| `/api/parcerias` | GET/POST/PUT/DELETE | Parcerias (nome + parceiro + cliente + valor + % do parceiro) — `ValorParceiro`/`MinhaParte` calculados; saldo via `TotalRecebido/Pago` e `FaltaReceber/Pagar` (a receber sobre o valor cheio, a pagar sobre a parte do parceiro) |
+| `/api/parcerias` | GET (`ativo?`)/POST/PUT/DELETE · PUT /{id}/encerrar\|reativar | Parcerias (nome + parceiro + cliente + valor + % do parceiro) — `ValorParceiro`/`MinhaParte` calculados; saldo via `TotalRecebido/Pago` e `FaltaReceber/Pagar` (a receber sobre o valor cheio, a pagar sobre a parte do parceiro); encerrar exige falta receber e falta pagar zerados (`PARCERIA_COM_PENDENCIAS` → 422) |
 | `/api/parcerias/{id}/receitas` | GET | Receitas vinculadas à parceria (dono validado) |
 | `/api/parcerias/{id}/despesas` | GET | Despesas vinculadas à parceria (dono validado) |
+| `/api/parcerias/resumo` | GET (`ano`, `mes`) | Resumo do mês (recebido/pago/a receber/a pagar + qtd) |
+| `/api/contratos` | GET (`ativo?`)/POST/PUT/DELETE · PUT /{id}/encerrar\|reativar | Contratos (nome + cliente + valor, sem parceiro) — saldo via `TotalRecebido` e `FaltaReceber`; encerrar exige falta receber zerada (`CONTRATO_COM_PENDENCIAS` → 422); receita vinculada via `IdContrato` (no máximo um vínculo por receita: parceria ou contrato) |
+| `/api/contratos/{id}/receitas` | GET | Receitas vinculadas ao contrato (dono validado) |
 | `/api/categorias/receita` | GET/POST/PUT/DELETE | Categorias de receita (compartilhadas) |
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa (compartilhadas) |
 | `/api/categorias/servicos` | GET/POST/PUT/DELETE | Categorias de serviços (compartilhadas) |
-| `/api/usuarios` | GET/POST/PUT · PATCH /{id}/ativo | Gerenciamento de usuários (somente admin) |
-| `/api/dashboard` | GET | Dashboard mensal com resumo (`mes`, `ano`) |
+| `/api/usuarios` | GET/POST/PUT/DELETE · PATCH /{id}/ativo · PATCH /{id}/senha | Gerenciamento de usuários (somente admin). Excluir valida auto-exclusão (`AUTO_EXCLUSAO` → 422) e vínculos (`USUARIO_COM_VINCULOS` → 422, contagem em 12 tabelas); com vínculos, desativar em vez de excluir |
+| `/api/diagnostico` | GET (somente admin) | Diagnóstico QA ao vivo: regras R1–R6 de `doc/regras.md` com cenários executados, saúde do banco (leitura) e débitos técnicos. Sem escrita. Alimenta a tela `/testes` |
+| `/api/dashboard` | GET | Dashboard mensal (`mes`, `ano`, `idConta?` Guid): realizado + previsto do mês (`totalReceitasPrevisto/totalDespesasPrevisto/saldoPrevisto` via regras vigentes — filtradas por conta quando `idConta` — descontando o já materializado por `IdRegra`, inclusive por conta em `resumoPorConta`) e `resumoParcerias` do mês (pago/recebido/a pagar/a receber + qtd) |
 | `/api/dashboard/anual` | GET | Dashboard anual (`ano`, `idConta?` Guid): totais + variação % vs ano anterior, média mensal pró-rata, `resumoPorMes[12]`, `resumoPorConta` (respeita `idConta`), `distribuicaoReceitas/Despesas` por categoria/subcategoria com %, `previsaoRestanteAno` (meses restantes via regras recorrentes) e `resumoParcerias` (recebido/pago/a receber/a pagar do ano + qtd) |
 
 **Autorização por posse:** operações por `{id}` (Obter, Atualizar, Excluir e marcar/estornar de receitas/despesas) validam que o recurso pertence ao usuário autenticado (via `IdUsuario` do registro). Recurso de outro usuário retorna `Erro.Permissao` → **HTTP 403**. Categorias compartilhadas: editar/excluir somente o dono ou admin → 403.

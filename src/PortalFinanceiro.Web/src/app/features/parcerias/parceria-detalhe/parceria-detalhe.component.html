@@ -7,7 +7,16 @@
       <span class="page__badge">
         <svg lucideIcon="handshake" class="page__icon" [size]="22" />
       </span>
-      <h1 class="page__title">Detalhes parceria - {{ parceria()?.nome ?? '...' }}</h1>
+      <div class="page__titles">
+        <h1 class="page__title">Detalhes parceria - {{ parceria()?.nome ?? '...' }}</h1>
+        @if (parceria(); as ph) {
+          <p class="page__subtitle">{{ ph.parceiro }} → {{ ph.cliente }} · {{ ph.valor | valorMascarado }} · {{ ph.percentualParceiro }}% ao parceiro</p>
+        }
+      </div>
+      @if (parceria(); as ps) {
+        <app-status-badge [type]="ps.ativo ? 'ativo' : 'inativo'" [label]="ps.ativo ? 'Ativa' : 'Encerrada'" />
+      }
+      <app-privacidade-toggle />
     </div>
   </header>
 
@@ -22,97 +31,139 @@
       }
     </div>
   } @else if (parceria(); as p) {
-    <div class="cards">
-      <div class="table-card card">
-        <span class="card__label">Parceiro</span>
-        <strong class="card__value">{{ p.parceiro }}</strong>
-        <span class="card__hint">{{ p.percentualParceiro }}% · {{ p.valorParceiro | currencyBRL }}</span>
+    <section class="hero">
+      <div class="hero__card hero__card--identity">
+        <div class="hero__top">
+          <span class="hero__avatar">
+            <svg lucideIcon="handshake" [size]="22" />
+          </span>
+          <div class="hero__heading">
+            <strong class="hero__name">{{ p.nome }}</strong>
+            <span class="hero__meta">Contratada em {{ p.dataCadastro | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+        <div class="hero__parties">
+          <div class="party">
+            <span class="party__label">Parceiro</span>
+            <strong class="party__name">{{ p.parceiro }}</strong>
+            <span class="party__sub">{{ p.percentualParceiro }}% · {{ p.valorParceiro | valorMascarado }}</span>
+          </div>
+          <span class="party__arrow">
+            <svg lucideIcon="arrow-right" [size]="18" />
+          </span>
+          <div class="party">
+            <span class="party__label">Cliente</span>
+            <strong class="party__name">{{ p.cliente }}</strong>
+            <span class="party__sub">{{ p.valor | valorMascarado }}</span>
+          </div>
+        </div>
+        <div class="split">
+          <div class="split__labels">
+            <span>Parceiro · {{ p.valorParceiro | valorMascarado }}</span>
+            <span>Minha parte · {{ p.minhaParte | valorMascarado }}</span>
+          </div>
+          <div class="pct-bar">
+            <span class="pct-bar__fill" [style.width.%]="p.percentualParceiro"></span>
+          </div>
+        </div>
       </div>
-      <div class="table-card card">
-        <span class="card__label">Cliente</span>
-        <strong class="card__value">{{ p.cliente }}</strong>
-        <span class="card__hint">Valor da parceria {{ p.valor | currencyBRL }} · minha parte {{ p.minhaParte | currencyBRL }}</span>
-      </div>
-      <div class="table-card card">
-        <span class="card__label">Recebido do cliente</span>
-        <strong class="card__value" style="color: var(--color-success)">{{ p.totalRecebido | currencyBRL }}</strong>
-        <span class="card__hint">Falta receber {{ p.faltaReceber | currencyBRL }}</span>
-      </div>
-      <div class="table-card card">
-        <span class="card__label">Pago ao parceiro</span>
-        <strong class="card__value" style="color: var(--color-success)">{{ p.totalPago | currencyBRL }}</strong>
-        <span class="card__hint">Falta pagar {{ p.faltaPagar | currencyBRL }}</span>
-      </div>
-    </div>
 
-    <h2 class="section-title">
-      <svg lucideIcon="trending-up" [size]="18" />
-      Entradas — o que o cliente pagou
-    </h2>
-    @if (receitas().length === 0) {
-      <div class="table-card">
+      <div class="hero__card hero__card--progress">
+        <div class="progress-group">
+          <div class="progress-group__head">
+            <span class="card-icon card-icon--green">
+              <svg lucideIcon="trending-up" [size]="22" />
+            </span>
+            <div class="progress-group__titles">
+              <span class="progress-group__label">Recebido do cliente</span>
+              <strong class="progress-group__value progress-group__value--success">{{ p.totalRecebido | valorMascarado }}</strong>
+            </div>
+            <span class="pill pill--green">{{ pctRecebido().toLocaleString('pt-BR', { maximumFractionDigits: 1 }) }}%</span>
+          </div>
+          <div class="pct-bar">
+            <span class="pct-bar__fill pct-bar__fill--success" [style.width.%]="pctRecebido()"></span>
+          </div>
+          <span class="progress-group__foot">Falta receber {{ p.faltaReceber | valorMascarado }}</span>
+        </div>
+        <div class="progress-group">
+          <div class="progress-group__head">
+            <span class="card-icon card-icon--primary">
+              <svg lucideIcon="trending-down" [size]="22" />
+            </span>
+            <div class="progress-group__titles">
+              <span class="progress-group__label">Pago ao parceiro</span>
+              <strong class="progress-group__value">{{ p.totalPago | valorMascarado }}</strong>
+            </div>
+            <span class="pill pill--primary">{{ pctPago().toLocaleString('pt-BR', { maximumFractionDigits: 1 }) }}%</span>
+          </div>
+          <div class="pct-bar">
+            <span class="pct-bar__fill" [style.width.%]="pctPago()"></span>
+          </div>
+          <span class="progress-group__foot">Falta pagar {{ p.faltaPagar | valorMascarado }}</span>
+        </div>
+      </div>
+    </section>
+
+    <app-collapsible-section title="Entradas — o que o cliente pagou" icon="trending-up" iconVariant="green">
+      @if (receitas().length === 0) {
         <div class="empty-state">
           <svg lucideIcon="inbox" [size]="36" class="empty-icon" />
           <h3>Nenhuma receita vinculada</h3>
           <p>Vincule receitas a esta parceria pelo modal de receita.</p>
         </div>
-      </div>
-    } @else {
-      <div class="table-card">
-        <table class="table">
-          <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
-          <tbody>
-            @for (r of receitasPaginacao.paginatedItems(); track r.id) {
-              <tr>
-                <td class="cell-name" data-label="Descrição">{{ r.descricao }}</td>
-                <td class="cell-value" data-label="Valor">{{ r.valor | currencyBRL }}</td>
-                <td class="cell-meta" data-label="Data">{{ r.data | date:'dd/MM/yyyy' }}</td>
-                <td data-label="Status"><app-status-badge [type]="r.status === statusRealizado ? 'realizado' : 'pendente'" [label]="r.status === statusRealizado ? 'Recebido' : 'Pendente'" /></td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        <app-list-pagination [pagination]="receitasPaginacao" />
-        <div class="table-footer">
-          <span>Recebido: <strong style="color: var(--color-success)">{{ entradasRecebidas() | currencyBRL }}</strong></span>
-          <span>Pendente: <strong style="color: var(--color-warning)">{{ entradasPendentes() | currencyBRL }}</strong></span>
+      } @else {
+        <div class="table-pills">
+          <span class="pill pill--green">Recebido {{ entradasRecebidas() | valorMascarado }}</span>
+          <span class="pill pill--muted">Pendente {{ entradasPendentes() | valorMascarado }}</span>
         </div>
-      </div>
-    }
+        <div class="table-card table-card--inner">
+          <table class="table">
+            <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
+            <tbody>
+              @for (r of receitasPaginacao.paginatedItems(); track r.id) {
+                <tr>
+                  <td class="cell-name" data-label="Descrição">{{ r.descricao }}</td>
+                  <td class="cell-value" data-label="Valor">{{ r.valor | valorMascarado }}</td>
+                  <td class="cell-meta" data-label="Data">{{ r.data | date:'dd/MM/yyyy' }}</td>
+                  <td data-label="Status"><app-status-badge [type]="r.status === statusRealizado ? 'realizado' : 'pendente'" [label]="r.status === statusRealizado ? 'Recebido' : 'Pendente'" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <app-list-pagination [pagination]="receitasPaginacao" />
+        </div>
+      }
+    </app-collapsible-section>
 
-    <h2 class="section-title">
-      <svg lucideIcon="trending-down" [size]="18" />
-      Saídas — o que paguei ao parceiro
-    </h2>
-    @if (despesas().length === 0) {
-      <div class="table-card">
+    <app-collapsible-section title="Saídas — o que paguei ao parceiro" icon="trending-down" iconVariant="primary">
+      @if (despesas().length === 0) {
         <div class="empty-state">
           <svg lucideIcon="inbox" [size]="36" class="empty-icon" />
           <h3>Nenhuma despesa vinculada</h3>
           <p>Vincule despesas a esta parceria pelo modal de despesa.</p>
         </div>
-      </div>
-    } @else {
-      <div class="table-card">
-        <table class="table">
-          <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
-          <tbody>
-            @for (d of despesasPaginacao.paginatedItems(); track d.id) {
-              <tr>
-                <td class="cell-name" data-label="Descrição">{{ d.descricao }}</td>
-                <td class="cell-value" data-label="Valor">{{ d.valor | currencyBRL }}</td>
-                <td class="cell-meta" data-label="Data">{{ d.data | date:'dd/MM/yyyy' }}</td>
-                <td data-label="Status"><app-status-badge [type]="d.status === statusRealizado ? 'realizado' : 'pendente'" [label]="d.status === statusRealizado ? 'Pago' : 'Pendente'" /></td>
-              </tr>
-            }
-          </tbody>
-        </table>
-        <app-list-pagination [pagination]="despesasPaginacao" />
-        <div class="table-footer">
-          <span>Pago: <strong style="color: var(--color-success)">{{ saidasPagas() | currencyBRL }}</strong></span>
-          <span>Pendente: <strong style="color: var(--color-warning)">{{ saidasPendentes() | currencyBRL }}</strong></span>
+      } @else {
+        <div class="table-pills">
+          <span class="pill pill--primary">Pago {{ saidasPagas() | valorMascarado }}</span>
+          <span class="pill pill--muted">Pendente {{ saidasPendentes() | valorMascarado }}</span>
         </div>
-      </div>
-    }
+        <div class="table-card table-card--inner">
+          <table class="table">
+            <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
+            <tbody>
+              @for (d of despesasPaginacao.paginatedItems(); track d.id) {
+                <tr>
+                  <td class="cell-name" data-label="Descrição">{{ d.descricao }}</td>
+                  <td class="cell-value" data-label="Valor">{{ d.valor | valorMascarado }}</td>
+                  <td class="cell-meta" data-label="Data">{{ d.data | date:'dd/MM/yyyy' }}</td>
+                  <td data-label="Status"><app-status-badge [type]="d.status === statusRealizado ? 'realizado' : 'pendente'" [label]="d.status === statusRealizado ? 'Pago' : 'Pendente'" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <app-list-pagination [pagination]="despesasPaginacao" />
+        </div>
+      }
+    </app-collapsible-section>
   }
 </div>

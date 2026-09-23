@@ -49,3 +49,50 @@ input, select, textarea { font-family: inherit; }
   color: var(--color-error);
   margin-left: 2px;
 }
+
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: -4px;
+  width: max-content;
+  max-width: 260px;
+  padding: 0.625rem 0.75rem;
+  background: var(--text-primary);
+  color: var(--content-surface);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  font-weight: 400;
+  white-space: normal;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility 0s var(--transition-fast);
+  pointer-events: none;
+  z-index: 60;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity var(--transition-fast), transform var(--transition-fast), visibility 0s;
+}
+
+.card:has([data-tip]:hover),
+.card:has([data-tip]:focus-visible) {
+  overflow: visible;
+  z-index: 30;
+}
+
+.card:has([data-tip]:hover)::before,
+.card:has([data-tip]:focus-visible)::before {
+  border-radius: inherit;
+}

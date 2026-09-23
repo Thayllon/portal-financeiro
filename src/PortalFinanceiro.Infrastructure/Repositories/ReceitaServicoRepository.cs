@@ -1,6 +1,7 @@
 using Dapper;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
+using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Infrastructure.Data;
 using PortalFinanceiro.Infrastructure.Sql;
 using PortalFinanceiro.Infrastructure.Sql.Base;
@@ -11,8 +12,8 @@ public class ReceitaServicoRepository : SqlBaseRepository, IReceitaServicoReposi
 {
     public ReceitaServicoRepository(IDatabaseConnectionFactory connectionFactory) : base(connectionFactory) { }
 
-    public async Task<IEnumerable<ReceitaServico>> ListarPorReceitaAsync(Guid receitaId)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<ReceitaServico>(conn, ReceitaServicoSql.ListarPorReceitaId, new { ReceitaId = receitaId }));
+    public async Task<IEnumerable<ReceitaServicoProjecao>> ListarPorReceitaAsync(Guid receitaId)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ReceitaServicoProjecao>(conn, ReceitaServicoSql.ListarPorReceitaId, new { ReceitaId = receitaId }));
 
     public async Task InserirEmMassaAsync(IEnumerable<ReceitaServico> entities)
     {

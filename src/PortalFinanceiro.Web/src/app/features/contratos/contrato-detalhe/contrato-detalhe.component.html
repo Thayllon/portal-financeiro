@@ -1,0 +1,74 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <button class="back-btn" (click)="voltar()" title="Voltar para contratos">
+        <svg lucideIcon="arrow-left" [size]="16" />
+      </button>
+      <span class="page__badge">
+        <svg lucideIcon="briefcase-business" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">Detalhes contrato - {{ contrato()?.nome ?? '...' }}</h1>
+      <app-privacidade-toggle />
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 30%"></div>
+          <div class="skeleton-line" style="width: 20%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+        </div>
+      }
+    </div>
+  } @else if (contrato(); as c) {
+    <div class="cards">
+      <div class="table-card card">
+        <span class="card__label">Cliente</span>
+        <strong class="card__value">{{ c.cliente }}</strong>
+        <span class="card__hint">Valor do contrato {{ c.valor | valorMascarado }}</span>
+      </div>
+      <div class="table-card card">
+        <span class="card__label">Recebido do cliente</span>
+        <strong class="card__value" style="color: var(--color-success)">{{ c.totalRecebido | valorMascarado }}</strong>
+        <span class="card__hint">Falta receber {{ c.faltaReceber | valorMascarado }}</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">
+      <svg lucideIcon="trending-up" [size]="18" />
+      Entradas — o que o cliente pagou
+    </h2>
+    @if (receitas().length === 0) {
+      <div class="table-card">
+        <div class="empty-state">
+          <svg lucideIcon="inbox" [size]="36" class="empty-icon" />
+          <h3>Nenhuma receita vinculada</h3>
+          <p>Vincule receitas a este contrato pelo modal de receita.</p>
+        </div>
+      </div>
+    } @else {
+      <div class="table-card">
+        <table class="table">
+          <thead><tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead>
+          <tbody>
+            @for (r of receitasPaginacao.paginatedItems(); track r.id) {
+              <tr>
+                <td class="cell-name" data-label="Descrição">{{ r.descricao }}</td>
+                <td class="cell-value" data-label="Valor">{{ r.valor | valorMascarado }}</td>
+                <td class="cell-meta" data-label="Data">{{ r.data | date:'dd/MM/yyyy' }}</td>
+                <td data-label="Status"><app-status-badge [type]="r.status === statusRealizado ? 'realizado' : 'pendente'" [label]="r.status === statusRealizado ? 'Recebido' : 'Pendente'" /></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        <app-list-pagination [pagination]="receitasPaginacao" />
+        <div class="table-footer">
+          <span>Recebido: <strong style="color: var(--color-success)">{{ entradasRecebidas() | valorMascarado }}</strong></span>
+          <span>Pendente: <strong style="color: var(--color-warning)">{{ entradasPendentes() | valorMascarado }}</strong></span>
+        </div>
+      </div>
+    }
+  }
+</div>

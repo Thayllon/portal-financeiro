@@ -1,7 +1,7 @@
     <app-toast />
     <app-confirm-dialog />
     <div class="layout" [class.layout--collapsed]="sidebarCollapsed()">
-      <aside class="sidebar">
+        <aside class="sidebar">
         <div class="sidebar-brand">
           <svg lucideIcon="hand-coins" [size]="28" class="sidebar-brand-icon" />
           @if (!sidebarCollapsed()) {
@@ -37,20 +37,28 @@
             }
           </a>
           }
-          @if (authService.temPermissao('parcerias')) {
+          @if (authService.temPermissao('parcerias') || authService.isAdmin()) {
           <a routerLink="/parcerias" routerLinkActive="active">
-            <svg lucideIcon="handshake" [size]="18" />
+            <svg lucideIcon="user-round-group" [size]="18" />
             @if (!sidebarCollapsed()) {
               <span>Parcerias</span>
             }
           </a>
           }
+          @if (authService.temPermissao('contratos') || authService.isAdmin()) {
+          <a routerLink="/contratos" routerLinkActive="active">
+            <svg lucideIcon="briefcase-business" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Contratos</span>
+            }
+          </a>
+          }
           @if (authService.temPermissao('contas') || authService.temPermissao('categorias') || authService.temPermissao('clientes') || authService.temPermissao('parceiros') || authService.isAdmin()) {
           <div class="nav-group">
-            <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Configurações' : ''">
+            <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Cadastros' : ''">
               <svg lucideIcon="monitor-cog" [size]="18" />
               @if (!sidebarCollapsed()) {
-                <span>Configurações</span>
+                <span>Cadastros</span>
               }
               @if (!sidebarCollapsed()) {
                 <svg [lucideIcon]="configuracoesOpen() ? 'chevron-down' : 'chevron-right'" class="nav-group__chevron" [size]="16" />
@@ -61,12 +69,12 @@
                 @if (authService.temPermissao('contas')) {
                 <a routerLink="/contas" routerLinkActive="active">
                   <svg lucideIcon="wallet" [size]="18" />
-                  <span>Contas bancárias</span>
+                  <span>Contas Bancárias</span>
                 </a>
                 }
                 @if (authService.temPermissao('categorias')) {
                 <a routerLink="/categorias" routerLinkActive="active">
-                  <svg lucideIcon="tag" [size]="18" />
+                  <svg lucideIcon="tags" [size]="18" />
                   <span>Categorias</span>
                 </a>
                 }
@@ -117,3 +125,6 @@
         <router-outlet />
       </main>
     </div>
+    <footer class="app-footer">
+      <span>Desenvolvido por Thayllon Gomes</span>
+    </footer>
