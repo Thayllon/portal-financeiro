@@ -18,8 +18,8 @@ public class ContratoRepository : SqlBaseRepository, IContratoRepository
     public async Task<ContratoProjecao?> ObterProjecaoPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<ContratoProjecao>(conn, ContratoSql.ObterProjecaoPorId, new { Id = id }));
 
-    public async Task<IEnumerable<ContratoProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null)
-        => await ExecuteWithConnectionAsync(conn => QueryAsync<ContratoProjecao>(conn, ContratoSql.ListarPorUsuario, new { IdUsuario = idUsuario, Ativo = ativo }));
+    public async Task<IEnumerable<ContratoProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null, bool? ehRecorrente = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ContratoProjecao>(conn, ContratoSql.ListarPorUsuario, new { IdUsuario = idUsuario, Ativo = ativo, EhRecorrente = ehRecorrente }));
 
     public async Task InserirAsync(Contrato entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ContratoSql.Inserir, entity));

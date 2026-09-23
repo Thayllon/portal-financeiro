@@ -6,7 +6,7 @@ namespace PortalFinanceiro.Core.Application.Interfaces;
 
 public interface IContratoAppService
 {
-    Task<Result<IEnumerable<ContratoResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null);
+    Task<Result<IEnumerable<ContratoResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null, bool? ehRecorrente = null);
     Task<Result<ContratoResponse>> ObterPorIdAsync(Guid id, Guid idUsuario);
     Task<Result<ContratoResponse>> AdicionarAsync(Guid idUsuario, ContratoRequest request);
     Task<Result<ContratoResponse>> AtualizarAsync(Guid id, Guid idUsuario, ContratoRequest request);

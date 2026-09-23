@@ -69,10 +69,13 @@ CREATE TABLE Contrato (
     IdCliente UNIQUEIDENTIFIER NOT NULL,
     Valor DECIMAL(18,2) NOT NULL,
     Ativo BIT NOT NULL DEFAULT 1,
+    EhRecorrente BIT NOT NULL DEFAULT 0,
+    IdRegra UNIQUEIDENTIFIER NULL,
     DataCadastro DATETIME2 NOT NULL,
     DataAlteracao DATETIME2 NOT NULL,
     CONSTRAINT FK_Contrato_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
-    CONSTRAINT FK_Contrato_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id)
+    CONSTRAINT FK_Contrato_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id),
+    CONSTRAINT FK_Contrato_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id)
 );
 
 CREATE INDEX IX_Contrato_Usuario ON Contrato(IdUsuario);
