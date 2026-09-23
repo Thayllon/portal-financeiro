@@ -1,0 +1,231 @@
+@use '../../design-system/styles/page-layout' as layout;
+@use '../../design-system/styles/data-table' as table;
+
+.page {
+  @include layout.page-wrapper;
+}
+
+.page__header {
+  @include layout.page-header;
+}
+
+.page__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page__badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
+  border-radius: var(--radius-lg);
+}
+
+.page__icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.page__title {
+  @include layout.page-title;
+}
+
+.page__subtitle {
+  @include layout.page-subtitle;
+  margin: 0;
+}
+
+.add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--content-surface);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+
+  &:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+}
+
+.table-card {
+  @include layout.card;
+}
+
+.semaforo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--surface-border);
+  border-left-width: 4px;
+  margin-bottom: 1.5rem;
+
+  strong {
+    display: block;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+
+  span {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+  }
+}
+
+.semaforo--ok {
+  border-left-color: var(--color-success);
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.semaforo--bloqueado {
+  border-left-color: var(--color-error);
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.section-title {
+  @include layout.section-title;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.cards {
+  @include layout.grid-cards(280px);
+  margin-bottom: 0.5rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.card--row {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  code {
+    font-size: 0.8125rem;
+    background: var(--surface-hover);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+}
+
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card__title {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.card__meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cenarios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.cenario {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+
+  em {
+    color: var(--text-muted);
+    font-style: normal;
+  }
+}
+
+.cenario--ok svg {
+  color: var(--color-success);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.cenario--falha svg {
+  color: var(--color-error);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.debito {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.debito + .debito {
+  border-top: 1px solid var(--surface-border);
+}
+
+.empty-state {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.skeleton-row {
+  display: flex;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.skeleton-line {
+  height: 1rem;
+  background: linear-gradient(90deg, var(--surface-border) 25%, var(--content-bg) 50%, var(--surface-border) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

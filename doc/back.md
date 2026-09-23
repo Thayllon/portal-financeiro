@@ -56,6 +56,7 @@ dotnet run --project src/PortalFinanceiro.API
 | `/api/categorias/despesa` | GET/POST/PUT/DELETE | Categorias de despesa (compartilhadas) |
 | `/api/categorias/servicos` | GET/POST/PUT/DELETE | Categorias de serviços (compartilhadas) |
 | `/api/usuarios` | GET/POST/PUT/DELETE · PATCH /{id}/ativo · PATCH /{id}/senha | Gerenciamento de usuários (somente admin). Excluir valida auto-exclusão (`AUTO_EXCLUSAO` → 422) e vínculos (`USUARIO_COM_VINCULOS` → 422, contagem em 12 tabelas); com vínculos, desativar em vez de excluir |
+| `/api/diagnostico` | GET (somente admin) | Diagnóstico QA ao vivo: regras R1–R6 de `doc/regras.md` com cenários executados, saúde do banco (leitura) e débitos técnicos. Sem escrita. Alimenta a tela `/testes` |
 | `/api/dashboard` | GET | Dashboard mensal (`mes`, `ano`, `idConta?` Guid): realizado + previsto do mês (`totalReceitasPrevisto/totalDespesasPrevisto/saldoPrevisto` via regras vigentes — filtradas por conta quando `idConta` — descontando o já materializado por `IdRegra`, inclusive por conta em `resumoPorConta`) e `resumoParcerias` do mês (pago/recebido/a pagar/a receber + qtd) |
 | `/api/dashboard/anual` | GET | Dashboard anual (`ano`, `idConta?` Guid): totais + variação % vs ano anterior, média mensal pró-rata, `resumoPorMes[12]`, `resumoPorConta` (respeita `idConta`), `distribuicaoReceitas/Despesas` por categoria/subcategoria com %, `previsaoRestanteAno` (meses restantes via regras recorrentes) e `resumoParcerias` (recebido/pago/a receber/a pagar do ano + qtd) |
 

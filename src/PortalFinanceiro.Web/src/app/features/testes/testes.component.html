@@ -1,0 +1,100 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <span class="page__badge">
+        <svg lucideIcon="flask-conical" class="page__icon" [size]="22" />
+      </span>
+      <div>
+        <h1 class="page__title">Testes e QA</h1>
+        <p class="page__subtitle">Macro das regras de negócio (doc/regras.md). Verde = pode subir para a main.</p>
+      </div>
+    </div>
+    <button class="add-btn" (click)="atualizar()" [disabled]="atualizando()">
+      <svg lucideIcon="refresh-cw" [size]="16" />
+      {{ atualizando() ? 'Atualizando...' : 'Atualizar' }}
+    </button>
+  </header>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 30%"></div>
+          <div class="skeleton-line" style="width: 20%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+        </div>
+      }
+    </div>
+  } @else if (dados(); as d) {
+    <section class="semaforo" [class.semaforo--ok]="d.liberadoParaMain" [class.semaforo--bloqueado]="!d.liberadoParaMain">
+      <svg [lucideIcon]="d.liberadoParaMain ? 'shield-check' : 'circle-alert'" [size]="28" />
+      <div>
+        <strong>{{ d.liberadoParaMain ? 'Liberado para a main' : 'Bloqueado — não subir para a main' }}</strong>
+        <span>{{ regrasPassando() }}/{{ d.regras.length }} regras · {{ cenariosPassando() }}/{{ totalCenarios() }} cenários · gerado em {{ d.geradoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </section>
+
+    <h2 class="section-title">
+      <svg lucideIcon="shield-check" [size]="18" />
+      Regras de negócio
+    </h2>
+    <div class="cards">
+      @for (r of d.regras; track r.id) {
+        <div class="table-card card">
+          <div class="card__header">
+            <strong class="card__title">{{ r.id }} — {{ r.titulo }}</strong>
+            <app-status-badge [type]="r.passou ? 'ativo' : 'inativo'" [label]="r.passou ? 'Passou' : 'Quebrou'" />
+          </div>
+          <span class="card__meta">Cobertura {{ r.cobertura }} · {{ r.fonte }}</span>
+          <ul class="cenarios">
+            @for (c of r.cenarios; track c.id) {
+              <li class="cenario" [class.cenario--ok]="c.passou" [class.cenario--falha]="!c.passou">
+                <svg [lucideIcon]="c.passou ? 'circle-check' : 'circle-alert'" [size]="14" />
+                <span><strong>{{ c.id }}</strong> {{ c.nome }} <em>({{ c.detalhe }})</em></span>
+              </li>
+            } @empty {
+              <li class="cenario"><span>Sem cenários automatizados.</span></li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    <h2 class="section-title">
+      <svg lucideIcon="database" [size]="18" />
+      Banco de dados
+    </h2>
+    <div class="table-card card card--row">
+      <app-status-badge [type]="d.banco.passou ? 'ativo' : 'inativo'" [label]="d.banco.passou ? 'Leitura OK' : 'Falha de leitura'" />
+      <span>{{ d.banco.detalhe }}</span>
+      @if (d.banco.passou) {
+        <span class="card__meta">{{ d.banco.contratos }} contratos ({{ d.banco.contratosRecorrentes }} recorrentes) · {{ d.banco.categoriasReceita }} categorias de receita · {{ d.banco.contas }} contas</span>
+      }
+    </div>
+
+    <h2 class="section-title">
+      <svg lucideIcon="monitor-cog" [size]="18" />
+      Débitos técnicos
+    </h2>
+    <div class="table-card">
+      @for (t of d.debitos; track t.titulo) {
+        <div class="debito">
+          <strong>{{ t.titulo }}</strong>
+          <span class="card__meta">{{ t.onde }}</span>
+          <span>{{ t.impacto }}</span>
+        </div>
+      } @empty {
+        <div class="empty-state"><p>Nenhum débito registrado.</p></div>
+      }
+    </div>
+
+    <h2 class="section-title">
+      <svg lucideIcon="circle-check" [size]="18" />
+      Suite completa
+    </h2>
+    <div class="table-card card card--row">
+      <span>Os cenários acima rodam ao vivo. A suite xUnit completa roda com:</span>
+      <code>{{ d.comandoSuite }}</code>
+    </div>
+  }
+</div>
