@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
 import { permissionGuard } from './core/guards/permission.guard';
+import { qaGuard } from './core/guards/qa.guard';
 import { LayoutComponent } from './core/layout/layout.component';
 
 export const routes: Routes = [
@@ -24,7 +25,7 @@ export const routes: Routes = [
       { path: 'clientes', loadComponent: () => import('./features/clientes/clientes.component').then(m => m.ClientesComponent), canActivate: [permissionGuard('clientes')] },
       { path: 'parceiros', loadComponent: () => import('./features/parceiros/parceiros.component').then(m => m.ParceirosComponent), canActivate: [permissionGuard('parceiros')] },
       { path: 'usuarios', loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent), canActivate: [adminGuard] },
-      { path: 'testes', loadComponent: () => import('./features/testes/testes.component').then(m => m.TestesComponent), canActivate: [adminGuard] },
+      { path: 'testes', loadComponent: () => import('./features/testes/testes.component').then(m => m.TestesComponent), canActivate: [qaGuard] },
     ]
   },
   { path: '**', redirectTo: '' }

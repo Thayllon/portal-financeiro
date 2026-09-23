@@ -30,8 +30,15 @@ cenários `C<regra>.<n>` ao vivo via `GET /api/diagnostico`.
 
 1. Rode `dotnet test PortalFinanceiro.API.slnx` (esperado: 0 falhas).
 2. Rode `npm run lint` em `src/PortalFinanceiro.Web` (esperado: 0 erros).
-3. Confira `GET /api/diagnostico` (admin): todas as regras com `passou: true`.
+3. Confira `GET /api/diagnostico` (admin **com módulo `qa` liberado**):
+   todas as regras com `passou: true`. Sem a linha `qa` em
+   `PermissaoUsuario`, a API retorna 403 `QA_ACESSO_NEGADO` por desenho.
 4. Se algo falhou, aponte regra, cenário, arquivo e erro — nunca diga "está ok".
+
+Pontos de registro do módulo `qa` (ver `doc/regras.md`, seção de acesso):
+constante `MODULO_QA`, toggle nas permissões especiais (vale para admin),
+`auth.temQA` sem bypass, `qa.guard`, card na home (seção ACESSO) e checagem
+no `DiagnosticoController`. Nenhum seed cria a linha — padrão desligado.
 
 ### 2. Gate develop → main
 
