@@ -47,7 +47,7 @@
           }
           @if (authService.temPermissao('contratos') || authService.isAdmin()) {
           <a routerLink="/contratos" routerLinkActive="active">
-            <svg lucideIcon="file-badge" [size]="18" />
+            <svg lucideIcon="briefcase-business" [size]="18" />
             @if (!sidebarCollapsed()) {
               <span>Contratos</span>
             }

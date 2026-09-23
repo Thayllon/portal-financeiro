@@ -85,3 +85,14 @@ input, select, textarea { font-family: inherit; }
   transform: none;
   transition: opacity var(--transition-fast), transform var(--transition-fast), visibility 0s;
 }
+
+.card:has([data-tip]:hover),
+.card:has([data-tip]:focus-visible) {
+  overflow: visible;
+  z-index: 30;
+}
+
+.card:has([data-tip]:hover)::before,
+.card:has([data-tip]:focus-visible)::before {
+  border-radius: inherit;
+}
