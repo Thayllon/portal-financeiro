@@ -54,7 +54,7 @@ export class HomeComponent {
         {
           title: 'Contratos',
           description: 'Contratos com clientes e receitas vinculadas.',
-          icon: 'file-badge',
+          icon: 'briefcase-business',
           route: '/contratos',
           modulo: 'contratos'
         }

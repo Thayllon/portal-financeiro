@@ -2,7 +2,7 @@
   <header class="page__header">
     <div class="page__header-left">
       <span class="page__badge">
-        <svg lucideIcon="file-badge" class="page__icon" [size]="22" />
+        <svg lucideIcon="briefcase-business" class="page__icon" [size]="22" />
       </span>
       <h1 class="page__title">Contratos</h1>
       <app-privacidade-toggle />
@@ -41,7 +41,7 @@
     <section class="collapse-section">
       <header class="collapse-section__header collapse-section__header--toggle" (click)="contratoAberto.set(!contratoAberto())">
         <div class="collapse-section__header-left">
-          <svg lucideIcon="file-badge" [size]="16" />
+          <svg lucideIcon="briefcase-business" [size]="16" />
           <span>Contrato</span>
           <span class="collapse-section__count">({{ contratosNormais().length }})</span>
         </div>
@@ -51,7 +51,7 @@
         @if (contratosNormais().length === 0) {
           <div class="table-card">
             <div class="empty-state">
-              <svg lucideIcon="file-badge" [size]="36" class="empty-icon" />
+              <svg lucideIcon="briefcase-business" [size]="36" class="empty-icon" />
               <h3>Nenhum contrato</h3>
               <p>Contratos avulsos sem recorrência. Pode ter múltiplas entradas para compor o valor.</p>
             </div>

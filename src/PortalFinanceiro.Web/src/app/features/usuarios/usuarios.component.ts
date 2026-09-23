@@ -55,7 +55,7 @@ export class UsuariosComponent implements OnInit {
     { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
     { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake' },
     { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'handshake' },
-    { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'file-badge' },
+    { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'briefcase-business' },
     { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'users' },
   ];
 
