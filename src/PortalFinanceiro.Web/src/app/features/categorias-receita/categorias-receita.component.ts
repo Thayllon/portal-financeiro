@@ -258,7 +258,7 @@ export class CategoriasComponent implements OnInit {
     const destinoNome = this.nomeCategoria(destinoId);
     const ok = await this.confirmService.confirm(
       'Mover subcategoria',
-      `Mover "${subNome}" de "${origemNome}" para "${destinoNome}"?`
+      `Mover "${subNome}" de "${origemNome}" para "${destinoNome}"? Lançamentos existentes permanecem em "${origemNome}".`
     );
     if (!ok) return;
     this.movendo.set(true);
