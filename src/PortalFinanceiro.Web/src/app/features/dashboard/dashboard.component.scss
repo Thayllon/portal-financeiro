@@ -403,8 +403,7 @@
 }
 
 .ind-tile__help {
-  width: 12px;
-  height: 12px;
+  display: inline-flex;
   margin-left: auto;
   color: var(--text-muted);
   flex-shrink: 0;

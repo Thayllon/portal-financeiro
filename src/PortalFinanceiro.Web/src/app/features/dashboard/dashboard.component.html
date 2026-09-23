@@ -56,6 +56,7 @@
                   <svg lucideIcon="trending-up" [size]="22"></svg>
                 </span>
                 <span class="card-label">Receitas</span>
+                <span class="ind-tile__help" data-tip="Quanto faturou/recebeu no mês: valores realizados + previstos das regras vigentes" tabindex="0" role="img" aria-label="Quanto faturou/recebeu no mês: valores realizados + previstos das regras vigentes"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value green">{{ kpiMensal()?.receitas | valorMascarado }}</div>
@@ -79,6 +80,7 @@
                   <svg lucideIcon="trending-down" [size]="22"></svg>
                 </span>
                 <span class="card-label">Despesas</span>
+                <span class="ind-tile__help" data-tip="Quanto consumiu no mês: valores realizados + previstos das regras vigentes" tabindex="0" role="img" aria-label="Quanto consumiu no mês: valores realizados + previstos das regras vigentes"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value red">{{ kpiMensal()?.despesas | valorMascarado }}</div>
@@ -102,6 +104,7 @@
                   <svg lucideIcon="wallet" [size]="22"></svg>
                 </span>
                 <span class="card-label">Lucro líquido</span>
+                <span class="ind-tile__help" data-tip="Resultado econômico do mês: receitas menos despesas" tabindex="0" role="img" aria-label="Resultado econômico do mês: receitas menos despesas"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value">{{ kpiMensal()?.saldo | valorMascarado }}</div>
@@ -125,6 +128,7 @@
                   <svg lucideIcon="arrow-down-up" [size]="22"></svg>
                 </span>
                 <span class="card-label">Fluxo de caixa</span>
+                <span class="ind-tile__help" data-tip="Movimentação efetiva de dinheiro: recebido menos pago (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Movimentação efetiva de dinheiro: recebido menos pago (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value" [class.green]="(kpiMensal()?.fluxo ?? 0) >= 0" [class.red]="(kpiMensal()?.fluxo ?? 0) < 0">{{ kpiMensal()?.fluxo | valorMascarado }}</div>
@@ -231,7 +235,7 @@
                     <svg lucideIcon="briefcase-business" [size]="22"></svg>
                   </span>
                   <span class="card-label">Contratos ativos</span>
-                  <svg lucideIcon="info" [size]="14" class="ind-tile__help" title="Contratos com status ativo e quanto ainda falta receber" />
+                  <span class="ind-tile__help" data-tip="Contratos com status ativo e quanto ainda falta receber" tabindex="0" role="img" aria-label="Contratos com status ativo e quanto ainda falta receber"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="card-value">{{ resumoContratos().qtd }}</div>
                 <div class="card-sub">
@@ -248,7 +252,7 @@
                     <svg lucideIcon="banknote-arrow-up" [size]="22"></svg>
                   </span>
                   <span class="card-label">Receita recorrente</span>
-                  <svg lucideIcon="info" [size]="14" class="ind-tile__help" title="Receitas do mês geradas por regras de repetição" />
+                  <span class="ind-tile__help" data-tip="Receitas do mês geradas por regras de repetição" tabindex="0" role="img" aria-label="Receitas do mês geradas por regras de repetição"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="card-value green">{{ recRecorrente().valor | valorMascarado }}</div>
                 <div class="card-sub">
@@ -265,7 +269,7 @@
                     <svg lucideIcon="banknote-arrow-down" [size]="22"></svg>
                   </span>
                   <span class="card-label">Despesas recorrentes</span>
-                  <svg lucideIcon="info" [size]="14" class="ind-tile__help" title="Despesas do mês geradas por regras de repetição (custo fixo)" />
+                  <span class="ind-tile__help" data-tip="Despesas do mês geradas por regras de repetição (custo fixo)" tabindex="0" role="img" aria-label="Despesas do mês geradas por regras de repetição (custo fixo)"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="card-value red">{{ despRecorrente().valor | valorMascarado }}</div>
                 <div class="card-sub">
@@ -282,7 +286,7 @@
                     <svg lucideIcon="handshake" [size]="22"></svg>
                   </span>
                   <span class="card-label">Parcerias</span>
-                  <svg lucideIcon="info" [size]="14" class="ind-tile__help" title="Total pago a parcerias no mês, já incluso na despesa" />
+                  <span class="ind-tile__help" data-tip="Total pago a parcerias no mês, já incluso na despesa" tabindex="0" role="img" aria-label="Total pago a parcerias no mês, já incluso na despesa"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="kpi-main">
                   <div class="card-value">{{ data()?.resumoParcerias?.totalPago | valorMascarado }}</div>
@@ -309,7 +313,7 @@
                     <svg lucideIcon="chart-line" [size]="22"></svg>
                   </span>
                   <span class="card-label">Margem líquida</span>
-                  <svg lucideIcon="info" [size]="14" class="ind-tile__help" title="Lucro líquido dividido pela receita" />
+                  <span class="ind-tile__help" data-tip="Lucro líquido dividido pela receita" tabindex="0" role="img" aria-label="Lucro líquido dividido pela receita"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="card-value">
                   @if (kpiMensal()?.margem !== null && kpiMensal()?.margem !== undefined) {
@@ -326,7 +330,7 @@
                     <svg lucideIcon="coins" [size]="22"></svg>
                   </span>
                   <span class="card-label">Ponto de equilíbrio</span>
-                  <svg lucideIcon="info" [size]="14" class="ind-tile__help" title="Receita necessária para cobrir as despesas do mês" />
+                  <span class="ind-tile__help" data-tip="Receita necessária para cobrir as despesas do mês" tabindex="0" role="img" aria-label="Receita necessária para cobrir as despesas do mês"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="kpi-main">
                   <div class="card-value">{{ kpiMensal()?.pontoEquilibrio | valorMascarado }}</div>
