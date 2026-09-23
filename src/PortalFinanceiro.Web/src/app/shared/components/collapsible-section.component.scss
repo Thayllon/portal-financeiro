@@ -62,6 +62,19 @@
   flex: 1;
 }
 
+.collapsible__actions {
+  display: inline-flex;
+  align-items: center;
+}
+
+.collapsible__actions:empty {
+  display: none;
+}
+
+.collapsible--collapsed .collapsible__actions {
+  display: none;
+}
+
 .collapsible__chevron {
   display: inline-flex;
   color: var(--text-muted);

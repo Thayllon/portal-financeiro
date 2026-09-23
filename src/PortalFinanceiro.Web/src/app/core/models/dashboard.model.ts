@@ -9,6 +9,8 @@ export interface Dashboard {
   saldoRealizado: number;
   totalReceitasPrevisto: number;
   totalDespesasPrevisto: number;
+  totalReceitasRecorrentes: number;
+  totalDespesasRecorrentes: number;
   saldoPrevisto: number;
   resumoParcerias: ResumoParceriasAnual;
   resumoPorConta: ResumoPorConta[];

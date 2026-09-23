@@ -111,7 +111,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | Rota | Feature | Descrição |
 |------|---------|-----------|
 | `/login` | login | Autenticação |
-| `/dashboard` | dashboard | Cabeçalho com subtítulo + toggle Mensal/Anual + navegação de período + filtro Todas as contas (vale p/ mensal e anual). Resumo mensal: 4 KPIs (Receitas, Despesas, Lucro líquido, Fluxo de caixa) + seção Outros indicadores com ícone chart-network (Parcerias, Média diária, Margem líquida, Despesas sobre receitas, Ponto de equilíbrio — cards compactos sem gráficos, 5 por linha); gráfico alterna por nº de contas (1 = Receitas x Despesas com evolução e saldos; 2+ = por conta do mês) com filtro de série Receitas/Ambos/Despesas e recolher; previsão incorporada do mês corrente em diante (realizado + regras vigentes descontando o materializado); na ordem: gráfico, Distribuição por categoria e subcategoria (nova, vazia), Outros indicadores e Contas bancárias (lucro líquido e % do total). Ver glossário em [Indicadores do dashboard mensal](#indicadores-do-dashboard-mensal). Visão anual: 5 KPIs com variação vs ano anterior + média pró-rata, bar 12 meses, donut receitas/despesas por categoria/subcategoria, resumo mês a mês, por conta e card parcerias com link |
+| `/dashboard` | dashboard | Cabeçalho com subtítulo + toggle Mensal/Anual + navegação de período + filtro Todas as contas (vale p/ mensal e anual). Resumo mensal: 4 KPIs (Receitas, Despesas, Lucro líquido, Fluxo de caixa) + card único com colapso conjunto: fechado mostra "Receitas x Despesas \| Outros indicadores"; aberto mostra dois cards internos com cabeçalho próprio (gráfico com filtro de série Receitas/Ambos/Despesas + seta de recolher; 6 indicadores em tiles compactos estilo StatusInvest com tooltip); gráfico alterna por nº de contas (1 = evolução mensal; 2+ = por conta do mês) com barras finas e espaçadas (`categoryPercentage`/`barPercentage`); previsão incorporada do mês corrente em diante (realizado + regras vigentes descontando o materializado); na ordem: KPIs, gráfico + indicadores, Distribuição por categoria e subcategoria (toggle Receitas/Despesas no cabeçalho da seção, visível só com ela aberta, com donuts de Categorias e Subcategorias lado a lado), Contas bancárias (lucro líquido e % do total). Ver glossário em [Indicadores do dashboard mensal](#indicadores-do-dashboard-mensal). Visão anual: 5 KPIs com variação vs ano anterior + média pró-rata, bar 12 meses, donut receitas/despesas por categoria/subcategoria, resumo mês a mês, por conta e card parcerias com link |
 | `/receitas` | receitas | Lançamentos de receita (avulsas e recorrentes) |
 | `/despesas` | despesas | Lançamentos de despesa |
 | `/contas` | contas | Contas bancárias |
@@ -136,14 +136,15 @@ KPIs (fileira principal, com variação % vs mês anterior e sparkline):
 | Lucro líquido | Resultado econômico (quanto sobrou) | Receitas − Despesas |
 | Fluxo de caixa | Movimentação efetiva de dinheiro (como terminou o caixa) | Recebido − Pago (só realizado, sem previsão) |
 
-Outros indicadores (seção expansível com ícone chart-network, cards compactos sem gráficos, 5 por linha):
+Outros indicadores (painel fixo ao lado do gráfico mensal, 6 tiles compactos com tooltip explicativo):
 
 | Indicador | Cálculo |
 |-----------|---------|
-| Parcerias | Total pago a parcerias no mês (nota: valor já incluso na despesa) + variação %, contagem e falta pagar |
-| Média diária | Receitas do mês ÷ dias (dias decorridos no mês corrente, dias do mês nos demais) |
+| Contratos ativos | Quantidade de contratos ativos + soma do falta receber |
+| Receita recorrente | Receitas do mês geradas por regras de repetição (R$ + % da receita) |
+| Despesas recorrentes | Despesas do mês geradas por regras de repetição, o custo fixo (R$ + % das despesas) |
+| Parcerias | Total pago a parcerias no mês (nota: valor já incluso na despesa) + variação %, contagem |
 | Margem líquida | Lucro líquido ÷ Receita (%) |
-| Despesas sobre receitas | Despesas ÷ Receitas (%) — quanto da receita é consumido |
 | Ponto de equilíbrio | Despesas do mês (= receita necessária para cobrir os gastos); distância % = (Receitas − Despesas) ÷ Despesas |
 
 Regras gerais: do mês corrente em diante os valores incorporam previsão (regras vigentes descontando o já materializado por `IdRegra`); meses passados mostram só o realizado. Variação % ancora no mês anterior (`—` sem base).

@@ -12,6 +12,8 @@ public class DashboardResponse
     public decimal SaldoRealizado { get; set; }
     public decimal TotalReceitasPrevisto { get; set; }
     public decimal TotalDespesasPrevisto { get; set; }
+    public decimal TotalReceitasRecorrentes { get; set; }
+    public decimal TotalDespesasRecorrentes { get; set; }
     public decimal SaldoPrevisto { get; set; }
     public List<ResumoPorConta> ResumoPorConta { get; set; } = [];
     public List<DistribuicaoCategoriaAnual> DistribuicaoReceitas { get; set; } = [];
