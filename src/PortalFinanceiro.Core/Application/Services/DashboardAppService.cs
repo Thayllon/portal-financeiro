@@ -116,6 +116,9 @@ public class DashboardAppService : IDashboardAppService
             .Where(d => d.Ativo && d.DataInicio < inicioMesSeguinteAtual && d.DataFim >= inicioMesAtual)
             .Sum(d => Math.Max(0, d.Valor - despesas.Where(l => l.IdRegra == d.Id).Sum(l => l.Valor)));
 
+        var totalReceitasRecorrentes = receitas.Where(r => r.EhRecorrente).Sum(r => r.Valor);
+        var totalDespesasRecorrentes = despesas.Where(d => d.EhRecorrente).Sum(d => d.Valor);
+
         return new DashboardResponse
         {
             Mes = mes,
@@ -128,6 +131,8 @@ public class DashboardAppService : IDashboardAppService
             SaldoRealizado = totalRecebido - totalPago,
             TotalReceitasPrevisto = totalReceitasPrevisto,
             TotalDespesasPrevisto = totalDespesasPrevisto,
+            TotalReceitasRecorrentes = totalReceitasRecorrentes,
+            TotalDespesasRecorrentes = totalDespesasRecorrentes,
             SaldoPrevisto = totalReceitas + totalReceitasPrevisto - totalDespesas - totalDespesasPrevisto,
             ResumoPorConta = resumoPorConta,
             DistribuicaoReceitas = distribuicaoReceitas,
@@ -290,12 +295,15 @@ public class DashboardAppService : IDashboardAppService
         return Math.Round((atual - anterior) / Math.Abs(anterior) * 100, 1);
     }
 
+    private static string ChaveCategoria(string? nome) =>
+        string.IsNullOrWhiteSpace(nome) ? "Sem categoria" : nome.Trim();
+
     private static List<DistribuicaoCategoriaAnual> MontarDistribuicao(IEnumerable<Domain.Projections.ResumoAnualCategoriaItem> itens)
     {
         var lista = itens.ToList();
         var totalGeral = lista.Sum(i => i.Total);
         var grupos = lista
-            .GroupBy(i => string.IsNullOrWhiteSpace(i.Categoria) ? "Sem categoria" : i.Categoria)
+            .GroupBy(i => ChaveCategoria(i.Categoria), StringComparer.OrdinalIgnoreCase)
             .Select(g =>
             {
                 var totalCategoria = g.Sum(i => i.Total);
@@ -306,7 +314,7 @@ public class DashboardAppService : IDashboardAppService
                     Percentual = totalGeral == 0 ? 0 : Math.Round(totalCategoria / totalGeral * 100, 1),
                     Subcategorias = g
                         .Where(i => !string.IsNullOrWhiteSpace(i.Subcategoria))
-                        .GroupBy(i => i.Subcategoria)
+                        .GroupBy(i => i.Subcategoria!.Trim(), StringComparer.OrdinalIgnoreCase)
                         .Select(sg =>
                         {
                             var totalSub = sg.Sum(i => i.Total);
