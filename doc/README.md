@@ -19,6 +19,7 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 
 | Documento | O que contém | Quando consultar |
 |-----------|--------------|------------------|
+| [regras.md](regras.md) | **Wiki micro das regras de negócio**: fonte única das 6 regras críticas, cenários `C<regra>.<n>` e débitos técnicos | Antes de mexer em regra; a tela `/testes` executa estes cenários ao vivo |
 | [back.md](back.md) | Backend: arquitetura, projetos, rotas da API, como rodar/buildar, padrões | Mexer na API/Core/Infra; descobrir endpoint |
 | [front.md](front.md) | Frontend: estrutura, features, como rodar/buildar/testar, padrões de UI | Mexer no Angular; criar tela/componente |
 | [banco.md](banco.md) | Banco: scripts por provider, DbSetup, modelo de dados, seed | Mexer em migração/schema; entender tabelas |

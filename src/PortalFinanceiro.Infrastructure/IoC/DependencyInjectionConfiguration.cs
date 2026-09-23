@@ -68,6 +68,7 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IPessoaAppService, PessoaAppService>();
         services.AddScoped<IParceriaAppService, ParceriaAppService>();
         services.AddScoped<IContratoAppService, ContratoAppService>();
+        services.AddScoped<IDiagnosticoAppService, DiagnosticoAppService>();
 
         return services;
     }
