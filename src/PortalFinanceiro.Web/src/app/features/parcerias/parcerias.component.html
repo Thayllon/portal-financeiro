@@ -134,27 +134,29 @@
       (valueChange)="form.idCliente = $event"
     />
   </div>
-  <div class="field">
-    <label>Valor da parceria (R$)<span class="required">*</span></label>
-    <input
-      type="text"
-      currencyInput
-      [(ngModel)]="form.valor"
-      placeholder="0,00"
-      class="input"
-      inputmode="decimal"
-    />
-  </div>
-  <div class="field">
-    <label>Percentual do parceiro (%)<span class="required">*</span></label>
-    <input
-      type="number"
-      [min]="0"
-      [max]="100"
-      [(ngModel)]="form.percentualParceiro"
-      placeholder="0-100"
-      class="input"
-    />
-    <span class="field-hint">Ex: 50 = metade do valor é do parceiro</span>
+  <div class="grid-2">
+    <div class="field">
+      <label>Valor da parceria (R$)<span class="required">*</span></label>
+      <input
+        type="text"
+        currencyInput
+        [(ngModel)]="form.valor"
+        placeholder="0,00"
+        class="input"
+        inputmode="decimal"
+      />
+    </div>
+    <div class="field">
+      <label>Percentual do parceiro (%)<span class="required">*</span></label>
+      <input
+        type="number"
+        [min]="0"
+        [max]="100"
+        [(ngModel)]="form.percentualParceiro"
+        placeholder="0-100"
+        class="input"
+      />
+      <span class="field-hint">Ex: 50 = metade do valor é do parceiro</span>
+    </div>
   </div>
 </app-modal>

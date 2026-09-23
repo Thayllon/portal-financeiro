@@ -14,6 +14,7 @@ export class ModalComponent {
   subtitle = input('');
   saving = input(false);
   showFooter = input(true);
+  width = input<string | null>(null);
   visibleChange = output<boolean>();
   save = output<void>();
 
