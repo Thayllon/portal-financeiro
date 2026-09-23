@@ -504,7 +504,7 @@ if (seq !== this.requestSeq) return;
     const flat: DistribuicaoCategoriaAnual[] = [];
     for (const cat of base) {
       for (const sub of cat.subcategorias ?? []) {
-        flat.push({ nome: `${cat.nome} • ${sub.nome}`, total: sub.total, percentual: sub.percentual, subcategorias: [] });
+        flat.push({ nome: sub.nome, total: sub.total, percentual: sub.percentual, subcategorias: [] });
       }
     }
     return flat.sort((a, b) => b.total - a.total);

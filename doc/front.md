@@ -106,6 +106,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Transições com `will-change` para GPU acceleration
 - Tokens: `_tokens.scss`, `_colors.scss`, `_responsive.scss`, `_transitions.scss`
 - Scroll fino: mixin `scroll-thin` (`_scrollbar.scss`) — aplicar em toda área com rolagem interna (listas, legends, dropdowns)
+- Tooltips de ajuda: atributo `data-tip` (CSS global em `styles.scss`, tooltip escuro; funciona com hover e foco de teclado)
 
 ## Telas / rotas
 
@@ -137,7 +138,7 @@ KPIs (fileira principal, com variação % vs mês anterior e sparkline):
 | Lucro líquido | Resultado econômico (quanto sobrou) | Receitas − Despesas |
 | Fluxo de caixa | Movimentação efetiva de dinheiro (como terminou o caixa) | Recebido − Pago (só realizado, sem previsão) |
 
-Outros indicadores (painel fixo ao lado do gráfico mensal, 6 tiles compactos com tooltip explicativo):
+Outros indicadores (painel fixo ao lado do gráfico mensal, 6 tiles compactos com tooltip explicativo via `data-tip` — mesmo padrão dos 4 KPIs):
 
 | Indicador | Cálculo |
 |-----------|---------|
