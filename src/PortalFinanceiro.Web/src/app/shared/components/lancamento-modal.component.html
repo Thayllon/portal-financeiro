@@ -175,51 +175,26 @@
               <div class="section">
                 @if (dominioCategoria() === 'receita') {
                   <div class="field">
-                    <label class="vinculo-check">
-                      <input
-                        type="checkbox"
-                        class="checkbox"
-                        [checked]="vinculoSelecionado() === 'contrato'"
-                        (change)="selecionarVinculo('contrato')"
-                      />
-                      Contrato
-                    </label>
-                  </div>
-                  @if (vinculoSelecionado() === 'contrato') {
-                    <div class="field">
-                      <label>Contrato</label>
-                      <app-custom-select
-                        placeholder="Selecione o contrato"
-                        [options]="contratosOptions()"
-                        [value]="form().idContrato ?? ''"
-                        (valueChange)="updateFormField('idContrato', $event)"
-                      />
-                    </div>
-                  }
-                  <div class="field">
-                    <label class="vinculo-check">
-                      <input
-                        type="checkbox"
-                        class="checkbox"
-                        [checked]="vinculoSelecionado() === 'parceria'"
-                        (change)="selecionarVinculo('parceria')"
-                      />
-                      Parceria
-                    </label>
+                    <label>Contrato</label>
+                    <app-custom-select
+                      placeholder="Nenhum (opcional)"
+                      searchPlaceholder="Buscar contrato..."
+                      [options]="contratosOptions()"
+                      [value]="form().idContrato ?? ''"
+                      (valueChange)="onVinculoChange('contrato', $event)"
+                    />
                   </div>
                 }
-                @if (vinculoSelecionado() === 'parceria' || dominioCategoria() !== 'receita') {
-                  <div class="field">
-                    <label>Parceria</label>
+                <div class="field">
+                  <label>Parceria</label>
                   <app-custom-select
                     placeholder="Nenhuma (opcional)"
                     searchPlaceholder="Buscar parceria..."
                     [options]="parceriasOptions()"
                     [value]="form().idParceria ?? ''"
-                    (valueChange)="updateFormField('idParceria', $event)"
+                    (valueChange)="onVinculoChange('parceria', $event)"
                   />
-                  </div>
-                }
+                </div>
               </div>
             </div>
           } @else if (passoAtual() === 2 && fluxoAdicional()) {

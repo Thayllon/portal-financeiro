@@ -96,7 +96,6 @@ export class LancamentoModalComponent {
   previewMeses = signal(0);
   fieldErrors = signal<Record<string, string>>({});
   passoAtual = signal(0);
-  vinculoSelecionado = signal<'contrato' | 'parceria' | null>(null);
 
   contasOptions = signal<SelectOption[]>([]);
   categoriasOptions = signal<SelectOption[]>([]);
@@ -151,7 +150,6 @@ export class LancamentoModalComponent {
         this.passoAtual.set(0);
         if (ini) {
           const blocos = this.agruparServicosEmBlocos(ini.servicos ?? []);
-          this.vinculoSelecionado.set(ini.idContrato ? 'contrato' : ini.idParceria ? 'parceria' : null);
           this.form.set({
             descricao: ini.descricao,
             valor: ini.valor,
@@ -168,11 +166,11 @@ export class LancamentoModalComponent {
             diaUtil: false,
             dataFim: ''
           });
+          this.reconciliarPaisComEstruturaAtual();
         } else {
           const hoje = new Date().toISOString().split('T')[0];
           const contas = untracked(() => this.contas());
           const contaPadrao = contas.find(c => c.ehPadrao)?.id ?? contas[0]?.id ?? '';
-          this.vinculoSelecionado.set(null);
           this.form.set({ ...this.emptyForm(), data: hoje, idConta: contaPadrao });
         }
       }
@@ -189,6 +187,45 @@ export class LancamentoModalComponent {
       categoriaServicoId: catId,
       subcategoriasSelecionadas: Array.from(subs)
     }));
+  }
+
+  private reconciliarPaisComEstruturaAtual() {
+    const cats = untracked(() => this.categorias());
+    const catServ = untracked(() => this.categoriasServico());
+    if (cats.length === 0 && catServ.length === 0) return;
+    const avisos: string[] = [];
+    this.form.update(f => {
+      let idCategoria = f.idCategoria;
+      if (f.idSubcategoria) {
+        const sub = cats.find(c => c.id === f.idSubcategoria);
+        const paiAtual = sub?.categoriaPaiId;
+        if (paiAtual && paiAtual !== idCategoria) {
+          const paiNome = cats.find(c => c.id === paiAtual)?.nome ?? 'nova categoria';
+          avisos.push(`"${sub?.nome}" agora pertence a "${paiNome}" — ajustado automaticamente`);
+          idCategoria = paiAtual;
+        }
+      }
+      const pares: { categoriaServicoId: string; subcategoriaServicoId?: string }[] = [];
+      for (const b of f.categoriasServicoBloco) {
+        if (b.subcategoriasSelecionadas.length === 0) {
+          pares.push({ categoriaServicoId: b.categoriaServicoId });
+          continue;
+        }
+        for (const subId of b.subcategoriasSelecionadas) {
+          const sub = catServ.find(c => c.id === subId);
+          const paiAtual = sub?.categoriaPaiId;
+          if (paiAtual && paiAtual !== b.categoriaServicoId) {
+            const paiNome = catServ.find(c => c.id === paiAtual)?.nome ?? 'nova categoria';
+            avisos.push(`"${sub?.nome}" agora pertence a "${paiNome}" — ajustado automaticamente`);
+          }
+          pares.push({ categoriaServicoId: paiAtual ?? b.categoriaServicoId, subcategoriaServicoId: subId });
+        }
+      }
+      return { ...f, idCategoria, categoriasServicoBloco: this.agruparServicosEmBlocos(pares) };
+    });
+    this.atualizarCategorizacao();
+    this.atualizarCategoriasServico();
+    avisos.slice(0, 2).forEach(a => this.notify.info(a));
   }
 
   private atualizarCategorizacao() {
@@ -278,14 +315,13 @@ export class LancamentoModalComponent {
     return result;
   }
 
-  selecionarVinculo(tipo: 'contrato' | 'parceria') {
-    if (this.vinculoSelecionado() === tipo) {
-      this.vinculoSelecionado.set(null);
-      this.form.update(f => ({ ...f, idParceria: undefined, idContrato: undefined }));
-      return;
+  onVinculoChange(tipo: 'contrato' | 'parceria', value: string) {
+    const id = value || undefined;
+    if (tipo === 'contrato') {
+      this.form.update(f => ({ ...f, idContrato: id, ...(id ? { idParceria: undefined } : {}) }));
+    } else {
+      this.form.update(f => ({ ...f, idParceria: id, ...(id ? { idContrato: undefined } : {}) }));
     }
-    this.vinculoSelecionado.set(tipo);
-    this.form.update(f => ({ ...f, idParceria: undefined, idContrato: undefined }));
   }
 
   irPara(indice: number) {
@@ -403,7 +439,7 @@ export class LancamentoModalComponent {
     if (fluxo) {
       switch (indice) {
         case 0: return !!f.idCategoria;
-        case 1: return !!f.idParceria || !!f.idContrato;
+        case 1: return true;
         case 2: return f.categoriasServicoBloco.length > 0;
         case 3: return !!f.idCliente;
         case 4: return !!(f.descricao?.trim() && f.data && f.valor > 0);
