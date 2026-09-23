@@ -405,7 +405,7 @@
                     <div class="donut-center"><strong>{{ totalDistSub() | valorMascarado }}</strong><span>Total</span></div>
                   </div>
                   <ul class="donut-legend">
-                    @for (item of distMensalSubcategorias(); track item.nome) {
+                    @for (item of distMensalSubcategorias(); track $index) {
                       <li>
                         <span class="donut-legend__label">{{ item.nome }}</span>
                         <span class="donut-legend__pct">{{ item.percentual }}%</span>
