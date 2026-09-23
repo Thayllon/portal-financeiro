@@ -1,83 +1,74 @@
-<app-modal
+﻿<app-modal
       [visible]="visible()"
       [title]="title()"
       [subtitle]="subtitleText()"
       [saving]="salvando()"
       [showFooter]="false"
+      [width]="'640px'"
       (visibleChange)="fechar()"
     >
       <div class="wizard">
-        <!-- STEPPER LATERAL -->
-        <nav class="wizard__nav">
+        <!-- BARRA SEGMENTADA DE PASSOS -->
+        <nav class="wizard__stepper">
           @if (fluxoAdicional()) {
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 0"
               [class.wizard__step--done]="passoConcluido(0)"
               (click)="irPara(0)">
               <span class="wizard__indicator">
-                @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
+                @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="14" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong><small>{{ dominioCategoria() === 'despesa' ? 'Categoria da despesa' : 'Categoria da receita' }}</small></span>
+              <span class="wizard__label">Categoria</span>
             </button>
-            <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
-            <!-- Passo 1: Contrato ou Parceria -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 1"
               [class.wizard__step--done]="passoConcluido(1)"
               (click)="irPara(1)">
               <span class="wizard__indicator">
-                @if (passoConcluido(1) && passoAtual() !== 1) { <svg lucideIcon="check" [size]="16" /> } @else { <span>2</span> }
+                @if (passoConcluido(1) && passoAtual() !== 1) { <svg lucideIcon="check" [size]="14" /> } @else { <span>2</span> }
               </span>
-              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'receita' ? 'Contrato ou Parceria' : 'Parceria' }}</strong><small>Vínculo opcional</small></span>
+              <span class="wizard__label">Vínculo</span>
             </button>
-            <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 1"></span>
 
-            <!-- Passo 2: Categorização Serviço -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 2"
               [class.wizard__step--done]="passoConcluido(2)"
               (click)="irPara(2)">
               <span class="wizard__indicator">
-                @if (passoConcluido(2) && passoAtual() !== 2) { <svg lucideIcon="check" [size]="16" /> } @else { <span>3</span> }
+                @if (passoConcluido(2) && passoAtual() !== 2) { <svg lucideIcon="check" [size]="14" /> } @else { <span>3</span> }
               </span>
-              <span class="wizard__meta"><strong>Categoria de Serviço</strong><small>Categoria de serviço</small></span>
+              <span class="wizard__label">Serviço</span>
             </button>
-            <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 2"></span>
 
-            <!-- Passo 3: Cliente -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 3"
               [class.wizard__step--done]="passoConcluido(3)"
               (click)="irPara(3)">
               <span class="wizard__indicator">
-                @if (passoConcluido(3) && passoAtual() !== 3) { <svg lucideIcon="check" [size]="16" /> } @else { <span>4</span> }
+                @if (passoConcluido(3) && passoAtual() !== 3) { <svg lucideIcon="check" [size]="14" /> } @else { <span>4</span> }
               </span>
-              <span class="wizard__meta"><strong>Cliente</strong><small>Cliente vinculado</small></span>
+              <span class="wizard__label">Cliente</span>
             </button>
-            <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 3"></span>
 
-            <!-- Passo 4: Dados Gerais -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 4"
               [class.wizard__step--done]="passoConcluido(4)"
               (click)="irPara(4)">
               <span class="wizard__indicator">
-                @if (passoConcluido(4) && passoAtual() !== 4) { <svg lucideIcon="check" [size]="16" /> } @else { <span>5</span> }
+                @if (passoConcluido(4) && passoAtual() !== 4) { <svg lucideIcon="check" [size]="14" /> } @else { <span>5</span> }
               </span>
-              <span class="wizard__meta"><strong>Dados Gerais</strong><small>Descrição, valor e data</small></span>
+              <span class="wizard__label">Dados</span>
             </button>
-            <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 4"></span>
 
-            <!-- Passo 5: Conta & Recorrência -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 5"
               [class.wizard__step--done]="passoConcluido(5)"
               (click)="irPara(5)">
               <span class="wizard__indicator">
-                @if (passoConcluido(5) && passoAtual() !== 5) { <svg lucideIcon="check" [size]="16" /> } @else { <span>6</span> }
+                @if (passoConcluido(5) && passoAtual() !== 5) { <svg lucideIcon="check" [size]="14" /> } @else { <span>6</span> }
               </span>
-              <span class="wizard__meta"><strong>Conta &amp; Recorrência</strong><small>Conta e repetição</small></span>
+              <span class="wizard__label">Conta</span>
             </button>
           } @else {
             <button type="button" class="wizard__step"
@@ -85,33 +76,29 @@
               [class.wizard__step--done]="passoConcluido(0)"
               (click)="irPara(0)">
               <span class="wizard__indicator">
-                @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="16" /> } @else { <span>1</span> }
+                @if (passoConcluido(0) && passoAtual() !== 0) { <svg lucideIcon="check" [size]="14" /> } @else { <span>1</span> }
               </span>
-              <span class="wizard__meta"><strong>{{ dominioCategoria() === 'despesa' ? 'Categoria de Despesa' : 'Categoria de Receita' }}</strong><small>Categoria e subcategoria</small></span>
+              <span class="wizard__label">Categoria</span>
             </button>
-            <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 0"></span>
 
-            <!-- Passo 1: Dados Gerais -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 1"
               [class.wizard__step--done]="passoConcluido(1)"
               (click)="irPara(1)">
               <span class="wizard__indicator">
-                @if (passoConcluido(1) && passoAtual() !== 1) { <svg lucideIcon="check" [size]="16" /> } @else { <span>2</span> }
+                @if (passoConcluido(1) && passoAtual() !== 1) { <svg lucideIcon="check" [size]="14" /> } @else { <span>2</span> }
               </span>
-              <span class="wizard__meta"><strong>Dados Gerais</strong><small>Descrição, valor e data</small></span>
+              <span class="wizard__label">Dados</span>
             </button>
-            <span class="wizard__connector" [class.wizard__connector--done]="passoAtual() > 1"></span>
 
-            <!-- Passo 2: Conta & Recorrência -->
             <button type="button" class="wizard__step"
               [class.wizard__step--active]="passoAtual() === 2"
               [class.wizard__step--done]="passoConcluido(2)"
               (click)="irPara(2)">
               <span class="wizard__indicator">
-                @if (passoConcluido(2) && passoAtual() !== 2) { <svg lucideIcon="check" [size]="16" /> } @else { <span>3</span> }
+                @if (passoConcluido(2) && passoAtual() !== 2) { <svg lucideIcon="check" [size]="14" /> } @else { <span>3</span> }
               </span>
-              <span class="wizard__meta"><strong>Conta &amp; Recorrência</strong><small>Conta e repetição</small></span>
+              <span class="wizard__label">Conta</span>
             </button>
           }
         </nav>
@@ -362,7 +349,7 @@
                   <span>Selecione a conta e configure a repetição.</span>
                 </div>
               </div>
-              <div class="section">
+              <div class="section section--account">
                 <div class="field">
                   <label>Conta<span class="required">*</span></label>
                   <app-custom-select
@@ -376,75 +363,75 @@
                     <span class="field-error">{{ fieldErrors()['idConta'] }}</span>
                   }
                 </div>
-              </div>
 
-              <div class="repete-toggle">
-                <label class="checkbox-label">
-                  <input type="checkbox" [ngModel]="form().repete" (ngModelChange)="updateFormField('repete', $event); calcularPreview()" class="checkbox" />
-                  <svg lucideIcon="repeat" [size]="14" />
-                  <span>Repete mensalmente?</span>
-                </label>
-              </div>
-
-              @if (form().repete) {
-                <div class="section section--recorrencia">
-                  <div class="section-header">
-                    <svg lucideIcon="calendar-clock" [size]="16" />
-                    <span>Recorrência</span>
-                  </div>
-                  <div class="grid-3">
-                    <div class="field">
-                      <label>Dia do mês<span class="required">*</span></label>
-                      <input
-                        type="number"
-                        [min]="1"
-                        [max]="form().diaUtil ? 5 : 31"
-                        [ngModel]="form().dia"
-                        (ngModelChange)="updateFormField('dia', $event); calcularPreview(); clearError('dia')"
-                        placeholder="1-31"
-                        class="input"
-                        [class.input-error]="fieldErrors()['dia']"
-                      />
-                      @if (fieldErrors()['dia']) {
-                        <span class="field-error">{{ fieldErrors()['dia'] }}</span>
-                      }
-                    </div>
-                    <div class="field field--checkbox">
-                      <label class="checkbox-label">
-                        <input
-                          type="checkbox"
-                          [ngModel]="form().diaUtil"
-                          (ngModelChange)="updateFormField('diaUtil', $event); onDiaUtilChange()"
-                          class="checkbox"
-                        />
-                        <span>Dia útil</span>
-                      </label>
-                      <span class="field-hint">Limita ao 1º dia útil</span>
-                    </div>
-                    <div class="field">
-                      <label>Data fim<span class="required">*</span></label>
-                      <input
-                        type="date"
-                        lang="pt-BR"
-                        [ngModel]="form().dataFim"
-                        (ngModelChange)="updateFormField('dataFim', $event); calcularPreview(); clearError('dataFim')"
-                        class="input"
-                        [class.input-error]="fieldErrors()['dataFim']"
-                      />
-                      <span class="field-hint">DD/MM/AAAA</span>
-                      @if (fieldErrors()['dataFim']) {
-                        <span class="field-error">{{ fieldErrors()['dataFim'] }}</span>
-                      }
-                    </div>
-                  </div>
-                  @if (previewMeses() > 0) {
-                    <div class="preview">
-                      <svg lucideIcon="info" [size]="14" />
-                      Serão gerados <strong>{{ previewMeses() }}</strong> lançamentos mensais
-                    </div>
-                  }
+                <div class="repete-toggle">
+                  <label class="checkbox-label">
+                    <input type="checkbox" [ngModel]="form().repete" (ngModelChange)="updateFormField('repete', $event); calcularPreview()" class="checkbox" />
+                    <svg lucideIcon="repeat" [size]="14" />
+                    <span>Repete mensalmente?</span>
+                  </label>
                 </div>
-              }
+
+                @if (form().repete) {
+                  <div class="recorrencia">
+                    <div class="section-header">
+                      <svg lucideIcon="calendar-clock" [size]="16" />
+                      <span>Recorrência</span>
+                    </div>
+                    <div class="grid-3">
+                      <div class="field">
+                        <label>Dia do mês<span class="required">*</span></label>
+                        <input
+                          type="number"
+                          [min]="1"
+                          [max]="form().diaUtil ? 5 : 31"
+                          [ngModel]="form().dia"
+                          (ngModelChange)="updateFormField('dia', $event); calcularPreview(); clearError('dia')"
+                          placeholder="1-31"
+                          class="input"
+                          [class.input-error]="fieldErrors()['dia']"
+                        />
+                        @if (fieldErrors()['dia']) {
+                          <span class="field-error">{{ fieldErrors()['dia'] }}</span>
+                        }
+                      </div>
+                      <div class="field field--checkbox">
+                        <label class="checkbox-label">
+                          <input
+                            type="checkbox"
+                            [ngModel]="form().diaUtil"
+                            (ngModelChange)="updateFormField('diaUtil', $event); onDiaUtilChange()"
+                            class="checkbox"
+                          />
+                          <span>Dia útil</span>
+                        </label>
+                        <span class="field-hint">Limita ao 1º dia útil</span>
+                      </div>
+                      <div class="field">
+                        <label>Data fim<span class="required">*</span></label>
+                        <input
+                          type="date"
+                          lang="pt-BR"
+                          [ngModel]="form().dataFim"
+                          (ngModelChange)="updateFormField('dataFim', $event); calcularPreview(); clearError('dataFim')"
+                          class="input"
+                          [class.input-error]="fieldErrors()['dataFim']"
+                        />
+                        <span class="field-hint">DD/MM/AAAA</span>
+                        @if (fieldErrors()['dataFim']) {
+                          <span class="field-error">{{ fieldErrors()['dataFim'] }}</span>
+                        }
+                      </div>
+                    </div>
+                    @if (previewMeses() > 0) {
+                      <div class="preview">
+                        <svg lucideIcon="info" [size]="14" />
+                        Serão gerados <strong>{{ previewMeses() }}</strong> lançamentos mensais
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
             </div>
           }
 
@@ -460,16 +447,22 @@
               Voltar
             </button>
 
-            @if (passoAtual() === ultimoPasso() || editando()) {
-              <button type="button" class="btn btn--primary" [disabled]="salvando()" (click)="salvar()">
+            <div class="wizard__footer-actions">
+              @if (passoAtual() < ultimoPasso()) {
+                <button type="button" class="btn btn--ghost" (click)="avancar()">
+                  Avançar
+                  <svg lucideIcon="arrow-right" [size]="16" />
+                </button>
+              }
+              <button
+                type="button"
+                class="btn btn--primary"
+                [disabled]="salvando() || !tudoConcluido()"
+                (click)="salvar()"
+              >
                 {{ salvando() ? 'Salvando...' : 'Salvar' }}
               </button>
-            } @else {
-              <button type="button" class="btn btn--primary" (click)="avancar()">
-                Avançar
-                <svg lucideIcon="arrow-right" [size]="16" />
-              </button>
-            }
+            </div>
           </div>
         </div>
       </div>

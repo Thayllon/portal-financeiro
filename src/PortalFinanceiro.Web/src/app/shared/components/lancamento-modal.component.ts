@@ -113,6 +113,13 @@ export class LancamentoModalComponent {
 
   ultimoPasso = computed(() => this.fluxoAdicional() ? 5 : 2);
 
+  tudoConcluido = computed(() => {
+    for (let i = 0; i <= this.ultimoPasso(); i++) {
+      if (!this.passoConcluido(i)) return false;
+    }
+    return true;
+  });
+
   constructor() {
     effect(() => {
       const contas = this.contas();

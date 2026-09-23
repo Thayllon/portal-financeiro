@@ -56,13 +56,13 @@ Pré-requisito comum: o repositório publicado no GitHub e as contas em **Neon**
    - Conferir se `environment.prod.ts` aponta para a URL do backend alpha.
 4. Testar login e o fluxo.
 
-#### Ambiente bravo (portfólio — joão e maria)
+#### Ambiente bravo (portfólio)
 
 > Banco **separado** (isolado) — criar um projeto Neon próprio.
 
 1. **Banco (Neon):** criar um **novo projeto Neon** (limite free: 100) → anotar a connection
-   string. Aplicar schema/seed nele: `001_CriarTabelas`, `099_SeedBase`, `100_SeedDemo`,
-   `101_AtualizarUsuariosDemo` (maria/joão com senha `123456`).
+   string. Aplicar schema/seed nele: `001_CriarTabelas`, `099_SeedBase` (usuários reais
+   criados via app).
 2. **Backend (Render):** novo Web Service → branch **`main`** → Docker.
    - Env vars: `ConnectionStrings__DefaultConnection` = conn do banco bravo,
      `Auth__Secret` = segredo 2, `Cors__AllowedOrigins` = `https://portal-financeiro-bravo.vercel.app`.
