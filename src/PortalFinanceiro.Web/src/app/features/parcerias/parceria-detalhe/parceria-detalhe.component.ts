@@ -11,6 +11,7 @@ import { NotificationService } from '../../../core/services/notification.service
 import { ValorMascaradoPipe } from '../../../shared/pipes/valor-mascarado.pipe';
 import { PrivacidadeToggleComponent } from '../../../shared/components/privacidade-toggle.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
+import { CollapsibleSectionComponent } from '../../../shared/components/collapsible-section.component';
 import { ListPaginationComponent } from '../../../shared/components/list-pagination.component';
 import { useListPagination } from '../../../shared/composables/use-list-pagination.composable';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -19,7 +20,7 @@ import { mensagemErro } from '../../../shared/utils/api-error.util';
 @Component({
   selector: 'app-parceria-detalhe',
   standalone: true,
-  imports: [DatePipe, ValorMascaradoPipe, PrivacidadeToggleComponent, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
+  imports: [DatePipe, ValorMascaradoPipe, PrivacidadeToggleComponent, StatusBadgeComponent, CollapsibleSectionComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './parceria-detalhe.component.html',
   styleUrl: './parceria-detalhe.component.scss'
 })
@@ -39,10 +40,22 @@ export class ParceriaDetalheComponent implements OnInit {
 
   readonly statusRealizado = STATUS_REALIZADO;
 
-  entradasRecebidas = computed(() => this.receitas().filter(r => r.status === STATUS_REALIZADO).reduce((s, r) => s + r.valor, 0));
-  entradasPendentes = computed(() => this.receitas().filter(r => r.status !== STATUS_REALIZADO).reduce((s, r) => s + r.valor, 0));
-  saidasPagas = computed(() => this.despesas().filter(d => d.status === STATUS_REALIZADO).reduce((s, d) => s + d.valor, 0));
-  saidasPendentes = computed(() => this.despesas().filter(d => d.status !== STATUS_REALIZADO).reduce((s, d) => s + d.valor, 0));
+  entradasRecebidas = computed(() => this.parceria()?.totalRecebido ?? 0);
+  entradasPendentes = computed(() => this.parceria()?.faltaReceber ?? 0);
+  saidasPagas = computed(() => this.parceria()?.totalPago ?? 0);
+  saidasPendentes = computed(() => this.parceria()?.faltaPagar ?? 0);
+
+  pctRecebido = computed(() => {
+    const p = this.parceria();
+    if (!p || !p.valor) return 0;
+    return Math.min(100, Math.max(0, (p.totalRecebido / p.valor) * 100));
+  });
+
+  pctPago = computed(() => {
+    const p = this.parceria();
+    if (!p || !p.valorParceiro) return 0;
+    return Math.min(100, Math.max(0, (p.totalPago / p.valorParceiro) * 100));
+  });
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
