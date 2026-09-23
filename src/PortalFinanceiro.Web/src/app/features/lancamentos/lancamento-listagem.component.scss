@@ -2,6 +2,7 @@
 @use '../../design-system/styles/data-table' as table;
 @use '../../design-system/styles/forms' as forms;
 @use '../../design-system/styles/responsive' as r;
+@use '../../design-system/styles/scrollbar' as scrollbar;
 
 .page {
   @include layout.page-wrapper;
@@ -111,25 +112,7 @@
   flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--surface-border) transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: var(--surface-border);
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
-  }
+  @include scrollbar.scroll-thin;
 
   thead th {
     position: sticky;
