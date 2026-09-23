@@ -105,6 +105,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 - Breakpoint mobile: 767px
 - Transições com `will-change` para GPU acceleration
 - Tokens: `_tokens.scss`, `_colors.scss`, `_responsive.scss`, `_transitions.scss`
+- Scroll fino: mixin `scroll-thin` (`_scrollbar.scss`) — aplicar em toda área com rolagem interna (listas, legends, dropdowns)
 
 ## Telas / rotas
 
