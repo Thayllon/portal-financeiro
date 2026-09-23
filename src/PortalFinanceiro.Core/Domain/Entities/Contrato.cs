@@ -10,12 +10,14 @@ public class Contrato
     public Guid IdCliente { get; private set; }
     public decimal Valor { get; private set; }
     public bool Ativo { get; private set; }
+    public bool EhRecorrente { get; private set; }
+    public Guid? IdRegra { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
 
     public Contrato() { }
 
-    public static Result<Contrato> Criar(Guid idUsuario, string nome, Guid idCliente, decimal valor)
+    public static Result<Contrato> Criar(Guid idUsuario, string nome, Guid idCliente, decimal valor, bool ehRecorrente = false, Guid? idRegra = null)
     {
         if (idUsuario == Guid.Empty)
             return Erro.Validacao("USUARIO_OBRIGATORIO", "Usuário é obrigatório.");
@@ -34,9 +36,18 @@ public class Contrato
             IdCliente = idCliente,
             Valor = valor,
             Ativo = true,
+            EhRecorrente = ehRecorrente,
+            IdRegra = idRegra,
             DataCadastro = DateTime.UtcNow,
             DataAlteracao = DateTime.UtcNow
         };
+    }
+
+    public void VincularRegra(Guid idRegra)
+    {
+        IdRegra = idRegra;
+        EhRecorrente = true;
+        DataAlteracao = DateTime.UtcNow;
     }
 
     public Result<Unit> Atualizar(string nome, Guid idCliente, decimal valor)

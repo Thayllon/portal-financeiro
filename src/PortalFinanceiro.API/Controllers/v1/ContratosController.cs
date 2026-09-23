@@ -20,9 +20,9 @@ public class ContratosController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar([FromQuery] bool? ativo)
+    public async Task<IActionResult> Listar([FromQuery] bool? ativo, [FromQuery] bool? ehRecorrente)
     {
-        var result = await _service.ListarAsync(ObterIdUsuario(), ativo);
+        var result = await _service.ListarAsync(ObterIdUsuario(), ativo, ehRecorrente);
         return ApiResponse(result);
     }
 

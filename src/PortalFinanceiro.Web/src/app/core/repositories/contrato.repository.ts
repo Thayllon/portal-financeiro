@@ -9,8 +9,11 @@ import { Receita } from '../models/receita.model';
 export class ContratoRepository extends BaseHttpRepository {
   protected http = inject(HttpClient);
 
-  listar(ativo?: boolean): Observable<Contrato[]> {
-    return this.get<Contrato[]>('/contratos', { ...(ativo !== undefined ? { ativo } : {}) });
+  listar(ativo?: boolean, ehRecorrente?: boolean): Observable<Contrato[]> {
+    return this.get<Contrato[]>('/contratos', {
+      ...(ativo !== undefined ? { ativo } : {}),
+      ...(ehRecorrente !== undefined ? { ehRecorrente } : {})
+    });
   }
 
   obter(id: string): Observable<Contrato> {

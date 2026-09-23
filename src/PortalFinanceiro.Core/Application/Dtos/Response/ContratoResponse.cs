@@ -8,6 +8,8 @@ public class ContratoResponse
     public string Cliente { get; set; } = string.Empty;
     public decimal Valor { get; set; }
     public bool Ativo { get; set; }
+    public bool EhRecorrente { get; set; }
+    public Guid? IdRegra { get; set; }
     public DateTime DataCadastro { get; set; }
     public decimal TotalRecebido { get; set; }
     public decimal FaltaReceber { get; set; }
