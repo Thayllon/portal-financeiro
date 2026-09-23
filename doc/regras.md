@@ -78,6 +78,27 @@ realizado. Detalhe em `doc/front.md` (Indicadores do dashboard mensal).
 | Vive em | `Core/Application/Services/DashboardAppService.cs`, `Core/Domain/Services/LancamentoHelper.cs`, `doc/front.md:126` |
 | Cenários | `C6.1` previsão jan–mar/2026 gera 3 meses; `C6.2` dia 31 em fev/2026 vence dia 28 (matemática da previsão; agregação do dashboard com cobertura parcial) |
 
+## Acesso à tela /testes (módulo `qa`)
+
+A tela `/testes` e o `GET /api/diagnostico` exigem admin **com toggle
+liberado** — sem bypass. Ausência da linha `qa` em `PermissaoUsuario`
+equivale a negado (padrão desligado para todos).
+
+Pontos de registro do módulo (todos obrigatórios ao mexer neste fluxo):
+
+| Ponto | Arquivo |
+|---|---|
+| Constante `MODULO_QA = 'qa'` | `Web/.../core/models/permissao.model.ts` |
+| Toggle em Permissões especiais (leitura/gravação, inclusive para admin) | `Web/.../features/usuarios/usuarios.component.ts/html` |
+| Leitura sem bypass de admin | `Web/.../core/services/auth.service.ts` (`temQA`) |
+| Bloqueio da rota manual | `Web/.../core/guards/qa.guard.ts` + `app.routes.ts` |
+| Atalho na home (só admin + `temQA`) | `Web/.../features/home/home.component.ts` (seção ACESSO) |
+| Bloqueio da API (403 `QA_ACESSO_NEGADO`) | `API/.../Controllers/v1/DiagnosticoController.cs` |
+
+Entidade `PermissaoUsuario` aceita qualquer string em `Modulo`
+(`NVARCHAR(50)`); nenhum seed cria a linha `qa` — ela nasce no primeiro
+salvamento via drawer de usuários.
+
 ## Débitos técnicos conhecidos
 
 - `TransactionScope` aninhado: `ContratoAppService.AdicionarAsync` abre

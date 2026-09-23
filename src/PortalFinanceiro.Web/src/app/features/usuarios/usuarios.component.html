@@ -205,7 +205,7 @@
                 <svg lucideIcon="lock" [size]="16" />
                 <div>
                   <strong>Acesso total</strong>
-                  <span>Administradores possuem escrita total em todos os módulos e as permissões não podem ser alteradas.</span>
+                  <span>Administradores possuem escrita total em todos os módulos, independente dos níveis abaixo. Os ajustes ficam registrados e valem caso o perfil seja alterado.</span>
                 </div>
               </div>
             }
@@ -234,7 +234,6 @@
                   <button
                     class="perm-btn perm-btn--opt-none"
                     [class.perm-btn--none]="permLevels()[m.id] === 'none'"
-                    [disabled]="u.isAdmin"
                     (click)="alternarPermissao(m.id, 'none')"
                   >
                     <svg lucideIcon="eye-off" [size]="14" />
@@ -243,7 +242,6 @@
                   <button
                     class="perm-btn perm-btn--opt-read"
                     [class.perm-btn--read]="permLevels()[m.id] === 'read'"
-                    [disabled]="u.isAdmin"
                     (click)="alternarPermissao(m.id, 'read')"
                   >
                     <svg lucideIcon="eye" [size]="14" />
@@ -253,7 +251,6 @@
                     <button
                       class="perm-btn perm-btn--opt-write"
                       [class.perm-btn--write]="permLevels()[m.id] === 'write'"
-                      [disabled]="u.isAdmin"
                       (click)="alternarPermissao(m.id, 'write')"
                     >
                       <svg lucideIcon="pencil" [size]="14" />
@@ -282,7 +279,7 @@
                 <svg lucideIcon="lock" [size]="16" />
                 <div>
                   <strong>Acesso total</strong>
-                  <span>Administradores já possuem acesso aos fluxos adicionais.</span>
+                  <span>Administradores já possuem acesso aos fluxos adicionais. Testes e QA exige liberação explícita abaixo.</span>
                 </div>
               </div>
             }
@@ -291,7 +288,7 @@
                 <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
                 <span class="perm-item__label">Fluxo de receita adicional</span>
                 <label class="switch">
-                  <input type="checkbox" [checked]="fluxoAdicional()" [disabled]="u.isAdmin" (change)="alternarFluxoAdicional($event)" />
+                  <input type="checkbox" [checked]="fluxoAdicional()" (change)="alternarFluxoAdicional($event)" />
                   <span class="switch__slider"></span>
                 </label>
               </div>
@@ -299,7 +296,15 @@
                 <svg lucideIcon="trending-up-down" [size]="16" class="perm-item__icon" />
                 <span class="perm-item__label">Fluxo de despesa adicional</span>
                 <label class="switch">
-                  <input type="checkbox" [checked]="fluxoAdicionalDespesa()" [disabled]="u.isAdmin" (change)="alternarFluxoAdicionalDespesa($event)" />
+                  <input type="checkbox" [checked]="fluxoAdicionalDespesa()" (change)="alternarFluxoAdicionalDespesa($event)" />
+                  <span class="switch__slider"></span>
+                </label>
+              </div>
+              <div class="perm-item">
+                <svg lucideIcon="flask-conical" [size]="16" class="perm-item__icon" />
+                <span class="perm-item__label">Testes e QA</span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="qaLiberado()" (change)="alternarQa($event)" />
                   <span class="switch__slider"></span>
                 </label>
               </div>
