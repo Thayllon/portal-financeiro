@@ -283,7 +283,4 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
-DO $$ BEGIN
-    CREATE INDEX IX_Receita_Contrato ON Receita(IdContrato);
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
+-- Índice IX_Receita_Contrato já criado acima com IF NOT EXISTS (idempotente)

@@ -9,6 +9,9 @@ import { Component, input, output } from '@angular/core';
 export class MonthNavComponent {
   mes = input<number>(0);
   ano = input<number>(0);
+  somenteAno = input(false);
+  rotuloAnterior = input('Anterior');
+  rotuloProximo = input('Próximo');
   prev = output<void>();
   next = output<void>();
 }
