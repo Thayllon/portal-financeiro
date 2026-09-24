@@ -47,6 +47,7 @@ export class UsuariosComponent implements OnInit {
   permLevels = signal<Record<string, 'none' | 'read' | 'write'>>({});
 
   modulosPermissao = [
+    { id: 'home', nome: 'Home', descricao: 'Página inicial do portal, sempre disponível.', icone: 'home' },
     { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line' },
     { id: 'receitas', nome: 'Receitas', descricao: 'Gestão de receitas e lançamentos financeiros.', icone: 'trending-up' },
     { id: 'despesas', nome: 'Despesas', descricao: 'Gestão de despesas e pagamentos.', icone: 'trending-down' },
@@ -119,16 +120,18 @@ export class UsuariosComponent implements OnInit {
     this.modulosPermissao.forEach(m => {
       niveis[m.id] = item.isAdmin ? 'write' : 'none';
     });
+    niveis['home'] = 'read';
     this.permLevels.set(niveis);
     try {
       const permissoes = await firstValueFrom(this.permissaoRepo.listar(item.id));
       this.permLevels.update(atual => {
         const copia = { ...atual };
         permissoes.forEach(p => {
-          if (p.modulo in copia) {
+          if (p.modulo in copia && p.modulo !== 'home') {
             copia[p.modulo] = p.nivel === NivelPermissao.Escrita ? 'write' : p.nivel === NivelPermissao.Leitura ? 'read' : 'none';
           }
         });
+        copia['home'] = 'read';
         return copia;
       });
       const fluxoPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL);
@@ -170,6 +173,7 @@ export class UsuariosComponent implements OnInit {
   }
 
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
+    if (moduloId === 'home') return;
     this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
   }
 

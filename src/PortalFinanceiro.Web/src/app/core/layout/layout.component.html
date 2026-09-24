@@ -15,12 +15,14 @@
               <span>Home</span>
             }
           </a>
+          @if (authService.temPermissao('dashboard')) {
           <a routerLink="/dashboard" routerLinkActive="active">
             <svg lucideIcon="chart-line" [size]="18" />
             @if (!sidebarCollapsed()) {
               <span>Dashboard</span>
             }
           </a>
+          }
           @if (authService.temPermissao('receitas')) {
           <a routerLink="/receitas" routerLinkActive="active">
             <svg lucideIcon="trending-up" [size]="18" />

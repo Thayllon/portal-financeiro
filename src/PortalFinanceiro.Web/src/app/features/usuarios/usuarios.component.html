@@ -231,6 +231,12 @@
                   <span class="perm-module__nome">{{ m.nome }}</span>
                 </div>
                 <div class="perm-module__actions" [class.perm-module__actions--center]="m.id === 'dashboard'">
+                  @if (m.id === 'home') {
+                    <span class="perm-btn perm-btn--opt-read perm-btn--read" title="Leitura fixa para todos os usuários">
+                      <svg lucideIcon="lock" [size]="14" />
+                      Leitura
+                    </span>
+                  } @else {
                   <button
                     class="perm-btn perm-btn--opt-none"
                     [class.perm-btn--none]="permLevels()[m.id] === 'none'"
@@ -256,6 +262,7 @@
                       <svg lucideIcon="pencil" [size]="14" />
                       Escrita
                     </button>
+                  }
                   }
                 </div>
               </div>

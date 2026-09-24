@@ -124,7 +124,6 @@ export class HomeComponent {
         cards: secao.cards.filter(card => {
           if (card.modulo === 'usuarios') return isAdmin;
           if (card.modulo === 'qa') return isAdmin && this.auth.temQA();
-          if (card.modulo === 'dashboard') return true;
           if (!card.modulo) return true;
           return this.auth.temPermissao(card.modulo);
         })
