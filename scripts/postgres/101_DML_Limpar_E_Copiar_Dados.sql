@@ -1,6 +1,6 @@
--- 103_DML_Limpar_E_Copiar_Dados.sql — PostgreSQL (Neon)
+-- 101_DML_Limpar_E_Copiar_Dados.sql — PostgreSQL (Neon)
 -- ATENÇÃO: APAGA TODOS OS DADOS DE PROD e substitui por uma cópia do seu banco LOCAL.
--- DDL (estrutura) deve já estar atualizada — rode o 102_DDL_AtualizarEstrutura.sql ANTES.
+-- DDL (estrutura) deve já estar atualizada — rode o 100_DDL_AtualizarEstrutura.sql ANTES.
 --
 -- COMO USAR:
 --   1. No seu PC, gere o arquivo com os INSERTs do banco local:
@@ -17,22 +17,22 @@
 BEGIN;
 
 -- Ordem respeita FKs (filhas primeiro). CASCADE garante limpeza total.
-TRUNCATE TABLE "CategoriaHistorico" CASCADE;
-TRUNCATE TABLE "ReceitaServico" CASCADE;
-TRUNCATE TABLE "DespesaServico" CASCADE;
-TRUNCATE TABLE "Receita" CASCADE;
-TRUNCATE TABLE "Despesa" CASCADE;
-TRUNCATE TABLE "RegraReceita" CASCADE;
-TRUNCATE TABLE "RegraDespesa" CASCADE;
-TRUNCATE TABLE "Parceria" CASCADE;
-TRUNCATE TABLE "Contrato" CASCADE;
-TRUNCATE TABLE "PermissaoUsuario" CASCADE;
-TRUNCATE TABLE "CategoriaServico" CASCADE;
-TRUNCATE TABLE "CategoriaDespesa" CASCADE;
-TRUNCATE TABLE "CategoriaReceita" CASCADE;
-TRUNCATE TABLE "Pessoa" CASCADE;
-TRUNCATE TABLE "ContaBancaria" CASCADE;
-TRUNCATE TABLE "Usuario" CASCADE;
+TRUNCATE TABLE CategoriaHistorico CASCADE;
+TRUNCATE TABLE ReceitaServico CASCADE;
+TRUNCATE TABLE DespesaServico CASCADE;
+TRUNCATE TABLE Receita CASCADE;
+TRUNCATE TABLE Despesa CASCADE;
+TRUNCATE TABLE RegraReceita CASCADE;
+TRUNCATE TABLE RegraDespesa CASCADE;
+TRUNCATE TABLE Parceria CASCADE;
+TRUNCATE TABLE Contrato CASCADE;
+TRUNCATE TABLE PermissaoUsuario CASCADE;
+TRUNCATE TABLE CategoriaServico CASCADE;
+TRUNCATE TABLE CategoriaDespesa CASCADE;
+TRUNCATE TABLE CategoriaReceita CASCADE;
+TRUNCATE TABLE Pessoa CASCADE;
+TRUNCATE TABLE ContaBancaria CASCADE;
+TRUNCATE TABLE Usuario CASCADE;
 
 COMMIT;
 
