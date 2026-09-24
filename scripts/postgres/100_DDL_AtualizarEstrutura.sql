@@ -1,11 +1,13 @@
--- 102_DDL_AtualizarEstrutura.sql — PostgreSQL (Neon)
+-- 100_DDL_AtualizarEstrutura.sql — PostgreSQL (Neon)
 -- Sincroniza a estrutura do banco de PROD com o schema atual do projeto (001_CriarTabelas.sql).
 -- IDEMPOTENTE: pode rodar quantas vezes quiser, em banco novo ou desatualizado.
--- Execute ANTES do DML de dados (103).
+-- Execute ANTES do DML de dados (101/102).
 --
 -- Uso no Neon:
---   psql "postgresql://USER:PASS@HOST/neondb?sslmode=require" -f scripts/postgres/102_DDL_AtualizarEstrutura.sql
+--   psql "postgresql://USER:PASS@HOST/neondb?sslmode=require" -f scripts/postgres/100_DDL_AtualizarEstrutura.sql
 --   ou cole no SQL Editor do console.neon.tech
+
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ============================================================
 -- Tabelas base (CREATE IF NOT EXISTS)

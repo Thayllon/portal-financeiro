@@ -10,6 +10,8 @@
 -- Período: 60 meses terminando no mês atual (ex.: se hoje é 2026-09, gera 2021-10 a 2026-09).
 -- Valores incluem previsão para o mês atual/futuro via regra, e realizado para meses passados.
 
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
 DO $$
 DECLARE
     v_maria_id UUID;
@@ -54,6 +56,12 @@ BEGIN
     -- Garante que e-mail está atualizado para portal.com
     UPDATE Usuario SET Email = 'maria@portal.com', SenhaHash = '9pY0pNVbjoJmULBS8GtvbA==.RwotAp0SRR2PFT3gFykFHlgmVqA699cndfDhr+r5X98=', DataAlteracao = CURRENT_TIMESTAMP WHERE Id = v_maria_id AND Email <> 'maria@portal.com';
     UPDATE Usuario SET Email = 'joao@portal.com', SenhaHash = '9pY0pNVbjoJmULBS8GtvbA==.RwotAp0SRR2PFT3gFykFHlgmVqA699cndfDhr+r5X98=', DataAlteracao = CURRENT_TIMESTAMP WHERE Id = v_joao_id AND Email <> 'joao@portal.com';
+
+    -- Garante admin (evita base sem admin após TRUNCATE)
+    IF NOT EXISTS (SELECT 1 FROM Usuario WHERE Email = 'admin@portal.com') THEN
+        INSERT INTO Usuario (Id, Nome, Email, SenhaHash, IsAdmin, Ativo, PrimeiroAcesso, DataCadastro, DataAlteracao)
+        VALUES (gen_random_uuid(), 'Admin', 'admin@portal.com', 'nc0RKfw9YhrKHokj4xZ3AQ==.11eIHgy/7VkSsZ734otOeP/9387OU5Ka6HtuZBumDJY=', TRUE, TRUE, FALSE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    END IF;
 
     -- ============================================================
     -- 2. Garante Conta Bancária
