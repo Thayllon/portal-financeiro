@@ -263,16 +263,6 @@
   }
 }
 
-.view-toggle--year {
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-}
-
-.nav-btn--inline {
-  width: 30px;
-  height: 30px;
-}
-
 .cards--kpi {
   @include layout.grid-cards(200px);
 }
@@ -701,33 +691,6 @@
   background: var(--color-primary);
   color: var(--content-surface);
   box-shadow: var(--shadow-sm);
-}
-
-.nav-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--surface-border);
-  background: var(--content-surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
-
-  &:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-  }
-}
-
-.year-label {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 80px;
-  text-align: center;
 }
 
 .chart-container {

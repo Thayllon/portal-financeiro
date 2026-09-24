@@ -22,15 +22,15 @@
           @if (visualizacao() === 'mensal') {
             <app-month-nav class="page__header-nav" [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
           } @else {
-            <div class="view-toggle view-toggle--year">
-              <button class="nav-btn nav-btn--inline" (click)="navegarAno(-1)" aria-label="Ano anterior">
-                <svg lucideIcon="chevron-left" [size]="18" />
-              </button>
-              <span class="year-label">{{ ano() }}</span>
-              <button class="nav-btn nav-btn--inline" (click)="navegarAno(1)" aria-label="Próximo ano">
-                <svg lucideIcon="chevron-right" [size]="18" />
-              </button>
-            </div>
+            <app-month-nav
+              class="page__header-nav"
+              [somenteAno]="true"
+              [ano]="ano()"
+              rotuloAnterior="Ano anterior"
+              rotuloProximo="Próximo ano"
+              (prev)="navegarAno(-1)"
+              (next)="navegarAno(1)"
+            />
           }
           <app-custom-select
             class="page__header-conta"
