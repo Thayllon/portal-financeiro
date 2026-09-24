@@ -296,6 +296,69 @@ export class DashboardComponent implements OnInit {
   totalDistCatAnual = computed(() => this.distAnualCategorias().reduce((s, i) => s + i.total, 0));
   totalDistSubAnual = computed(() => this.distAnualSubcategorias().reduce((s, i) => s + i.total, 0));
 
+  recRecorrenteAnual = computed(() => {
+    const d = this.dataAnual();
+    const valor = d?.totalReceitasRecorrentes ?? 0;
+    const total = d?.totalReceitas ?? 0;
+    return { valor, percentual: total > 0 ? Math.round(valor / total * 1000) / 10 : null };
+  });
+
+  despRecorrenteAnual = computed(() => {
+    const d = this.dataAnual();
+    const valor = d?.totalDespesasRecorrentes ?? 0;
+    const total = d?.totalDespesas ?? 0;
+    return { valor, percentual: total > 0 ? Math.round(valor / total * 1000) / 10 : null };
+  });
+
+  kpiAnualExtra = computed(() => {
+    const d = this.dataAnual();
+    if (!d) return null;
+    const margem = d.totalReceitas !== 0 ? Math.round(d.saldo / d.totalReceitas * 1000) / 10 : null;
+    const distanciaPonto = d.totalDespesas !== 0 ? Math.round(d.saldo / d.totalDespesas * 1000) / 10 : null;
+    const taxaRecebida = d.totalReceitas !== 0 ? Math.round(d.totalRecebido / d.totalReceitas * 1000) / 10 : null;
+    const taxaPaga = d.totalDespesas !== 0 ? Math.round(d.totalPago / d.totalDespesas * 1000) / 10 : null;
+    const meses = d.mesesConsiderados > 0 ? d.mesesConsiderados : 0;
+    const mediaReceitas = meses > 0 ? Math.round(d.totalReceitas / meses * 100) / 100 : 0;
+    const mediaDespesas = meses > 0 ? Math.round(d.totalDespesas / meses * 100) / 100 : 0;
+    return {
+      fluxo: d.saldoRealizado,
+      margem,
+      pontoEquilibrio: d.totalDespesas,
+      distanciaPonto,
+      taxaRecebida,
+      taxaPaga,
+      mediaReceitas,
+      mediaDespesas
+    };
+  });
+
+  melhorPiorMesAnual = computed(() => {
+    const meses = this.dataAnual()?.resumoPorMes ?? [];
+    if (!meses.length) return null;
+    let melhor = meses[0];
+    let pior = meses[0];
+    for (const m of meses) {
+      if (m.saldo > melhor.saldo) melhor = m;
+      if (m.saldo < pior.saldo) pior = m;
+    }
+    return { melhor, pior };
+  });
+
+  topCategoriaAnual = computed(() => {
+    const d = this.dataAnual();
+    if (!d) return null;
+    const topRec = [...(d.distribuicaoReceitas ?? [])].sort((a, b) => b.total - a.total)[0];
+    const topDesp = [...(d.distribuicaoDespesas ?? [])].sort((a, b) => b.total - a.total)[0];
+    return { topRec, topDesp };
+  });
+
+  previsaoRestanteAnual = computed(() => {
+    const lista = this.dataAnual()?.previsaoRestanteAno ?? [];
+    const receitas = lista.reduce((s, p) => s + p.totalReceitas, 0);
+    const despesas = lista.reduce((s, p) => s + p.totalDespesas, 0);
+    return { receitas, despesas, saldo: receitas - despesas, meses: lista.length };
+  });
+
   doughnutChartOptions = computed<ChartConfiguration<'doughnut'>['options']>(() => {
     const oculto = this.privacidade.valoresOcultos();
     return {

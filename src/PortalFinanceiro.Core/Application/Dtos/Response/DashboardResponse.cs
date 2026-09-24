@@ -36,6 +36,8 @@ public class DashboardAnualResponse
     public decimal? VariacaoSaldoPercentual { get; set; }
     public decimal MediaMensalSaldo { get; set; }
     public int MesesConsiderados { get; set; }
+    public decimal TotalReceitasRecorrentes { get; set; }
+    public decimal TotalDespesasRecorrentes { get; set; }
     public List<MensalResumoAnual> ResumoPorMes { get; set; } = [];
     public List<ResumoPorContaAnual> ResumoPorConta { get; set; } = [];
     public List<DistribuicaoCategoriaAnual> DistribuicaoReceitas { get; set; } = [];
