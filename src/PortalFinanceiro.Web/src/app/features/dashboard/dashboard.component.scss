@@ -278,6 +278,11 @@
   }
 }
 
+.charts-row--unico {
+  grid-template-columns: 1fr;
+  margin-bottom: 0;
+}
+
 .chart-ind-grid {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
