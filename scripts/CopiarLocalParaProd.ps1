@@ -147,7 +147,7 @@ Write-Host "Arquivo gerado: $saidaPath" -ForegroundColor Green
 Write-Host "Tamanho: $([math]::Round((Get-Item $saidaPath).Length / 1KB, 1)) KB" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "PASSO 1 (DDL) ja deve ter sido rodado no Neon:" -ForegroundColor Yellow
-Write-Host "  psql ""`$DATABASE_URL"" -f scripts/postgres/102_DDL_AtualizarEstrutura.sql" -ForegroundColor Gray
+Write-Host "  psql ""`$DATABASE_URL"" -f scripts/postgres/100_DDL_AtualizarEstrutura.sql" -ForegroundColor Gray
 Write-Host "PASSO 2 (DML) execute o arquivo gerado no prod (Neon):" -ForegroundColor Yellow
 Write-Host '  psql "postgresql://USER:PASS@HOST/neondb?sslmode=require" -f portal-financeiro-prod-restore.sql' -ForegroundColor Gray
 Write-Host "  ou cole o conteudo no SQL Editor do Neon (https://console.neon.tech)" -ForegroundColor Gray

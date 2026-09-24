@@ -22,15 +22,15 @@
           @if (visualizacao() === 'mensal') {
             <app-month-nav class="page__header-nav" [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
           } @else {
-            <div class="view-toggle view-toggle--year">
-              <button class="nav-btn nav-btn--inline" (click)="navegarAno(-1)" aria-label="Ano anterior">
-                <svg lucideIcon="chevron-left" [size]="18" />
-              </button>
-              <span class="year-label">{{ ano() }}</span>
-              <button class="nav-btn nav-btn--inline" (click)="navegarAno(1)" aria-label="Próximo ano">
-                <svg lucideIcon="chevron-right" [size]="18" />
-              </button>
-            </div>
+            <app-month-nav
+              class="page__header-nav"
+              [somenteAno]="true"
+              [ano]="ano()"
+              rotuloAnterior="Ano anterior"
+              rotuloProximo="Próximo ano"
+              (prev)="navegarAno(-1)"
+              (next)="navegarAno(1)"
+            />
           }
           <app-custom-select
             class="page__header-conta"
@@ -355,8 +355,8 @@
 
         <app-collapsible-section title="Distribuição por categoria e subcategoria" icon="tags" iconVariant="primary">
           <div slot="actions" class="view-toggle view-toggle--sm">
-            <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'receita'" (click)="trocarTipoDistMensal('receita')">Receitas</button>
-            <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'despesa'" (click)="trocarTipoDistMensal('despesa')">Despesas</button>
+            <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'receita'" (click)="trocarTipoDistribuicao('receita')">Receitas</button>
+            <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'despesa'" (click)="trocarTipoDistribuicao('despesa')">Despesas</button>
           </div>
           <div class="dist-grid">
             <div class="dist-block">
@@ -491,7 +491,7 @@
       } @else {
         @if (loading()) {
           <div class="cards cards--kpi">
-            <app-skeleton type="card" [count]="5" />
+            <app-skeleton type="card" [count]="4" />
           </div>
         } @else {
           <div class="cards cards--kpi">
@@ -501,18 +501,27 @@
                   <svg lucideIcon="trending-up" [size]="22"></svg>
                 </span>
                 <span class="card-label">Receitas</span>
+                <span class="ind-tile__help" data-tip="Quanto faturou/recebeu no ano" tabindex="0" role="img" aria-label="Quanto faturou/recebeu no ano"><svg lucideIcon="info" [size]="14" /></span>
               </div>
-              <div class="card-value green">{{ dataAnual()?.totalReceitas | valorMascarado }}</div>
-              <div class="card-sub">
+              <div class="kpi-main">
+                <div class="card-value green">{{ dataAnual()?.totalReceitas | valorMascarado }}</div>
                 @if (dataAnual()?.variacaoReceitasPercentual !== null && dataAnual()?.variacaoReceitasPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoReceitasPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoReceitasPercentual!) < 0">
                     @if ((dataAnual()!.variacaoReceitasPercentual!) >= 0) { ↑ } @else { ↓ }
                     {{ dataAnual()!.variacaoReceitasPercentual }}%
                   </span>
-                  <span>Em relação a {{ ano() - 1 }}</span>
                 } @else {
-                  <span class="pill pill--green">{{ dataAnual()?.totalRecebido | valorMascarado }} recebido</span>
+                  <span class="pill pill--muted">—</span>
                 }
+              </div>
+              @if (dataAnual()?.variacaoReceitasPercentual === null || dataAnual()?.variacaoReceitasPercentual === undefined) {
+                <div class="card-sub">
+                  <span class="pill pill--green">{{ dataAnual()?.totalRecebido | valorMascarado }} recebido</span>
+                </div>
+              }
+              <div class="kpi-foot">
+                <span class="card-sub">em relação a {{ ano() - 1 }}</span>
+                <span class="spark"><canvas baseChart [data]="sparkReceitasAnualExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
@@ -521,18 +530,27 @@
                   <svg lucideIcon="trending-down" [size]="22"></svg>
                 </span>
                 <span class="card-label">Despesas</span>
+                <span class="ind-tile__help" data-tip="Quanto consumiu no ano" tabindex="0" role="img" aria-label="Quanto consumiu no ano"><svg lucideIcon="info" [size]="14" /></span>
               </div>
-              <div class="card-value red">{{ dataAnual()?.totalDespesas | valorMascarado }}</div>
-              <div class="card-sub">
+              <div class="kpi-main">
+                <div class="card-value red">{{ dataAnual()?.totalDespesas | valorMascarado }}</div>
                 @if (dataAnual()?.variacaoDespesasPercentual !== null && dataAnual()?.variacaoDespesasPercentual !== undefined) {
-                  <span class="pill" [class.pill--green]="(dataAnual()!.variacaoDespesasPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoDespesasPercentual!) < 0">
+                  <span class="pill pill--red">
                     @if ((dataAnual()!.variacaoDespesasPercentual!) >= 0) { ↑ } @else { ↓ }
                     {{ dataAnual()!.variacaoDespesasPercentual }}%
                   </span>
-                  <span>Em relação a {{ ano() - 1 }}</span>
                 } @else {
-                  <span class="pill pill--green">{{ dataAnual()?.totalPago | valorMascarado }} pago</span>
+                  <span class="pill pill--muted">—</span>
                 }
+              </div>
+              @if (dataAnual()?.variacaoDespesasPercentual === null || dataAnual()?.variacaoDespesasPercentual === undefined) {
+                <div class="card-sub">
+                  <span class="pill pill--green">{{ dataAnual()?.totalPago | valorMascarado }} pago</span>
+                </div>
+              }
+              <div class="kpi-foot">
+                <span class="card-sub">em relação a {{ ano() - 1 }}</span>
+                <span class="spark"><canvas baseChart [data]="sparkDespesasAnualExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
@@ -541,20 +559,24 @@
                   <svg lucideIcon="wallet" [size]="22"></svg>
                 </span>
                 <span class="card-label">Saldo do ano</span>
+                <span class="ind-tile__help" data-tip="Resultado econômico do ano: receitas menos despesas" tabindex="0" role="img" aria-label="Resultado econômico do ano: receitas menos despesas"><svg lucideIcon="info" [size]="14" /></span>
               </div>
-              <div class="card-value" [class.green]="(dataAnual()?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.saldo ?? 0) < 0">
-                {{ dataAnual()?.saldo | valorMascarado }}
-              </div>
-              <div class="card-sub">
+              <div class="kpi-main">
+                <div class="card-value" [class.green]="(dataAnual()?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.saldo ?? 0) < 0">
+                  {{ dataAnual()?.saldo | valorMascarado }}
+                </div>
                 @if (dataAnual()?.variacaoSaldoPercentual !== null && dataAnual()?.variacaoSaldoPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoSaldoPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoSaldoPercentual!) < 0">
                     @if ((dataAnual()!.variacaoSaldoPercentual!) >= 0) { ↑ } @else { ↓ }
                     {{ dataAnual()!.variacaoSaldoPercentual }}%
                   </span>
-                  <span>Em relação a {{ ano() - 1 }}</span>
                 } @else {
-                  <span>receitas - despesas</span>
+                  <span class="pill pill--muted">—</span>
                 }
+              </div>
+              <div class="kpi-foot">
+                <span class="card-sub">em relação a {{ ano() - 1 }}</span>
+                <span class="spark"><canvas baseChart [data]="sparkSaldoAnualExibicao()" [options]="sparkOptions" type="line"></canvas></span>
               </div>
             </div>
             <div class="card">
@@ -563,121 +585,162 @@
                   <svg lucideIcon="chart-line" [size]="22"></svg>
                 </span>
                 <span class="card-label">Média mensal (saldo)</span>
+                <span class="ind-tile__help" data-tip="Média do saldo nos meses considerados do ano" tabindex="0" role="img" aria-label="Média do saldo nos meses considerados do ano"><svg lucideIcon="info" [size]="14" /></span>
               </div>
-              <div class="card-value">{{ dataAnual()?.mediaMensalSaldo | valorMascarado }}</div>
-              <div class="card-sub">Baseado em {{ dataAnual()?.mesesConsiderados }} meses</div>
-            </div>
-            <div class="card">
-              <div class="card-header">
-                <span class="card-icon card-icon--warning">
-                  <svg lucideIcon="handshake" [size]="22"></svg>
-                </span>
-                <span class="card-label">Parcerias</span>
+              <div class="kpi-main">
+                <div class="card-value">{{ dataAnual()?.mediaMensalSaldo | valorMascarado }}</div>
               </div>
-              <div class="card-value" [class.green]="(dataAnual()?.resumoParcerias?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.resumoParcerias?.saldo ?? 0) < 0">
-                {{ dataAnual()?.resumoParcerias?.saldo | valorMascarado }}
-              </div>
-              <div class="card-sub">
-                <span class="pill pill--green">{{ dataAnual()?.resumoParcerias?.totalRecebido | valorMascarado }} recebido</span>
-                <span class="pill pill--red">{{ dataAnual()?.resumoParcerias?.totalPago | valorMascarado }} pago</span>
-              </div>
-              <div class="card-sub card-sub--link">
-                <a routerLink="/parcerias">{{ dataAnual()?.resumoParcerias?.qtdParcerias }} parcerias movimentadas · Ver parcerias</a>
+              <div class="kpi-foot">
+                <span class="card-sub">Baseado em {{ dataAnual()?.mesesConsiderados }} meses</span>
               </div>
             </div>
           </div>
 
-          <div class="charts-row">
-            <app-collapsible-section title="Receitas x Despesas por mês" icon="bar-chart-3" iconVariant="primary">
+          <div class="charts-row charts-row--unico">
+            <app-collapsible-section title="Receitas, Despesas e Saldo por mês" icon="bar-chart-3" iconVariant="primary">
               <div class="chart-container">
                 <canvas baseChart
-                  [data]="barChartData"
+                  [data]="barChartAnualData"
                   [options]="barChartOptions()"
-                  type="bar">
+                  [type]="tipoGraficoAnual">
                 </canvas>
               </div>
             </app-collapsible-section>
-
-            <app-collapsible-section
-              [title]="tipoDistribuicao() === 'receita' ? 'Distribuição das receitas' : 'Distribuição das despesas'"
-              icon="tag" iconVariant="primary">
-              <div class="dist-toggles">
-                <div class="view-toggle view-toggle--sm">
-                  <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'receita'" (click)="trocarTipoDistribuicao('receita')">Receitas</button>
-                  <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'despesa'" (click)="trocarTipoDistribuicao('despesa')">Despesas</button>
-                </div>
-                <div class="view-toggle view-toggle--sm">
-                  <button class="toggle-btn" [class.active]="nivelDistribuicao() === 'categoria'" (click)="trocarNivelDistribuicao('categoria')">Categoria</button>
-                  <button class="toggle-btn" [class.active]="nivelDistribuicao() === 'subcategoria'" (click)="trocarNivelDistribuicao('subcategoria')">Subcategoria</button>
-                </div>
-              </div>
-              @if (distribuicaoAtual().length) {
-                <div class="donut-wrap">
-                  <div class="donut-chart">
-                    <canvas baseChart
-                      [data]="doughnutChartData"
-                      [options]="doughnutChartOptions()"
-                      type="doughnut">
-                    </canvas>
-                    <div class="donut-center">
-                      <strong>{{ totalDistribuicao() | valorMascarado }}</strong>
-                      <span>Total</span>
-                    </div>
-                  </div>
-                  <ul class="donut-legend">
-                    @for (item of distribuicaoAtual(); track item.nome) {
-                      <li>
-                        <span class="donut-legend__label">{{ item.nome }}</span>
-                        <span class="donut-legend__pct">{{ item.percentual }}%</span>
-                        <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
-                      </li>
-                    }
-                  </ul>
-                </div>
-              } @else {
-                <p class="empty-text">Sem movimentações no ano para este filtro.</p>
-              }
-            </app-collapsible-section>
           </div>
 
-          @if (dataAnual()?.resumoPorMes?.length) {
-            <app-collapsible-section title="Resumo mês a mês" icon="calendar-range" iconVariant="info">
-              <div class="table-card">
-                <table class="table">
-                  <thead><tr><th>Mês</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
-                  <tbody>
-                    @for (m of dataAnual()!.resumoPorMes; track m.mes) {
-                      <tr>
-                        <td class="cell-name" data-label="Mês">{{ MESES[m.mes - 1] }}</td>
-                        <td class="cell-value green" data-label="Receitas">{{ m.totalReceitas | valorMascarado }}</td>
-                        <td class="cell-value red" data-label="Despesas">{{ m.totalDespesas | valorMascarado }}</td>
-                        <td class="cell-value" [class.green]="m.saldo >= 0" [class.red]="m.saldo < 0" data-label="Saldo">{{ m.saldo | valorMascarado }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+          <app-collapsible-section title="Distribuição por categoria e subcategoria" icon="tags" iconVariant="primary">
+            <div slot="actions" class="view-toggle view-toggle--sm">
+              <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'receita'" (click)="trocarTipoDistribuicao('receita')">Receitas</button>
+              <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'despesa'" (click)="trocarTipoDistribuicao('despesa')">Despesas</button>
+            </div>
+            <div class="dist-grid">
+              <div class="dist-block">
+                <div class="dist-block__head">
+                  <h3 class="dist-block__title">Categorias</h3>
+                </div>
+                @if (distAnualCategorias().length) {
+                  <div class="donut-wrap">
+                    <div class="donut-chart">
+                      <canvas baseChart [data]="donutDistCatAnualData" [options]="doughnutChartOptions()" type="doughnut"></canvas>
+                      <div class="donut-center"><strong>{{ totalDistCatAnual() | valorMascarado }}</strong><span>Total</span></div>
+                    </div>
+                    <ul class="donut-legend">
+                      @for (item of distAnualCategorias(); track item.nome) {
+                        <li>
+                          <span class="donut-legend__label">{{ item.nome }}</span>
+                          <span class="donut-legend__pct">{{ item.percentual }}%</span>
+                          <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                } @else {
+                  <div class="donut-wrap">
+                    <div class="donut-chart">
+                      <canvas baseChart [data]="donutVazioData" [options]="doughnutVazioOptions" type="doughnut"></canvas>
+                      <div class="donut-center"><strong>{{ 0 | valorMascarado }}</strong><span>Total</span></div>
+                    </div>
+                    <div class="dist-empty">
+                      <span class="dist-empty__icon"><svg lucideIcon="wallet" [size]="22"></svg></span>
+                      @if (tipoDistribuicao() === 'receita') {
+                        <strong>Ainda não há receitas</strong>
+                        <p>Registre suas receitas para visualizar a distribuição por categoria.</p>
+                      } @else {
+                        <strong>Ainda não há despesas</strong>
+                        <p>Registre suas despesas para visualizar a distribuição por categoria.</p>
+                      }
+                    </div>
+                  </div>
+                }
               </div>
-            </app-collapsible-section>
-          }
+              <div class="dist-block">
+                <div class="dist-block__head">
+                  <h3 class="dist-block__title">Subcategorias</h3>
+                </div>
+                @if (distAnualSubcategorias().length) {
+                  <div class="donut-wrap">
+                    <div class="donut-chart">
+                      <canvas baseChart [data]="donutDistSubAnualData" [options]="doughnutChartOptions()" type="doughnut"></canvas>
+                      <div class="donut-center"><strong>{{ totalDistSubAnual() | valorMascarado }}</strong><span>Total</span></div>
+                    </div>
+                    <ul class="donut-legend">
+                      @for (item of distAnualSubcategorias(); track item.nome) {
+                        <li>
+                          <span class="donut-legend__label">{{ item.nome }}</span>
+                          <span class="donut-legend__pct">{{ item.percentual }}%</span>
+                          <span class="donut-legend__value">{{ item.total | valorMascarado }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                } @else {
+                  <div class="donut-wrap">
+                    <div class="donut-chart">
+                      <canvas baseChart [data]="donutVazioData" [options]="doughnutVazioOptions" type="doughnut"></canvas>
+                      <div class="donut-center"><strong>{{ 0 | valorMascarado }}</strong><span>Total</span></div>
+                    </div>
+                    <div class="dist-empty">
+                      <span class="dist-empty__icon"><svg lucideIcon="wallet" [size]="22"></svg></span>
+                      @if (tipoDistribuicao() === 'receita') {
+                        <strong>Ainda não há receitas</strong>
+                        <p>Registre suas receitas para visualizar a distribuição por subcategoria.</p>
+                      } @else {
+                        <strong>Ainda não há despesas</strong>
+                        <p>Registre suas despesas para visualizar a distribuição por subcategoria.</p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </app-collapsible-section>
 
           @if (dataAnual()?.resumoPorConta?.length) {
             <app-collapsible-section title="Por conta" icon="wallet" iconVariant="info">
+              @if (contasTabelaAnual().linhas.length) {
               <div class="table-card">
                 <table class="table">
-                  <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Saldo</th></tr></thead>
+                  <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Lucro líquido</th><th>% do total (receitas)</th></tr></thead>
                   <tbody>
-                    @for (c of dataAnual()!.resumoPorConta; track c.nomeConta) {
+                    @for (c of contasTabelaAnual().linhas; track c.nomeConta) {
                       <tr>
-                        <td class="cell-name" data-label="Conta">{{ c.nomeConta }} <span class="cell-meta">{{ c.banco }}</span></td>
+                        <td class="cell-name" data-label="Conta">
+                          <span class="conta-cell">
+                            <span class="bank-avatar bank-avatar--{{ varianteAvatarBanco(c.banco) }}">{{ iniciaisBanco(c.banco) }}</span>
+                            <span class="conta-text">{{ c.nomeConta }}<span class="cell-meta">{{ c.banco }}</span></span>
+                          </span>
+                        </td>
                         <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                        <td class="cell-value green" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
-                        <td class="cell-value red" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
-                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo">{{ c.saldo | valorMascarado }}</td>
+                        <td class="cell-value" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
+                        <td class="cell-value" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
+                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Lucro líquido">{{ c.saldo | valorMascarado }}</td>
+                        <td data-label="% do total (receitas)">
+                          <span class="pct-cell">
+                            <span class="pct-bar"><span class="pct-bar__fill" [style.width.%]="c.percentual"></span></span>
+                            <span class="pct-value">{{ c.percentual.toLocaleString('pt-BR') }}%</span>
+                          </span>
+                        </td>
                       </tr>
                     }
+                    <tr class="row-total">
+                      <td class="cell-name" data-label="Conta">Total</td>
+                      <td data-label="Tipo">—</td>
+                      <td class="cell-value" data-label="Receitas">{{ contasTabelaAnual().totalReceitas | valorMascarado }}</td>
+                      <td class="cell-value" data-label="Despesas">{{ contasTabelaAnual().totalDespesas | valorMascarado }}</td>
+                      <td class="cell-value" [class.green]="contasTabelaAnual().totalLucro >= 0" [class.red]="contasTabelaAnual().totalLucro < 0" data-label="Lucro líquido">{{ contasTabelaAnual().totalLucro | valorMascarado }}</td>
+                      <td data-label="% do total (receitas)">
+                        <span class="pct-cell">
+                          <span class="pct-bar"><span class="pct-bar__fill pct-bar__fill--total" [style.width.%]="100"></span></span>
+                          <span class="pct-value">100%</span>
+                        </span>
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
+              } @else {
+                <p class="empty-text">Nenhuma conta ativa para exibir.</p>
+              }
             </app-collapsible-section>
           }
         }

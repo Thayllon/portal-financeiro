@@ -1,4 +1,5 @@
 using FluentAssertions;
+using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Services;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
@@ -40,6 +41,7 @@ public class UsuarioAppServiceTests
     private sealed class PermissaoRepositoryFake : IPermissaoUsuarioRepository
     {
         public List<Guid> ExcluidosPorUsuario { get; } = new();
+        public List<PermissaoUsuario> Inseridas { get; } = new();
 
         public Task<IEnumerable<PermissaoUsuario>> ObterPorUsuarioIdAsync(Guid usuarioId)
             => Task.FromResult<IEnumerable<PermissaoUsuario>>(Array.Empty<PermissaoUsuario>());
@@ -47,7 +49,11 @@ public class UsuarioAppServiceTests
         public Task<PermissaoUsuario?> ObterPorUsuarioEModuloAsync(Guid usuarioId, string modulo)
             => Task.FromResult<PermissaoUsuario?>(null);
 
-        public Task InserirAsync(PermissaoUsuario entity) => Task.CompletedTask;
+        public Task InserirAsync(PermissaoUsuario entity)
+        {
+            Inseridas.Add(entity);
+            return Task.CompletedTask;
+        }
         public Task AtualizarAsync(PermissaoUsuario entity) => Task.CompletedTask;
         public Task ExcluirAsync(Guid id) => Task.CompletedTask;
 
@@ -126,5 +132,28 @@ public class UsuarioAppServiceTests
         result.EhSucesso.Should().BeTrue();
         permissoes.ExcluidosPorUsuario.Should().ContainSingle().Which.Should().Be(alvo.Id);
         usuarios.Excluidos.Should().ContainSingle().Which.Should().Be(alvo.Id);
+    }
+
+    [Fact]
+    public async Task Adicionar_NovoUsuario_CriaHomeEDashboardComLeituraEDemaisSemAcesso()
+    {
+        var (service, _, permissoes, _) = CriarCenario();
+
+        var result = await service.AdicionarAsync(new UsuarioRequest
+        {
+            Nome = "Novo Usuário",
+            Email = "novo@portal.com",
+            Senha = "senhasenha"
+        });
+
+        result.EhSucesso.Should().BeTrue();
+        var porModulo = permissoes.Inseridas.ToDictionary(p => p.Modulo, p => p.Nivel);
+        porModulo["home"].Should().Be(NivelPermissao.Leitura);
+        porModulo["dashboard"].Should().Be(NivelPermissao.Leitura);
+        porModulo.Should().ContainKeys("receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos");
+        porModulo
+            .Where(p => p.Key != "home" && p.Key != "dashboard")
+            .Select(p => p.Value)
+            .Should().OnlyContain(n => n == NivelPermissao.Nenhum);
     }
 }

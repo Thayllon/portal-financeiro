@@ -1,12 +1,11 @@
 import { Component, inject, signal, OnInit, computed, ViewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardRepository } from '../../core/repositories/dashboard.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { ContratoRepository } from '../../core/repositories/contrato.repository';
 import { Contrato } from '../../core/models/contrato.model';
-import { Dashboard, DashboardAnual, DistribuicaoCategoriaAnual, ResumoPorConta } from '../../core/models/dashboard.model';
+import { Dashboard, DashboardAnual, DistribuicaoCategoriaAnual, MensalResumoAnual, ResumoPorConta } from '../../core/models/dashboard.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { SkeletonComponent } from '../../shared/components/skeleton.component';
@@ -19,7 +18,7 @@ import { CustomSelectComponent } from '../../shared/components/custom-select.com
 import { CollapsibleSectionComponent } from '../../shared/components/collapsible-section.component';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, Chart, registerables, Plugin } from 'chart.js';
+import { ChartConfiguration, Chart, ChartType, registerables, Plugin } from 'chart.js';
 
 Chart.register(...registerables);
 
@@ -33,6 +32,7 @@ function lerCorToken(nome: string, padrao: string): string {
 const corReceita = (): string => lerCorToken('--color-success', '#16a34a');
 const corDespesa = (): string => lerCorToken('--color-error', '#dc2626');
 const corRoxa = (): string => lerCorToken('--color-purple', '#7c3aed');
+const corInformacao = (): string => lerCorToken('--color-info', '#2563eb');
 const corTextoGrafico = (): string => lerCorToken('--text-secondary', '#475569');
 const corGradeGrafico = (): string => lerCorToken('--surface-border', '#e2e8f0');
 const comTransparencia = (cor: string): string => `${cor}cc`;
@@ -51,6 +51,40 @@ function varianteAvatarBanco(banco: string): number {
   let hash = 0;
   for (const ch of nome) hash = (hash * 31 + ch.charCodeAt(0)) % TOTAL_VARIANTES_AVATAR;
   return hash;
+}
+
+interface LinhaTabelaContas {
+  nomeConta: string;
+  banco: string;
+  tipo: string;
+  totalReceitas: number;
+  totalDespesas: number;
+  saldo: number;
+}
+
+interface LinhaTabelaContasComPercentual extends LinhaTabelaContas {
+  percentual: number;
+}
+
+interface TabelaContas {
+  linhas: LinhaTabelaContasComPercentual[];
+  totalReceitas: number;
+  totalDespesas: number;
+  totalLucro: number;
+}
+
+function montarTabelaContas(contas: LinhaTabelaContas[]): TabelaContas {
+  const totalReceitas = contas.reduce((s, c) => s + c.totalReceitas, 0);
+  const totalDespesas = contas.reduce((s, c) => s + c.totalDespesas, 0);
+  return {
+    linhas: contas.map(c => ({
+      ...c,
+      percentual: totalReceitas > 0 ? Math.round(c.totalReceitas / totalReceitas * 1000) / 10 : 0
+    })),
+    totalReceitas,
+    totalDespesas,
+    totalLucro: totalReceitas - totalDespesas
+  };
 }
 
 function calcularVariacao(atual: number, anterior: number): number | null {
@@ -96,7 +130,7 @@ const PALETA_DONUT = ['#0d9488', '#dc2626', '#5b8def', '#eab308', '#f97316', '#a
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, SkeletonComponent, MonthNavComponent, StatusBadgeComponent, ValorMascaradoPipe, PrivacidadeToggleComponent, CustomSelectComponent, CollapsibleSectionComponent, LucideDynamicIcon, BaseChartDirective],
+  imports: [SkeletonComponent, MonthNavComponent, StatusBadgeComponent, ValorMascaradoPipe, PrivacidadeToggleComponent, CustomSelectComponent, CollapsibleSectionComponent, LucideDynamicIcon, BaseChartDirective],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -118,26 +152,14 @@ export class DashboardComponent implements OnInit {
   contas = signal<ContaBancaria[]>([]);
   contratos = signal<Contrato[]>([]);
   tipoDistribuicao = signal<'receita' | 'despesa'>('despesa');
-  nivelDistribuicao = signal<'categoria' | 'subcategoria'>('categoria');
 
   readonly MESES = MESES;
   readonly iniciaisBanco = iniciaisBanco;
   readonly varianteAvatarBanco = varianteAvatarBanco;
 
-  contasTabela = computed(() => {
-    const contas = this.data()?.resumoPorConta ?? [];
-    const totalReceitas = contas.reduce((s, c) => s + c.totalReceitas, 0);
-    const totalDespesas = contas.reduce((s, c) => s + c.totalDespesas, 0);
-    return {
-      linhas: contas.map(c => ({
-        ...c,
-        percentual: totalReceitas > 0 ? Math.round(c.totalReceitas / totalReceitas * 1000) / 10 : 0
-      })),
-      totalReceitas,
-      totalDespesas,
-      totalLucro: totalReceitas - totalDespesas
-    };
-  });
+  contasTabela = computed(() => montarTabelaContas(this.data()?.resumoPorConta ?? []));
+
+  contasTabelaAnual = computed(() => montarTabelaContas(this.dataAnual()?.resumoPorConta ?? []));
 
   resumoContratos = computed(() => {
     const ativos = this.contratos().filter(c => c.ativo);
@@ -166,13 +188,20 @@ export class DashboardComponent implements OnInit {
     datasets: []
   };
 
-  barChartOptions = computed<ChartConfiguration<'bar'>['options']>(() => {
+  barChartAnualData: ChartConfiguration['data'] = {
+    labels: [],
+    datasets: []
+  };
+
+  tipoGraficoAnual: ChartType = 'bar';
+
+  barChartOptions = computed<ChartConfiguration['options']>(() => {
     const oculto = this.privacidade.valoresOcultos();
     return {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'top' },
+        legend: { position: 'bottom' },
         tooltip: {
           callbacks: {
             label: (context) => {
@@ -255,26 +284,17 @@ export class DashboardComponent implements OnInit {
     return contas.filter(c => c.ativo).map(c => ({ value: c.id, label: `${c.nome} (${c.banco})` }));
   });
 
-  distribuicaoAtual = computed<DistribuicaoCategoriaAnual[]>(() => {
+  distAnualCategorias = computed<DistribuicaoCategoriaAnual[]>(() => {
     const anual = this.dataAnual();
     if (!anual) return [];
-    const base = this.tipoDistribuicao() === 'receita' ? anual.distribuicaoReceitas : anual.distribuicaoDespesas;
-    if (this.nivelDistribuicao() === 'categoria') return base;
-    const flat: DistribuicaoCategoriaAnual[] = [];
-    for (const cat of base) {
-      for (const sub of cat.subcategorias ?? []) {
-        flat.push({ nome: `${cat.nome} • ${sub.nome}`, total: sub.total, percentual: sub.percentual, subcategorias: [] });
-      }
-    }
-    return flat.sort((a, b) => b.total - a.total);
+    return this.tipoDistribuicao() === 'receita' ? anual.distribuicaoReceitas : anual.distribuicaoDespesas;
   });
 
-  totalDistribuicao = computed(() => this.distribuicaoAtual().reduce((s, i) => s + i.total, 0));
+  distAnualSubcategorias = computed<DistribuicaoCategoriaAnual[]>(() =>
+    this.achatarSubcategorias(this.distAnualCategorias()));
 
-  doughnutChartData: ChartConfiguration<'doughnut'>['data'] = {
-    labels: [],
-    datasets: []
-  };
+  totalDistCatAnual = computed(() => this.distAnualCategorias().reduce((s, i) => s + i.total, 0));
+  totalDistSubAnual = computed(() => this.distAnualSubcategorias().reduce((s, i) => s + i.total, 0));
 
   doughnutChartOptions = computed<ChartConfiguration<'doughnut'>['options']>(() => {
     const oculto = this.privacidade.valoresOcultos();
@@ -314,6 +334,8 @@ export class DashboardComponent implements OnInit {
 
   donutDistCatData: ChartConfiguration<'doughnut'>['data'] = { labels: [], datasets: [] };
   donutDistSubData: ChartConfiguration<'doughnut'>['data'] = { labels: [], datasets: [] };
+  donutDistCatAnualData: ChartConfiguration<'doughnut'>['data'] = { labels: [], datasets: [] };
+  donutDistSubAnualData: ChartConfiguration<'doughnut'>['data'] = { labels: [], datasets: [] };
 
   private requestSeq = 0;
   chartVersion = signal(0);
@@ -397,10 +419,20 @@ export class DashboardComponent implements OnInit {
     this.chartVersion();
     return this.privacidade.valoresOcultos() ? this.sparkVazio : dados;
   }
+  private montarSparkAnual(selecionar: (mes: MensalResumoAnual) => number, cor: string): ChartConfiguration<'line'>['data'] {
+    const meses = this.dataAnual()?.resumoPorMes ?? [];
+    return {
+      labels: meses.map(m => MESES[m.mes - 1].slice(0, 3)),
+      datasets: [{ data: meses.map(selecionar), borderColor: cor, fill: false }]
+    };
+  }
   sparkReceitasExibicao = computed(() => this.sparkExibicao(this.sparkReceitas));
   sparkDespesasExibicao = computed(() => this.sparkExibicao(this.sparkDespesas));
   sparkSaldoExibicao = computed(() => this.sparkExibicao(this.sparkSaldo));
   sparkFluxoExibicao = computed(() => this.sparkExibicao(this.sparkFluxo));
+  sparkReceitasAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.totalReceitas, corReceita())));
+  sparkDespesasAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.totalDespesas, corDespesa())));
+  sparkSaldoAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.saldo, corReceita())));
 
   ngOnInit() { this.carregar(); this.carregarContas(); this.carregarContratos(); }
 
@@ -445,7 +477,7 @@ if (seq !== this.requestSeq) return;
 if (seq !== this.requestSeq) return;
             this.dataAnual.set(anual);
             this.atualizarGraficoAnual();
-            this.atualizarDonut();
+            this.atualizarDonutsDistribuicaoAnual();
             this.chartVersion.update(v => v + 1);
             setTimeout(() => this.chart?.update(), 50);
       }
@@ -474,9 +506,11 @@ if (seq !== this.requestSeq) return;
     this.valoresExibidos.set([]);
     this.valoresTooltip.set([]);
     this.barChartData = { labels: [], datasets: [] };
-    this.doughnutChartData = { labels: [], datasets: [] };
+    this.barChartAnualData = { labels: [], datasets: [] };
     this.donutDistCatData = { labels: [], datasets: [] };
     this.donutDistSubData = { labels: [], datasets: [] };
+    this.donutDistCatAnualData = { labels: [], datasets: [] };
+    this.donutDistSubAnualData = { labels: [], datasets: [] };
     this.carregar();
   }
 
@@ -487,17 +521,8 @@ if (seq !== this.requestSeq) return;
 
   trocarTipoDistribuicao(tipo: 'receita' | 'despesa') {
     this.tipoDistribuicao.set(tipo);
-    this.atualizarDonut();
-  }
-
-  trocarNivelDistribuicao(nivel: 'categoria' | 'subcategoria') {
-    this.nivelDistribuicao.set(nivel);
-    this.atualizarDonut();
-  }
-
-  trocarTipoDistMensal(tipo: 'receita' | 'despesa') {
-    this.tipoDistribuicao.set(tipo);
     this.atualizarDonutsDistribuicao();
+    this.atualizarDonutsDistribuicaoAnual();
   }
 
   private achatarSubcategorias(base: DistribuicaoCategoriaAnual[]): DistribuicaoCategoriaAnual[] {
@@ -527,6 +552,11 @@ if (seq !== this.requestSeq) return;
   private atualizarDonutsDistribuicao() {
     this.donutDistCatData = this.montarDonutDistribuicao(this.distMensalCategorias());
     this.donutDistSubData = this.montarDonutDistribuicao(this.distMensalSubcategorias());
+  }
+
+  private atualizarDonutsDistribuicaoAnual() {
+    this.donutDistCatAnualData = this.montarDonutDistribuicao(this.distAnualCategorias());
+    this.donutDistSubAnualData = this.montarDonutDistribuicao(this.distAnualSubcategorias());
   }
 
   trocarFiltroSerie(filtro: 'ambos' | 'receitas' | 'despesas', event: MouseEvent) {
@@ -673,37 +703,53 @@ if (seq !== this.requestSeq) return;
     const anual = this.dataAnual();
     if (!anual) return;
 
-    this.barChartData = {
+    this.barChartAnualData = {
       labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
       datasets: [
         {
+          type: 'bar',
           data: anual.resumoPorMes.map(m => m.totalReceitas),
           label: 'Receitas',
           backgroundColor: comTransparencia(corReceita()),
           borderColor: corReceita(),
-          borderWidth: 1
+          borderWidth: 0,
+          borderRadius: 6,
+          borderSkipped: 'bottom',
+          categoryPercentage: 0.55,
+          barPercentage: 0.65
         },
         {
+          type: 'bar',
           data: anual.resumoPorMes.map(m => m.totalDespesas),
           label: 'Despesas',
           backgroundColor: comTransparencia(corDespesa()),
           borderColor: corDespesa(),
-          borderWidth: 1
-        }
-      ]
-    };
-  }
-
-  private atualizarDonut() {
-    const itens = this.distribuicaoAtual();
-    this.doughnutChartData = {
-      labels: itens.map(i => i.nome),
-      datasets: [
+          borderWidth: 0,
+          borderRadius: 6,
+          borderSkipped: 'bottom',
+          categoryPercentage: 0.55,
+          barPercentage: 0.65
+        },
         {
-          data: itens.map(i => i.total),
-          backgroundColor: itens.map((_, idx) => PALETA_DONUT[idx % PALETA_DONUT.length]),
+          type: 'line',
+          data: anual.resumoPorMes.map(m => m.saldo),
+          label: 'Saldo',
+          borderColor: corRoxa(),
           borderWidth: 2,
-          borderColor: '#ffffff'
+          tension: 0.4,
+          fill: false,
+          pointRadius: 0
+        },
+        {
+          type: 'line',
+          data: anual.resumoPorMes.map(m => m.saldoAcumulado),
+          label: 'Saldo acumulado',
+          borderColor: corInformacao(),
+          borderWidth: 2,
+          borderDash: [6, 4],
+          tension: 0.4,
+          fill: false,
+          pointRadius: 0
         }
       ]
     };

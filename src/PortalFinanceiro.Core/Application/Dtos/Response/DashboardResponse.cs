@@ -53,6 +53,7 @@ public class MensalResumoAnual
     public decimal TotalPago { get; set; }
     public decimal Saldo { get; set; }
     public decimal SaldoRealizado { get; set; }
+    public decimal SaldoAcumulado { get; set; }
 }
 
 public class ResumoPorContaAnual
