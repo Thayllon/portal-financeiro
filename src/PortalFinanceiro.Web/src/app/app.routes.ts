@@ -13,7 +13,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent) },
-      { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent), canActivate: [permissionGuard('dashboard')] },
       { path: 'receitas', loadComponent: () => import('./features/receitas/receitas.component').then(m => m.ReceitasComponent), canActivate: [permissionGuard('receitas')] },
       { path: 'despesas', loadComponent: () => import('./features/despesas/despesas.component').then(m => m.DespesasComponent), canActivate: [permissionGuard('despesas')] },
       { path: 'parcerias', loadComponent: () => import('./features/parcerias/parcerias.component').then(m => m.ParceriasComponent), canActivate: [permissionGuard('parcerias')] },

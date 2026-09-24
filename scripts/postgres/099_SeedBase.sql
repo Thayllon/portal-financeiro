@@ -11,3 +11,19 @@ FROM Usuario
 WHERE Id NOT IN (
     SELECT UsuarioId FROM PermissaoUsuario WHERE Modulo = 'parcerias'
 );
+
+-- Garante 'home' e 'dashboard' com Leitura para usuários que ainda não os possuem.
+-- Apenas insere onde falta; nunca altera níveis já definidos (inclusive 'não pode ver' explícito).
+INSERT INTO PermissaoUsuario (Id, UsuarioId, Modulo, Nivel)
+SELECT gen_random_uuid(), Id, 'home', 1
+FROM Usuario
+WHERE Id NOT IN (
+    SELECT UsuarioId FROM PermissaoUsuario WHERE Modulo = 'home'
+);
+
+INSERT INTO PermissaoUsuario (Id, UsuarioId, Modulo, Nivel)
+SELECT gen_random_uuid(), Id, 'dashboard', 1
+FROM Usuario
+WHERE Id NOT IN (
+    SELECT UsuarioId FROM PermissaoUsuario WHERE Modulo = 'dashboard'
+);

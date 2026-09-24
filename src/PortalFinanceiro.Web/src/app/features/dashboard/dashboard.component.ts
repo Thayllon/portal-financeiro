@@ -32,6 +32,7 @@ function lerCorToken(nome: string, padrao: string): string {
 const corReceita = (): string => lerCorToken('--color-success', '#16a34a');
 const corDespesa = (): string => lerCorToken('--color-error', '#dc2626');
 const corRoxa = (): string => lerCorToken('--color-purple', '#7c3aed');
+const corInformacao = (): string => lerCorToken('--color-info', '#2563eb');
 const corTextoGrafico = (): string => lerCorToken('--text-secondary', '#475569');
 const corGradeGrafico = (): string => lerCorToken('--surface-border', '#e2e8f0');
 const comTransparencia = (cor: string): string => `${cor}cc`;
@@ -711,7 +712,11 @@ if (seq !== this.requestSeq) return;
           label: 'Receitas',
           backgroundColor: comTransparencia(corReceita()),
           borderColor: corReceita(),
-          borderWidth: 1
+          borderWidth: 0,
+          borderRadius: 6,
+          borderSkipped: 'bottom',
+          categoryPercentage: 0.55,
+          barPercentage: 0.65
         },
         {
           type: 'bar',
@@ -719,7 +724,11 @@ if (seq !== this.requestSeq) return;
           label: 'Despesas',
           backgroundColor: comTransparencia(corDespesa()),
           borderColor: corDespesa(),
-          borderWidth: 1
+          borderWidth: 0,
+          borderRadius: 6,
+          borderSkipped: 'bottom',
+          categoryPercentage: 0.55,
+          barPercentage: 0.65
         },
         {
           type: 'line',
@@ -727,6 +736,17 @@ if (seq !== this.requestSeq) return;
           label: 'Saldo',
           borderColor: corRoxa(),
           borderWidth: 2,
+          tension: 0.4,
+          fill: false,
+          pointRadius: 0
+        },
+        {
+          type: 'line',
+          data: anual.resumoPorMes.map(m => m.saldoAcumulado),
+          label: 'Saldo acumulado',
+          borderColor: corInformacao(),
+          borderWidth: 2,
+          borderDash: [6, 4],
           tension: 0.4,
           fill: false,
           pointRadius: 0

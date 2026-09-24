@@ -164,6 +164,7 @@ public class DashboardAppService : IDashboardAppService
             var resumoParceria = await _parceriaRepository.ResumoAnualAsync(idUsuario, ano, idConta);
 
             var resumoPorMes = new List<MensalResumoAnual>();
+            var saldoAcumulado = 0m;
             for (int m = 1; m <= 12; m++)
             {
                 var rec = receitasPorMes.FirstOrDefault(r => r.Mes == m);
@@ -173,6 +174,8 @@ public class DashboardAppService : IDashboardAppService
                 var totalRecebido = rec?.TotalRealizado ?? 0;
                 var totalDesp = desp?.Total ?? 0;
                 var totalPago = desp?.TotalRealizado ?? 0;
+                var saldo = totalRec - totalDesp;
+                saldoAcumulado += saldo;
 
                 resumoPorMes.Add(new MensalResumoAnual
                 {
@@ -181,8 +184,9 @@ public class DashboardAppService : IDashboardAppService
                     TotalRecebido = totalRecebido,
                     TotalDespesas = totalDesp,
                     TotalPago = totalPago,
-                    Saldo = totalRec - totalDesp,
-                    SaldoRealizado = totalRecebido - totalPago
+                    Saldo = saldo,
+                    SaldoRealizado = totalRecebido - totalPago,
+                    SaldoAcumulado = saldoAcumulado
                 });
             }
 
