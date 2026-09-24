@@ -198,6 +198,11 @@ CREATE TABLE IF NOT EXISTS Receita (
     CONSTRAINT FK_Receita_Contrato FOREIGN KEY (IdContrato) REFERENCES Contrato(Id)
 );
 
+ALTER TABLE Receita ADD COLUMN IF NOT EXISTS IdContrato UUID NULL;
+ALTER TABLE Receita ADD COLUMN IF NOT EXISTS IdSubcategoria UUID NULL;
+ALTER TABLE Despesa ADD COLUMN IF NOT EXISTS IdSubcategoria UUID NULL;
+ALTER TABLE ContaBancaria ADD COLUMN IF NOT EXISTS EhPadrao BOOLEAN NOT NULL DEFAULT FALSE;
+
 CREATE INDEX IF NOT EXISTS IX_Receita_Parceria ON Receita(IdParceria);
 CREATE INDEX IF NOT EXISTS IX_Receita_Contrato ON Receita(IdContrato);
 
@@ -270,16 +275,7 @@ CREATE TABLE IF NOT EXISTS CategoriaHistorico (
 
 CREATE INDEX IF NOT EXISTS IX_CategoriaHistorico_Categoria ON CategoriaHistorico(IdCategoria, TipoCategoria);
 
--- ============================================================
--- Colunas que podem faltar em bancos antigos (ADD IF NOT EXISTS)
--- ============================================================
-
-ALTER TABLE ContaBancaria ADD COLUMN IF NOT EXISTS EhPadrao BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE Receita ADD COLUMN IF NOT EXISTS IdContrato UUID NULL;
-ALTER TABLE Receita ADD COLUMN IF NOT EXISTS IdSubcategoria UUID NULL;
-ALTER TABLE Despesa ADD COLUMN IF NOT EXISTS IdSubcategoria UUID NULL;
-
--- Garante FK de IdContrato se foi adicionada agora (idempotente)
+-- Garante FK de IdContrato (colunas já garantidas acima, idempotente)
 DO $$ BEGIN
     ALTER TABLE Receita ADD CONSTRAINT FK_Receita_Contrato FOREIGN KEY (IdContrato) REFERENCES Contrato(Id);
 EXCEPTION WHEN duplicate_object THEN NULL;
