@@ -19,7 +19,7 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 | `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
 | `100_DDL_AtualizarEstrutura.sql` | **DDL idempotente p/ Neon desatualizado**: sincroniza schema (cria tabelas/colunas/índices/FKs faltantes) |
 | `101_DML_Limpar_E_Copiar_Dados.sql` | **DML idempotente**: `TRUNCATE CASCADE` — esvazia o banco (rodar antes de copiar) |
-| `102_DML_Seed_1Ano_Joao_Maria.sql` | **DML**: gera 12 meses de receitas/despesas para `joao@portal.com` e `maria@portal.com` |
+| `102_DML_Seed_5Anos_Joao_Maria.sql` | **DML**: gera 60 meses (5 anos) de receitas/despesas para `joao@portal.com` e `maria@portal.com` |
 
 > **Copiar Local → Prod (Neon):** DDL e DML separados, conforme solicitado:
 > 1. **DDL — estrutura:** `psql "$DATABASE_URL" -f scripts/postgres/100_DDL_AtualizarEstrutura.sql`
