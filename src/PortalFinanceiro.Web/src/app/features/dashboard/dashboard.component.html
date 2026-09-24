@@ -608,6 +608,211 @@
             </app-collapsible-section>
           </div>
 
+          <app-collapsible-section title="Outros indicadores" icon="chart-network" iconVariant="primary">
+            <div class="indicadores-grid">
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--primary">
+                    <svg lucideIcon="arrow-down-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Fluxo de caixa anual</span>
+                  <span class="ind-tile__help" data-tip="Movimentação efetiva de dinheiro no ano: recebido menos pago (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Movimentação efetiva de dinheiro no ano: recebido menos pago (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value" [class.green]="(kpiAnualExtra()?.fluxo ?? 0) >= 0" [class.red]="(kpiAnualExtra()?.fluxo ?? 0) < 0">{{ kpiAnualExtra()?.fluxo | valorMascarado }}</div>
+                <div class="card-sub">Recebido menos pago no ano</div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="banknote-arrow-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Receita recorrente</span>
+                  <span class="ind-tile__help" data-tip="Receitas do ano geradas por regras de repetição" tabindex="0" role="img" aria-label="Receitas do ano geradas por regras de repetição"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value green">{{ recRecorrenteAnual().valor | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (recRecorrenteAnual().percentual !== null && recRecorrenteAnual().percentual !== undefined) {
+                    {{ recRecorrenteAnual().percentual!.toLocaleString('pt-BR') }}% da receita
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--red">
+                    <svg lucideIcon="banknote-arrow-down" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Despesa recorrente</span>
+                  <span class="ind-tile__help" data-tip="Despesas do ano geradas por regras de repetição (custo fixo)" tabindex="0" role="img" aria-label="Despesas do ano geradas por regras de repetição (custo fixo)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value red">{{ despRecorrenteAnual().valor | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (despRecorrenteAnual().percentual !== null && despRecorrenteAnual().percentual !== undefined) {
+                    {{ despRecorrenteAnual().percentual!.toLocaleString('pt-BR') }}% das despesas
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--primary">
+                    <svg lucideIcon="briefcase-business" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Contratos ativos</span>
+                  <span class="ind-tile__help" data-tip="Contratos com status ativo e quanto ainda falta receber" tabindex="0" role="img" aria-label="Contratos com status ativo e quanto ainda falta receber"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value">{{ resumoContratos().qtd }}</div>
+                <div class="card-sub">
+                  @if (resumoContratos().qtd > 0) {
+                    Falta receber {{ resumoContratos().faltaReceber | valorMascarado }}
+                  } @else {
+                    Sem contratos ativos
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--warning">
+                    <svg lucideIcon="handshake" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Parcerias no ano</span>
+                  <span class="ind-tile__help" data-tip="Total pago a parcerias no ano, já incluso na despesa" tabindex="0" role="img" aria-label="Total pago a parcerias no ano, já incluso na despesa"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value">{{ dataAnual()?.resumoParcerias?.totalPago | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if ((dataAnual()?.resumoParcerias?.qtdParcerias ?? 0) > 0) {
+                    {{ dataAnual()?.resumoParcerias?.qtdParcerias }} parcerias no ano
+                  } @else {
+                    Sem parcerias no ano
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="chart-line" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Margem líquida anual</span>
+                  <span class="ind-tile__help" data-tip="Lucro líquido do ano dividido pela receita do ano" tabindex="0" role="img" aria-label="Lucro líquido do ano dividido pela receita do ano"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value">
+                  @if (kpiAnualExtra()?.margem !== null && kpiAnualExtra()?.margem !== undefined) {
+                    {{ kpiAnualExtra()!.margem!.toLocaleString('pt-BR') }}%
+                  } @else {
+                    —
+                  }
+                </div>
+                <div class="card-sub">Lucro líquido ÷ receita</div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--primary">
+                    <svg lucideIcon="coins" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Ponto de equilíbrio</span>
+                  <span class="ind-tile__help" data-tip="Receita necessária no ano para cobrir as despesas do ano" tabindex="0" role="img" aria-label="Receita necessária no ano para cobrir as despesas do ano"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="kpi-main">
+                  <div class="card-value">{{ kpiAnualExtra()?.pontoEquilibrio | valorMascarado }}</div>
+                  @if (kpiAnualExtra()?.distanciaPonto !== null && kpiAnualExtra()?.distanciaPonto !== undefined) {
+                    <span class="pill" [class.pill--green]="(kpiAnualExtra()!.distanciaPonto!) >= 0" [class.pill--red]="(kpiAnualExtra()!.distanciaPonto!) < 0">
+                      @if ((kpiAnualExtra()!.distanciaPonto!) >= 0) { ↑ } @else { ↓ }
+                      {{ kpiAnualExtra()!.distanciaPonto }}%
+                    </span>
+                  } @else {
+                    <span class="pill pill--muted">—</span>
+                  }
+                </div>
+                <div class="card-sub">Receita atual: {{ dataAnual()?.totalReceitas | valorMascarado }}</div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="trending-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Melhor / pior mês</span>
+                  <span class="ind-tile__help" data-tip="Meses com maior e menor saldo (receitas menos despesas) no ano" tabindex="0" role="img" aria-label="Meses com maior e menor saldo (receitas menos despesas) no ano"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                @if (melhorPiorMesAnual()) {
+                  <div class="card-value">{{ MESES[melhorPiorMesAnual()!.melhor.mes - 1] }}</div>
+                  <div class="card-sub">{{ melhorPiorMesAnual()!.melhor.saldo | valorMascarado }} · Pior: {{ MESES[melhorPiorMesAnual()!.pior.mes - 1] }} ({{ melhorPiorMesAnual()!.pior.saldo | valorMascarado }})</div>
+                } @else {
+                  <div class="card-value">—</div>
+                  <div class="card-sub">Sem dados no ano</div>
+                }
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--primary">
+                    <svg lucideIcon="calendar-clock" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Taxa de realização</span>
+                  <span class="ind-tile__help" data-tip="Quanto do previsto no ano já virou dinheiro: recebido sobre receitas e pago sobre despesas" tabindex="0" role="img" aria-label="Quanto do previsto no ano já virou dinheiro: recebido sobre receitas e pago sobre despesas"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value">
+                  @if (kpiAnualExtra()?.taxaRecebida !== null && kpiAnualExtra()?.taxaRecebida !== undefined) {
+                    {{ kpiAnualExtra()!.taxaRecebida!.toLocaleString('pt-BR') }}%
+                  } @else {
+                    —
+                  }
+                </div>
+                <div class="card-sub">
+                  @if (kpiAnualExtra()?.taxaPaga !== null && kpiAnualExtra()?.taxaPaga !== undefined) {
+                    {{ kpiAnualExtra()!.taxaPaga!.toLocaleString('pt-BR') }}% das despesas pagas
+                  } @else {
+                    Sem base no ano
+                  }
+                </div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--info">
+                    <svg lucideIcon="wallet" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Médias mensais</span>
+                  <span class="ind-tile__help" data-tip="Média por mês considerado no ano: receitas e despesas" tabindex="0" role="img" aria-label="Média por mês considerado no ano: receitas e despesas"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value">{{ kpiAnualExtra()?.mediaReceitas | valorMascarado }}</div>
+                <div class="card-sub">Despesas: {{ kpiAnualExtra()?.mediaDespesas | valorMascarado }} · {{ dataAnual()?.mesesConsiderados }} meses</div>
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--primary">
+                    <svg lucideIcon="star" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Top categoria do ano</span>
+                  <span class="ind-tile__help" data-tip="Categoria com maior total no ano em receitas e em despesas" tabindex="0" role="img" aria-label="Categoria com maior total no ano em receitas e em despesas"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                @if (topCategoriaAnual()?.topRec || topCategoriaAnual()?.topDesp) {
+                  <div class="card-value" style="font-size: 1rem;">{{ topCategoriaAnual()?.topRec?.nome ?? '—' }}</div>
+                  <div class="card-sub">{{ topCategoriaAnual()?.topRec?.total | valorMascarado }} · Desp: {{ topCategoriaAnual()?.topDesp?.nome ?? '—' }} ({{ topCategoriaAnual()?.topDesp?.total | valorMascarado }})</div>
+                } @else {
+                  <div class="card-value">—</div>
+                  <div class="card-sub">Sem categorias no ano</div>
+                }
+              </div>
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--warning">
+                    <svg lucideIcon="calendar-clock" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Previsão restante</span>
+                  <span class="ind-tile__help" data-tip="Saldo previsto para os meses restantes do ano pelas regras vigentes" tabindex="0" role="img" aria-label="Saldo previsto para os meses restantes do ano pelas regras vigentes"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value" [class.green]="(previsaoRestanteAnual().saldo ?? 0) >= 0" [class.red]="(previsaoRestanteAnual().saldo ?? 0) < 0">{{ previsaoRestanteAnual().saldo | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (previsaoRestanteAnual().meses > 0) {
+                    {{ previsaoRestanteAnual().meses }} meses restantes
+                  } @else {
+                    Ano encerrado
+                  }
+                </div>
+              </div>
+            </div>
+          </app-collapsible-section>
+
           <app-collapsible-section title="Distribuição por categoria e subcategoria" icon="tags" iconVariant="primary">
             <div slot="actions" class="view-toggle view-toggle--sm">
               <button class="toggle-btn" [class.active]="tipoDistribuicao() === 'receita'" (click)="trocarTipoDistribuicao('receita')">Receitas</button>

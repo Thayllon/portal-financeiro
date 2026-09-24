@@ -5,6 +5,7 @@ public class ResumoAnualItem
     public int Mes { get; set; }
     public decimal Total { get; set; }
     public decimal TotalRealizado { get; set; }
+    public decimal TotalRecorrente { get; set; }
 }
 
 public class ResumoAnualContaItem

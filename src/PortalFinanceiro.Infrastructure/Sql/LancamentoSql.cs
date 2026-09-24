@@ -78,7 +78,8 @@ internal static class LancamentoSql
         => $@"
         SELECT {SqlDialect.Current.MonthOf($"{t}.Data")} AS Mes,
                SUM({t}.Valor) AS Total,
-               SUM(CASE WHEN {t}.Status = 2 THEN {t}.Valor ELSE 0 END) AS TotalRealizado
+               SUM(CASE WHEN {t}.Status = 2 THEN {t}.Valor ELSE 0 END) AS TotalRealizado,
+               SUM(CASE WHEN {t}.IdRegra IS NOT NULL THEN {t}.Valor ELSE 0 END) AS TotalRecorrente
         FROM {t}
         WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {SqlDialect.Current.YearOf($"{t}.Data")} = @Ano
           AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)

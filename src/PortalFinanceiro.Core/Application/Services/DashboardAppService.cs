@@ -233,6 +233,8 @@ public class DashboardAppService : IDashboardAppService
             var totalDespesasAno = resumoPorMes.Sum(m => m.TotalDespesas);
             var totalPagoAno = resumoPorMes.Sum(m => m.TotalPago);
             var saldoAno = totalReceitasAno - totalDespesasAno;
+            var totalReceitasRecorrentesAno = receitasPorMes.Sum(r => r.TotalRecorrente);
+            var totalDespesasRecorrentesAno = despesasPorMes.Sum(d => d.TotalRecorrente);
 
             var anoAnterior = ano - 1;
             var recAnterior = (await _receitaRepository.ResumoAnualPorMesAsync(idUsuario, anoAnterior, idConta)).Sum(r => r.Total);
@@ -258,6 +260,8 @@ public class DashboardAppService : IDashboardAppService
                 VariacaoSaldoPercentual = CalcularVariacao(saldoAno, recAnterior - despAnterior),
                 MediaMensalSaldo = mediaMensalSaldo,
                 MesesConsiderados = mesesConsiderados,
+                TotalReceitasRecorrentes = totalReceitasRecorrentesAno,
+                TotalDespesasRecorrentes = totalDespesasRecorrentesAno,
                 ResumoPorMes = resumoPorMes,
                 ResumoPorConta = todasContas.Values.ToList(),
                 DistribuicaoReceitas = MontarDistribuicao(receitasPorCategoria),
