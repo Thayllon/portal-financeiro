@@ -204,6 +204,23 @@
   flex-shrink: 0;
 }
 
+.split {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.split__labels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  flex-wrap: wrap;
+}
+
 .progress-group {
   display: flex;
   flex-direction: column;
