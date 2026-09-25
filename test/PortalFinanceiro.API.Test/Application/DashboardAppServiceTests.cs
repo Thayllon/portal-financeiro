@@ -27,7 +27,7 @@ public class DashboardAppServiceTests
         public Task AtualizarAsync(Receita entity) => throw new NotImplementedException();
         public Task ExcluirAsync(Guid id) => throw new NotImplementedException();
         public Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
-            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes.Where(r => ano == 2020));
+            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes);
         public Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
             => Task.FromResult<IEnumerable<ResumoAnualContaItem>>(Array.Empty<ResumoAnualContaItem>());
         public Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
@@ -51,7 +51,7 @@ public class DashboardAppServiceTests
         public Task AtualizarAsync(Despesa entity) => throw new NotImplementedException();
         public Task ExcluirAsync(Guid id) => throw new NotImplementedException();
         public Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
-            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes.Where(r => ano == 2020));
+            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes);
         public Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
             => Task.FromResult<IEnumerable<ResumoAnualContaItem>>(Array.Empty<ResumoAnualContaItem>());
         public Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
