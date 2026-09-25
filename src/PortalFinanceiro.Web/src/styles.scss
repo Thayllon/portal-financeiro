@@ -1,5 +1,6 @@
 @use 'app/design-system/styles/tokens';
 @use 'app/design-system/styles/colors';
+@use 'app/design-system/styles/shared';
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -13,7 +14,7 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   font-size: 14px;
   color: var(--text-primary);
-  background: #e8ecf1;
+  background: var(--body-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

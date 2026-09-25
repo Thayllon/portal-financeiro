@@ -19,6 +19,7 @@ import { CollapsibleSectionComponent } from '../../shared/components/collapsible
 import { LucideDynamicIcon } from '@lucide/angular';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, Chart, ChartType, registerables, Plugin } from 'chart.js';
+import { PALETA_DONUT, COR_BORDA_DONUT } from '../../shared/constants/chart-palette.constants';
 
 Chart.register(...registerables);
 
@@ -124,8 +125,6 @@ function criarRotuloValorBarras(casasDecimais: number): Plugin<'bar'> {
     }
   };
 }
-
-const PALETA_DONUT = ['#0d9488', '#dc2626', '#5b8def', '#eab308', '#f97316', '#a855f7', '#64748b', '#16a34a', '#ec4899', '#14b8a6'];
 
 @Component({
   selector: 'app-dashboard',
@@ -604,7 +603,7 @@ if (seq !== this.requestSeq) return;
           data: itens.map(i => i.total),
           backgroundColor: itens.map((_, idx) => PALETA_DONUT[idx % PALETA_DONUT.length]),
           borderWidth: 2,
-          borderColor: '#ffffff'
+          borderColor: COR_BORDA_DONUT
         }
       ]
     };
