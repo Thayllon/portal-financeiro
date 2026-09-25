@@ -328,6 +328,20 @@
   text-overflow: ellipsis;
 }
 
+.app-footer__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: -2px;
+  margin-left: 6px;
+  color: inherit;
+  line-height: 0;
+
+  svg {
+    display: block;
+  }
+}
+
 @include r.mobile {
   :host {
     padding: 0;
