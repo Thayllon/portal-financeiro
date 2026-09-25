@@ -57,6 +57,15 @@
             <span class="party__sub">{{ p.valor | valorMascarado }}</span>
           </div>
         </div>
+        <div class="split">
+          <div class="split__labels">
+            <span>Parceiro · {{ p.valorParceiro | valorMascarado }}</span>
+            <span>Minha parte · {{ p.minhaParte | valorMascarado }}</span>
+          </div>
+          <div class="pct-bar">
+            <span class="pct-bar__fill" [style.width.%]="p.percentualParceiro"></span>
+          </div>
+        </div>
       </div>
 
       <div class="hero__card hero__card--progress">
