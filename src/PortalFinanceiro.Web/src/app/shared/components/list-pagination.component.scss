@@ -18,14 +18,8 @@
   font-size: 0.8125rem;
   color: var(--text-muted);
 }
-.lp__size {
-  padding: 0.25rem 0.75rem;
-  border: 1px solid var(--surface-border);
-  border-radius: var(--radius-pill);
-  font-size: 0.8125rem;
-  color: var(--text-primary);
-  background: var(--content-surface);
-  cursor: pointer;
+.lp__size-select {
+  width: 5.5rem;
 }
 .lp__controls {
   display: flex;

@@ -10,6 +10,7 @@ import { ParceriaRepository } from '../../core/repositories/parceria.repository'
 import { ContratoRepository } from '../../core/repositories/contrato.repository';
 import { AuthService } from '../../core/services/auth.service';
 import { ReceitaRequest } from '../../core/models/receita.model';
+import { DespesaRequest } from '../../core/models/despesa.model';
 import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
@@ -350,7 +351,7 @@ export class LancamentoListagemComponent implements OnInit {
   async salvar(data: LancamentoForm) {
     this.salvando.set(true);
     try {
-      const request: ReceitaRequest = {
+      const comuns = {
         descricao: data.descricao,
         valor: data.valor,
         data: data.data + 'T00:00:00',
@@ -358,7 +359,6 @@ export class LancamentoListagemComponent implements OnInit {
         idCategoria: data.idCategoria,
         idSubcategoria: data.idSubcategoria || undefined,
         idParceria: data.idParceria || undefined,
-        idContrato: this.ehReceita() ? data.idContrato || undefined : undefined,
         servicos: data.servicos?.map(s => ({
           categoriaServicoId: s.categoriaServicoId,
           subcategoriaServicoId: s.subcategoriaServicoId
@@ -372,15 +372,19 @@ export class LancamentoListagemComponent implements OnInit {
       const rotulo = this.config().singular;
       if (this.editando()?.id) {
         if (this.ehReceita()) {
+          const request: ReceitaRequest = { ...comuns, idContrato: data.idContrato || undefined };
           await firstValueFrom(this.receitaRepo.atualizar(this.editando()!.id, request));
         } else {
+          const request: DespesaRequest = { ...comuns };
           await firstValueFrom(this.despesaRepo.atualizar(this.editando()!.id, request));
         }
         this.notify.success(`${rotulo.charAt(0).toUpperCase() + rotulo.slice(1)} atualizada`);
       } else {
         if (this.ehReceita()) {
+          const request: ReceitaRequest = { ...comuns, idContrato: data.idContrato || undefined };
           await firstValueFrom(this.receitaRepo.criar(request));
         } else {
+          const request: DespesaRequest = { ...comuns };
           await firstValueFrom(this.despesaRepo.criar(request));
         }
         this.notify.success(data.repete ? `${rotulo.charAt(0).toUpperCase() + rotulo.slice(1)} recorrente criada` : `${rotulo.charAt(0).toUpperCase() + rotulo.slice(1)} criada`);

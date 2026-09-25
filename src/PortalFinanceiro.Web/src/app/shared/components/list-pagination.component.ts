@@ -1,22 +1,23 @@
-import { Component, input } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { PaginationState } from '../composables/use-list-pagination.composable';
 import { PAGE_SIZE_OPTIONS, PageSizeOption } from '../constants/pagination.constants';
+import { CustomSelectComponent, SelectOption } from './custom-select.component';
 
 @Component({
   selector: 'app-list-pagination',
   standalone: true,
-  imports: [LucideDynamicIcon],
+  imports: [LucideDynamicIcon, CustomSelectComponent],
   templateUrl: './list-pagination.component.html',
   styleUrl: './list-pagination.component.scss'
 })
 export class ListPaginationComponent {
   pagination = input.required<PaginationState & { pageSize: import('@angular/core').Signal<PageSizeOption>; onPageSizeChange: (size: PageSizeOption) => void }>();
 
-  pageSizes = PAGE_SIZE_OPTIONS;
+  sizeOptions: SelectOption[] = PAGE_SIZE_OPTIONS.map(size => ({ value: String(size), label: String(size) }));
+  tamanhoSelecionado = computed(() => String(this.pagination().pageSize()));
 
-  onSizeChange(event: Event) {
-    const value = Number((event.target as HTMLSelectElement).value) as PageSizeOption;
-    this.pagination().onPageSizeChange(value);
+  onSizeChangeValue(value: string) {
+    this.pagination().onPageSizeChange(Number(value) as PageSizeOption);
   }
 }
