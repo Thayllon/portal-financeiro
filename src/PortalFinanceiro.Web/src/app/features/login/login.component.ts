@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -28,26 +30,24 @@ export class LoginComponent {
   salvandoSenha = signal(false);
   erroSenha = signal('');
 
-  onSubmit() {
+  async onSubmit(): Promise<void> {
     this.loading.set(true);
     this.erro.set('');
-    this.authService.login(this.email, this.senha).subscribe({
-      next: (response) => {
-        this.loading.set(false);
-        if (response.precisaTrocarSenha) {
-          this.trocandoSenha.set(true);
-          return;
-        }
-        this.router.navigate(['/']);
-      },
-      error: (err) => {
-        this.erro.set(err.status === 0 ? 'Não foi possível conectar ao servidor.' : 'Dados inválidos.');
-        this.loading.set(false);
+    try {
+      const response = await firstValueFrom(this.authService.login(this.email, this.senha));
+      this.loading.set(false);
+      if (response.precisaTrocarSenha) {
+        this.trocandoSenha.set(true);
+        return;
       }
-    });
+      await this.router.navigate(['/']);
+    } catch (err: unknown) {
+      this.erro.set(err instanceof HttpErrorResponse && err.status === 0 ? 'Não foi possível conectar ao servidor.' : 'Dados inválidos.');
+      this.loading.set(false);
+    }
   }
 
-  onTrocarSenha() {
+  async onTrocarSenha(): Promise<void> {
     if (this.novaSenha.length < 6) {
       this.erroSenha.set('A nova senha deve ter no mínimo 6 caracteres.');
       return;
@@ -58,13 +58,13 @@ export class LoginComponent {
     }
     this.salvandoSenha.set(true);
     this.erroSenha.set('');
-    this.authService.trocarSenha(this.email, this.senha, this.novaSenha).subscribe({
-      next: () => this.router.navigate(['/']),
-      error: (err) => {
-        this.erroSenha.set(err.status === 0 ? 'Não foi possível conectar ao servidor.' : 'Não foi possível alterar a senha. Tente novamente.');
-        this.salvandoSenha.set(false);
-      }
-    });
+    try {
+      await firstValueFrom(this.authService.trocarSenha(this.email, this.senha, this.novaSenha));
+      await this.router.navigate(['/']);
+    } catch (err: unknown) {
+      this.erroSenha.set(err instanceof HttpErrorResponse && err.status === 0 ? 'Não foi possível conectar ao servidor.' : 'Não foi possível alterar a senha. Tente novamente.');
+      this.salvandoSenha.set(false);
+    }
   }
 
   voltarLogin() {

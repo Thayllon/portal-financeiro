@@ -308,7 +308,7 @@ export class LancamentoModalComponent {
     return this.form().categoriasServicoBloco[blocoIndex]?.subcategoriasSelecionadas.includes(subcategoriaId) ?? false;
   }
 
-  flatttenServicos(): ServicoItem[] {
+  flattenServicos(): ServicoItem[] {
     const result: ServicoItem[] = [];
     for (const bloco of this.form().categoriasServicoBloco) {
       if (bloco.subcategoriasSelecionadas.length > 0) {
@@ -596,7 +596,7 @@ export class LancamentoModalComponent {
     }
 
     this.fieldErrors.set({});
-    this.saved.emit({ ...f, servicos: this.flatttenServicos() });
+    this.saved.emit({ ...f, servicos: this.flattenServicos() });
   }
 
   updateFormField<K extends keyof LancamentoForm>(key: K, value: LancamentoForm[K]) {
