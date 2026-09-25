@@ -45,7 +45,7 @@
 
       @if (visualizacao() === 'mensal') {
         @if (loading()) {
-          <div class="cards">
+          <div class="cards cards--kpi">
             <app-skeleton type="card" [count]="4" />
           </div>
         } @else {
