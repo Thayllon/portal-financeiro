@@ -404,7 +404,6 @@ export class DashboardComponent implements OnInit {
   chartVersion = signal(0);
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
   private graficoMensal = signal<{ label: string; mes: number; ano: number; d: Dashboard }[]>([]);
-  valoresExibidos = signal<{ receitas: number; despesas: number; previsto: number }[]>([]);
   valoresTooltip = signal<{ previsto: number }[]>([]);
   modoPorConta = computed(() => (this.data()?.resumoPorConta?.length ?? 0) > 1);
 
@@ -566,7 +565,6 @@ if (seq !== this.requestSeq) return;
     this.data.set(null);
     this.dataAnual.set(null);
     this.graficoMensal.set([]);
-    this.valoresExibidos.set([]);
     this.valoresTooltip.set([]);
     this.barChartData = { labels: [], datasets: [] };
     this.barChartAnualData = { labels: [], datasets: [] };
@@ -663,7 +661,6 @@ if (seq !== this.requestSeq) return;
     const itens = todos.slice(-3);
 
     const valores = itens.map(i => this.valorExibido(i.mes, i.ano, i.d));
-    this.valoresExibidos.set(valores);
     this.valoresTooltip.set(valores);
 
     this.barChartData = {

@@ -78,7 +78,6 @@ export class ContratosComponent implements OnInit {
   contratosNormais = computed(() => this.contratos().filter(c => !c.ehRecorrente));
   contratosRecorrentes = computed(() => this.contratos().filter(c => c.ehRecorrente));
 
-  paginacao = useListPagination(this.contratos, { initialPageSize: 10 });
   paginacaoContrato = useListPagination(this.contratosNormais, { initialPageSize: 10 });
   paginacaoRecorrente = useListPagination(this.contratosRecorrentes, { initialPageSize: 10 });
 

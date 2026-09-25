@@ -78,12 +78,6 @@ public class Usuario
         DataAlteracao = DateTime.UtcNow;
     }
 
-    public void MarcarSenhaAlterada()
-    {
-        PrimeiroAcesso = false;
-        DataAlteracao = DateTime.UtcNow;
-    }
-
     public void ResetarSenha(string novaSenhaHash)
     {
         SenhaHash = novaSenhaHash;

@@ -12,10 +12,6 @@ export class PessoaRepository extends BaseHttpRepository {
     return this.get<Pessoa[]>('/pessoas');
   }
 
-  obter(id: string): Observable<Pessoa> {
-    return this.get<Pessoa>(`/pessoas/${id}`);
-  }
-
   criar(data: PessoaRequest): Observable<Pessoa> {
     return this.post<Pessoa>('/pessoas', data);
   }

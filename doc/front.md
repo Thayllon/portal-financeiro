@@ -6,7 +6,7 @@
 - **Design system** próprio em `src/app/design-system/styles/` (tokens, mixins, variáveis)
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes reutilizáveis** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login)
+- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login, testes)
 
 ## Como rodar / buildar / testar
 

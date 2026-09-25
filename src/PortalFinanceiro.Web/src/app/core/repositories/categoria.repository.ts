@@ -13,10 +13,6 @@ class CategoriaBaseRepository extends BaseHttpRepository {
     return this.get<Categoria[]>(`/categorias/${this.rota}`);
   }
 
-  obter(id: string): Observable<Categoria> {
-    return this.get<Categoria>(`/categorias/${this.rota}/${id}`);
-  }
-
   criar(data: CategoriaRequest): Observable<Categoria> {
     return this.post<Categoria>(`/categorias/${this.rota}`, data);
   }

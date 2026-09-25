@@ -1,6 +1,6 @@
 -- Portal Financeiro - Schema unificado (PostgreSQL).
 -- ATENÇÃO: executar somente em banco NOVO (from scratch).
--- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 099_SeedBase.sql.
+-- Schema base: 001_CriarTabelas.sql + incrementais 003-006 + 099_SeedBase.sql.
 -- Bancos já criados evoluem apenas via scripts incrementais (quando existirem).
 
 CREATE TABLE Usuario (
