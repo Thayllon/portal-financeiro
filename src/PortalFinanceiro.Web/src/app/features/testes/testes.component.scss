@@ -15,23 +15,6 @@
   gap: 0.75rem;
 }
 
-.page__badge {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  flex-shrink: 0;
-  background: var(--color-primary-muted);
-  color: var(--color-primary);
-  border-radius: var(--radius-lg);
-}
-
-.page__icon {
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
 .page__title {
   @include layout.page-title;
 }
@@ -210,22 +193,3 @@
   font-size: 0.875rem;
 }
 
-.skeleton-row {
-  display: flex;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--surface-border);
-}
-
-.skeleton-line {
-  height: 1rem;
-  background: linear-gradient(90deg, var(--surface-border) 25%, var(--content-bg) 50%, var(--surface-border) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: var(--radius-sm);
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
