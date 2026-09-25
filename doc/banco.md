@@ -5,20 +5,26 @@
 | Provider | Pasta | Status |
 |----------|-------|--------|
 | SQL Server | `scripts/sqlserver/` | **Padrão do app** (LocalDB) |
-| PostgreSQL | `scripts/postgres/` | Pronto (uuid, boolean, `gen_random_uuid`), aguarda suporte no `SqlDialect` |
+| PostgreSQL | `scripts/postgres/` | Suportado (`Npgsql` + `PostgresDialect`; provider via `Database__Provider`) |
 
 ## Scripts
 
-Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
+Ambos os providers têm o **mesmo conjunto "from scratch"** (banco novo) mais
+incrementais idempotentes para bancos já criados:
 
 | Script | Conteúdo |
 |--------|----------|
 | `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro`, `Contrato` + `Receita.IdContrato` e `PermissaoUsuario`) |
 | `003_FluxoAdicionalDespesa.sql` | Incremental idempotente para bancos criados antes do refactor: adiciona `Despesa.IdCliente` e tabela `DespesaServico` se ainda não existirem |
+| `004_ContaPadrao.sql` | Incremental idempotente: adiciona `ContaBancaria.EhPadrao` se ainda não existir |
 | `005_Contratos.sql` | Incremental idempotente: cria `Contrato`, adiciona `Receita.IdContrato` (FK + índice) e garante o módulo `contratos` em `PermissaoUsuario` |
-| `099_SeedBase.sql` | Admin + garantia do módulo `parcerias` para usuários sem a permissão |
+| `006_ContratoRecorrente.sql` | Incremental idempotente: adiciona `Contrato.EhRecorrente` + `Contrato.IdRegra` se ainda não existirem |
+### Operacionais Postgres (só em `scripts/postgres/` — uso manual, NÃO via DbUp)
+
+| Script | Conteúdo |
+|--------|----------|
 | `100_DDL_AtualizarEstrutura.sql` | **DDL idempotente p/ Neon desatualizado**: sincroniza schema (cria tabelas/colunas/índices/FKs faltantes) |
-| `101_DML_Limpar_E_Copiar_Dados.sql` | **DML idempotente**: `TRUNCATE CASCADE` — esvazia o banco (rodar antes de copiar) |
+| `101_DML_Limpar_E_Copiar_Dados.sql` | **DML destrutivo**: `TRUNCATE CASCADE` — esvazia o banco (rodar antes de copiar) |
 | `102_DML_Seed_5Anos_Joao_Maria.sql` | **DML**: gera 60 meses (5 anos) de receitas/despesas para `joao@portal.com` e `maria@portal.com` |
 
 > **Copiar Local → Prod (Neon):** DDL e DML separados, conforme solicitado:
@@ -34,7 +40,9 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 >
 > Os incrementais antigos (`006`–`014` no SQL Server, `002`–`006` no Postgres e
 > `002_AdicionarNomePercentualParceria`) foram removidos por já estarem absorvidos no `001` — com exceção do backfill de
-> `parcerias`, movido para o `099_SeedBase`. O `003_FluxoAdicionalDespesa` foi **recriado** idempotente pois o `001` from-scratch não é reaplicado em bancos existentes e o erro “Não foi possível retornar as despesas” ocorria justamente pela falta de `IdCliente`/`DespesaServico`.
+> `parcerias`, movido para o `099_SeedBase`. A numeração foi **reutilizada**: os atuais
+> `003`/`004`/`005`/`006` são scripts novos e idempotentes para bancos já criados (o `003_FluxoAdicionalDespesa` foi
+> **recriado** idempotente pois o `001` from-scratch não é reaplicado em bancos existentes e o erro “Não foi possível retornar as despesas” ocorria justamente pela falta de `IdCliente`/`DespesaServico`).
 
 ### Differs entre providers
 
@@ -48,10 +56,13 @@ Cada provider tem o **mesmo conjunto "from scratch"** (banco novo):
 ```bash
 # Criar banco padrão (SQL Server LocalDB) + rodar scripts de scripts/sqlserver
 dotnet run --project tools/DbSetup
-
-# Pasta customizada (ex.: Postgres)
-dotnet run --project tools/DbSetup -- --scripts=C:\caminho\scripts\postgres
 ```
+
+> O `DbSetup` é **somente SQL Server** (DbUp + `Microsoft.Data.SqlClient`) e roda
+> todos os scripts da pasta em ordem de nome. **Não** aponte `--scripts=` para
+> `scripts/postgres/` (sintaxe Postgres não roda no LocalDB) e **não** rode os
+> operacionais `101`/`102` via DbUp — são manuais e destrutivos (`TRUNCATE`, seed
+> de 5 anos).
 
 - Cria o banco `PortalFinanceiro` no LocalDB caso não exista
 - Roda os scripts em ordem de nome (não aplica os que já estão no journal)

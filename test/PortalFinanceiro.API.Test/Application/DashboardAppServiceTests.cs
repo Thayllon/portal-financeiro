@@ -45,7 +45,6 @@ public class DashboardAppServiceTests
         public Task<int> ContarPorSubcategoriaAsync(Guid idSubcategoria) => throw new NotImplementedException();
         public Task<int> ContarPorRegraAsync(Guid idRegra) => throw new NotImplementedException();
         public Task<IEnumerable<Despesa>> ListarPorRegraAsync(Guid idRegra) => throw new NotImplementedException();
-        public Task<IEnumerable<Despesa>> ListarPorReceitaOrigemAsync(Guid idReceitaOrigem) => throw new NotImplementedException();
         public Task<IEnumerable<DespesaProjecao>> ListarPorParceriaAsync(Guid idParceria) => throw new NotImplementedException();
         public Task InserirAsync(Despesa entity) => throw new NotImplementedException();
         public Task InserirEmMassaAsync(IEnumerable<Despesa> entities) => throw new NotImplementedException();

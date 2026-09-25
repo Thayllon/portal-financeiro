@@ -1,7 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
-import { AuthService } from '../../core/services/auth.service';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { ContaBancaria, ContaBancariaRequest } from '../../core/models/conta-bancaria.model';
 import { NotificationService } from '../../core/services/notification.service';
@@ -23,7 +22,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
 })
 export class ContasComponent implements OnInit {
   private repo = inject(ContaBancariaRepository);
-  private auth = inject(AuthService);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
 

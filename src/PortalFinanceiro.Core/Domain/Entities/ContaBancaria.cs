@@ -64,10 +64,4 @@ public class ContaBancaria
         EhPadrao = true;
         DataAlteracao = DateTime.UtcNow;
     }
-
-    public void RemoverPadrao()
-    {
-        EhPadrao = false;
-        DataAlteracao = DateTime.UtcNow;
-    }
 }

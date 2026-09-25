@@ -26,10 +26,6 @@ export class ReceitaRepository extends BaseHttpRepository {
     return this.get<Receita[]>('/receitas', filtros);
   }
 
-  obter(id: string): Observable<Receita> {
-    return this.get<Receita>(`/receitas/${id}`);
-  }
-
   criar(data: ReceitaRequest): Observable<Receita> {
     return this.post<Receita>('/receitas', data);
   }
@@ -57,10 +53,6 @@ export class DespesaRepository extends BaseHttpRepository {
 
   listar(filtros: LancamentoFiltros): Observable<Despesa[]> {
     return this.get<Despesa[]>('/despesas', filtros);
-  }
-
-  obter(id: string): Observable<Despesa> {
-    return this.get<Despesa>(`/despesas/${id}`);
   }
 
   criar(data: DespesaRequest): Observable<Despesa> {

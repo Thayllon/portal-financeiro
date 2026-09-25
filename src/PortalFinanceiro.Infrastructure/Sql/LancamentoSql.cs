@@ -59,9 +59,6 @@ internal static class LancamentoSql
     public static string ListarPorRegra(string t, string tabelaCategoria, string extras, string joinsExtras)
         => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdRegra = @IdRegra AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} ORDER BY {t}.Data";
 
-    public static string ListarPorReceitaOrigem(string t, string tabelaCategoria, string extras, string joinsExtras)
-        => $"SELECT {ColunasNomes(t, tabelaCategoria, extras)} FROM {t} {Joins(t, tabelaCategoria, joinsExtras)} WHERE {t}.IdReceitaOrigem = @IdReceitaOrigem AND {t}.Ativo = {SqlDialect.Current.BooleanTrue}";
-
     public static string Inserir(string t, string colunas)
     {
         var valores = string.Join(", ", colunas.Split(", ").Select(c => $"@{c}"));

@@ -177,26 +177,13 @@ Tudo roda em **uma única VM** (1 servidor) com 3 containers:
 2. **Docker** instalado na sua máquina (para o passo de build local, opcional)
 3. Testar local primeiro: **[deploy-local.md](deploy-local.md)**
 
-## ⚠️ Pré-requisito de código: suporte a PostgreSQL
+## ✅ Suporte a PostgreSQL (já implementado)
 
-> **Leia antes.** Hoje o backend está **acoplado a SQL Server**: `Program.cs` força
-> `SqlServerDialect`, o `SqlBaseRepository` usa `SqlConnection`/`SqlException` e a
-> connection factory cria `SqlConnection`. O `docker-compose.yml` de produção usa
-> **PostgreSQL** — para o deploy funcionar, o código precisa primeiro ganhar suporte
-> a `Npgsql`.
-
-Checklist da migração (fora do escopo desta doc, mas necessário):
-
-- [ ] Adicionar pacote `Npgsql` em `PortalFinanceiro.Infrastructure`
-- [ ] Criar `PostgresDialect` (`ISqlDialect`) com `SchemaPrefix => ""`
-- [ ] Criar `PostgresConnectionFactory` (implementa `IDatabaseConnectionFactory`)
-- [ ] Desacoplar `SqlBaseRepository`: Polly de `SqlException` → `NpgsqlException`/`DbException`, remover cast `(SqlConnection)`
-- [ ] Trocar o provider em `DependencyInjectionConfiguration` e `Program.cs`
-- [ ] Configurar CORS para o domínio/URL de produção (`ConfigureCors.cs` hoje só libera `localhost:4200`)
-- [ ] Ajustar sintaxe das queries, se necessário (já há scripts Postgres em `scripts/postgres/`)
-
-> Até concluir o checklist, use o **[deploy-local.md](deploy-local.md)** (SQL Server),
-> que funciona com o código atual.
+O backend já fala com PostgreSQL: pacote `Npgsql` em `PortalFinanceiro.Infrastructure`,
+`PostgresDialect`, `PostgresConnectionFactory` e seleção de provider em
+`DependencyInjectionConfiguration` via `Database__Provider: "Postgres"` (ver
+`docker-compose.yml:23-25`). CORS já aceita as origens configuradas em
+`Cors__AllowedOrigins` (+ `*.vercel.app`).
 
 ---
 
