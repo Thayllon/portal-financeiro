@@ -362,6 +362,26 @@
   }
 }
 
+.indicadores-grid--anual {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+
+  .card-value {
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 .ind-tile {
   display: flex;
   flex-direction: column;
