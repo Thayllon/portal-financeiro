@@ -38,10 +38,10 @@ public class ContratoAppService : IContratoAppService
 
     public async Task<Result<IEnumerable<ContratoResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null, bool? ehRecorrente = null)
     {
-        var contratos = await _repository.ListarAsync(idUsuario, ativo, ehRecorrente);
+        var contratos = await _repository.ListarComTotaisAsync(idUsuario, ativo, ehRecorrente, (int)StatusMensal.Realizado);
         var responses = new List<ContratoResponse>();
         foreach (var c in contratos)
-            responses.Add(await MapearComResumoAsync(c));
+            responses.Add(await MapearComResumoAsync(c, c.TotalRecebido));
         return responses;
     }
 
@@ -251,9 +251,9 @@ public class ContratoAppService : IContratoAppService
         return Resultado.Sucesso();
     }
 
-    private async Task<ContratoResponse> MapearComResumoAsync(ContratoProjecao c)
+    private async Task<ContratoResponse> MapearComResumoAsync(ContratoProjecao c, decimal? totalRecebido = null)
     {
-        var totalRecebido = await _repository.SomarReceitasPorStatusAsync(c.Id, 2);
+        totalRecebido ??= await _repository.SomarReceitasPorStatusAsync(c.Id, (int)StatusMensal.Realizado);
         return new ContratoResponse
         {
             Id = c.Id,
@@ -265,8 +265,8 @@ public class ContratoAppService : IContratoAppService
             EhRecorrente = c.EhRecorrente,
             IdRegra = c.IdRegra,
             DataCadastro = c.DataCadastro,
-            TotalRecebido = totalRecebido,
-            FaltaReceber = c.Valor - totalRecebido
+            TotalRecebido = totalRecebido.Value,
+            FaltaReceber = c.Valor - totalRecebido.Value
         };
     }
 }
