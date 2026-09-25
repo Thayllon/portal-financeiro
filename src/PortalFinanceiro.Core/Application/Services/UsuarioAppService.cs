@@ -42,14 +42,14 @@ public class UsuarioAppService : IUsuarioAppService
 
         await _repository.InserirAsync(result.Dado!);
 
-        var modulosLeitura = new[] { "home", "dashboard" };
+        var modulosLeitura = new[] { "home" };
         foreach (var modulo in modulosLeitura)
         {
             var permissao = PermissaoUsuario.Criar(result.Dado!.Id, modulo, NivelPermissao.Leitura);
             await _permissaoRepository.InserirAsync(permissao);
         }
 
-        var modulos = new[] { "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos" };
+        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos" };
         foreach (var modulo in modulos)
         {
             var permissao = PermissaoUsuario.Criar(result.Dado!.Id, modulo, NivelPermissao.Nenhum);

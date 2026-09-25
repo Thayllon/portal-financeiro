@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 
@@ -18,5 +18,5 @@ export interface ModuleCardItem {
   styleUrl: './module-card.component.scss'
 })
 export class ModuleCardComponent {
-  @Input({ required: true }) item!: ModuleCardItem;
+  item = input.required<ModuleCardItem>();
 }

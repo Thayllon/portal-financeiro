@@ -65,7 +65,7 @@ cd src/PortalFinanceiro.Web && npm run lint
 - **Design system** em `src/app/design-system/styles/`
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes compartilhados** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (dashboard, receitas, despesas, contas, categorias)
+- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login, testes)
 
 ### Scripts e Documentação
 
@@ -209,8 +209,10 @@ src/app/
 │   ├── clientes/        # wrapper fino → PessoaListagemComponent
 │   ├── parceiros/       # wrapper fino → PessoaListagemComponent
 │   ├── parcerias/       # + parceria-detalhe/
-│   ├── categorias-receita/
+│   ├── contratos/       # + contrato-detalhe/
+│   ├── categorias-receita/  # CategoriasComponent (receita + despesa + servicos via tabs)
 │   ├── usuarios/
+│   ├── testes/          # tela QA ao vivo (consome /api/diagnostico)
 │   └── login/
 └── shared/
     ├── components/      # Componentes reutilizáveis

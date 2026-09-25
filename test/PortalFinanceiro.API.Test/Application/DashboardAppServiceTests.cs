@@ -27,7 +27,7 @@ public class DashboardAppServiceTests
         public Task AtualizarAsync(Receita entity) => throw new NotImplementedException();
         public Task ExcluirAsync(Guid id) => throw new NotImplementedException();
         public Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
-            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes.Where(r => ano == 2020));
+            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes);
         public Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
             => Task.FromResult<IEnumerable<ResumoAnualContaItem>>(Array.Empty<ResumoAnualContaItem>());
         public Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
@@ -45,14 +45,13 @@ public class DashboardAppServiceTests
         public Task<int> ContarPorSubcategoriaAsync(Guid idSubcategoria) => throw new NotImplementedException();
         public Task<int> ContarPorRegraAsync(Guid idRegra) => throw new NotImplementedException();
         public Task<IEnumerable<Despesa>> ListarPorRegraAsync(Guid idRegra) => throw new NotImplementedException();
-        public Task<IEnumerable<Despesa>> ListarPorReceitaOrigemAsync(Guid idReceitaOrigem) => throw new NotImplementedException();
         public Task<IEnumerable<DespesaProjecao>> ListarPorParceriaAsync(Guid idParceria) => throw new NotImplementedException();
         public Task InserirAsync(Despesa entity) => throw new NotImplementedException();
         public Task InserirEmMassaAsync(IEnumerable<Despesa> entities) => throw new NotImplementedException();
         public Task AtualizarAsync(Despesa entity) => throw new NotImplementedException();
         public Task ExcluirAsync(Guid id) => throw new NotImplementedException();
         public Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
-            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes.Where(r => ano == 2020));
+            => Task.FromResult<IEnumerable<ResumoAnualItem>>(PorMes);
         public Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
             => Task.FromResult<IEnumerable<ResumoAnualContaItem>>(Array.Empty<ResumoAnualContaItem>());
         public Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
@@ -96,6 +95,7 @@ public class DashboardAppServiceTests
         public Task<Parceria?> ObterPorIdAsync(Guid id) => throw new NotImplementedException();
         public Task<ParceriaProjecao?> ObterProjecaoPorIdAsync(Guid id) => throw new NotImplementedException();
         public Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null) => throw new NotImplementedException();
+        public Task<IEnumerable<ParceriaProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, int statusRealizado) => throw new NotImplementedException();
         public Task InserirAsync(Parceria entity) => throw new NotImplementedException();
         public Task AtualizarAsync(Parceria entity) => throw new NotImplementedException();
         public Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status) => throw new NotImplementedException();

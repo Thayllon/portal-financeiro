@@ -5,7 +5,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
-RUN npm run build
+RUN npm run build:docker
 
 FROM nginx:alpine AS runtime
 COPY --from=build /app/dist/portal-financeiro/browser /usr/share/nginx/html

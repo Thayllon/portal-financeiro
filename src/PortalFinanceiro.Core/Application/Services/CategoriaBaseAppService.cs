@@ -60,6 +60,9 @@ public abstract class CategoriaBaseAppService<T> where T : class
         if (categoria is null)
             return Erro.NaoEncontrado("Categoria");
 
+        if (!PodeGerenciar(categoria, idUsuario, isAdmin))
+            return Erro.Permissao("CATEGORIA_ACESSO_NEGADO", "Categoria de outro usuário.");
+
         if (request is null)
             return Erro.Validacao("REQUISICAO_INVALIDA", "Corpo da requisição é obrigatório.");
 
@@ -81,6 +84,9 @@ public abstract class CategoriaBaseAppService<T> where T : class
         var categoria = await Repository.ObterPorIdAsync(id);
         if (categoria is null)
             return Erro.NaoEncontrado("Categoria");
+
+        if (!PodeGerenciar(categoria, idUsuario, isAdmin))
+            return Erro.Permissao("CATEGORIA_ACESSO_NEGADO", "Categoria de outro usuário.");
 
         var vinculadas = await contarVinculos(id);
         if (vinculadas > 0)
@@ -140,7 +146,7 @@ public abstract class CategoriaBaseAppService<T> where T : class
             Nome = obterNome(c),
             CategoriaPaiId = obterCategoriaPaiId(c),
             Ativo = obterAtivo(c),
-            PodeEditar = true,
+            PodeEditar = obterIdUsuario(c) == idUsuario || isAdmin,
             DataCadastro = obterDataCadastro(c)
         };
 

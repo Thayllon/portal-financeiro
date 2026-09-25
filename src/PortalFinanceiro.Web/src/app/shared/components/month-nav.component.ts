@@ -1,8 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
   selector: 'app-month-nav',
   standalone: true,
+  imports: [LucideDynamicIcon],
   templateUrl: './month-nav.component.html',
   styleUrl: './month-nav.component.scss'
 })

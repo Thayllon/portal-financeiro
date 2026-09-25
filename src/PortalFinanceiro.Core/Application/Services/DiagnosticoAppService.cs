@@ -4,28 +4,38 @@ using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Application.Validations;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
+using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
 public class DiagnosticoAppService : IDiagnosticoAppService
 {
+    private const string ModuloQa = "qa";
+
     private readonly IContratoRepository _contratoRepository;
     private readonly ICategoriaReceitaRepository _categoriaRepository;
     private readonly IContaBancariaRepository _contaRepository;
+    private readonly IPermissaoUsuarioAppService _permissoes;
 
     public DiagnosticoAppService(
         IContratoRepository contratoRepository,
         ICategoriaReceitaRepository categoriaRepository,
-        IContaBancariaRepository contaRepository)
+        IContaBancariaRepository contaRepository,
+        IPermissaoUsuarioAppService permissoes)
     {
         _contratoRepository = contratoRepository;
         _categoriaRepository = categoriaRepository;
         _contaRepository = contaRepository;
+        _permissoes = permissoes;
     }
 
-    public async Task<DiagnosticoResponse> GerarAsync(Guid idUsuario)
+    public async Task<Result<DiagnosticoResponse>> GerarAsync(Guid idUsuario)
     {
+        var liberado = await _permissoes.VerificarPermissaoAsync(idUsuario, ModuloQa, NivelPermissao.Leitura);
+        if (!liberado.EhSucesso || !liberado.Dado)
+            return Erro.Permissao("QA_ACESSO_NEGADO", "Testes e QA não liberado para este usuário.");
+
         var regras = new List<DiagnosticoRegraResponse>
         {
             AvaliarContratoSimples(),

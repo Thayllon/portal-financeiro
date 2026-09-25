@@ -3,19 +3,6 @@ export interface Permissao {
   nivel: number;
 }
 
-export const MODULOS = [
-  { id: 'dashboard', nome: 'Dashboard' },
-  { id: 'receitas', nome: 'Receitas' },
-  { id: 'despesas', nome: 'Despesas' },
-  { id: 'contas', nome: 'Contas bancárias' },
-  { id: 'categorias', nome: 'Categorias' },
-  { id: 'clientes', nome: 'Clientes' },
-  { id: 'parceiros', nome: 'Parceiros' },
-  { id: 'parcerias', nome: 'Parcerias' },
-  { id: 'contratos', nome: 'Contratos' },
-  { id: 'usuarios', nome: 'Usuários' },
-] as const;
-
 export const NivelPermissao = {
   Nenhum: 0,
   Leitura: 1,

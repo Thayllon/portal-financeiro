@@ -6,7 +6,7 @@
 - **Design system** próprio em `src/app/design-system/styles/` (tokens, mixins, variáveis)
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes reutilizáveis** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login)
+- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login, testes)
 
 ## Como rodar / buildar / testar
 
@@ -17,8 +17,11 @@ npm install
 # Rodar (http://localhost:4200)
 npm start        # = ng serve
 
-# Build de produção
+# Build de produção (Vercel/Render — `environment.prod.ts` com a URL da API)
 npm run build
+
+# Build para containers Docker (compose local / Oracle — `environment.docker.ts`, `apiUrl: '/api'`)
+npm run build:docker
 
 # Testes unitários (headless)
 npm test
@@ -158,7 +161,8 @@ Regras gerais: do mês corrente em diante os valores incorporam previsão (regra
 - Receitas, Despesas e Saldo mostram variação % contra o ano anterior e sparkline dos 12 meses.
 - Média mensal (saldo) usa o valor pró-rata e a quantidade de meses considerados.
 - O gráfico anual combina barras de Receitas e Despesas com linhas de Saldo e Saldo acumulado no mesmo eixo; a tabela redundante Resumo mês a mês foi removida.
-- O card Distribuição por categoria e subcategoria é o mesmo layout mensal, fica acima de Por conta e mantém o toggle Receitas/Despesas.
+- A seção Outros indicadores (entre o gráfico e a Distribuição, mesmo padrão de tiles do mensal) tem 10 grupos: Fluxo de caixa anual (`saldoRealizado`), Receita/Despesa recorrente (`totalReceitasRecorrentes/totalDespesasRecorrentes` do `/dashboard/anual` + % do total), Contratos ativos (reuse do mensal), Parcerias no ano (`resumoParcerias.totalPago` + qtd), Margem líquida (`saldo ÷ receitas`), Ponto de equilíbrio (`totalDespesas` + distância %), Melhor/pior mês (max/min de `resumoPorMes[].saldo`), Taxa de realização (`totalRecebido÷totalReceitas`, `totalPago÷totalDespesas`), Médias mensais (receitas e despesas por `mesesConsiderados`), Top categoria do ano (maior de `distribuicaoReceitas/Despesas`) e Previsão restante (`previsaoRestanteAno` somado).
+- O card Distribuição por categoria e subcategoria é o mesmo layout mensal, fica abaixo de Outros indicadores e acima de Por conta e mantém o toggle Receitas/Despesas.
 - Por conta usa a tabela mensal, com avatar do banco, lucro líquido, % do total de receitas e linha Total.
 
 ### Menu lateral

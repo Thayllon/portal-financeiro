@@ -21,6 +21,9 @@ public class ContratoRepository : SqlBaseRepository, IContratoRepository
     public async Task<IEnumerable<ContratoProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null, bool? ehRecorrente = null)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<ContratoProjecao>(conn, ContratoSql.ListarPorUsuario, new { IdUsuario = idUsuario, Ativo = ativo, EhRecorrente = ehRecorrente }));
 
+    public async Task<IEnumerable<ContratoProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, bool? ehRecorrente, int statusRealizado)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ContratoProjecao>(conn, ContratoSql.ListarPorUsuarioComTotais, new { IdUsuario = idUsuario, Ativo = ativo, EhRecorrente = ehRecorrente, StatusRealizado = statusRealizado }));
+
     public async Task InserirAsync(Contrato entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ContratoSql.Inserir, entity));
 

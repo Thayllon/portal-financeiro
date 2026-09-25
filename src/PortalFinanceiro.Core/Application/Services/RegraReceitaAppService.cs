@@ -59,8 +59,10 @@ public class RegraReceitaAppService : IRegraReceitaAppService
         {
             var dataVencimento = LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, parcela.Data.Month, parcela.Data.Year);
             var atualizar = parcela.Atualizar(regra.Descricao, regra.Valor, dataVencimento, regra.IdConta, regra.IdCategoria, parcela.IdSubcategoria);
-            if (atualizar.EhSucesso)
-                await _receitaRepository.AtualizarAsync(parcela);
+            if (!atualizar.EhSucesso)
+                return atualizar.Erro!;
+
+            await _receitaRepository.AtualizarAsync(parcela);
         }
 
         var projecao = await _regraRepository.ObterProjecaoPorIdAsync(id);

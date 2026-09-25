@@ -13,7 +13,7 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 | Auth | JWT Bearer |
 | Migrations | DbUp |
 | Ícones | Lucide Angular |
-| Deploy | Docker Compose — local (SQL Server) e produção Oracle Cloud (PostgreSQL) |
+| Deploy | Docker Compose — local (SQL Server) e produção Neon (PostgreSQL) + Render (API) + Vercel (Web) |
 
 ## Índice da documentação
 
@@ -37,16 +37,17 @@ portal-financeiro/
 │   ├── PortalFinanceiro.Infrastructure# Dapper repositories, IoC
 │   └── PortalFinanceiro.Web/          # Angular 22 (+ Dockerfile e nginx.conf)
 ├── scripts/
-│   ├── sqlserver/                     # Migrations DbUp (SQL Server) — from scratch
-│   │   ├── 001_CriarTabelas.sql       #   schema unificado completo
+│   ├── sqlserver/                     # Migrations DbUp (SQL Server)
+│   │   ├── 001_CriarTabelas.sql       #   schema unificado completo (banco novo)
+│   │   ├── 003..006_*.sql             #   incrementais idempotentes (bancos já criados)
 │   │   └── 099_SeedBase.sql           #   admin + categorias base
-│   └── postgres/                      # Mesmo conjunto para PostgreSQL
+│   └── postgres/                      # Mesmo conjunto + operacionais 100/101/102 (uso manual)
 ├── tools/
 │   └── DbSetup/                       # Ferramenta para rodar migrations (+ Dockerfile)
 ├── doc/                               # Documentação (este índice + arquivos por área)
 ├── test/
 ├── Dockerfile                         # Backend .NET 11 (multi-stage, porta 8080)
-├── docker-compose.yml                 # Produção: PostgreSQL + API + Web (Oracle Cloud)
+├── docker-compose.yml                 # Self-hosted legado (Oracle Cloud): PostgreSQL + API + Web
 ├── docker-compose.local.yml           # Local: SQL Server + API + Web (link único)
 ├── .env.example                       # Modelo de variáveis (sem segredos reais)
 └── .github/workflows/ci.yml           # CI: build + teste (backend e frontend)

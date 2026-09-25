@@ -135,7 +135,7 @@ public class UsuarioAppServiceTests
     }
 
     [Fact]
-    public async Task Adicionar_NovoUsuario_CriaHomeEDashboardComLeituraEDemaisSemAcesso()
+    public async Task Adicionar_NovoUsuario_CriaApenasHomeComLeituraEDemaisSemAcesso()
     {
         var (service, _, permissoes, _) = CriarCenario();
 
@@ -149,10 +149,10 @@ public class UsuarioAppServiceTests
         result.EhSucesso.Should().BeTrue();
         var porModulo = permissoes.Inseridas.ToDictionary(p => p.Modulo, p => p.Nivel);
         porModulo["home"].Should().Be(NivelPermissao.Leitura);
-        porModulo["dashboard"].Should().Be(NivelPermissao.Leitura);
-        porModulo.Should().ContainKeys("receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos");
+        porModulo["dashboard"].Should().Be(NivelPermissao.Nenhum);
+        porModulo.Should().ContainKeys("dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos");
         porModulo
-            .Where(p => p.Key != "home" && p.Key != "dashboard")
+            .Where(p => p.Key != "home")
             .Select(p => p.Value)
             .Should().OnlyContain(n => n == NivelPermissao.Nenhum);
     }

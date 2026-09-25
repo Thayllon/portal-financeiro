@@ -114,10 +114,15 @@ public class DespesaAppService : IDespesaAppService
         var regra = regraResult.Dado!;
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
-        var despesas = meses.Select(m => Despesa.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id, idParceria: request.IdParceria, idCliente: request.IdCliente))
-                            .Where(d => d.EhSucesso)
-                            .Select(d => d.Dado!)
-                            .ToList();
+        var despesas = new List<Despesa>();
+        foreach (var m in meses)
+        {
+            var criada = Despesa.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id, idParceria: request.IdParceria, idCliente: request.IdCliente);
+            if (!criada.EhSucesso)
+                return criada.Erro!;
+
+            despesas.Add(criada.Dado!);
+        }
 
         if (despesas.Count == 0)
             return Erro.Negocio("NENHUMA_DESPESA_GERADA", "Nenhuma despesa foi gerada para o período informado.");

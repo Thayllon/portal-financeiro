@@ -32,6 +32,8 @@ export interface DashboardAnual {
   variacaoSaldoPercentual: number | null;
   mediaMensalSaldo: number;
   mesesConsiderados: number;
+  totalReceitasRecorrentes: number;
+  totalDespesasRecorrentes: number;
   resumoPorMes: MensalResumoAnual[];
   resumoPorConta: ResumoPorContaAnual[];
   distribuicaoReceitas: DistribuicaoCategoriaAnual[];

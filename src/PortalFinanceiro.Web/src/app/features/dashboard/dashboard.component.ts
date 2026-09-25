@@ -19,6 +19,7 @@ import { CollapsibleSectionComponent } from '../../shared/components/collapsible
 import { LucideDynamicIcon } from '@lucide/angular';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, Chart, ChartType, registerables, Plugin } from 'chart.js';
+import { PALETA_DONUT, COR_BORDA_DONUT } from '../../shared/constants/chart-palette.constants';
 
 Chart.register(...registerables);
 
@@ -32,7 +33,6 @@ function lerCorToken(nome: string, padrao: string): string {
 const corReceita = (): string => lerCorToken('--color-success', '#16a34a');
 const corDespesa = (): string => lerCorToken('--color-error', '#dc2626');
 const corRoxa = (): string => lerCorToken('--color-purple', '#7c3aed');
-const corInformacao = (): string => lerCorToken('--color-info', '#2563eb');
 const corTextoGrafico = (): string => lerCorToken('--text-secondary', '#475569');
 const corGradeGrafico = (): string => lerCorToken('--surface-border', '#e2e8f0');
 const comTransparencia = (cor: string): string => `${cor}cc`;
@@ -124,8 +124,6 @@ function criarRotuloValorBarras(casasDecimais: number): Plugin<'bar'> {
     }
   };
 }
-
-const PALETA_DONUT = ['#0d9488', '#dc2626', '#5b8def', '#eab308', '#f97316', '#a855f7', '#64748b', '#16a34a', '#ec4899', '#14b8a6'];
 
 @Component({
   selector: 'app-dashboard',
@@ -296,6 +294,69 @@ export class DashboardComponent implements OnInit {
   totalDistCatAnual = computed(() => this.distAnualCategorias().reduce((s, i) => s + i.total, 0));
   totalDistSubAnual = computed(() => this.distAnualSubcategorias().reduce((s, i) => s + i.total, 0));
 
+  recRecorrenteAnual = computed(() => {
+    const d = this.dataAnual();
+    const valor = d?.totalReceitasRecorrentes ?? 0;
+    const total = d?.totalReceitas ?? 0;
+    return { valor, percentual: total > 0 ? Math.round(valor / total * 1000) / 10 : null };
+  });
+
+  despRecorrenteAnual = computed(() => {
+    const d = this.dataAnual();
+    const valor = d?.totalDespesasRecorrentes ?? 0;
+    const total = d?.totalDespesas ?? 0;
+    return { valor, percentual: total > 0 ? Math.round(valor / total * 1000) / 10 : null };
+  });
+
+  kpiAnualExtra = computed(() => {
+    const d = this.dataAnual();
+    if (!d) return null;
+    const margem = d.totalReceitas !== 0 ? Math.round(d.saldo / d.totalReceitas * 1000) / 10 : null;
+    const distanciaPonto = d.totalDespesas !== 0 ? Math.round(d.saldo / d.totalDespesas * 1000) / 10 : null;
+    const taxaRecebida = d.totalReceitas !== 0 ? Math.round(d.totalRecebido / d.totalReceitas * 1000) / 10 : null;
+    const taxaPaga = d.totalDespesas !== 0 ? Math.round(d.totalPago / d.totalDespesas * 1000) / 10 : null;
+    const meses = d.mesesConsiderados > 0 ? d.mesesConsiderados : 0;
+    const mediaReceitas = meses > 0 ? Math.round(d.totalReceitas / meses * 100) / 100 : 0;
+    const mediaDespesas = meses > 0 ? Math.round(d.totalDespesas / meses * 100) / 100 : 0;
+    return {
+      fluxo: d.saldoRealizado,
+      margem,
+      pontoEquilibrio: d.totalDespesas,
+      distanciaPonto,
+      taxaRecebida,
+      taxaPaga,
+      mediaReceitas,
+      mediaDespesas
+    };
+  });
+
+  melhorPiorMesAnual = computed(() => {
+    const meses = this.dataAnual()?.resumoPorMes ?? [];
+    if (!meses.length) return null;
+    let melhor = meses[0];
+    let pior = meses[0];
+    for (const m of meses) {
+      if (m.saldo > melhor.saldo) melhor = m;
+      if (m.saldo < pior.saldo) pior = m;
+    }
+    return { melhor, pior };
+  });
+
+  topCategoriaAnual = computed(() => {
+    const d = this.dataAnual();
+    if (!d) return null;
+    const topRec = [...(d.distribuicaoReceitas ?? [])].sort((a, b) => b.total - a.total)[0];
+    const topDesp = [...(d.distribuicaoDespesas ?? [])].sort((a, b) => b.total - a.total)[0];
+    return { topRec, topDesp };
+  });
+
+  previsaoRestanteAnual = computed(() => {
+    const lista = this.dataAnual()?.previsaoRestanteAno ?? [];
+    const receitas = lista.reduce((s, p) => s + p.totalReceitas, 0);
+    const despesas = lista.reduce((s, p) => s + p.totalDespesas, 0);
+    return { receitas, despesas, saldo: receitas - despesas, meses: lista.length };
+  });
+
   doughnutChartOptions = computed<ChartConfiguration<'doughnut'>['options']>(() => {
     const oculto = this.privacidade.valoresOcultos();
     return {
@@ -341,7 +402,6 @@ export class DashboardComponent implements OnInit {
   chartVersion = signal(0);
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
   private graficoMensal = signal<{ label: string; mes: number; ano: number; d: Dashboard }[]>([]);
-  valoresExibidos = signal<{ receitas: number; despesas: number; previsto: number }[]>([]);
   valoresTooltip = signal<{ previsto: number }[]>([]);
   modoPorConta = computed(() => (this.data()?.resumoPorConta?.length ?? 0) > 1);
 
@@ -503,7 +563,6 @@ if (seq !== this.requestSeq) return;
     this.data.set(null);
     this.dataAnual.set(null);
     this.graficoMensal.set([]);
-    this.valoresExibidos.set([]);
     this.valoresTooltip.set([]);
     this.barChartData = { labels: [], datasets: [] };
     this.barChartAnualData = { labels: [], datasets: [] };
@@ -543,7 +602,7 @@ if (seq !== this.requestSeq) return;
           data: itens.map(i => i.total),
           backgroundColor: itens.map((_, idx) => PALETA_DONUT[idx % PALETA_DONUT.length]),
           borderWidth: 2,
-          borderColor: '#ffffff'
+          borderColor: COR_BORDA_DONUT
         }
       ]
     };
@@ -600,7 +659,6 @@ if (seq !== this.requestSeq) return;
     const itens = todos.slice(-3);
 
     const valores = itens.map(i => this.valorExibido(i.mes, i.ano, i.d));
-    this.valoresExibidos.set(valores);
     this.valoresTooltip.set(valores);
 
     this.barChartData = {
@@ -736,17 +794,6 @@ if (seq !== this.requestSeq) return;
           label: 'Saldo',
           borderColor: corRoxa(),
           borderWidth: 2,
-          tension: 0.4,
-          fill: false,
-          pointRadius: 0
-        },
-        {
-          type: 'line',
-          data: anual.resumoPorMes.map(m => m.saldoAcumulado),
-          label: 'Saldo acumulado',
-          borderColor: corInformacao(),
-          borderWidth: 2,
-          borderDash: [6, 4],
           tension: 0.4,
           fill: false,
           pointRadius: 0

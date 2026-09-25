@@ -1,7 +1,7 @@
 -- Portal Financeiro - Schema unificado (SQL Server).
 -- ATENÇÃO: executar somente em banco NOVO (from scratch). O banco de desenvolvimento
 -- já existente foi migrado incrementalmente e NÃO deve receber este script.
--- Conjunto final consolidado em 2 scripts: 001_CriarTabelas.sql + 099_SeedBase.sql.
+-- Schema base: 001_CriarTabelas.sql + incrementais 003-006 + 099_SeedBase.sql.
 -- Bancos já criados evoluem apenas via scripts incrementais (quando existirem);
 -- o DbUp rastreia os scripts executados por nome (journal) e não reaplica o 001.
 
