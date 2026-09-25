@@ -334,8 +334,12 @@
   justify-content: center;
   vertical-align: -2px;
   margin-left: 6px;
+  padding: 2px;
   color: inherit;
   line-height: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
 
   svg {
     display: block;
