@@ -148,11 +148,16 @@ public class ReceitaAppService : IReceitaAppService
         var regra = regraResult.Dado!;
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
-        var receitas = meses.Select(m => Receita.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id,
-                                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria, idContrato: request.IdContrato))
-                            .Where(r => r.EhSucesso)
-                            .Select(r => r.Dado!)
-                            .ToList();
+        var receitas = new List<Receita>();
+        foreach (var m in meses)
+        {
+            var criada = Receita.Criar(idUsuario, regra.Descricao, regra.Valor, LancamentoHelper.CalcularDataVencimento(regra.Dia, regra.DiaUtil, m.Mes, m.Ano), regra.IdConta, regra.IdCategoria, null, regra.Id,
+                idParceiro: request.IdParceiro, idCliente: request.IdCliente, idParceria: request.IdParceria, idContrato: request.IdContrato);
+            if (!criada.EhSucesso)
+                return criada.Erro!;
+
+            receitas.Add(criada.Dado!);
+        }
 
         if (receitas.Count == 0)
             return Erro.Negocio("NENHUMA_RECEITA_GERADA", "Nenhuma receita foi gerada para o período informado.");
