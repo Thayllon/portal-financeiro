@@ -95,6 +95,7 @@ public class DashboardAppServiceTests
         public Task<Parceria?> ObterPorIdAsync(Guid id) => throw new NotImplementedException();
         public Task<ParceriaProjecao?> ObterProjecaoPorIdAsync(Guid id) => throw new NotImplementedException();
         public Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null) => throw new NotImplementedException();
+        public Task<IEnumerable<ParceriaProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, int statusRealizado) => throw new NotImplementedException();
         public Task InserirAsync(Parceria entity) => throw new NotImplementedException();
         public Task AtualizarAsync(Parceria entity) => throw new NotImplementedException();
         public Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status) => throw new NotImplementedException();

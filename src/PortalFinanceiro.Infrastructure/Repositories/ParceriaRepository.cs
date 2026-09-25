@@ -21,6 +21,9 @@ public class ParceriaRepository : SqlBaseRepository, IParceriaRepository
     public async Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<ParceriaProjecao>(conn, ParceriaSql.ListarPorUsuario, new { IdUsuario = idUsuario, Ativo = ativo }));
 
+    public async Task<IEnumerable<ParceriaProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, int statusRealizado)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ParceriaProjecao>(conn, ParceriaSql.ListarPorUsuarioComTotais, new { IdUsuario = idUsuario, Ativo = ativo, StatusRealizado = statusRealizado }));
+
     public async Task InserirAsync(Parceria entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ParceriaSql.Inserir, entity));
 

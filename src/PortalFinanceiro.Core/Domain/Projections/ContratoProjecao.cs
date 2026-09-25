@@ -13,4 +13,5 @@ public class ContratoProjecao
     public Guid? IdRegra { get; set; }
     public DateTime DataCadastro { get; set; }
     public DateTime DataAlteracao { get; set; }
+    public decimal TotalRecebido { get; set; }
 }

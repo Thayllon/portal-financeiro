@@ -22,10 +22,10 @@ public class ParceriaAppService : IParceriaAppService
 
     public async Task<Result<IEnumerable<ParceriaResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null)
     {
-        var parcerias = await _repository.ListarAsync(idUsuario, ativo);
+        var parcerias = await _repository.ListarComTotaisAsync(idUsuario, ativo, (int)StatusMensal.Realizado);
         var responses = new List<ParceriaResponse>();
         foreach (var p in parcerias)
-            responses.Add(await MapearComResumoAsync(p));
+            responses.Add(await MapearComResumoAsync(p, p.TotalRecebido, p.TotalPago));
         return responses;
     }
 
@@ -156,10 +156,10 @@ public class ParceriaAppService : IParceriaAppService
         return Resultado.Sucesso();
     }
 
-    private async Task<ParceriaResponse> MapearComResumoAsync(ParceriaProjecao p)
+    private async Task<ParceriaResponse> MapearComResumoAsync(ParceriaProjecao p, decimal? totalRecebido = null, decimal? totalPago = null)
     {
-        var totalRecebido = await _repository.SomarReceitasPorStatusAsync(p.Id, 2);
-        var totalPago = await _repository.SomarDespesasPorStatusAsync(p.Id, 2);
+        totalRecebido ??= await _repository.SomarReceitasPorStatusAsync(p.Id, (int)StatusMensal.Realizado);
+        totalPago ??= await _repository.SomarDespesasPorStatusAsync(p.Id, (int)StatusMensal.Realizado);
         var valorParceiro = Math.Round(p.Valor * p.PercentualParceiro / 100, 2);
         return new ParceriaResponse
         {
@@ -175,10 +175,10 @@ public class ParceriaAppService : IParceriaAppService
             MinhaParte = p.Valor - valorParceiro,
             Ativo = p.Ativo,
             DataCadastro = p.DataCadastro,
-            TotalRecebido = totalRecebido,
-            TotalPago = totalPago,
-            FaltaReceber = p.Valor - totalRecebido,
-            FaltaPagar = valorParceiro - totalPago
+            TotalRecebido = totalRecebido.Value,
+            TotalPago = totalPago.Value,
+            FaltaReceber = p.Valor - totalRecebido.Value,
+            FaltaPagar = valorParceiro - totalPago.Value
         };
     }
 }
