@@ -36,6 +36,10 @@ appsettings.Production.json
 *.mdf
 *.ldf
 
+# Dump local -> prod (contem dados sensiveis, nunca commitar)
+portal-financeiro-prod-restore.sql
+*-prod-restore.sql
+
 # Runtime logs
 api*.log
 api*.err
