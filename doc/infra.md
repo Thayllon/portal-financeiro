@@ -159,6 +159,9 @@ Tudo roda em **uma única VM** (1 servidor) com 3 containers:
 | `api` | .NET 11 (Dockerfile) | API ASP.NET Core, JWT, Dapper |
 | `db` | `postgres:17-alpine` | Banco de dados |
 
+> A imagem `web` é compilada com `npm run build:docker` (configuração `docker`,
+> `apiUrl: '/api'` via `environment.docker.ts`) — o front fala com a API da mesma VM.
+
 ### Custo
 
 | Item | Custo |

@@ -13,7 +13,7 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 | Auth | JWT Bearer |
 | Migrations | DbUp |
 | Ícones | Lucide Angular |
-| Deploy | Docker Compose — local (SQL Server) e produção Oracle Cloud (PostgreSQL) |
+| Deploy | Docker Compose — local (SQL Server) e produção Neon (PostgreSQL) + Render (API) + Vercel (Web) |
 
 ## Índice da documentação
 

@@ -17,8 +17,11 @@ npm install
 # Rodar (http://localhost:4200)
 npm start        # = ng serve
 
-# Build de produção
+# Build de produção (Vercel/Render — `environment.prod.ts` com a URL da API)
 npm run build
+
+# Build para containers Docker (compose local / Oracle — `environment.docker.ts`, `apiUrl: '/api'`)
+npm run build:docker
 
 # Testes unitários (headless)
 npm test

@@ -84,8 +84,9 @@ docker compose -f docker-compose.local.yml down -v
 
 ## Como funciona o proxy
 
-O Nginx (`web`) serve o build de produção do Angular, que aponta para `apiUrl: '/api'`
-(`environment.prod.ts`). O Nginx repassa `/api/...` para o container `api:8080`:
+O Nginx (`web`) serve o build Angular para containers, compilado com `npm run build:docker`
+(configuração `docker` em `angular.json`, `apiUrl: '/api'` via `environment.docker.ts`).
+O Nginx repassa `/api/...` para o container `api:8080`:
 
 ```
 navegador → http://localhost:8080          → arquivos Angular (SPA)
