@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -32,6 +33,7 @@ public class RegrasReceitasController : BaseController
     }
 
     [HttpPut("{id}")]
+    [RequerPermissaoEscrita("receitas")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] RegraReceitaRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
@@ -39,6 +41,7 @@ public class RegrasReceitasController : BaseController
     }
 
     [HttpDelete("{id}")]
+    [RequerPermissaoEscrita("receitas")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario());

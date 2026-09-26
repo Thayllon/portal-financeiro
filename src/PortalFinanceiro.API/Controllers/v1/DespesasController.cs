@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -32,6 +33,7 @@ public class DespesasController : BaseController
     }
 
     [HttpPost]
+    [RequerPermissaoEscrita("despesas")]
     public async Task<IActionResult> Criar([FromBody] DespesaRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
@@ -39,6 +41,7 @@ public class DespesasController : BaseController
     }
 
     [HttpPut("{id}")]
+    [RequerPermissaoEscrita("despesas")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] DespesaRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
@@ -46,6 +49,7 @@ public class DespesasController : BaseController
     }
 
     [HttpPost("{id}/pagar")]
+    [RequerPermissaoEscrita("despesas")]
     public async Task<IActionResult> Pagar(Guid id, [FromBody] MensalStatusRequest request)
     {
         var result = await _service.PagarAsync(id, ObterIdUsuario(), request);
@@ -53,6 +57,7 @@ public class DespesasController : BaseController
     }
 
     [HttpPost("{id}/estornar")]
+    [RequerPermissaoEscrita("despesas")]
     public async Task<IActionResult> Estornar(Guid id)
     {
         var result = await _service.EstornarAsync(id, ObterIdUsuario());
@@ -60,6 +65,7 @@ public class DespesasController : BaseController
     }
 
     [HttpDelete("{id}")]
+    [RequerPermissaoEscrita("despesas")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario());

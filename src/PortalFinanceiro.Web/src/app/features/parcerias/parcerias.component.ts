@@ -6,6 +6,8 @@ import { ParceriaRepository } from '../../core/repositories/parceria.repository'
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { Parceria, ParceriaRequest, ResumoParceriaMensal } from '../../core/models/parceria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
+import { AuthService } from '../../core/services/auth.service';
+import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -33,6 +35,9 @@ export class ParceriasComponent implements OnInit {
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private router = inject(Router);
+  private auth = inject(AuthService);
+
+  podeEscrever = computed(() => this.auth.temPermissao('parcerias', NivelPermissao.Escrita));
 
   parcerias = signal<Parceria[]>([]);
   parceiros = signal<Pessoa[]>([]);
