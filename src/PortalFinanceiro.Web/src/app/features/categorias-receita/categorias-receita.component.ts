@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { Categoria, CategoriaRequest } from '../../core/models/categoria.model';
+import { AuthService } from '../../core/services/auth.service';
+import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -35,6 +37,9 @@ export class CategoriasComponent implements OnInit {
   private repoReceita = inject(CategoriaReceitaRepository);
   private repoDespesa = inject(CategoriaDespesaRepository);
   private repoServico = inject(CategoriaServicoRepository);
+  private auth = inject(AuthService);
+
+  podeEscrever = computed(() => this.auth.temPermissao('categorias', NivelPermissao.Escrita));
 
   tabs: Tab[] = [
     { id: 'receita', label: 'Receita' },

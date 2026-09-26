@@ -65,6 +65,8 @@ dotnet run --project src/PortalFinanceiro.API
 
 **Autorização por posse:** operações por `{id}` (Obter, Atualizar, Excluir e marcar/estornar de receitas/despesas) validam que o recurso pertence ao usuário autenticado (via `IdUsuario` do registro). Recurso de outro usuário retorna `Erro.Permissao` → **HTTP 403**. Categorias compartilhadas: editar/excluir somente o dono ou admin → 403.
 
+**Autorização por nível de permissão (módulo):** endpoints de escrita (POST/PUT/DELETE e ações como receber/estornar/pagar/encerrar/reativar/definir padrão) exigem o nível **Escrita** no módulo correspondente da tabela `PermissaoUsuario` (0=Nenhum, 1=Leitura, 2=Escrita). A verificação é feita pelo atributo `[RequerPermissaoEscrita("<modulo>")]` (`PortalFinanceiro.API/Authorization/`), que consulta `IPermissaoUsuarioAppService.VerificarPermissaoAsync`; sem Escrita retorna `Erro.Permissao("PERMISSAO_ESCRITA_NEGADA", ...)` → **HTTP 403**. Admin (`IsAdmin` / role `Admin`) passa direto. Mapeamento de módulos: `receitas`/`despesas` (incl. regras recorrentes), `contas`, `categorias` (receita/despesa/serviços), `parcerias`, `contratos`. Pessoas usam `[RequerPermissaoEscritaPessoa]`, que resolve o módulo pelo `TipoPessoa` do body (`clientes` ou `parceiros`).
+
 ## Padrões de código
 
 Regras completas no [AGENTS.md](../AGENTS.md). Resumo:

@@ -12,6 +12,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ReceitaRequest } from '../../core/models/receita.model';
 import { DespesaRequest } from '../../core/models/despesa.model';
 import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
+import { NivelPermissao } from '../../core/models/permissao.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
@@ -156,6 +157,8 @@ export class LancamentoListagemComponent implements OnInit {
   }
 
   readonly statusRealizado = STATUS_REALIZADO;
+
+  podeEscrever = computed(() => this.auth.temPermissao(this.tipo(), NivelPermissao.Escrita));
 
   fluxoAdicional = computed(() => this.ehReceita() ? this.auth.temFluxoAdicionalReceita() : this.auth.temFluxoAdicionalDespesa());
   fluxoSelectorVisible = signal(false);

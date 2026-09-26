@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -32,6 +33,7 @@ public class CategoriasDespesaController : BaseController
     }
 
     [HttpPost]
+    [RequerPermissaoEscrita("categorias")]
     public async Task<IActionResult> Criar([FromBody] CategoriaRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
@@ -39,6 +41,7 @@ public class CategoriasDespesaController : BaseController
     }
 
     [HttpPut("{id}")]
+    [RequerPermissaoEscrita("categorias")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] CategoriaRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), User.IsInRole("Admin"), request);
@@ -46,6 +49,7 @@ public class CategoriasDespesaController : BaseController
     }
 
     [HttpDelete("{id}")]
+    [RequerPermissaoEscrita("categorias")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario(), User.IsInRole("Admin"));

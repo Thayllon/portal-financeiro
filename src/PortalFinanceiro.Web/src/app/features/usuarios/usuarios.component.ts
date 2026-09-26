@@ -51,12 +51,12 @@ export class UsuariosComponent implements OnInit {
     { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line' },
     { id: 'receitas', nome: 'Receitas', descricao: 'Gestão de receitas e lançamentos financeiros.', icone: 'trending-up' },
     { id: 'despesas', nome: 'Despesas', descricao: 'Gestão de despesas e pagamentos.', icone: 'trending-down' },
+    { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'user-round-group' },
+    { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'briefcase-business' },
     { id: 'contas', nome: 'Contas bancárias', descricao: 'Cadastro e gerenciamento de contas.', icone: 'wallet' },
     { id: 'categorias', nome: 'Categorias', descricao: 'Cadastro e organização de categorias.', icone: 'tag' },
     { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
     { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake' },
-    { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'handshake' },
-    { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'briefcase-business' },
     { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'users' },
   ];
 

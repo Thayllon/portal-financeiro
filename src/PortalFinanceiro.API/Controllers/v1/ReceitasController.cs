@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -32,6 +33,7 @@ public class ReceitasController : BaseController
     }
 
     [HttpPost]
+    [RequerPermissaoEscrita("receitas")]
     public async Task<IActionResult> Criar([FromBody] ReceitaRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
@@ -39,6 +41,7 @@ public class ReceitasController : BaseController
     }
 
     [HttpPut("{id}")]
+    [RequerPermissaoEscrita("receitas")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] ReceitaRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
@@ -46,6 +49,7 @@ public class ReceitasController : BaseController
     }
 
     [HttpPost("{id}/receber")]
+    [RequerPermissaoEscrita("receitas")]
     public async Task<IActionResult> Receber(Guid id, [FromBody] MensalStatusRequest request)
     {
         var result = await _service.ReceberAsync(id, ObterIdUsuario(), request);
@@ -53,6 +57,7 @@ public class ReceitasController : BaseController
     }
 
     [HttpPost("{id}/estornar")]
+    [RequerPermissaoEscrita("receitas")]
     public async Task<IActionResult> Estornar(Guid id)
     {
         var result = await _service.EstornarAsync(id, ObterIdUsuario());
@@ -60,6 +65,7 @@ public class ReceitasController : BaseController
     }
 
     [HttpDelete("{id}")]
+    [RequerPermissaoEscrita("receitas")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario());

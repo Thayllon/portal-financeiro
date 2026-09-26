@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { Pessoa, PessoaRequest } from '../../core/models/pessoa.model';
+import { AuthService } from '../../core/services/auth.service';
+import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -26,6 +28,10 @@ export class PessoaListagemComponent implements OnInit {
   private repo = inject(PessoaRepository);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
+  private auth = inject(AuthService);
+
+  modulo = computed(() => this.tipo() === 'Cliente' ? 'clientes' : 'parceiros');
+  podeEscrever = computed(() => this.auth.temPermissao(this.modulo(), NivelPermissao.Escrita));
 
   rotulo = computed(() => this.tipo() === 'Cliente' ? 'Cliente' : 'Parceiro');
   rotuloPlural = computed(() => this.tipo() === 'Cliente' ? 'clientes' : 'parceiros');

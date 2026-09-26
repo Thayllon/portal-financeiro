@@ -7,10 +7,12 @@
       <h1 class="page__title">{{ config().titulo }}</h1>
       <app-privacidade-toggle />
     </div>
-    <button class="add-btn" (click)="abrirModal()">
-      <svg lucideIcon="plus" [size]="16" />
-      Nova {{ config().singular }}
-    </button>
+    @if (podeEscrever()) {
+      <button class="add-btn" (click)="abrirModal()">
+        <svg lucideIcon="plus" [size]="16" />
+        Nova {{ config().singular }}
+      </button>
+    }
   </header>
 
   <div class="toolbar">
@@ -54,11 +56,15 @@
     <div class="empty-state">
       <svg lucideIcon="inbox" [size]="48" class="empty-icon" />
       <h3>Nenhuma {{ config().singular }} neste mês</h3>
-      <p>Cadastre sua primeira {{ config().singular }} — recorrente ou avulsa.</p>
-      <button class="add-btn" (click)="abrirModal()">
-        <svg lucideIcon="plus" [size]="16" />
-        Nova {{ config().singular }}
-      </button>
+      @if (podeEscrever()) {
+        <p>Cadastre sua primeira {{ config().singular }} — recorrente ou avulsa.</p>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Nova {{ config().singular }}
+        </button>
+      } @else {
+        <p>Você tem acesso somente a leitura nesta tela.</p>
+      }
     </div>
   } @else {
     <div class="table-card">
@@ -83,7 +89,9 @@
             }
             <th>Categoria</th>
             <th>Status</th>
-            <th class="th-actions">Ações</th>
+            @if (podeEscrever()) {
+              <th class="th-actions">Ações</th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -97,26 +105,28 @@
               }
               <td class="cell-meta" data-label="Categoria" [title]="rotuloCategoria(l)">{{ rotuloCategoria(l) }}</td>
               <td data-label="Status"><app-status-badge [type]="l.status === statusRealizado ? 'realizado' : 'pendente'" [label]="l.status === statusRealizado ? config().statusRealizadoLabel : 'Pendente'" /></td>
-              <td class="cell-actions">
-                @if (l.status !== statusRealizado) {
-                  <button class="action-btn action-btn--success" [title]="config().acaoRealizar" (click)="realizar(l)">
-                    <svg lucideIcon="check" [size]="16" />
+              @if (podeEscrever()) {
+                <td class="cell-actions">
+                  @if (l.status !== statusRealizado) {
+                    <button class="action-btn action-btn--success" [title]="config().acaoRealizar" (click)="realizar(l)">
+                      <svg lucideIcon="check" [size]="16" />
+                    </button>
+                  } @else {
+                    <button class="action-btn" title="Estornar" (click)="estornar(l)">
+                      <svg lucideIcon="arrow-left" [size]="16" />
+                    </button>
+                  }
+                  <button class="action-btn" title="Copiar" (click)="copiar(l)">
+                    <svg lucideIcon="copy" [size]="16" />
                   </button>
-                } @else {
-                  <button class="action-btn" title="Estornar" (click)="estornar(l)">
-                    <svg lucideIcon="arrow-left" [size]="16" />
+                  <button class="action-btn" title="Editar" (click)="abrirModal(l)">
+                    <svg lucideIcon="pencil" [size]="16" />
                   </button>
-                }
-                <button class="action-btn" title="Copiar" (click)="copiar(l)">
-                  <svg lucideIcon="copy" [size]="16" />
-                </button>
-                <button class="action-btn" title="Editar" (click)="abrirModal(l)">
-                  <svg lucideIcon="pencil" [size]="16" />
-                </button>
-                <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(l)">
-                  <svg lucideIcon="trash-2" [size]="16" />
-                </button>
-              </td>
+                  <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(l)">
+                    <svg lucideIcon="trash-2" [size]="16" />
+                  </button>
+                </td>
+              }
             </tr>
           }
         </tbody>

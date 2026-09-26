@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -36,6 +37,7 @@ public class ParceriasController : BaseController
     }
 
     [HttpPost]
+    [RequerPermissaoEscrita("parcerias")]
     public async Task<IActionResult> Criar([FromBody] ParceriaRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
@@ -43,6 +45,7 @@ public class ParceriasController : BaseController
     }
 
     [HttpPut("{id}")]
+    [RequerPermissaoEscrita("parcerias")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] ParceriaRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
@@ -50,6 +53,7 @@ public class ParceriasController : BaseController
     }
 
     [HttpPut("{id}/encerrar")]
+    [RequerPermissaoEscrita("parcerias")]
     public async Task<IActionResult> Encerrar(Guid id)
     {
         var result = await _service.EncerrarAsync(id, ObterIdUsuario());
@@ -57,6 +61,7 @@ public class ParceriasController : BaseController
     }
 
     [HttpPut("{id}/reativar")]
+    [RequerPermissaoEscrita("parcerias")]
     public async Task<IActionResult> Reativar(Guid id)
     {
         var result = await _service.ReativarAsync(id, ObterIdUsuario());
@@ -64,6 +69,7 @@ public class ParceriasController : BaseController
     }
 
     [HttpDelete("{id}")]
+    [RequerPermissaoEscrita("parcerias")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario());
