@@ -135,6 +135,18 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/usuarios` | usuarios | Usuários e permissões (admin). Admin possui acesso total (bypass) a parcerias, contratos e demais telas; todos os botões e toggles são editáveis e os níveis ficam registrados, valendo caso o perfil seja alterado. Banner "Acesso total" explica a regra |
 | `/testes` | testes | QA técnico (admin, fora do menu, só URL direta): semáforo develop → main, regras R1–R6 com cenários, saúde do banco, débitos e botão Atualizar. Consome `GET /api/diagnostico` |
 
+### Regressão de permissões (perfil restrito)
+Script: `scripts/test-perfil-restrito.ps1` (exige a API no ar; não cria dados; restaura os níveis ao final). Cobre `receitas`, `despesas`, `parcerias` e `contratos` nos níveis 0/1/2: reflete no login, leitura de lista liberada (só exige auth) e escrita bloqueada com 403 nos níveis 0/1.
+
+Checklist manual (sair/entrar do usuário teste a cada troca — permissões congelam no login, `auth.service.ts`):
+| Nível | Menu | URL direta | Botão incluir |
+|-------|------|------------|---------------|
+| 0 – não pode ver | oculto | redireciona para `/` | oculto |
+| 1 – leitura | visível, lista carrega | abre | oculto |
+| 2 – escrita | visível | abre | visível |
+
+Nomes de módulo são tipados (`ModuloPermissao` em `core/models/permissao.model.ts`, sempre no plural: `receitas`, `despesas`, ...). Nunca usar o `tipo` singular de listagem (`receita`/`despesa`) como módulo — o compilador barra (TS2345).
+
 ### Indicadores do dashboard mensal
 
 KPIs (fileira principal, com variação % vs mês anterior e sparkline):
