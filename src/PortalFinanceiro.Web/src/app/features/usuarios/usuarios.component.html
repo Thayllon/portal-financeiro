@@ -283,7 +283,7 @@
                 <svg lucideIcon="lock" [size]="16" />
                 <div>
                   <strong>Acesso total</strong>
-                  <span>Administradores já possuem acesso aos fluxos adicionais. Testes e QA exige liberação explícita abaixo.</span>
+                  <span>Administradores já possuem acesso aos fluxos adicionais e aos outros indicadores. Testes e QA exige liberação explícita abaixo.</span>
                 </div>
               </div>
             }
@@ -301,6 +301,14 @@
                 <span class="perm-item__label">Fluxo de despesa adicional</span>
                 <label class="switch">
                   <input type="checkbox" [checked]="fluxoAdicionalDespesa()" (change)="alternarFluxoAdicionalDespesa($event)" />
+                  <span class="switch__slider"></span>
+                </label>
+              </div>
+              <div class="perm-item">
+                <svg lucideIcon="layout-dashboard" [size]="16" class="perm-item__icon" />
+                <span class="perm-item__label">Outros indicadores (fluxo adicional)</span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="outrosIndicadores()" (change)="alternarOutrosIndicadores($event)" />
                   <span class="switch__slider"></span>
                 </label>
               </div>

@@ -20,6 +20,7 @@ incrementais idempotentes para bancos já criados:
 | `005_Contratos.sql` | Incremental idempotente: cria `Contrato`, adiciona `Receita.IdContrato` (FK + índice) e garante o módulo `contratos` em `PermissaoUsuario` |
 | `006_ContratoRecorrente.sql` | Incremental idempotente: adiciona `Contrato.EhRecorrente` + `Contrato.IdRegra` se ainda não existirem |
 | `015_Processos.sql` | Incremental idempotente: cria `Processo` (vínculo exclusivo `IdParceria` XOR `IdContrato` via CHECK) + `ProcessoEtapa` (ordem, conclusão, prevista) e garante o módulo `processos` em `PermissaoUsuario` |
+| `016_OutrosIndicadores.sql` | Incremental idempotente: garante o módulo especial `outros-indicadores` (Leitura) para admin e quem já usa fluxo adicional |
 ### Operacionais Postgres (só em `scripts/postgres/` — uso manual, NÃO via DbUp)
 
 | Script | Conteúdo |

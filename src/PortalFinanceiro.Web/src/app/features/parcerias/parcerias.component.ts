@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ParceriaRepository } from '../../core/repositories/parceria.repository';
 import { PessoaRepository } from '../../core/repositories/pessoa.repository';
-import { Parceria, ParceriaRequest, ResumoParceriaMensal } from '../../core/models/parceria.model';
+import { Parceria, ParceriaRequest } from '../../core/models/parceria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
 import { AuthService } from '../../core/services/auth.service';
 import { NivelPermissao } from '../../core/models/permissao.model';
@@ -17,7 +17,6 @@ import { ValorMascaradoPipe } from '../../shared/pipes/valor-mascarado.pipe';
 import { PrivacidadeToggleComponent } from '../../shared/components/privacidade-toggle.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
-import { MonthNavComponent } from '../../shared/components/month-nav.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -25,7 +24,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 @Component({
   selector: 'app-parcerias',
   standalone: true,
-  imports: [FormsModule, ModalComponent, CustomSelectComponent, CurrencyInputDirective, ValorMascaradoPipe, PrivacidadeToggleComponent, StatusBadgeComponent, ListPaginationComponent, MonthNavComponent, LucideDynamicIcon],
+  imports: [FormsModule, ModalComponent, CustomSelectComponent, CurrencyInputDirective, ValorMascaradoPipe, PrivacidadeToggleComponent, StatusBadgeComponent, ListPaginationComponent, LucideDynamicIcon],
   templateUrl: './parcerias.component.html',
   styleUrl: './parcerias.component.scss'
 })
@@ -47,9 +46,6 @@ export class ParceriasComponent implements OnInit {
   editando = signal<Parceria | null>(null);
   salvando = signal(false);
   filtroSituacao: boolean | undefined = undefined;
-  mes = signal(new Date().getMonth() + 1);
-  ano = signal(new Date().getFullYear());
-  resumoMensal = signal<ResumoParceriaMensal | null>(null);
 
   form: ParceriaRequest = { nome: '', idParceiro: '', idCliente: '', valor: 0, percentualParceiro: 50 };
 
@@ -63,7 +59,7 @@ export class ParceriasComponent implements OnInit {
 
   paginacao = useListPagination(this.parcerias, { initialPageSize: 10 });
 
-  ngOnInit() { this.carregarPessoas(); this.carregar(); this.carregarResumo(); }
+  ngOnInit() { this.carregarPessoas(); this.carregar(); }
 
   async carregar() {
     this.loading.set(true);
@@ -77,21 +73,6 @@ export class ParceriasComponent implements OnInit {
   mudarSituacao(valor: string | number | null) {
     this.filtroSituacao = valor === 'ativas' ? true : valor === 'encerradas' ? false : undefined;
     this.carregar();
-  }
-
-  navegarMes(dir: number) {
-    let m = this.mes() + dir, a = this.ano();
-    if (m > 12) { m = 1; a++; }
-    if (m < 1) { m = 12; a--; }
-    this.mes.set(m); this.ano.set(a);
-    this.carregarResumo();
-  }
-
-  async carregarResumo() {
-    try {
-      const data = await firstValueFrom(this.repo.resumoMensal(this.ano(), this.mes()));
-      this.resumoMensal.set(data);
-    } catch { this.resumoMensal.set(null); }
   }
 
   async carregarPessoas() {

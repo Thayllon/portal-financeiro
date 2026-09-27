@@ -134,12 +134,6 @@ public class ParceriaAppService : IParceriaAppService
         return Resultado.Sucesso();
     }
 
-    public async Task<Result<ResumoParceriaAnual>> ResumoMensalAsync(Guid idUsuario, int ano, int mes)
-    {
-        var resumo = await _repository.ResumoMensalAsync(idUsuario, ano, mes);
-        return resumo;
-    }
-
     private async Task<Result<Unit>> ValidarPessoasAsync(Guid idUsuario, Guid idParceiro, Guid idCliente)
     {
         var parceiro = await _pessoaRepository.ObterPorIdAsync(idParceiro);
