@@ -57,6 +57,13 @@ export class HomeComponent {
           icon: 'briefcase-business',
           route: '/contratos',
           modulo: 'contratos'
+        },
+        {
+          title: 'Processos',
+          description: 'Etapas do mundo real vinculadas a parcerias e contratos.',
+          icon: 'route',
+          route: '/processos',
+          modulo: 'processos'
         }
       ]
     },

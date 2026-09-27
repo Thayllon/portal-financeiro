@@ -14,6 +14,14 @@ WHERE Id NOT IN (
     SELECT UsuarioId FROM PermissaoUsuario WHERE Modulo = 'parcerias'
 );
 
+-- Garante o módulo 'processos' para usuários que ainda não o possuem.
+INSERT INTO PermissaoUsuario (Id, UsuarioId, Modulo, Nivel)
+SELECT NEWID(), Id, 'processos', 0
+FROM Usuario
+WHERE Id NOT IN (
+    SELECT UsuarioId FROM PermissaoUsuario WHERE Modulo = 'processos'
+);
+
 -- Garante 'home' e 'dashboard' com Leitura para usuários que ainda não os possuem.
 -- Apenas insere onde falta; nunca altera níveis já definidos (inclusive 'não pode ver' explícito).
 INSERT INTO PermissaoUsuario (Id, UsuarioId, Modulo, Nivel)

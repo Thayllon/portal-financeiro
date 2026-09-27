@@ -1,0 +1,149 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <button class="back-btn" (click)="voltar()" title="Voltar para processos">
+        <svg lucideIcon="arrow-left" [size]="16" />
+      </button>
+      <span class="page__badge">
+        <svg lucideIcon="route" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">Detalhes processo - {{ processo()?.nome ?? '...' }}</h1>
+    </div>
+    @if (podeEscrever() && !loading() && processo()) {
+      <button class="add-btn" (click)="abrirModal()">
+        <svg lucideIcon="plus" [size]="16" />
+        Nova etapa
+      </button>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 30%"></div>
+          <div class="skeleton-line" style="width: 20%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+        </div>
+      }
+    </div>
+  } @else if (processo(); as p) {
+    <div class="cards">
+      <div class="table-card card">
+        <span class="card__label">Vínculo ({{ p.vinculoTipo }})</span>
+        <strong class="card__value">{{ p.vinculoNome }}</strong>
+        <span class="card__hint">Cliente {{ p.cliente }}</span>
+      </div>
+      <div class="table-card card">
+        <span class="card__label">Progresso</span>
+        <strong class="card__value">{{ p.etapasConcluidas }}/{{ p.totalEtapas }} • {{ p.percentualConcluido }}%</strong>
+        <span class="card__hint">{{ p.ativo ? 'Processo ativo' : 'Processo encerrado' }}</span>
+      </div>
+    </div>
+
+    <h2 class="section-title">
+      <svg lucideIcon="list-checks" [size]="18" />
+      Etapas — o caminho até a entrega
+    </h2>
+    @if (etapas().length === 0) {
+      <div class="table-card">
+        <div class="empty-state">
+          <svg lucideIcon="inbox" [size]="36" class="empty-icon" />
+          <h3>Nenhuma etapa cadastrada</h3>
+          @if (podeEscrever()) {
+            <p>Cadastre a primeira etapa para tornar visível o status do mundo real.</p>
+          } @else {
+            <p>Você tem acesso somente a leitura nesta tela.</p>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="table-card">
+        <table class="table">
+          <thead><tr><th>Etapa</th><th>Prevista</th><th>Conclusão</th><th>Status</th>@if (podeEscrever()) {<th class="th-actions">Ações</th>}</tr></thead>
+          <tbody>
+            @for (e of etapasPaginacao.paginatedItems(); track e.id) {
+              <tr>
+                <td class="cell-name" data-label="Etapa">{{ e.ordem }}. {{ e.nome }}</td>
+                <td class="cell-meta" data-label="Prevista">{{ e.dataPrevista ? (e.dataPrevista | date:'dd/MM/yyyy') : '—' }}</td>
+                <td class="cell-meta" data-label="Conclusão">{{ e.dataConclusao ? (e.dataConclusao | date:'dd/MM/yyyy') : '—' }}</td>
+                <td data-label="Status">
+                  @if (e.concluida) {
+                    <app-status-badge type="realizado" label="Concluída" />
+                  } @else if (atrasada(e)) {
+                    <app-status-badge type="pendente" label="Atrasada" />
+                  } @else {
+                    <app-status-badge type="pendente" label="Pendente" />
+                  }
+                </td>
+                @if (podeEscrever()) {
+                  <td class="cell-actions">
+                    @if (!e.concluida) {
+                      <button class="action-btn" title="Concluir" (click)="concluir(e)">
+                        <svg lucideIcon="check" [size]="16" />
+                      </button>
+                    } @else {
+                      <button class="action-btn" title="Estornar" (click)="estornar(e)">
+                        <svg lucideIcon="rotate-ccw" [size]="16" />
+                      </button>
+                    }
+                    <button class="action-btn" title="Subir" (click)="mover(e, -1)">
+                      <svg lucideIcon="chevron-up" [size]="16" />
+                    </button>
+                    <button class="action-btn" title="Descer" (click)="mover(e, 1)">
+                      <svg lucideIcon="chevron-down" [size]="16" />
+                    </button>
+                    <button class="action-btn" title="Editar" (click)="editar(e)">
+                      <svg lucideIcon="pencil" [size]="16" />
+                    </button>
+                    <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(e)">
+                      <svg lucideIcon="trash-2" [size]="16" />
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+        <app-list-pagination [pagination]="etapasPaginacao" />
+      </div>
+    }
+  }
+</div>
+
+<app-modal
+  [visible]="modalVisible()"
+  [title]="editando() ? 'Editar etapa' : 'Nova etapa'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input
+      type="text"
+      [(ngModel)]="form.nome"
+      placeholder="Ex: Cliente pagou"
+      class="input"
+    />
+  </div>
+  <div class="field">
+    <label>Descrição</label>
+    <input
+      type="text"
+      [(ngModel)]="form.descricao"
+      placeholder="Ex: Pagamento via transferência"
+      class="input"
+    />
+  </div>
+  <div class="field">
+    <label>Data prevista</label>
+    <input
+      type="date"
+      lang="pt-BR"
+      [(ngModel)]="form.dataPrevista"
+      class="input"
+    />
+    <span class="field-hint">DD/MM/AAAA</span>
+  </div>
+</app-modal>

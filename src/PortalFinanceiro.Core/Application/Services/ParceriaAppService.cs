@@ -13,11 +13,13 @@ public class ParceriaAppService : IParceriaAppService
 {
     private readonly IParceriaRepository _repository;
     private readonly IPessoaRepository _pessoaRepository;
+    private readonly IProcessoRepository? _processoRepository;
 
-    public ParceriaAppService(IParceriaRepository repository, IPessoaRepository pessoaRepository)
+    public ParceriaAppService(IParceriaRepository repository, IPessoaRepository pessoaRepository, IProcessoRepository? processoRepository = null)
     {
         _repository = repository;
         _pessoaRepository = pessoaRepository;
+        _processoRepository = processoRepository;
     }
 
     public async Task<Result<IEnumerable<ParceriaResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null)
@@ -123,6 +125,9 @@ public class ParceriaAppService : IParceriaAppService
         var totalDespesas = await _repository.SomarDespesasPorStatusAsync(id, 1) + await _repository.SomarDespesasPorStatusAsync(id, 2);
         if (totalReceitas > 0 || totalDespesas > 0)
             return Erro.Negocio("PARCERIA_COM_VINCULOS", "Não é possível excluir parceria com receitas ou despesas vinculadas.");
+
+        if (_processoRepository is not null && await _processoRepository.ContarAtivosPorParceriaAsync(id) > 0)
+            return Erro.Negocio("PARCERIA_COM_PROCESSOS", "Não é possível excluir parceria com processos ativos vinculados.");
 
         parceria.Desativar();
         await _repository.AtualizarAsync(parceria);

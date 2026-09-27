@@ -15,6 +15,7 @@ public class ContratoAppService : IContratoAppService
 {
     private readonly IContratoRepository _repository;
     private readonly IPessoaRepository _pessoaRepository;
+    private readonly IProcessoRepository? _processoRepository;
     private readonly IRegraReceitaRepository? _regraRepository;
     private readonly IReceitaRepository? _receitaRepository;
     private readonly ICategoriaReceitaRepository? _categoriaRepository;
@@ -26,7 +27,8 @@ public class ContratoAppService : IContratoAppService
         IRegraReceitaRepository? regraRepository = null,
         IReceitaRepository? receitaRepository = null,
         ICategoriaReceitaRepository? categoriaRepository = null,
-        IContaBancariaRepository? contaRepository = null)
+        IContaBancariaRepository? contaRepository = null,
+        IProcessoRepository? processoRepository = null)
     {
         _repository = repository;
         _pessoaRepository = pessoaRepository;
@@ -34,6 +36,7 @@ public class ContratoAppService : IContratoAppService
         _receitaRepository = receitaRepository;
         _categoriaRepository = categoriaRepository;
         _contaRepository = contaRepository;
+        _processoRepository = processoRepository;
     }
 
     public async Task<Result<IEnumerable<ContratoResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null, bool? ehRecorrente = null)
@@ -190,6 +193,9 @@ public class ContratoAppService : IContratoAppService
         var totalReceitas = await _repository.SomarReceitasPorStatusAsync(id, 1) + await _repository.SomarReceitasPorStatusAsync(id, 2);
         if (totalReceitas > 0)
             return Erro.Negocio("CONTRATO_COM_VINCULOS", "Não é possível excluir contrato com receitas vinculadas.");
+
+        if (_processoRepository is not null && await _processoRepository.ContarAtivosPorContratoAsync(id) > 0)
+            return Erro.Negocio("CONTRATO_COM_PROCESSOS", "Não é possível excluir contrato com processos ativos vinculados.");
 
         contrato.Desativar();
         await _repository.AtualizarAsync(contrato);

@@ -14,11 +14,12 @@ incrementais idempotentes para bancos já criados:
 
 | Script | Conteúdo |
 |--------|----------|
-| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro`, `Contrato` + `Receita.IdContrato` e `PermissaoUsuario`) |
+| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs — inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro`, `Contrato` + `Receita.IdContrato`, `Processo` + `ProcessoEtapa` e `PermissaoUsuario`) |
 | `003_FluxoAdicionalDespesa.sql` | Incremental idempotente para bancos criados antes do refactor: adiciona `Despesa.IdCliente` e tabela `DespesaServico` se ainda não existirem |
 | `004_ContaPadrao.sql` | Incremental idempotente: adiciona `ContaBancaria.EhPadrao` se ainda não existir |
 | `005_Contratos.sql` | Incremental idempotente: cria `Contrato`, adiciona `Receita.IdContrato` (FK + índice) e garante o módulo `contratos` em `PermissaoUsuario` |
 | `006_ContratoRecorrente.sql` | Incremental idempotente: adiciona `Contrato.EhRecorrente` + `Contrato.IdRegra` se ainda não existirem |
+| `015_Processos.sql` | Incremental idempotente: cria `Processo` (vínculo exclusivo `IdParceria` XOR `IdContrato` via CHECK) + `ProcessoEtapa` (ordem, conclusão, prevista) e garante o módulo `processos` em `PermissaoUsuario` |
 ### Operacionais Postgres (só em `scripts/postgres/` — uso manual, NÃO via DbUp)
 
 | Script | Conteúdo |
@@ -78,15 +79,17 @@ dotnet run --project tools/DbSetup
 | `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
 | `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuário |
 | `Contrato` | Contratos (nome + cliente + valor, sem parceiro) por usuário |
+| `Processo` | Processos (nome + descrição + vínculo exclusivo parceria/contrato) por usuário |
+| `ProcessoEtapa` | Etapas do processo (nome + descrição + ordem + conclusão + prevista) |
 | `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) — `IdParceria`/`IdContrato` opcionais e mutuamente exclusivos para vínculo |
 | `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
-| `PermissaoUsuario` | Nível por módulo por usuário (`dashboard`, `receitas`, `despesas`, `contas`, `categorias`, `clientes`, `parceiros`, `parcerias`, `contratos` garantidos via seed; admin com `Escrita` em todos) |
+| `PermissaoUsuario` | Nível por módulo por usuário (`dashboard`, `receitas`, `despesas`, `contas`, `categorias`, `clientes`, `parceiros`, `parcerias`, `contratos`, `processos` garantidos via seed; admin com `Escrita` em todos) |
 
 ### Exclusão de usuário
 
-- `Usuario` é referenciado por 12 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
+- `Usuario` é referenciado por 13 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `Processo`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
 - `DELETE /api/usuarios/{id}` conta vínculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` → 422 com mensagem orientando desativar em vez de excluir
 - Auto-exclusão é bloqueada (`AUTO_EXCLUSAO` → 422) no backend além do frontend
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |

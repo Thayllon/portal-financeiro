@@ -55,6 +55,14 @@
             }
           </a>
           }
+          @if (authService.temPermissao('processos') || authService.isAdmin()) {
+          <a routerLink="/processos" routerLinkActive="active">
+            <svg lucideIcon="route" [size]="18" />
+            @if (!sidebarCollapsed()) {
+              <span>Processos</span>
+            }
+          </a>
+          }
           @if (authService.temPermissao('contas') || authService.temPermissao('categorias') || authService.temPermissao('clientes') || authService.temPermissao('parceiros') || authService.isAdmin()) {
           <div class="nav-group">
             <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Cadastros' : ''">
