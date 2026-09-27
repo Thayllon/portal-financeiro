@@ -53,6 +53,7 @@ export class UsuariosComponent implements OnInit {
     { id: 'despesas', nome: 'Despesas', descricao: 'Gestão de despesas e pagamentos.', icone: 'trending-down' },
     { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'user-round-group' },
     { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'briefcase-business' },
+    { id: 'processos', nome: 'Processos', descricao: 'Etapas do mundo real vinculadas a parcerias e contratos.', icone: 'route' },
     { id: 'contas', nome: 'Contas bancárias', descricao: 'Cadastro e gerenciamento de contas.', icone: 'wallet' },
     { id: 'categorias', nome: 'Categorias', descricao: 'Cadastro e organização de categorias.', icone: 'tag' },
     { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
@@ -174,6 +175,7 @@ export class UsuariosComponent implements OnInit {
 
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
     if (moduloId === 'home') return;
+    if (moduloId === 'dashboard' && nivel === 'write') return;
     this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
   }
 

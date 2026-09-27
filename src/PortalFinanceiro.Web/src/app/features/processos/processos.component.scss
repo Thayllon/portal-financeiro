@@ -1,0 +1,86 @@
+@use '../../design-system/styles/page-layout' as layout;
+@use '../../design-system/styles/data-table' as table;
+@use '../../design-system/styles/forms' as forms;
+
+.page {
+  @include layout.page-wrapper;
+}
+
+.page__header {
+  @include layout.page-header;
+}
+
+.page__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page__title {
+  @include layout.page-title;
+}
+
+.table-card {
+  @include layout.card;
+}
+
+.toolbar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.filtros {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.table {
+  @include table.data-table;
+
+  th.th-actions {
+    text-align: right;
+  }
+}
+
+.cell-name {
+  @include table.cell-name;
+}
+
+.cell-actions {
+  @include table.cell-actions;
+}
+
+.action-btn {
+  @include table.action-btn;
+}
+
+.field {
+  @include forms.field;
+  margin-bottom: 0.75rem;
+}
+
+.field label {
+  @include forms.label;
+}
+
+.input {
+  @include forms.input;
+}
+
+.required {
+  color: var(--color-error);
+}
+
+.field-hint {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}

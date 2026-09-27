@@ -23,5 +23,6 @@ internal static class UsuarioSql
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}RegraDespesa WHERE IdUsuario = @Id) + "
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdUsuario = @Id) + "
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @Id) + "
-        + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}CategoriaHistorico WHERE IdUsuario = @Id)";
+        + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}CategoriaHistorico WHERE IdUsuario = @Id) + "
+        + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Processo WHERE IdUsuario = @Id)";
 }

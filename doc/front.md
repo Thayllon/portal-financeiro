@@ -6,7 +6,7 @@
 - **Design system** próprio em `src/app/design-system/styles/` (tokens, mixins, variáveis)
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes reutilizáveis** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login, testes)
+- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, processos, categorias-receita, usuarios, login, testes)
 
 ## Como rodar / buildar / testar
 
@@ -58,6 +58,7 @@ src/app/
 │   ├── parceiros/       # wrapper fino → PessoaListagemComponent
 │   ├── parcerias/       # + parceria-detalhe/
 │   ├── contratos/       # + contrato-detalhe/
+│   ├── processos/       # + processo-detalhe/
 │   ├── categorias-receita/
 │   ├── usuarios/
 │   └── login/
@@ -129,6 +130,8 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/parcerias/:id` | parceria-detalhe | Detalhe da parceria: resumo (partes, recebido, pago, faltas) + entradas (receitas) + saídas (despesas) |
 | `/contratos` | contratos | Cadastro de contratos (nome + cliente + valor, sem parceiro) com falta receber; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige falta receber zerada |
 | `/contratos/:id` | contrato-detalhe | Detalhe do contrato: cliente + recebido/falta receber + entradas (receitas) |
+| `/processos` | processos | Processos com etapas do mundo real (vínculo obrigatório a parceria ou contrato, progresso x/y • %) |
+| `/processos/:id` | processo-detalhe | Detalhe do processo: vínculo + progresso + etapas (concluir/estornar, reordenar) |
 | `/usuarios` | usuarios | Usuários e permissões (admin). Admin possui acesso total (bypass) a parcerias, contratos e demais telas; todos os botões e toggles são editáveis e os níveis ficam registrados, valendo caso o perfil seja alterado. Banner "Acesso total" explica a regra |
 | `/testes` | testes | QA técnico (admin, fora do menu, só URL direta): semáforo develop → main, regras R1–R6 com cenários, saúde do banco, débitos e botão Atualizar. Consome `GET /api/diagnostico` |
 
@@ -168,6 +171,6 @@ Regras gerais: do mês corrente em diante os valores incorporam previsão (regra
 
 ### Menu lateral
 
-- **Dashboard**, **Receitas**, **Despesas**, **Parcerias** e **Contratos** ficam no nível principal. **Parcerias** e **Contratos** usam permissão regular (Leitura/Escrita) como Clientes e Parceiros, com bypass explícito para admin (`temPermissao(...) || isAdmin()` na sidebar e `temPermissao` com `isAdmin => true` no guard). Parcerias são vinculadas em Receitas/Despesas via `IdParceria` e exibem saldo (falta receber/pagar); contratos são vinculados em Receitas via `IdContrato` (no máximo um vínculo por receita) e exibem falta receber.
+- **Dashboard**, **Receitas**, **Despesas**, **Parcerias**, **Contratos** e **Processos** ficam no nível principal. **Parcerias**, **Contratos** e **Processos** usam permissão regular (Leitura/Escrita) como Clientes e Parceiros, com bypass explícito para admin (`temPermissao(...) || isAdmin()` na sidebar e `temPermissao` com `isAdmin => true` no guard). Parcerias são vinculadas em Receitas/Despesas via `IdParceria` e exibem saldo (falta receber/pagar); contratos são vinculados em Receitas via `IdContrato` (no máximo um vínculo por receita) e exibem falta receber; processos são vinculados a uma parceria ou a um contrato (vínculo exclusivo e obrigatório) e exibem progresso das etapas.
 - **Configurações** é um grupo colapsável que reúne, nesta ordem: **Contas**, **Categorias**, **Cliente**, **Parceiro** e **Usuários** (admin).
 - O ícone `user-key` fica reservado para quando o item **Permissões** voltar.
