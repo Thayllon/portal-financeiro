@@ -1,13 +1,14 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { ModuloPermissao } from '../../../core/models/permissao.model';
 
 export interface ModuleCardItem {
   title: string;
   description: string;
   icon: string;
   route: string;
-  modulo?: string;
+  modulo?: ModuloPermissao;
 }
 
 @Component({
