@@ -158,7 +158,7 @@ export class LancamentoListagemComponent implements OnInit {
 
   readonly statusRealizado = STATUS_REALIZADO;
 
-  podeEscrever = computed(() => this.auth.temPermissao(this.tipo(), NivelPermissao.Escrita));
+  podeEscrever = computed(() => this.auth.temPermissao(this.ehReceita() ? 'receitas' : 'despesas', NivelPermissao.Escrita));
 
   fluxoAdicional = computed(() => this.ehReceita() ? this.auth.temFluxoAdicionalReceita() : this.auth.temFluxoAdicionalDespesa());
   fluxoSelectorVisible = signal(false);
