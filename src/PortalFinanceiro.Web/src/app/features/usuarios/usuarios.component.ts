@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { UsuarioRepository } from '../../core/repositories/usuario.repository';
 import { PermissaoRepository } from '../../core/repositories/permissao.repository';
 import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
-import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_OUTROS_INDICADORES, MODULO_QA } from '../../core/models/permissao.model';
+import { Permissao, ModuloPermissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_OUTROS_INDICADORES, MODULO_QA } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -45,9 +45,9 @@ export class UsuariosComponent implements OnInit {
   permissoesAberto = signal(false);
   especiaisAberto = signal(false);
 
-  permLevels = signal<Record<string, 'none' | 'read' | 'write'>>({});
+  permLevels = signal<Record<ModuloPermissao, 'none' | 'read' | 'write'>>({} as Record<ModuloPermissao, 'none' | 'read' | 'write'>);
 
-  modulosPermissao = [
+  modulosPermissao: { id: ModuloPermissao; nome: string; descricao: string; icone: string }[] = [
     { id: 'home', nome: 'Home', descricao: 'Página inicial do portal, sempre disponível.', icone: 'home' },
     { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line' },
     { id: 'receitas', nome: 'Receitas', descricao: 'Gestão de receitas e lançamentos financeiros.', icone: 'trending-up' },
@@ -118,7 +118,7 @@ export class UsuariosComponent implements OnInit {
     this.modalVisible.set(false);
     this.drawerVisible.set(true);
     this.buscaPermissao.set('');
-    const niveis: Record<string, 'none' | 'read' | 'write'> = {};
+    const niveis = {} as Record<ModuloPermissao, 'none' | 'read' | 'write'>;
     this.modulosPermissao.forEach(m => {
       niveis[m.id] = item.isAdmin ? 'write' : 'none';
     });
@@ -181,7 +181,7 @@ export class UsuariosComponent implements OnInit {
     this.qaLiberado.set(ligado);
   }
 
-  alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
+  alternarPermissao(moduloId: ModuloPermissao, nivel: 'none' | 'read' | 'write') {
     if (moduloId === 'home') return;
     if (moduloId === 'dashboard' && nivel === 'write') return;
     this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
@@ -236,7 +236,7 @@ export class UsuariosComponent implements OnInit {
         usuarioId = novo.id;
         this.notify.success('Usuário criado');
       }
-      const permissoes: Permissao[] = Object.entries(this.permLevels()).map(([modulo, nivel]) => ({
+      const permissoes: Permissao[] = (Object.entries(this.permLevels()) as [ModuloPermissao, 'none' | 'read' | 'write'][]).map(([modulo, nivel]) => ({
         modulo,
         nivel: nivel === 'write' ? NivelPermissao.Escrita : nivel === 'read' ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
       }));
