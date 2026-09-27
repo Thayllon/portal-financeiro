@@ -175,6 +175,7 @@ export class UsuariosComponent implements OnInit {
 
   alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
     if (moduloId === 'home') return;
+    if (moduloId === 'dashboard' && nivel === 'write') return;
     this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
   }
 

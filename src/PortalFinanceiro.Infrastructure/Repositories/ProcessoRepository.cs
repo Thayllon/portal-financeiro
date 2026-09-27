@@ -26,6 +26,9 @@ public class ProcessoRepository : SqlBaseRepository, IProcessoRepository
     public async Task AtualizarAsync(Processo entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ProcessoSql.Atualizar, entity));
 
+    public async Task ExcluirProcessoAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ProcessoSql.ExcluirProcesso, new { Id = id }));
+
     public async Task<int> ContarAtivosPorParceriaAsync(Guid idParceria)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ProcessoSql.ContarAtivosPorParceria, new { IdParceria = idParceria }));
 

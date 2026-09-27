@@ -10,6 +10,7 @@ public interface IProcessoRepository
     Task<IEnumerable<ProcessoProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null);
     Task InserirAsync(Processo entity);
     Task AtualizarAsync(Processo entity);
+    Task ExcluirProcessoAsync(Guid id);
     Task<int> ContarAtivosPorParceriaAsync(Guid idParceria);
     Task<int> ContarAtivosPorContratoAsync(Guid idContrato);
     Task<ProcessoEtapa?> ObterEtapaPorIdAsync(Guid id);

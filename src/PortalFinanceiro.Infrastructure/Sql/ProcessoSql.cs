@@ -22,6 +22,7 @@ internal static class ProcessoSql
     public static string ListarPorUsuario => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario AND (@Ativo IS NULL OR {T}.Ativo = @Ativo) ORDER BY {T}.DataCadastro DESC";
     public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Nome, @Descricao, @IdParceria, @IdContrato, @Ativo, @DataCadastro, @DataAlteracao)";
     public static string Atualizar => $"UPDATE {T} SET Nome = @Nome, Descricao = @Descricao, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
+    public static string ExcluirProcesso => $"DELETE FROM {T} WHERE Id = @Id";
     public static string ContarAtivosPorParceria => $"SELECT COUNT(*) FROM {T} WHERE IdParceria = @IdParceria AND Ativo = {SqlDialect.Current.BooleanTrue}";
     public static string ContarAtivosPorContrato => $"SELECT COUNT(*) FROM {T} WHERE IdContrato = @IdContrato AND Ativo = {SqlDialect.Current.BooleanTrue}";
 

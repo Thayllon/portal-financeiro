@@ -122,8 +122,10 @@ public class ProcessoAppService : IProcessoAppService
         if (processo.IdUsuario != idUsuario)
             return Erro.Permissao("PROCESSO_ACESSO_NEGADO", "Processo de outro usuário.");
 
-        processo.Desativar();
-        await _repository.AtualizarAsync(processo);
+        var etapas = await _repository.ListarEtapasAsync(id);
+        foreach (var etapa in etapas)
+            await _repository.ExcluirEtapaAsync(etapa.Id);
+        await _repository.ExcluirProcessoAsync(id);
         return Resultado.Sucesso();
     }
 
