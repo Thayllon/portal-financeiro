@@ -126,7 +126,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/categorias` | categorias-receita | Categorias compartilhadas (com subcategorias) |
 | `/clientes` | clientes | Cadastro de clientes (tipo Cliente) |
 | `/parceiros` | parceiros | Cadastro de parceiros (tipo Parceiro) |
-| `/parcerias` | parcerias | Cadastro de parcerias (nome + parceiro + cliente + valor + % do parceiro) com visão de falta receber/pagar; total pago no mês com navegação de período; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige faltas zeradas |
+| `/parcerias` | parcerias | Cadastro de parcerias (nome + parceiro + cliente + valor + % do parceiro) com visão de falta receber/pagar; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige faltas zeradas |
 | `/parcerias/:id` | parceria-detalhe | Detalhe da parceria: resumo (partes, recebido, pago, faltas) + entradas (receitas) + saídas (despesas) |
 | `/contratos` | contratos | Cadastro de contratos (nome + cliente + valor, sem parceiro) com falta receber; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige falta receber zerada |
 | `/contratos/:id` | contrato-detalhe | Detalhe do contrato: cliente + recebido/falta receber + entradas (receitas) |
@@ -146,7 +146,7 @@ KPIs (fileira principal, com variação % vs mês anterior e sparkline):
 | Lucro líquido | Resultado econômico (quanto sobrou) | Receitas − Despesas |
 | Fluxo de caixa | Movimentação efetiva de dinheiro (como terminou o caixa) | Recebido − Pago (só realizado, sem previsão) |
 
-Outros indicadores (painel fixo ao lado do gráfico mensal, 6 tiles compactos com tooltip explicativo via `data-tip` — mesmo padrão dos 4 KPIs):
+Outros indicadores (painel fixo ao lado do gráfico mensal, 6 tiles compactos com tooltip explicativo via `data-tip` — mesmo padrão dos 4 KPIs; os tiles **Contratos ativos** e **Parcerias** aparecem somente com a permissão especial **Outros indicadores** + leitura no módulo (`contratos`/`parcerias`) — sem ela, os slots mostram **Recebido** e **Pago** (realizado puro, sem previsão), mantendo 6 tiles; contagem fixa):
 
 | Indicador | Cálculo |
 |-----------|---------|
@@ -167,6 +167,7 @@ Regras gerais: do mês corrente em diante os valores incorporam previsão (regra
 - O gráfico anual combina barras de Receitas e Despesas com linhas de Saldo e Saldo acumulado no mesmo eixo; a tabela redundante Resumo mês a mês foi removida.
 - A seção Outros indicadores (entre o gráfico e a Distribuição, mesmo padrão de tiles do mensal) tem 10 grupos: Fluxo de caixa anual (`saldoRealizado`), Receita/Despesa recorrente (`totalReceitasRecorrentes/totalDespesasRecorrentes` do `/dashboard/anual` + % do total), Contratos ativos (reuse do mensal), Parcerias no ano (`resumoParcerias.totalPago` + qtd), Margem líquida (`saldo ÷ receitas`), Ponto de equilíbrio (`totalDespesas` + distância %), Melhor/pior mês (max/min de `resumoPorMes[].saldo`), Taxa de realização (`totalRecebido÷totalReceitas`, `totalPago÷totalDespesas`), Médias mensais (receitas e despesas por `mesesConsiderados`), Top categoria do ano (maior de `distribuicaoReceitas/Despesas`) e Previsão restante (`previsaoRestanteAno` somado).
 - O card Distribuição por categoria e subcategoria é o mesmo layout mensal, fica abaixo de Outros indicadores e acima de Por conta e mantém o toggle Receitas/Despesas.
+- Na visão anual, os tiles **Contratos ativos** e **Parcerias no ano** seguem a mesma regra da flag **Outros indicadores** (sem ela, viram **Recebido no ano** e **Pago no ano**), mantendo 10 tiles.
 - Por conta usa a tabela mensal, com avatar do banco, lucro líquido, % do total de receitas e linha Total.
 
 ### Menu lateral

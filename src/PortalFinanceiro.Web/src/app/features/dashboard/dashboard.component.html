@@ -229,6 +229,7 @@
                       </button>
                     </div>
                     <div class="indicadores-grid">
+              @if (verContratos()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--primary">
@@ -246,6 +247,25 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="banknote-arrow-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Recebido</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato entrou no mês (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato entrou no mês (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value green">{{ data()?.totalRecebido | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (taxaRecebidaMensal() !== null && taxaRecebidaMensal() !== undefined) {
+                    {{ taxaRecebidaMensal()!.toLocaleString('pt-BR') }}% das receitas
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              }
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--green">
@@ -280,6 +300,7 @@
                   }
                 </div>
               </div>
+              @if (verParcerias()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--warning">
@@ -307,6 +328,25 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--red">
+                    <svg lucideIcon="banknote-arrow-down" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Pago</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato saiu no mês (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato saiu no mês (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value red">{{ data()?.totalPago | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (taxaPagaMensal() !== null && taxaPagaMensal() !== undefined) {
+                    {{ taxaPagaMensal()!.toLocaleString('pt-BR') }}% das despesas
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              }
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--green">
@@ -655,6 +695,7 @@
                   }
                 </div>
               </div>
+              @if (verContratos()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--primary">
@@ -672,6 +713,26 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="banknote-arrow-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Recebido no ano</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato entrou no ano (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato entrou no ano (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value green">{{ dataAnual()?.totalRecebido | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (kpiAnualExtra()?.taxaRecebida !== null && kpiAnualExtra()?.taxaRecebida !== undefined) {
+                    {{ kpiAnualExtra()!.taxaRecebida!.toLocaleString('pt-BR') }}% das receitas
+                  } @else {
+                    Sem base no ano
+                  }
+                </div>
+              </div>
+              }
+              @if (verParcerias()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--warning">
@@ -689,6 +750,25 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--red">
+                    <svg lucideIcon="banknote-arrow-down" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Pago no ano</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato saiu no ano (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato saiu no ano (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value red">{{ dataAnual()?.totalPago | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (kpiAnualExtra()?.taxaPaga !== null && kpiAnualExtra()?.taxaPaga !== undefined) {
+                    {{ kpiAnualExtra()!.taxaPaga!.toLocaleString('pt-BR') }}% das despesas
+                  } @else {
+                    Sem base no ano
+                  }
+                </div>
+              </div>
+              }
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--green">

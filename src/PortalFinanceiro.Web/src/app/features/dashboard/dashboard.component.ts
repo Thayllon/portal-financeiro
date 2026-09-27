@@ -167,6 +167,21 @@ export class DashboardComponent implements OnInit {
     };
   });
 
+  verContratos = computed(() => this.auth.temOutrosIndicadores() && this.auth.temPermissao('contratos'));
+  verParcerias = computed(() => this.auth.temOutrosIndicadores() && this.auth.temPermissao('parcerias'));
+
+  taxaRecebidaMensal = computed(() => {
+    const d = this.data();
+    const total = d?.totalReceitas ?? 0;
+    return total > 0 ? Math.round((d?.totalRecebido ?? 0) / total * 1000) / 10 : null;
+  });
+
+  taxaPagaMensal = computed(() => {
+    const d = this.data();
+    const total = d?.totalDespesas ?? 0;
+    return total > 0 ? Math.round((d?.totalPago ?? 0) / total * 1000) / 10 : null;
+  });
+
   recRecorrente = computed(() => {
     const d = this.data();
     const valor = d?.totalReceitasRecorrentes ?? 0;
@@ -497,6 +512,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit() { this.carregar(); this.carregarContas(); this.carregarContratos(); }
 
   async carregarContratos() {
+    if (!this.verContratos()) { this.contratos.set([]); return; }
     try {
       const contratos = await firstValueFrom(this.contratoRepo.listar(true));
       this.contratos.set(contratos ?? []);

@@ -16,14 +16,9 @@
   </header>
 
   <div class="toolbar">
-    <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
     <div class="filtros">
       <app-custom-select placeholder="Todas" [options]="situacaoOptions" (valueChange)="mudarSituacao($event)" />
     </div>
-  </div>
-
-  <div class="totals">
-    <span>Pago no mês: <strong style="color: var(--color-success)">{{ (resumoMensal()?.totalPago ?? 0) | valorMascarado }}</strong></span>
   </div>
 
   @if (loading()) {
