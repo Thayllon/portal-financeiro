@@ -21,4 +21,8 @@ public interface IReceitaRepository
     Task<IEnumerable<ResumoAnualItem>> ResumoAnualPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null);
     Task<IEnumerable<ResumoAnualContaItem>> ResumoAnualPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null);
     Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null);
+    Task<IEnumerable<ResumoAnualItem>> ResumoAnualRealizadoPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null);
+    Task<IEnumerable<ResumoRealizadoContaItem>> ResumoAnualRealizadoPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null);
+    Task<decimal> ResumoMensalRealizadoAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null);
+    Task<IEnumerable<ResumoRealizadoContaItem>> ResumoMensalRealizadoPorContaAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null);
 }

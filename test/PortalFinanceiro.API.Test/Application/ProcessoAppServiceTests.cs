@@ -30,6 +30,8 @@ public class ProcessoAppServiceTests
         }
         public Task<int> ContarAtivosPorParceriaAsync(Guid idParceria) => Task.FromResult(0);
         public Task<int> ContarAtivosPorContratoAsync(Guid idContrato) => Task.FromResult(0);
+        public Task<int> ContarPorParceriaAsync(Guid idParceria) => Task.FromResult(0);
+        public Task<int> ContarPorContratoAsync(Guid idContrato) => Task.FromResult(0);
         public Task<ProcessoEtapa?> ObterEtapaPorIdAsync(Guid id) => throw new NotImplementedException();
         public Task<IEnumerable<ProcessoEtapa>> ListarEtapasAsync(Guid idProcesso)
             => Task.FromResult<IEnumerable<ProcessoEtapa>>(Etapas.Values.Where(e => e.IdProcesso == idProcesso).ToList());
@@ -52,6 +54,7 @@ public class ProcessoAppServiceTests
         public Task<IEnumerable<ParceriaProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, int statusRealizado) => throw new NotImplementedException();
         public Task InserirAsync(Parceria entity) => throw new NotImplementedException();
         public Task AtualizarAsync(Parceria entity) => throw new NotImplementedException();
+        public Task ExcluirAsync(Guid id) => throw new NotImplementedException();
         public Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status) => throw new NotImplementedException();
         public Task<decimal> SomarDespesasPorStatusAsync(Guid idParceria, int status) => throw new NotImplementedException();
         public Task<ResumoParceriaAnual> ResumoAnualAsync(Guid idUsuario, int ano, Guid? idConta = null) => throw new NotImplementedException();
@@ -66,6 +69,7 @@ public class ProcessoAppServiceTests
         public Task<IEnumerable<ContratoProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, bool? ehRecorrente, int statusRealizado) => throw new NotImplementedException();
         public Task InserirAsync(Contrato entity) => throw new NotImplementedException();
         public Task AtualizarAsync(Contrato entity) => throw new NotImplementedException();
+        public Task ExcluirAsync(Guid id) => throw new NotImplementedException();
         public Task<decimal> SomarReceitasPorStatusAsync(Guid idContrato, int status) => throw new NotImplementedException();
     }
 

@@ -11,4 +11,5 @@ public interface IUsuarioRepository
     Task AtualizarAsync(Usuario entity);
     Task ExcluirAsync(Guid id);
     Task<int> ContarVinculosAsync(Guid id);
+    Task ExcluirEmCascataAsync(Guid idUsuario);
 }

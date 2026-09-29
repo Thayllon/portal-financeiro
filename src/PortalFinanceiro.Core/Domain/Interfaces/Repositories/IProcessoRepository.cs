@@ -13,6 +13,8 @@ public interface IProcessoRepository
     Task ExcluirProcessoAsync(Guid id);
     Task<int> ContarAtivosPorParceriaAsync(Guid idParceria);
     Task<int> ContarAtivosPorContratoAsync(Guid idContrato);
+    Task<int> ContarPorParceriaAsync(Guid idParceria);
+    Task<int> ContarPorContratoAsync(Guid idContrato);
     Task<ProcessoEtapa?> ObterEtapaPorIdAsync(Guid id);
     Task<IEnumerable<ProcessoEtapa>> ListarEtapasAsync(Guid idProcesso);
     Task<int> ProximaOrdemAsync(Guid idProcesso);

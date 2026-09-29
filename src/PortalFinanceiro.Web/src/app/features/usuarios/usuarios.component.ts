@@ -14,7 +14,7 @@ import { CustomSelectComponent, SelectOption } from '../../shared/components/cus
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
-import { mensagemErro } from '../../shared/utils/api-error.util';
+import { mensagemErro, codigoErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
@@ -203,6 +203,33 @@ export class UsuariosComponent implements OnInit {
     try {
       await firstValueFrom(this.repo.excluir(u.id));
       this.notify.success('Usuário excluído');
+      if (doDrawer) this.fecharDrawer();
+      await this.carregar();
+    } catch (e) {
+      if (codigoErro(e) === 'USUARIO_COM_VINCULOS') {
+        await this.excluirComCascata(u, doDrawer, mensagemErro(e, 'Erro ao excluir usuário'));
+        return;
+      }
+      this.notify.error(mensagemErro(e, 'Erro ao excluir usuário'));
+    }
+  }
+
+  private async excluirComCascata(u: Usuario, doDrawer: boolean, motivo: string) {
+    let total: number;
+    try {
+      total = (await firstValueFrom(this.repo.vinculos(u.id))).total ?? 0;
+    } catch { total = 0; }
+    const impacto = total > 0
+      ? ` Todos os ${total} registro(s) serão excluídos junto com o usuário.`
+      : ' Todos os registros vinculados serão excluídos junto com o usuário.';
+    const ok = await this.confirmService.confirmComTexto(
+      'Excluir usuário com vínculos',
+      `${motivo}${impacto} Digite SIM para confirmar.`
+    );
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.repo.excluir(u.id, true, 'sim'));
+      this.notify.success('Usuário e vínculos excluídos');
       if (doDrawer) this.fecharDrawer();
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir usuário')); }

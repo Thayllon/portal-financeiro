@@ -11,6 +11,7 @@ public interface IParceriaRepository
     Task<IEnumerable<ParceriaProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, int statusRealizado);
     Task InserirAsync(Parceria entity);
     Task AtualizarAsync(Parceria entity);
+    Task ExcluirAsync(Guid id);
     Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status);
     Task<decimal> SomarDespesasPorStatusAsync(Guid idParceria, int status);
     Task<ResumoParceriaAnual> ResumoAnualAsync(Guid idUsuario, int ano, Guid? idConta = null);

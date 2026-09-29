@@ -30,4 +30,13 @@ public class UsuarioRepository : SqlBaseRepository, IUsuarioRepository
 
     public async Task<int> ContarVinculosAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, UsuarioSql.ContarVinculos, new { Id = id }));
+
+    public async Task ExcluirEmCascataAsync(Guid idUsuario)
+        => await ExecuteWithConnectionAsync(async conn =>
+        {
+            var afetados = 0;
+            foreach (var sql in UsuarioSql.ExcluirEmCascata())
+                afetados += await ExecuteAsync(conn, sql, new { Id = idUsuario });
+            return afetados;
+        });
 }

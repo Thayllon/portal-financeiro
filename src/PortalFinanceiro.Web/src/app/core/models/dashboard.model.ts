@@ -67,6 +67,7 @@ export interface MensalResumoAnual {
   saldo: number;
   saldoRealizado: number;
   saldoAcumulado: number;
+  saldoRealizadoAcumulado: number;
 }
 
 export interface ResumoPorContaAnual {
@@ -90,6 +91,8 @@ export interface ResumoPorConta {
   saldo: number;
   totalReceitasPrevisto: number;
   totalDespesasPrevisto: number;
+  totalRecebido: number;
+  totalPago: number;
 }
 
 export interface PrevisaoMensal {

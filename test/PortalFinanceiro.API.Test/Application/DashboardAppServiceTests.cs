@@ -12,6 +12,7 @@ public class DashboardAppServiceTests
     private sealed class ReceitaRepositoryFake : IReceitaRepository
     {
         public List<ResumoAnualItem> PorMes { get; } = new();
+        public List<ResumoAnualItem> RealizadoPorMes { get; } = new();
 
         public Task<Receita?> ObterPorIdAsync(Guid id) => throw new NotImplementedException();
         public Task<ReceitaProjecao?> ObterProjecaoPorIdAsync(Guid id) => throw new NotImplementedException();
@@ -32,11 +33,19 @@ public class DashboardAppServiceTests
             => Task.FromResult<IEnumerable<ResumoAnualContaItem>>(Array.Empty<ResumoAnualContaItem>());
         public Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
             => Task.FromResult<IEnumerable<ResumoAnualCategoriaItem>>(Array.Empty<ResumoAnualCategoriaItem>());
+        public Task<IEnumerable<ResumoAnualItem>> ResumoAnualRealizadoPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
+            => Task.FromResult<IEnumerable<ResumoAnualItem>>(RealizadoPorMes);
+        public Task<IEnumerable<ResumoRealizadoContaItem>> ResumoAnualRealizadoPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
+            => Task.FromResult<IEnumerable<ResumoRealizadoContaItem>>(Array.Empty<ResumoRealizadoContaItem>());
+        public Task<decimal> ResumoMensalRealizadoAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null) => Task.FromResult(0m);
+        public Task<IEnumerable<ResumoRealizadoContaItem>> ResumoMensalRealizadoPorContaAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null)
+            => Task.FromResult<IEnumerable<ResumoRealizadoContaItem>>(Array.Empty<ResumoRealizadoContaItem>());
     }
 
     private sealed class DespesaRepositoryFake : IDespesaRepository
     {
         public List<ResumoAnualItem> PorMes { get; } = new();
+        public List<ResumoAnualItem> RealizadoPorMes { get; } = new();
 
         public Task<Despesa?> ObterPorIdAsync(Guid id) => throw new NotImplementedException();
         public Task<DespesaProjecao?> ObterProjecaoPorIdAsync(Guid id) => throw new NotImplementedException();
@@ -56,6 +65,13 @@ public class DashboardAppServiceTests
             => Task.FromResult<IEnumerable<ResumoAnualContaItem>>(Array.Empty<ResumoAnualContaItem>());
         public Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
             => Task.FromResult<IEnumerable<ResumoAnualCategoriaItem>>(Array.Empty<ResumoAnualCategoriaItem>());
+        public Task<IEnumerable<ResumoAnualItem>> ResumoAnualRealizadoPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
+            => Task.FromResult<IEnumerable<ResumoAnualItem>>(RealizadoPorMes);
+        public Task<IEnumerable<ResumoRealizadoContaItem>> ResumoAnualRealizadoPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
+            => Task.FromResult<IEnumerable<ResumoRealizadoContaItem>>(Array.Empty<ResumoRealizadoContaItem>());
+        public Task<decimal> ResumoMensalRealizadoAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null) => Task.FromResult(0m);
+        public Task<IEnumerable<ResumoRealizadoContaItem>> ResumoMensalRealizadoPorContaAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null)
+            => Task.FromResult<IEnumerable<ResumoRealizadoContaItem>>(Array.Empty<ResumoRealizadoContaItem>());
     }
 
     private sealed class RegraReceitaRepositoryFake : IRegraReceitaRepository
@@ -98,6 +114,7 @@ public class DashboardAppServiceTests
         public Task<IEnumerable<ParceriaProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, int statusRealizado) => throw new NotImplementedException();
         public Task InserirAsync(Parceria entity) => throw new NotImplementedException();
         public Task AtualizarAsync(Parceria entity) => throw new NotImplementedException();
+        public Task ExcluirAsync(Guid id) => throw new NotImplementedException();
         public Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status) => throw new NotImplementedException();
         public Task<decimal> SomarDespesasPorStatusAsync(Guid idParceria, int status) => throw new NotImplementedException();
         public Task<ResumoParceriaAnual> ResumoAnualAsync(Guid idUsuario, int ano, Guid? idConta = null)
@@ -146,5 +163,40 @@ public class DashboardAppServiceTests
         meses[0].SaldoAcumulado.Should().Be(2000);
         meses[1].Saldo.Should().Be(-500);
         meses[1].SaldoAcumulado.Should().Be(1500);
+    }
+
+    [Fact]
+    public async Task ObterDashboardAnual_RealizadoUsaDataRealizacao()
+    {
+        var receitas = new ReceitaRepositoryFake();
+        receitas.PorMes.Add(new ResumoAnualItem { Mes = 8, Total = 1000 });
+        receitas.RealizadoPorMes.Add(new ResumoAnualItem { Mes = 9, TotalRealizado = 1000 });
+
+        var despesas = new DespesaRepositoryFake();
+        despesas.PorMes.Add(new ResumoAnualItem { Mes = 9, Total = 5000 });
+        despesas.RealizadoPorMes.Add(new ResumoAnualItem { Mes = 9, TotalRealizado = 5000 });
+
+        var service = new DashboardAppService(
+            receitas,
+            despesas,
+            new RegraReceitaRepositoryFake(),
+            new RegraDespesaRepositoryFake(),
+            new ContaBancariaRepositoryFake(),
+            new ParceriaRepositoryFake(),
+            new LoggerFake());
+
+        var result = await service.ObterDashboardAnualAsync(Guid.NewGuid(), 2026);
+
+        result.EhSucesso.Should().BeTrue();
+        var meses = result.Dado!.ResumoPorMes;
+        meses[7].TotalReceitas.Should().Be(1000);
+        meses[7].TotalRecebido.Should().Be(0);
+        meses[7].SaldoRealizado.Should().Be(0);
+        meses[8].TotalRecebido.Should().Be(1000);
+        meses[8].TotalPago.Should().Be(5000);
+        meses[8].SaldoRealizado.Should().Be(-4000);
+        meses[8].SaldoRealizadoAcumulado.Should().Be(-4000);
+        result.Dado!.SaldoRealizado.Should().Be(-4000);
+        result.Dado!.MesesConsiderados.Should().Be(1);
     }
 }

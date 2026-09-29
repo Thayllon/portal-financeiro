@@ -88,10 +88,13 @@ dotnet run --project tools/DbSetup
 | `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
 | `PermissaoUsuario` | Nível por módulo por usuário (`dashboard`, `receitas`, `despesas`, `contas`, `categorias`, `clientes`, `parceiros`, `parcerias`, `contratos`, `processos` garantidos via seed; admin com `Escrita` em todos) |
 
+> **Caixa do dashboard** (`DataRealizacao`): o recebido/pago por mês do dashboard usa `COALESCE(DataRealizacao, Data)` quando `Status=2` — o dinheiro conta no mês em que efetivamente entrou/saiu, não no mês do vencimento. Queries em `LancamentoSql` (`ResumoAnualRealizadoPorMes`, `ResumoMensalRealizado`, `*RealizadoPorConta`).
+
 ### Exclusão de usuário
 
 - `Usuario` é referenciado por 13 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `Processo`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
-- `DELETE /api/usuarios/{id}` conta vínculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` → 422 com mensagem orientando desativar em vez de excluir
+- `DELETE /api/usuarios/{id}` sem flag conta vínculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` → 422 orientando desativar
+- Exclusão em cascata (`DELETE /{id}?cascata=true&confirmacao=sim`): exige `confirmacao=sim` e executa `UsuarioSql.ExcluirEmCascata` numa única conexão (transação implícita) na ordem segura pelas FKs: `ReceitaServico`/`DespesaServico` → `ProcessoEtapa` → `Receita`/`Despesa` → `Processo` → `Contrato`/`Parceria` → `RegraReceita`/`RegraDespesa` → `ContaBancaria`/`Pessoa` → `CategoriaReceita`/`Despesa`/`Servico` → `CategoriaHistorico` → `PermissaoUsuario` → `Usuario`
 - Auto-exclusão é bloqueada (`AUTO_EXCLUSAO` → 422) no backend além do frontend
 | `RegraReceita` / `RegraDespesa` | Recorrências mensais (fixas/variáveis) |
 

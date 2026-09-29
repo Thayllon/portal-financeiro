@@ -25,6 +25,8 @@ internal static class ProcessoSql
     public static string ExcluirProcesso => $"DELETE FROM {T} WHERE Id = @Id";
     public static string ContarAtivosPorParceria => $"SELECT COUNT(*) FROM {T} WHERE IdParceria = @IdParceria AND Ativo = {SqlDialect.Current.BooleanTrue}";
     public static string ContarAtivosPorContrato => $"SELECT COUNT(*) FROM {T} WHERE IdContrato = @IdContrato AND Ativo = {SqlDialect.Current.BooleanTrue}";
+    public static string ContarPorParceria => $"SELECT COUNT(*) FROM {T} WHERE IdParceria = @IdParceria";
+    public static string ContarPorContrato => $"SELECT COUNT(*) FROM {T} WHERE IdContrato = @IdContrato";
 
     static string CE => "Id, IdProcesso, Nome, Descricao, Ordem, Concluida, DataPrevista, DataConclusao, DataCadastro, DataAlteracao";
 

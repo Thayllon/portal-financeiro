@@ -17,6 +17,13 @@
 .dialog-body { margin: 1rem 0; }
 .dialog-body p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
 .dialog-footer { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.field--confirm-text { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.field--confirm-text label { font-size: 0.8125rem; font-weight: 500; color: var(--text-primary); }
+.field--confirm-text .required { color: var(--color-error); }
+.field--confirm-text .input {
+  padding: 0.5rem 0.75rem; border: 1px solid var(--surface-border); border-radius: var(--radius-md);
+  font-size: 0.875rem; color: var(--text-primary); background: var(--content-surface); width: 100%;
+}
 .btn {
   padding: 0.5rem 1rem; border-radius: var(--radius-md); font-size: 0.875rem;
   font-weight: 500; transition: all var(--transition-fast);

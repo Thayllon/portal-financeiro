@@ -7,10 +7,22 @@
       </div>
       <div class="dialog-body">
         <p>{{ confirm.message() }}</p>
+        @if (confirm.palavraChave() !== null) {
+          <div class="field field--confirm-text">
+            <label>Digite {{ confirm.palavraChave() }} para confirmar<span class="required">*</span></label>
+            <input
+              [ngModel]="texto()"
+              (ngModelChange)="texto.set($event)"
+              placeholder="{{ confirm.palavraChave() }}"
+              class="input"
+              autocomplete="off"
+            />
+          </div>
+        }
       </div>
       <div class="dialog-footer">
         <button class="btn btn--ghost" (click)="confirm.cancel()">Cancelar</button>
-        <button class="btn btn--danger" (click)="confirm.accept()">Confirmar</button>
+        <button class="btn btn--danger" [disabled]="!podeConfirmar()" (click)="confirm.accept()">Confirmar</button>
       </div>
     </div>
   </div>
