@@ -35,6 +35,12 @@ public class ProcessoRepository : SqlBaseRepository, IProcessoRepository
     public async Task<int> ContarAtivosPorContratoAsync(Guid idContrato)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ProcessoSql.ContarAtivosPorContrato, new { IdContrato = idContrato }));
 
+    public async Task<int> ContarPorParceriaAsync(Guid idParceria)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ProcessoSql.ContarPorParceria, new { IdParceria = idParceria }));
+
+    public async Task<int> ContarPorContratoAsync(Guid idContrato)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ProcessoSql.ContarPorContrato, new { IdContrato = idContrato }));
+
     public async Task<ProcessoEtapa?> ObterEtapaPorIdAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<ProcessoEtapa>(conn, ProcessoSql.ObterEtapaPorId, new { Id = id }));
 

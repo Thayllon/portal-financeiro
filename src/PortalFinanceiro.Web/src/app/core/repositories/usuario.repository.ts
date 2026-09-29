@@ -28,7 +28,14 @@ export class UsuarioRepository extends BaseHttpRepository {
     return this.patch<any>(`/usuarios/${id}/senha`);
   }
 
-  excluir(id: string): Observable<any> {
-    return this.delete<any>(`/usuarios/${id}`);
+  excluir(id: string, cascata?: boolean, confirmacao?: string): Observable<any> {
+    return this.delete<any>(`/usuarios/${id}`, {
+      ...(cascata ? { cascata } : {}),
+      ...(confirmacao ? { confirmacao } : {})
+    });
+  }
+
+  vinculos(id: string): Observable<{ total: number }> {
+    return this.get<{ total: number }>(`/usuarios/${id}/vinculos`);
   }
 }

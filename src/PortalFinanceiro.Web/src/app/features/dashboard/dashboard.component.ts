@@ -5,7 +5,7 @@ import { DashboardRepository } from '../../core/repositories/dashboard.repositor
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { ContratoRepository } from '../../core/repositories/contrato.repository';
 import { Contrato } from '../../core/models/contrato.model';
-import { Dashboard, DashboardAnual, DistribuicaoCategoriaAnual, MensalResumoAnual, ResumoPorConta } from '../../core/models/dashboard.model';
+import { Dashboard, DashboardAnual, DistribuicaoCategoriaAnual, MensalResumoAnual } from '../../core/models/dashboard.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { SkeletonComponent } from '../../shared/components/skeleton.component';
@@ -57,8 +57,8 @@ interface LinhaTabelaContas {
   nomeConta: string;
   banco: string;
   tipo: string;
-  totalReceitas: number;
-  totalDespesas: number;
+  totalRecebido: number;
+  totalPago: number;
   saldo: number;
 }
 
@@ -68,22 +68,22 @@ interface LinhaTabelaContasComPercentual extends LinhaTabelaContas {
 
 interface TabelaContas {
   linhas: LinhaTabelaContasComPercentual[];
-  totalReceitas: number;
-  totalDespesas: number;
+  totalRecebido: number;
+  totalPago: number;
   totalLucro: number;
 }
 
 function montarTabelaContas(contas: LinhaTabelaContas[]): TabelaContas {
-  const totalReceitas = contas.reduce((s, c) => s + c.totalReceitas, 0);
-  const totalDespesas = contas.reduce((s, c) => s + c.totalDespesas, 0);
+  const totalRecebido = contas.reduce((s, c) => s + c.totalRecebido, 0);
+  const totalPago = contas.reduce((s, c) => s + c.totalPago, 0);
   return {
     linhas: contas.map(c => ({
       ...c,
-      percentual: totalReceitas > 0 ? Math.round(c.totalReceitas / totalReceitas * 1000) / 10 : 0
+      percentual: totalRecebido > 0 ? Math.round(c.totalRecebido / totalRecebido * 1000) / 10 : 0
     })),
-    totalReceitas,
-    totalDespesas,
-    totalLucro: totalReceitas - totalDespesas
+    totalRecebido,
+    totalPago,
+    totalLucro: totalRecebido - totalPago
   };
 }
 
@@ -96,6 +96,19 @@ function diasReferencia(mes: number, ano: number): number {
   const hoje = new Date();
   if (ano === hoje.getFullYear() && mes === hoje.getMonth() + 1) return hoje.getDate();
   return new Date(ano, mes, 0).getDate();
+}
+
+export function calcularYtdAcumulado(meses: MensalResumoAnual[], ateMes: number): { recebido: number; pago: number; saldo: number } {
+  const considerados = meses.filter(m => m.mes <= ateMes);
+  const recebido = considerados.reduce((s, m) => s + m.totalRecebido, 0);
+  const pago = considerados.reduce((s, m) => s + m.totalPago, 0);
+  return { recebido, pago, saldo: recebido - pago };
+}
+
+export function montarPrevisaoMensal(d: Dashboard): { receitas: number; despesas: number; saldo: number } {
+  const receitas = d.totalReceitasPrevisto;
+  const despesas = d.totalDespesasPrevisto;
+  return { receitas, despesas, saldo: receitas - despesas };
 }
 
 function criarRotuloValorBarras(casasDecimais: number): Plugin<'bar'> {
@@ -142,6 +155,7 @@ export class DashboardComponent implements OnInit {
 
   data = signal<Dashboard | null>(null);
   dataAnual = signal<DashboardAnual | null>(null);
+  ytdAnual = signal<DashboardAnual | null>(null);
   loading = signal(true);
   mes = signal(new Date().getMonth() + 1);
   ano = signal(new Date().getFullYear());
@@ -155,9 +169,35 @@ export class DashboardComponent implements OnInit {
   readonly iniciaisBanco = iniciaisBanco;
   readonly varianteAvatarBanco = varianteAvatarBanco;
 
-  contasTabela = computed(() => montarTabelaContas(this.data()?.resumoPorConta ?? []));
+  contasTabela = computed(() => montarTabelaContas((this.data()?.resumoPorConta ?? []).map(c => ({
+    nomeConta: c.nomeConta,
+    banco: c.banco,
+    tipo: c.tipo,
+    totalRecebido: c.totalRecebido,
+    totalPago: c.totalPago,
+    saldo: c.totalRecebido - c.totalPago
+  }))));
 
-  contasTabelaAnual = computed(() => montarTabelaContas(this.dataAnual()?.resumoPorConta ?? []));
+  contasTabelaAnual = computed(() => montarTabelaContas((this.dataAnual()?.resumoPorConta ?? []).map(c => ({
+    nomeConta: c.nomeConta,
+    banco: c.banco,
+    tipo: c.tipo,
+    totalRecebido: c.totalRecebido,
+    totalPago: c.totalPago,
+    saldo: c.saldoRealizado
+  }))));
+
+  ytdAcumulado = computed(() => {
+    const meses = this.ytdAnual()?.resumoPorMes ?? [];
+    return meses.length ? calcularYtdAcumulado(meses, this.mes()) : null;
+  });
+
+  rotuloYtd = computed(() => `Jan–${MESES[this.mes() - 1].slice(0, 3)} de ${this.ano()}`);
+
+  previsaoMensal = computed(() => {
+    const d = this.data();
+    return d ? montarPrevisaoMensal(d) : null;
+  });
 
   resumoContratos = computed(() => {
     const ativos = this.contratos().filter(c => c.ativo);
@@ -260,13 +300,6 @@ export class DashboardComponent implements OnInit {
               if (oculto) return '••••••';
               const value = context.parsed.y ?? 0;
               return `${context.dataset.label}: R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            },
-            footer: (items) => {
-              if (oculto) return '';
-              const i = items[0]?.dataIndex ?? 0;
-              const info = this.valoresTooltip()[i];
-              if (!info || info.previsto <= 0) return '';
-              return `Inclui R$ ${info.previsto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} previstos`;
             }
           }
         }
@@ -326,17 +359,17 @@ export class DashboardComponent implements OnInit {
   kpiAnualExtra = computed(() => {
     const d = this.dataAnual();
     if (!d) return null;
-    const margem = d.totalReceitas !== 0 ? Math.round(d.saldo / d.totalReceitas * 1000) / 10 : null;
-    const distanciaPonto = d.totalDespesas !== 0 ? Math.round(d.saldo / d.totalDespesas * 1000) / 10 : null;
+    const margem = d.totalRecebido !== 0 ? Math.round(d.saldoRealizado / d.totalRecebido * 1000) / 10 : null;
+    const distanciaPonto = d.totalPago !== 0 ? Math.round(d.saldoRealizado / d.totalPago * 1000) / 10 : null;
     const taxaRecebida = d.totalReceitas !== 0 ? Math.round(d.totalRecebido / d.totalReceitas * 1000) / 10 : null;
     const taxaPaga = d.totalDespesas !== 0 ? Math.round(d.totalPago / d.totalDespesas * 1000) / 10 : null;
     const meses = d.mesesConsiderados > 0 ? d.mesesConsiderados : 0;
-    const mediaReceitas = meses > 0 ? Math.round(d.totalReceitas / meses * 100) / 100 : 0;
-    const mediaDespesas = meses > 0 ? Math.round(d.totalDespesas / meses * 100) / 100 : 0;
+    const mediaReceitas = meses > 0 ? Math.round(d.totalRecebido / meses * 100) / 100 : 0;
+    const mediaDespesas = meses > 0 ? Math.round(d.totalPago / meses * 100) / 100 : 0;
     return {
       fluxo: d.saldoRealizado,
       margem,
-      pontoEquilibrio: d.totalDespesas,
+      pontoEquilibrio: d.totalPago,
       distanciaPonto,
       taxaRecebida,
       taxaPaga,
@@ -351,8 +384,8 @@ export class DashboardComponent implements OnInit {
     let melhor = meses[0];
     let pior = meses[0];
     for (const m of meses) {
-      if (m.saldo > melhor.saldo) melhor = m;
-      if (m.saldo < pior.saldo) pior = m;
+      if (m.saldoRealizado > melhor.saldoRealizado) melhor = m;
+      if (m.saldoRealizado < pior.saldoRealizado) pior = m;
     }
     return { melhor, pior };
   });
@@ -417,7 +450,6 @@ export class DashboardComponent implements OnInit {
   chartVersion = signal(0);
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
   private graficoMensal = signal<{ label: string; mes: number; ano: number; d: Dashboard }[]>([]);
-  valoresTooltip = signal<{ previsto: number }[]>([]);
   modoPorConta = computed(() => (this.data()?.resumoPorConta?.length ?? 0) > 1);
 
   distMensalCategorias = computed<DistribuicaoCategoriaAnual[]>(() => {
@@ -444,35 +476,30 @@ export class DashboardComponent implements OnInit {
     if (itens.length < 2) return null;
     const atual = itens[itens.length - 2];
     const anterior = itens[itens.length - 3];
-    const v = this.valorExibido(atual.mes, atual.ano, atual.d);
-    const va = this.valorExibido(anterior.mes, anterior.ano, anterior.d);
-    const saldo = v.receitas - v.despesas;
-    const saldoAnt = va.receitas - va.despesas;
+    const recebido = atual.d.totalRecebido;
+    const pago = atual.d.totalPago;
+    const recebidoAnt = anterior.d.totalRecebido;
+    const pagoAnt = anterior.d.totalPago;
+    const saldo = recebido - pago;
+    const saldoAnt = recebidoAnt - pagoAnt;
     const dias = diasReferencia(atual.mes, atual.ano);
     const diasAnt = diasReferencia(anterior.mes, anterior.ano);
-    const mediaDiaria = dias > 0 ? v.receitas / dias : 0;
-    const mediaAnt = diasAnt > 0 ? va.receitas / diasAnt : 0;
-    const fluxo = atual.d.totalRecebido - atual.d.totalPago;
-    const fluxoAnt = anterior.d.totalRecebido - anterior.d.totalPago;
+    const mediaDiaria = dias > 0 ? recebido / dias : 0;
+    const mediaAnt = diasAnt > 0 ? recebidoAnt / diasAnt : 0;
     const pagoParcerias = atual.d.resumoParcerias?.totalPago ?? 0;
     const pagoParceriasAnt = anterior.d.resumoParcerias?.totalPago ?? 0;
     return {
-      receitas: v.receitas,
-      despesas: v.despesas,
+      receitas: recebido,
+      despesas: pago,
       saldo,
       mediaDiaria,
       dias,
-      fluxo,
-      varReceitas: calcularVariacao(v.receitas, va.receitas),
-      varDespesas: calcularVariacao(v.despesas, va.despesas),
+      varReceitas: calcularVariacao(recebido, recebidoAnt),
+      varDespesas: calcularVariacao(pago, pagoAnt),
       varSaldo: calcularVariacao(saldo, saldoAnt),
       varMediaDiaria: calcularVariacao(mediaDiaria, mediaAnt),
-      varFluxo: calcularVariacao(fluxo, fluxoAnt),
       varParcerias: calcularVariacao(pagoParcerias, pagoParceriasAnt),
-      margem: v.receitas !== 0 ? Math.round(saldo / v.receitas * 1000) / 10 : null,
-      despesaSobreReceita: v.receitas !== 0 ? Math.round(v.despesas / v.receitas * 1000) / 10 : null,
-      pontoEquilibrio: v.despesas,
-      distanciaPonto: v.despesas !== 0 ? Math.round(saldo / v.despesas * 1000) / 10 : null
+      margem: recebido !== 0 ? Math.round(saldo / recebido * 1000) / 10 : null
     };
   });
 
@@ -487,7 +514,6 @@ export class DashboardComponent implements OnInit {
   sparkReceitas: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
   sparkDespesas: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
   sparkSaldo: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
-  sparkFluxo: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
 
   private sparkVazio: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
   private sparkExibicao(dados: ChartConfiguration<'line'>['data']) {
@@ -504,10 +530,9 @@ export class DashboardComponent implements OnInit {
   sparkReceitasExibicao = computed(() => this.sparkExibicao(this.sparkReceitas));
   sparkDespesasExibicao = computed(() => this.sparkExibicao(this.sparkDespesas));
   sparkSaldoExibicao = computed(() => this.sparkExibicao(this.sparkSaldo));
-  sparkFluxoExibicao = computed(() => this.sparkExibicao(this.sparkFluxo));
-  sparkReceitasAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.totalReceitas, corReceita())));
-  sparkDespesasAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.totalDespesas, corDespesa())));
-  sparkSaldoAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.saldo, corReceita())));
+  sparkReceitasAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.totalRecebido, corReceita())));
+  sparkDespesasAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.totalPago, corDespesa())));
+  sparkSaldoAnualExibicao = computed(() => this.sparkExibicao(this.montarSparkAnual(m => m.saldoRealizado, corReceita())));
 
   ngOnInit() { this.carregar(); this.carregarContas(); this.carregarContratos(); }
 
@@ -539,6 +564,7 @@ export class DashboardComponent implements OnInit {
           meses.map(m => firstValueFrom(this.repo.obter(m.mes, m.ano, idConta)))
         );
 if (seq !== this.requestSeq) return;
+            try { this.ytdAnual.set(await firstValueFrom(this.repo.obterAnual(anoAtual, idConta))); } catch { this.ytdAnual.set(null); }
             this.data.set(dashboards[6]);
             this.graficoMensal.set(meses.map((m, i) => ({ label: MESES[m.mes - 1], mes: m.mes, ano: m.ano, d: dashboards[i] })));
             this.montarSparks();
@@ -579,7 +605,6 @@ if (seq !== this.requestSeq) return;
     this.data.set(null);
     this.dataAnual.set(null);
     this.graficoMensal.set([]);
-    this.valoresTooltip.set([]);
     this.barChartData = { labels: [], datasets: [] };
     this.barChartAnualData = { labels: [], datasets: [] };
     this.donutDistCatData = { labels: [], datasets: [] };
@@ -650,7 +675,7 @@ if (seq !== this.requestSeq) return;
       ...this.barChartData,
       datasets: this.barChartData.datasets.map(ds => ({
         ...ds,
-        hidden: (filtro === 'receitas' && ds.label !== 'Receitas') || (filtro === 'despesas' && ds.label !== 'Despesas')
+        hidden: (filtro === 'receitas' && ds.label !== 'Recebido') || (filtro === 'despesas' && ds.label !== 'Pago')
       }))
     };
   }
@@ -659,14 +684,12 @@ if (seq !== this.requestSeq) return;
     const itens = this.graficoMensal();
     if (itens.length < 2) return;
     const labels = itens.map(i => MESES[i.mes - 1].slice(0, 3));
-    const rec = itens.map(i => this.valorExibido(i.mes, i.ano, i.d).receitas);
-    const desp = itens.map(i => this.valorExibido(i.mes, i.ano, i.d).despesas);
+    const rec = itens.map(i => i.d.totalRecebido);
+    const desp = itens.map(i => i.d.totalPago);
     const saldos = rec.map((r, i) => r - desp[i]);
-    const fluxos = itens.map(i => i.d.totalRecebido - i.d.totalPago);
     this.sparkReceitas = { labels, datasets: [{ data: rec, borderColor: corReceita(), fill: false }] };
     this.sparkDespesas = { labels, datasets: [{ data: desp, borderColor: corDespesa(), fill: false }] };
     this.sparkSaldo = { labels, datasets: [{ data: saldos, borderColor: corReceita(), fill: false }] };
-    this.sparkFluxo = { labels, datasets: [{ data: fluxos, borderColor: corRoxa(), fill: false }] };
   }
 
   private atualizarGraficoMensal() {
@@ -674,15 +697,12 @@ if (seq !== this.requestSeq) return;
     if (todos.length < 4) return;
     const itens = todos.slice(-3);
 
-    const valores = itens.map(i => this.valorExibido(i.mes, i.ano, i.d));
-    this.valoresTooltip.set(valores);
-
     this.barChartData = {
       labels: itens.map(i => i.label),
       datasets: [
         {
-          data: valores.map(v => v.receitas),
-          label: 'Receitas',
+          data: itens.map(i => i.d.totalRecebido),
+          label: 'Recebido',
           backgroundColor: comTransparencia(corReceita()),
           borderWidth: 0,
           borderRadius: 6,
@@ -691,8 +711,8 @@ if (seq !== this.requestSeq) return;
           barPercentage: 0.65
         },
         {
-          data: valores.map(v => v.despesas),
-          label: 'Despesas',
+          data: itens.map(i => i.d.totalPago),
+          label: 'Pago',
           backgroundColor: comTransparencia(corDespesa()),
           borderWidth: 0,
           borderRadius: 6,
@@ -710,15 +730,12 @@ if (seq !== this.requestSeq) return;
     const mensal = this.data();
     if (!mensal?.resumoPorConta.length) return;
 
-    const valores = mensal.resumoPorConta.map(c => this.valorExibidoConta(mensal.mes, mensal.ano, c));
-    this.valoresTooltip.set(valores);
-
     this.barChartData = {
       labels: mensal.resumoPorConta.map(c => c.nomeConta),
       datasets: [
         {
-          data: valores.map(v => v.receitas),
-          label: 'Receitas',
+          data: mensal.resumoPorConta.map(c => c.totalRecebido),
+          label: 'Recebido',
           backgroundColor: comTransparencia(corReceita()),
           borderWidth: 0,
           borderRadius: 6,
@@ -727,8 +744,8 @@ if (seq !== this.requestSeq) return;
           barPercentage: 0.65
         },
         {
-          data: valores.map(v => v.despesas),
-          label: 'Despesas',
+          data: mensal.resumoPorConta.map(c => c.totalPago),
+          label: 'Pago',
           backgroundColor: comTransparencia(corDespesa()),
           borderWidth: 0,
           borderRadius: 6,
@@ -739,30 +756,6 @@ if (seq !== this.requestSeq) return;
       ]
     };
     this.aplicarFiltroSerie();
-  }
-
-  private valorExibidoConta(mes: number, ano: number, c: ResumoPorConta): { receitas: number; despesas: number; previsto: number } {
-    const hoje = new Date();
-    const atualOuFuturo = ano > hoje.getFullYear() || (ano === hoje.getFullYear() && mes >= hoje.getMonth() + 1);
-    if (!atualOuFuturo) return { receitas: c.totalReceitas, despesas: c.totalDespesas, previsto: 0 };
-    return {
-      receitas: c.totalReceitas + c.totalReceitasPrevisto,
-      despesas: c.totalDespesas + c.totalDespesasPrevisto,
-      previsto: c.totalReceitasPrevisto + c.totalDespesasPrevisto
-    };
-  }
-
-  private valorExibido(mes: number, ano: number, d: Dashboard): { receitas: number; despesas: number; previsto: number } {
-    const hoje = new Date();
-    const mesHoje = hoje.getMonth() + 1;
-    const anoHoje = hoje.getFullYear();
-    const atualOuFuturo = ano > anoHoje || (ano === anoHoje && mes >= mesHoje);
-    if (!atualOuFuturo) return { receitas: d.totalReceitas, despesas: d.totalDespesas, previsto: 0 };
-    return {
-      receitas: d.totalReceitas + d.totalReceitasPrevisto,
-      despesas: d.totalDespesas + d.totalDespesasPrevisto,
-      previsto: d.totalReceitasPrevisto + d.totalDespesasPrevisto
-    };
   }
 
   private mesAdjacente(mes: number, ano: number, delta: number): { mes: number; ano: number } {
@@ -782,8 +775,8 @@ if (seq !== this.requestSeq) return;
       datasets: [
         {
           type: 'bar',
-          data: anual.resumoPorMes.map(m => m.totalReceitas),
-          label: 'Receitas',
+          data: anual.resumoPorMes.map(m => m.totalRecebido),
+          label: 'Recebido',
           backgroundColor: comTransparencia(corReceita()),
           borderColor: corReceita(),
           borderWidth: 0,
@@ -794,8 +787,8 @@ if (seq !== this.requestSeq) return;
         },
         {
           type: 'bar',
-          data: anual.resumoPorMes.map(m => m.totalDespesas),
-          label: 'Despesas',
+          data: anual.resumoPorMes.map(m => m.totalPago),
+          label: 'Pago',
           backgroundColor: comTransparencia(corDespesa()),
           borderColor: corDespesa(),
           borderWidth: 0,
@@ -806,8 +799,8 @@ if (seq !== this.requestSeq) return;
         },
         {
           type: 'line',
-          data: anual.resumoPorMes.map(m => m.saldo),
-          label: 'Saldo',
+          data: anual.resumoPorMes.map(m => m.saldoRealizadoAcumulado),
+          label: 'Saldo acumulado',
           borderColor: corRoxa(),
           borderWidth: 2,
           tension: 0.4,

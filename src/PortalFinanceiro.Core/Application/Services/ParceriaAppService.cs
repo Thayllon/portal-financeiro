@@ -126,11 +126,15 @@ public class ParceriaAppService : IParceriaAppService
         if (totalReceitas > 0 || totalDespesas > 0)
             return Erro.Negocio("PARCERIA_COM_VINCULOS", "Não é possível excluir parceria com receitas ou despesas vinculadas.");
 
-        if (_processoRepository is not null && await _processoRepository.ContarAtivosPorParceriaAsync(id) > 0)
-            return Erro.Negocio("PARCERIA_COM_PROCESSOS", "Não é possível excluir parceria com processos ativos vinculados.");
+        if (_processoRepository is not null)
+        {
+            if (await _processoRepository.ContarAtivosPorParceriaAsync(id) > 0)
+                return Erro.Negocio("PARCERIA_COM_PROCESSOS", "Não é possível excluir parceria com processos ativos vinculados.");
+            if (await _processoRepository.ContarPorParceriaAsync(id) > 0)
+                return Erro.Negocio("PARCERIA_COM_PROCESSOS", "Não é possível excluir parceria com processos vinculados. Exclua os processos primeiro.");
+        }
 
-        parceria.Desativar();
-        await _repository.AtualizarAsync(parceria);
+        await _repository.ExcluirAsync(id);
         return Resultado.Sucesso();
     }
 

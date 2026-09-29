@@ -152,36 +152,39 @@ export class LancamentoModalComponent {
     effect(() => {
       const ini = this.editando();
       const visible = this.visible();
-      if (visible) {
-        this.fieldErrors.set({});
-        this.passoAtual.set(0);
-        if (ini) {
-          const blocos = this.agruparServicosEmBlocos(ini.servicos ?? []);
-          this.form.set({
-            descricao: ini.descricao,
-            valor: ini.valor,
-            data: ini.data?.split('T')[0] ?? '',
-            idConta: ini.idConta,
-            idCategoria: ini.idCategoria,
-            idSubcategoria: ini.idSubcategoria ?? undefined,
-            idParceria: ini.idParceria ?? undefined,
-            idContrato: ini.idContrato ?? undefined,
-            categoriasServicoBloco: blocos,
-            idCliente: ini.idCliente ?? undefined,
-            repete: false,
-            dia: 1,
-            diaUtil: false,
-            dataFim: ''
-          });
-          this.reconciliarPaisComEstruturaAtual();
-        } else {
-          const hoje = new Date().toISOString().split('T')[0];
-          const contas = untracked(() => this.contas());
-          const contaPadrao = contas.find(c => c.ehPadrao)?.id ?? contas[0]?.id ?? '';
-          this.form.set({ ...this.emptyForm(), data: hoje, idConta: contaPadrao });
-        }
-      }
+      if (!visible) return;
+      untracked(() => this.inicializarFormulario(ini));
     });
+  }
+
+  private inicializarFormulario(ini: LancamentoItem | null) {
+    this.fieldErrors.set({});
+    this.passoAtual.set(0);
+    if (ini) {
+      const blocos = this.agruparServicosEmBlocos(ini.servicos ?? []);
+      this.form.set({
+        descricao: ini.descricao,
+        valor: ini.valor,
+        data: ini.data?.split('T')[0] ?? '',
+        idConta: ini.idConta,
+        idCategoria: ini.idCategoria,
+        idSubcategoria: ini.idSubcategoria ?? undefined,
+        idParceria: ini.idParceria ?? undefined,
+        idContrato: ini.idContrato ?? undefined,
+        categoriasServicoBloco: blocos,
+        idCliente: ini.idCliente ?? undefined,
+        repete: false,
+        dia: 1,
+        diaUtil: false,
+        dataFim: ''
+      });
+      this.reconciliarPaisComEstruturaAtual();
+    } else {
+      const hoje = new Date().toISOString().split('T')[0];
+      const contas = this.contas();
+      const contaPadrao = contas.find(c => c.ehPadrao)?.id ?? contas[0]?.id ?? '';
+      this.form.set({ ...this.emptyForm(), data: hoje, idConta: contaPadrao });
+    }
   }
 
   private agruparServicosEmBlocos(servicos: { categoriaServicoId: string; subcategoriaServicoId?: string }[]): CategoriaServicoBloco[] {

@@ -12,18 +12,24 @@ public class ParceriaAppServiceTests
     {
         public List<ParceriaProjecao> Itens { get; } = new();
         public ParceriaProjecao? PorId { get; set; }
+        public Dictionary<Guid, Parceria> Entidades { get; } = new();
         public int ChamadasSomarReceitas { get; private set; }
         public int ChamadasSomarDespesas { get; private set; }
         public decimal SomaReceitas { get; set; }
         public decimal SomaDespesas { get; set; }
 
-        public Task<Parceria?> ObterPorIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<Parceria?> ObterPorIdAsync(Guid id) => Task.FromResult(Entidades.GetValueOrDefault(id));
         public Task<ParceriaProjecao?> ObterProjecaoPorIdAsync(Guid id) => Task.FromResult(PorId);
         public Task<IEnumerable<ParceriaProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null) => throw new NotImplementedException();
         public Task<IEnumerable<ParceriaProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, int statusRealizado)
             => Task.FromResult<IEnumerable<ParceriaProjecao>>(Itens.ToList());
         public Task InserirAsync(Parceria entity) => throw new NotImplementedException();
         public Task AtualizarAsync(Parceria entity) => throw new NotImplementedException();
+        public Task ExcluirAsync(Guid id)
+        {
+            Entidades.Remove(id);
+            return Task.CompletedTask;
+        }
         public Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status)
         {
             ChamadasSomarReceitas++;
@@ -36,6 +42,30 @@ public class ParceriaAppServiceTests
         }
         public Task<ResumoParceriaAnual> ResumoAnualAsync(Guid idUsuario, int ano, Guid? idConta = null) => throw new NotImplementedException();
         public Task<ResumoParceriaAnual> ResumoMensalAsync(Guid idUsuario, int ano, int mes, Guid? idConta = null) => throw new NotImplementedException();
+    }
+
+    private sealed class ProcessoRepositoryFake : IProcessoRepository
+    {
+        public int ProcessosVinculados { get; set; }
+        public int ProcessosAtivosVinculados { get; set; }
+
+        public Task<Processo?> ObterPorIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<ProcessoProjecao?> ObterProjecaoPorIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<IEnumerable<ProcessoProjecao>> ListarAsync(Guid idUsuario, bool? ativo = null) => throw new NotImplementedException();
+        public Task InserirAsync(Processo entity) => throw new NotImplementedException();
+        public Task AtualizarAsync(Processo entity) => throw new NotImplementedException();
+        public Task ExcluirProcessoAsync(Guid id) => throw new NotImplementedException();
+        public Task<int> ContarAtivosPorParceriaAsync(Guid idParceria) => Task.FromResult(ProcessosAtivosVinculados);
+        public Task<int> ContarAtivosPorContratoAsync(Guid idContrato) => throw new NotImplementedException();
+        public Task<int> ContarPorParceriaAsync(Guid idParceria) => Task.FromResult(ProcessosVinculados);
+        public Task<int> ContarPorContratoAsync(Guid idContrato) => throw new NotImplementedException();
+        public Task<ProcessoEtapa?> ObterEtapaPorIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<IEnumerable<ProcessoEtapa>> ListarEtapasAsync(Guid idProcesso) => throw new NotImplementedException();
+        public Task<int> ProximaOrdemAsync(Guid idProcesso) => throw new NotImplementedException();
+        public Task<int> ContarEtapasPendentesAsync(Guid idProcesso) => throw new NotImplementedException();
+        public Task InserirEtapaAsync(ProcessoEtapa entity) => throw new NotImplementedException();
+        public Task AtualizarEtapaAsync(ProcessoEtapa entity) => throw new NotImplementedException();
+        public Task ExcluirEtapaAsync(Guid id) => throw new NotImplementedException();
     }
 
     private sealed class PessoaRepositoryFake : IPessoaRepository
@@ -107,5 +137,73 @@ public class ParceriaAppServiceTests
         result.Dado!.FaltaPagar.Should().Be(2000);
         repos.ChamadasSomarReceitas.Should().Be(1);
         repos.ChamadasSomarDespesas.Should().Be(1);
+    }
+
+    private static Parceria NovaParceria(Guid usuario)
+        => Parceria.Criar(usuario, "Parceria", Guid.NewGuid(), Guid.NewGuid(), 10000, 30).Dado!;
+
+    [Fact]
+    public async Task Excluir_SemVinculos_RemoveDefinitivamente()
+    {
+        var repos = new ParceriaRepositoryFake();
+        var processos = new ProcessoRepositoryFake();
+        var usuario = Guid.NewGuid();
+        var parceria = NovaParceria(usuario);
+        repos.Entidades[parceria.Id] = parceria;
+        var service = new ParceriaAppService(repos, new PessoaRepositoryFake(), processos);
+
+        var result = await service.ExcluirAsync(parceria.Id, usuario);
+
+        result.EhSucesso.Should().BeTrue();
+        repos.Entidades.Should().NotContainKey(parceria.Id);
+    }
+
+    [Fact]
+    public async Task Excluir_ComDespesas_Bloqueia()
+    {
+        var repos = new ParceriaRepositoryFake();
+        var usuario = Guid.NewGuid();
+        var parceria = NovaParceria(usuario);
+        repos.Entidades[parceria.Id] = parceria;
+        repos.SomaDespesas = 500;
+        var service = new ParceriaAppService(repos, new PessoaRepositoryFake());
+
+        var result = await service.ExcluirAsync(parceria.Id, usuario);
+
+        result.EhSucesso.Should().BeFalse();
+        result.Erro!.Codigo.Should().Be("PARCERIA_COM_VINCULOS");
+        repos.Entidades.Should().ContainKey(parceria.Id);
+    }
+
+    [Fact]
+    public async Task Excluir_ComProcessosEncerrados_Bloqueia()
+    {
+        var repos = new ParceriaRepositoryFake();
+        var processos = new ProcessoRepositoryFake { ProcessosVinculados = 2 };
+        var usuario = Guid.NewGuid();
+        var parceria = NovaParceria(usuario);
+        repos.Entidades[parceria.Id] = parceria;
+        var service = new ParceriaAppService(repos, new PessoaRepositoryFake(), processos);
+
+        var result = await service.ExcluirAsync(parceria.Id, usuario);
+
+        result.EhSucesso.Should().BeFalse();
+        result.Erro!.Codigo.Should().Be("PARCERIA_COM_PROCESSOS");
+        repos.Entidades.Should().ContainKey(parceria.Id);
+    }
+
+    [Fact]
+    public async Task Excluir_DeOutroUsuario_RetornaPermissao()
+    {
+        var repos = new ParceriaRepositoryFake();
+        var parceria = NovaParceria(Guid.NewGuid());
+        repos.Entidades[parceria.Id] = parceria;
+        var service = new ParceriaAppService(repos, new PessoaRepositoryFake());
+
+        var result = await service.ExcluirAsync(parceria.Id, Guid.NewGuid());
+
+        result.EhSucesso.Should().BeFalse();
+        result.Erro!.Codigo.Should().Be("PARCERIA_ACESSO_NEGADO");
+        repos.Entidades.Should().ContainKey(parceria.Id);
     }
 }

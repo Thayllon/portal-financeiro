@@ -10,8 +10,23 @@ interface ApiError {
   errors?: Record<string, string[]>;
 }
 
-export function mensagemErro(error: unknown, fallback: string): string {
+export function codigoErro(error: unknown): string | null {
   if (!(error instanceof HttpErrorResponse)) {
+    return null;
+  }
+
+  const body = (error.error ?? null) as ApiError | null;
+  if (body && typeof body === 'object') {
+    const codigo = body.codigo ?? body.code;
+    if (typeof codigo === 'string' && codigo.trim()) {
+      return codigo;
+    }
+  }
+
+  return null;
+}
+
+export function mensagemErro(error: unknown, fallback: string): string {  if (!(error instanceof HttpErrorResponse)) {
     return fallback;
   }
 

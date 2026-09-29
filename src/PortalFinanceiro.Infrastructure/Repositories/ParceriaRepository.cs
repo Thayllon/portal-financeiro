@@ -30,6 +30,9 @@ public class ParceriaRepository : SqlBaseRepository, IParceriaRepository
     public async Task AtualizarAsync(Parceria entity)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ParceriaSql.Atualizar, entity));
 
+    public async Task ExcluirAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ParceriaSql.Excluir, new { Id = id }));
+
     public async Task<decimal> SomarReceitasPorStatusAsync(Guid idParceria, int status)
         => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<decimal>(conn, ParceriaSql.SomarReceitas, new { IdParceria = idParceria, Status = status }));
 

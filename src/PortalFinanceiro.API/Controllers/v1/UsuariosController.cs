@@ -52,10 +52,17 @@ public class UsuariosController : BaseController
         return ApiResponse(result);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Excluir(Guid id)
+    [HttpGet("{id}/vinculos")]
+    public async Task<IActionResult> ContarVinculos(Guid id)
     {
-        var result = await _service.ExcluirAsync(id, ObterIdUsuario());
+        var result = await _service.ContarVinculosAsync(id);
+        return ApiResponse(result);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Excluir(Guid id, [FromQuery] bool cascata = false, [FromQuery] string? confirmacao = null)
+    {
+        var result = await _service.ExcluirAsync(id, ObterIdUsuario(), cascata, confirmacao);
         return ApiResponse(result);
     }
 }

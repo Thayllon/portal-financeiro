@@ -10,3 +10,8 @@ public class UsuarioResponse
     public bool PrimeiroAcesso { get; set; }
     public DateTime DataCadastro { get; set; }
 }
+
+public class UsuarioVinculosResponse
+{
+    public int Total { get; set; }
+}

@@ -25,4 +25,27 @@ internal static class UsuarioSql
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @Id) + "
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}CategoriaHistorico WHERE IdUsuario = @Id) + "
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Processo WHERE IdUsuario = @Id)";
+
+    public static IEnumerable<string> ExcluirEmCascata()
+    {
+        var p = SqlDialect.Current.SchemaPrefix;
+        yield return $"DELETE FROM {p}ReceitaServico WHERE ReceitaId IN (SELECT Id FROM {p}Receita WHERE IdUsuario = @Id)";
+        yield return $"DELETE FROM {p}DespesaServico WHERE DespesaId IN (SELECT Id FROM {p}Despesa WHERE IdUsuario = @Id)";
+        yield return $"DELETE FROM {p}ProcessoEtapa WHERE IdProcesso IN (SELECT Id FROM {p}Processo WHERE IdUsuario = @Id)";
+        yield return $"DELETE FROM {p}Receita WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}Despesa WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}Processo WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}Contrato WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}Parceria WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}RegraReceita WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}RegraDespesa WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}ContaBancaria WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}Pessoa WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}CategoriaReceita WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}CategoriaDespesa WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}CategoriaServico WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}CategoriaHistorico WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}PermissaoUsuario WHERE UsuarioId = @Id";
+        yield return $"DELETE FROM {p}Usuario WHERE Id = @Id";
+    }
 }

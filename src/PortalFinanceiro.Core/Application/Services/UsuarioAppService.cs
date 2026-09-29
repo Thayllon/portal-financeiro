@@ -1,3 +1,4 @@
+using System.Transactions;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -109,7 +110,7 @@ public class UsuarioAppService : IUsuarioAppService
         return Resultado.Sucesso();
     }
 
-    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuarioLogado)
+    public async Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuarioLogado, bool cascata = false, string? confirmacao = null)
     {
         if (id == idUsuarioLogado)
             return Erro.Negocio("AUTO_EXCLUSAO", "Você não pode excluir o próprio usuário.");
@@ -119,12 +120,32 @@ public class UsuarioAppService : IUsuarioAppService
             return Erro.NaoEncontrado("Usuário");
 
         var vinculos = await _repository.ContarVinculosAsync(id);
-        if (vinculos > 0)
+        if (vinculos > 0 && !cascata)
             return Erro.Negocio("USUARIO_COM_VINCULOS", $"Não é possível excluir \"{usuario.Nome}\": há {vinculos} registro(s) vinculado(s). Desative o usuário em vez de excluir.");
+
+        if (cascata && vinculos > 0 && !string.Equals(confirmacao?.Trim(), "sim", StringComparison.OrdinalIgnoreCase))
+            return Erro.Validacao("CONFIRMACAO_INVALIDA", "Para excluir com vínculos, digite SIM.");
+
+        if (cascata && vinculos > 0)
+        {
+            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+            await _repository.ExcluirEmCascataAsync(id);
+            scope.Complete();
+            return Resultado.Sucesso();
+        }
 
         await _permissaoRepository.ExcluirPorUsuarioIdAsync(id);
         await _repository.ExcluirAsync(id);
         return Resultado.Sucesso();
+    }
+
+    public async Task<Result<UsuarioVinculosResponse>> ContarVinculosAsync(Guid id)
+    {
+        var usuario = await _repository.ObterPorIdAsync(id);
+        if (usuario is null)
+            return Erro.NaoEncontrado("Usuário");
+
+        return new UsuarioVinculosResponse { Total = await _repository.ContarVinculosAsync(id) };
     }
 
     private static UsuarioResponse Mapear(Usuario u) => new()

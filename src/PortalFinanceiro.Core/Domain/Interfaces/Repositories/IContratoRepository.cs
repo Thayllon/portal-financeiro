@@ -11,5 +11,6 @@ public interface IContratoRepository
     Task<IEnumerable<ContratoProjecao>> ListarComTotaisAsync(Guid idUsuario, bool? ativo, bool? ehRecorrente, int statusRealizado);
     Task InserirAsync(Contrato entity);
     Task AtualizarAsync(Contrato entity);
+    Task ExcluirAsync(Guid id);
     Task<decimal> SomarReceitasPorStatusAsync(Guid idContrato, int status);
 }
