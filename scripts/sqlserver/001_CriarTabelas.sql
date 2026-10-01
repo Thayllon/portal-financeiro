@@ -279,9 +279,8 @@ CREATE TABLE Processo (
     CONSTRAINT FK_Processo_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
     CONSTRAINT FK_Processo_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id),
     CONSTRAINT FK_Processo_Contrato FOREIGN KEY (IdContrato) REFERENCES Contrato(Id),
-    CONSTRAINT CK_Processo_Vinculo_Exclusivo CHECK (
-        (IdParceria IS NOT NULL AND IdContrato IS NULL)
-        OR (IdParceria IS NULL AND IdContrato IS NOT NULL)
+    CONSTRAINT CK_Processo_Vinculo_Unico CHECK (
+        NOT (IdParceria IS NOT NULL AND IdContrato IS NOT NULL)
     )
 );
 

@@ -30,11 +30,6 @@
   } @else if (processo(); as p) {
     <div class="cards">
       <div class="table-card card">
-        <span class="card__label">Vínculo ({{ p.vinculoTipo }})</span>
-        <strong class="card__value">{{ p.vinculoNome }}</strong>
-        <span class="card__hint">Cliente {{ p.cliente }}</span>
-      </div>
-      <div class="table-card card">
         <span class="card__label">Progresso</span>
         <strong class="card__value">{{ p.etapasConcluidas }}/{{ p.totalEtapas }} • {{ p.percentualConcluido }}%</strong>
         <span class="card__hint">{{ p.ativo ? 'Processo ativo' : 'Processo encerrado' }}</span>

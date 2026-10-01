@@ -67,8 +67,8 @@ public class Processo
     {
         var temParceria = idParceria.HasValue && idParceria.Value != Guid.Empty;
         var temContrato = idContrato.HasValue && idContrato.Value != Guid.Empty;
-        if (temParceria == temContrato)
-            return Erro.Validacao("VINCULO_OBRIGATORIO", "Vincule o processo a uma parceria ou a um contrato.");
+        if (temParceria && temContrato)
+            return Erro.Validacao("VINCULO_DUPLO", "Vincule o processo a uma parceria OU a um contrato, não ambos.");
         return Resultado.Sucesso();
     }
 }

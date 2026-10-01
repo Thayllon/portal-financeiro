@@ -38,7 +38,7 @@
         <svg lucideIcon="route" [size]="36" class="empty-icon" />
         <h3>Nenhum processo cadastrado</h3>
         @if (podeEscrever()) {
-          <p>Cadastre o primeiro processo vinculando uma parceria ou um contrato e acompanhe as etapas do mundo real.</p>
+          <p>Cadastre o primeiro processo e acompanhe as etapas do mundo real.</p>
         } @else {
           <p>Você tem acesso somente a leitura nesta tela.</p>
         }
@@ -50,8 +50,6 @@
         <thead>
           <tr>
             <th>Nome</th>
-            <th>Vínculo</th>
-            <th>Cliente</th>
             <th>Progresso</th>
             <th>Status</th>
             @if (podeEscrever()) {
@@ -63,8 +61,6 @@
           @for (p of paginacao.paginatedItems(); track p.id) {
             <tr>
               <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
-              <td data-label="Vínculo">{{ p.vinculoNome }}</td>
-              <td data-label="Cliente">{{ p.cliente }}</td>
               <td data-label="Progresso">{{ p.etapasConcluidas }}/{{ p.totalEtapas }} • {{ p.percentualConcluido }}%</td>
               <td data-label="Status"><app-status-badge [type]="p.ativo ? 'ativo' : 'inativo'" [label]="p.ativo ? 'Ativo' : 'Encerrado'" /></td>
               <td class="cell-actions">
@@ -123,29 +119,4 @@
       class="input"
     />
   </div>
-  @if (!editando()) {
-    <div class="field">
-      <label>Parceria<span class="required">*</span></label>
-      <app-custom-select
-        placeholder="Selecione a parceria"
-        searchPlaceholder="Buscar parceria..."
-        [options]="parceriasOptions()"
-        [value]="form.idParceria ?? ''"
-        (valueChange)="onVinculoChange('parceria', $event)"
-      />
-    </div>
-    <div class="field">
-      <label>Contrato<span class="required">*</span></label>
-      <app-custom-select
-        placeholder="Selecione o contrato"
-        searchPlaceholder="Buscar contrato..."
-        [options]="contratosOptions()"
-        [value]="form.idContrato ?? ''"
-        (valueChange)="onVinculoChange('contrato', $event)"
-      />
-      <span class="field-hint">Vincule a uma parceria ou a um contrato (apenas um).</span>
-    </div>
-  } @else {
-    <span class="field-hint">O vínculo (parceria ou contrato) não pode ser alterado após a criação.</span>
-  }
 </app-modal>
