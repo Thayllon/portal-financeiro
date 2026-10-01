@@ -33,7 +33,6 @@ try
 {
     Log.Information("=== Portal Financeiro API iniciando ===");
     Log.Information("Ambiente: {Ambiente}", app.Environment.EnvironmentName);
-    Log.Information("Swagger: {Url}", "http://localhost:5178/swagger");
     app.Run();
 }
 catch (Exception ex)
@@ -49,12 +48,22 @@ public static partial class ProgramExtensions
 {
     public static void ConfigureSerilog(this WebApplicationBuilder builder)
     {
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(builder.Configuration)
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.File("logs/portal-financeiro-.log", rollingInterval: RollingInterval.Day)
-            .CreateLogger();
+        var config = builder.Configuration.GetSection("Serilog");
+
+        if (!config.GetChildren().Any())
+        {
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+        }
+        else
+        {
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .Enrich.FromLogContext()
+                .CreateLogger();
+        }
 
         builder.Host.UseSerilog();
     }
