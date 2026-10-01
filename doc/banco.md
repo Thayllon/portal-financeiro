@@ -34,6 +34,7 @@ incrementais idempotentes para bancos jÃ¡ criados:
 | `103_CheckEnums.sql` | DDL: `CHECK constraints` dos enums (tipo/nÃ­vel/status) |
 | `104_PermissaoCategoriasGranulares.sql` | DML de permissÃµes: divide `categorias` em los 3 mÃ³dulos granulares preservando nÃ­veis |
 | `105_AuditoriaAtor.sql` | DDL: adicionar `CriadoPor`/`AlteradoPor` (auditoinÃ­cio no futuro, dados antigos ficam com NULL) |
+| `106_MotorProcessos.sql` | **Espelha o `021_MotorProcessos.sql` do SQL Server**: cria `ModeloProcesso`/`ModeloEtapa`/`ModeloItem`, `Processo`/`ProcessoEtapa`, `ProcessoEtapaItem` e `ProcessoAnexo`; adiciona `IdModeloProcesso`/`IdCliente`/`DataEncerramento` em `Processo` e `DataInicio` em `ProcessoEtapa`; auditoria de ator, CHECKs, índices, módulo `processos` e seed do modelo "Regularização de imóvel". Idempotente. **Em banco novo a ordem completa é `001` → `003` → `004` → `005` → `006` → `100` → `103` → `104` → `105` → `106`** |
 ### Estrutura Postgres
 
 > O repositÃ³rio mantÃ©m **somente DDL + scripts de permissÃµes**. Scripts de dados/remise (seeds DML destrutivos) foram removidos; cargas de dados sÃ£o executadas pontualmente no banco, via SQL Editor/psql, e nÃ£o versionadas.
