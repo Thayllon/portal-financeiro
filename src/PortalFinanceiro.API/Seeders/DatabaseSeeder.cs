@@ -3,6 +3,7 @@ using PortalFinanceiro.Core.Domain.Interfaces.Services;
 using PortalFinanceiro.Infrastructure.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace PortalFinanceiro.API.Seeders;
 
@@ -25,14 +26,14 @@ public class DatabaseSeeder
         IUsuarioRepository usuarioRepository,
         IPermissaoUsuarioRepository permissaoRepository,
         IPasswordService passwordService,
-        SeedOptions seedOptions,
+        IOptions<SeedOptions> seedOptions,
         IHostEnvironment environment,
         ILogger<DatabaseSeeder> logger)
     {
         _usuarioRepository = usuarioRepository;
         _permissaoRepository = permissaoRepository;
         _passwordService = passwordService;
-        _seedOptions = seedOptions;
+        _seedOptions = seedOptions.Value;
         _environment = environment;
         _logger = logger;
     }

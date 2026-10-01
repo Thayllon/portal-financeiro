@@ -15,7 +15,7 @@ builder.Services.AddAppSwagger();
 builder.Services.AddAppControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.Configure<SeedOptions>(builder.Configuration.GetSection(SeedOptions.SectionName));
-builder.Services.AddSingleton<DatabaseSeeder>();
+builder.Services.AddScoped<DatabaseSeeder>();
 
 var app = builder.Build();
 
@@ -55,7 +55,8 @@ static async Task InvokeSeedAsync(WebApplication app)
 {
     try
     {
-        await app.Services.GetRequiredService<DatabaseSeeder>().SeedAsync();
+        using var scope = app.Services.CreateScope();
+        await scope.ServiceProvider.GetRequiredService<DatabaseSeeder>().SeedAsync();
     }
     catch (Exception ex)
     {
