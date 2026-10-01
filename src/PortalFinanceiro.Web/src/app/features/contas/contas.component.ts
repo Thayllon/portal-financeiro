@@ -42,6 +42,10 @@ export class ContasComponent implements OnInit {
   form: ContaBancariaRequest = { nome: '', banco: '', tipo: TipoConta.Pf };
   formEhPadrao = false;
 
+  setTipo(value: string): void {
+    this.form.tipo = value as TipoConta;
+  }
+
   contasPaginacao = useListPagination(this.contas, { initialPageSize: 10 });
 
   contaPadraoAtual(): ContaBancaria | undefined {

@@ -47,7 +47,7 @@ export class CategoriasComponent implements OnInit {
 
   podeEscrever = computed(() => this.auth.temPermissao(this.modulosPorAba[this.tabAtiva()] ?? 'categorias-receita', NivelPermissao.Escrita));
 
-  podeEditarItem = (item: Categoria) => item.podeEditar || this.auth.isAdmin();
+  podeEditarItem = (item: Categoria | null) => !!item && (item.podeEditar || this.auth.isAdmin());
 
   tabs: Tab[] = [
     { id: 'receita', label: 'Receita' },

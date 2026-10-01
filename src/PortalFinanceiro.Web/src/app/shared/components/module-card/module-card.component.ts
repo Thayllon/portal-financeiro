@@ -8,7 +8,7 @@ export interface ModuleCardItem {
   description: string;
   icon: string;
   route: string;
-  modulo?: ModuloPermissao;
+  modulo?: ModuloPermissao | ModuloPermissao[];
 }
 
 @Component({

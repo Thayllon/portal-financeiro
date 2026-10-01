@@ -95,7 +95,7 @@
         <input [(ngModel)]="form.banco" placeholder="Ex: Nubank" class="input" />
       </div>
       <div class="field">
-        <app-custom-select label="Tipo" placeholder="Selecione o tipo" [options]="tipoOptions" [value]="form.tipo" (valueChange)="form.tipo = $event" />
+        <app-custom-select label="Tipo" placeholder="Selecione o tipo" [options]="tipoOptions" [value]="form.tipo" (valueChange)="setTipo($event)" />
       </div>
       <div class="field field--checkbox">
         <label class="checkbox-label">
