@@ -71,9 +71,9 @@ function Write-Log {
 function Convert-SqlServerTypeToPostgres {
     param([string]$SqlType, $MaxLength = -1, $Precision = -1, $Scale = -1)
 
-    if ($null -eq $MaxLength -or $MaxLength -eq [DBNull]::Value) { $MaxLength = -1 }
-    if ($null -eq $Precision -or $Precision -eq [DBNull]::Value) { $Precision = -1 }
-    if ($null -eq $Scale -or $Scale -eq [DBNull]::Value) { $Scale = -1 }
+    if ($null -eq $MaxLength -or $MaxLength -is [DBNull]) { $MaxLength = -1 }
+    if ($null -eq $Precision -or $Precision -is [DBNull]) { $Precision = -1 }
+    if ($null -eq $Scale -or $Scale -is [DBNull]) { $Scale = -1 }
 
     $MaxLength = [int]$MaxLength
     $Precision = [int]$Precision
@@ -176,16 +176,16 @@ ORDER BY ORDINAL_POSITION
     $columns = @()
     while ($reader.Read()) {
         $maxLen = $reader['CHARACTER_MAXIMUM_LENGTH']
-        if ($null -eq $maxLen -or $maxLen -eq [DBNull]::Value) { $maxLen = $null }
+        if ($null -eq $maxLen -or $maxLen -is [DBNull]) { $maxLen = $null }
 
         $precision = $reader['NUMERIC_PRECISION']
-        if ($null -eq $precision -or $precision -eq [DBNull]::Value) { $precision = $null }
+        if ($null -eq $precision -or $precision -is [DBNull]) { $precision = $null }
 
         $scale = $reader['NUMERIC_SCALE']
-        if ($null -eq $scale -or $scale -eq [DBNull]::Value) { $scale = $null }
+        if ($null -eq $scale -or $scale -is [DBNull]) { $scale = $null }
 
         $default = $reader['COLUMN_DEFAULT']
-        if ($null -eq $default -or $default -eq [DBNull]::Value) { $default = $null }
+        if ($null -eq $default -or $default -is [DBNull]) { $default = $null }
 
         $columns += [PSCustomObject]@{
             Name           = $reader['COLUMN_NAME']
@@ -346,12 +346,24 @@ function New-PostgresCreateTable {
         $nullable = if ($col.IsNullable -eq 'YES') { '' } else { ' NOT NULL' }
         $default = ''
         if ($col.Default -and $col.Default -ne '()') {
-            $defaultVal = $col.Default -replace '^\(|\)$', ''
-            if ($pgType -eq 'BOOLEAN') {
-                if ($defaultVal -match '0') { $defaultVal = 'false' }
-                elseif ($defaultVal -match '1') { $defaultVal = 'true' }
+            $defaultVal = $col.Default.Trim()
+            # ((1)) -> (1) -> 1: o SQL Server empilha parenteses nos defaults
+            while ($defaultVal -match '^\((.*)\)$') {
+                $defaultVal = $Matches[1].Trim()
             }
-            $default = " DEFAULT $defaultVal"
+            if ($pgType -eq 'BOOLEAN') {
+                if ($defaultVal -eq '1') { $defaultVal = 'true' }
+                elseif ($defaultVal -eq '0') { $defaultVal = 'false' }
+            }
+            elseif ($defaultVal -match '(?i)getdate|getutcdate|sysdatetime|newid') {
+                # funcoes do SQL Server sem equivalente direto: DEFAULT no Postgres vira
+                # CURRENT_TIMESTAMP e o UUID passa a ser gerado pela aplicacao
+                if ($pgType -match 'TIMESTAMP') { $defaultVal = 'CURRENT_TIMESTAMP' }
+                else { $defaultVal = '' }
+            }
+            if ($defaultVal) {
+                $default = " DEFAULT $defaultVal"
+            }
         }
         $columnDefs += "    $($col.Name) $pgType$nullable$default"
     }
@@ -376,14 +388,18 @@ function New-PostgresForeignKeys {
     $fullName = if ($Schema -eq 'dbo') { $Table } else { "$Schema.$Table" }
     $lines = @()
 
+    # Dollar-quoting do Postgres: sem ele o psql interpretaria o corpo do bloco.
+    # Montado com [char]36 para evitar escape dentro da propria string.
+    $dq = [string][char]36
+
     foreach ($fk in $ForeignKeys) {
         $refFullName = if ($fk.RefSchema -eq 'dbo') { $fk.RefTable } else { "$($fk.RefSchema).$($fk.RefTable)" }
-        $lines += "DO `$$`$"
-        $lines += "BEGIN"
-        $lines += "    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '$($fk.ConstraintName)') THEN"
+        $lines += "DO $dq$dq"
+        $lines += 'BEGIN'
+        $lines += "    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE LOWER(conname) = LOWER('$($fk.ConstraintName)')) THEN"
         $lines += "        ALTER TABLE $fullName ADD CONSTRAINT $($fk.ConstraintName) FOREIGN KEY ($($fk.ColumnName)) REFERENCES $refFullName($($fk.RefColumn));"
-        $lines += "    END IF;"
-        $lines += "END `$$`;"
+        $lines += '    END IF;'
+        $lines += "END $dq$dq;"
     }
 
     return $lines -join "`n"
@@ -441,7 +457,7 @@ function Get-SqlServerTableData {
 function Convert-ToPostgresValue {
     param($Value, [string]$SqlType)
 
-    if ($null -eq $Value -or $Value -eq [DBNull]::Value) { return 'NULL' }
+    if ($null -eq $Value -or $Value -is [DBNull]) { return 'NULL' }
 
     $type = $SqlType.ToUpper()
 
@@ -466,12 +482,71 @@ function Convert-ToPostgresValue {
             return "$Value"
         }
         default {
-            $str = "$Value"
-            $str = $str -replace "''", "''"
-            $str = $str -replace "'", "''"
+            $str = "$Value".Replace("'", "''")
             return "'$str'"
         }
     }
+}
+
+function Sort-RowsBySelfReference {
+    <#
+    .SYNOPSIS
+        Ordena os INSERTs de uma tabela que referencia a si mesma (ex.: categoria pai/filha).
+    .DESCRIPTION
+        O Postgres valida a FK no proprio INSERT, entao o pai precisa entrar antes do filho.
+        Em caso de ciclo (impossivel na hierarquia de categorias, mas por seguranca) o
+        restante e emitido como veio, para o gerador nunca travar.
+    #>
+    param(
+        [array]$Rows,
+        [array]$SelfForeignKeys,
+        [string]$KeyColumn
+    )
+
+    if ($SelfForeignKeys.Count -eq 0 -or $Rows.Count -eq 0) { return $Rows }
+
+    $known = @{}
+    foreach ($row in $Rows) { $known["$($row.($KeyColumn))"] = $true }
+
+    $pending = [System.Collections.Generic.List[object]]::new()
+    foreach ($row in $Rows) { $pending.Add($row) }
+
+    $emitted = @{}
+    $ordered = [System.Collections.Generic.List[object]]::new()
+
+    while ($pending.Count -gt 0) {
+        $progressed = $false
+
+        for ($i = 0; $i -lt $pending.Count; $i++) {
+            $row = $pending[$i]
+            $ready = $true
+
+            foreach ($fk in $SelfForeignKeys) {
+                $reference = $row.($fk.ColumnName)
+                if ($null -eq $reference -or $reference -is [DBNull]) { continue }
+                $referenceKey = "$reference"
+                if ($known.ContainsKey($referenceKey) -and -not $emitted.ContainsKey($referenceKey)) {
+                    $ready = $false
+                    break
+                }
+            }
+
+            if (-not $ready) { continue }
+
+            $ordered.Add($row)
+            $emitted["$($row.($KeyColumn))"] = $true
+            $pending.RemoveAt($i)
+            $progressed = $true
+            break
+        }
+
+        if (-not $progressed) {
+            foreach ($row in $pending) { $ordered.Add($row) }
+            break
+        }
+    }
+
+    return $ordered
 }
 
 function New-PostgresInsertStatements {
@@ -479,14 +554,18 @@ function New-PostgresInsertStatements {
         [string]$Schema,
         [string]$Table,
         [array]$Columns,
-        [array]$Data
+        [array]$Data,
+        [array]$SelfForeignKeys = @(),
+        [string]$KeyColumn = 'Id'
     )
 
     $fullName = if ($Schema -eq 'dbo') { $Table } else { "$Schema.$Table" }
     $colNames = ($Columns | ForEach-Object { $_.Name }) -join ', '
     $lines = @()
 
-    foreach ($row in $Data) {
+    $ordered = Sort-RowsBySelfReference -Rows $Data -SelfForeignKeys $SelfForeignKeys -KeyColumn $KeyColumn
+
+    foreach ($row in $ordered) {
         $values = @()
         foreach ($col in $Columns) {
             $val = Convert-ToPostgresValue -Value $row.($col.Name) -SqlType $col.SqlType
@@ -513,14 +592,105 @@ function Invoke-Psql {
 
     Write-Log "Executando psql em $Database..." "INFO"
 
-    & $psqlPath -h $DbHost -p $Port -U $Username -d $Database -f $SqlFile -v "ON_ERROR_STOP=1" --no-psqlrc
+    $stdoutFile = Join-Path $tempDir "psql_stdout.log"
+    $stderrFile = Join-Path $tempDir "psql_stderr.log"
 
-    if ($LASTEXITCODE -ne 0) {
-        Write-Log "Erro ao executar psql em $Database (exit code: $LASTEXITCODE)" "ERROR"
+    $process = Start-Process -FilePath $psqlPath -ArgumentList @(
+        "-h", $DbHost,
+        "-p", $Port,
+        "-U", $Username,
+        "-d", $Database,
+        "-f", $SqlFile,
+        "-v", "ON_ERROR_STOP=1",
+        "--no-psqlrc"
+    ) -NoNewWindow -Wait -PassThru -RedirectStandardOutput $stdoutFile -RedirectStandardError $stderrFile
+
+    $stderr = Get-Content $stderrFile -Raw -ErrorAction SilentlyContinue
+    $stdout = Get-Content $stdoutFile -Raw -ErrorAction SilentlyContinue
+
+    if ($process.ExitCode -ne 0) {
+        Write-Log "Erro ao executar psql em $Database (exit code: $($process.ExitCode))" "ERROR"
+        if ($stderr) { Write-Log $stderr "ERROR" }
         throw "Falha ao aplicar script no $Database"
     }
 
     Write-Log "psql executado com sucesso em $Database" "SUCCESS"
+    if ($stdout) { Write-Log $stdout "INFO" }
+}
+
+function Get-SchemaMetadata {
+    <#
+    .SYNOPSIS
+        Le metadados (colunas, PKs, FKs e indices) de todas as tabelas de origem.
+    .DESCRIPTION
+        Retorna hashtable nome-da-tabela -> metadados, incluindo DependsOn (tabelas
+        referenciadas) para permitir a ordenacao topologica exigida pelo Postgres.
+        Tabelas do DbUp (journal de migracao) e schemas de sistema sao ignorados.
+    #>
+    param([string]$Server, [string]$Database)
+
+    $skip = @('schemaversions')
+
+    $tables = Get-SqlServerTables -Server $Server -Database $Database |
+        Where-Object { $_.Schema -eq 'dbo' -and ($skip -notcontains $_.Name.ToLower()) }
+
+    $metadata = @{}
+    foreach ($table in $tables) {
+        $fks = Get-SqlServerForeignKeys -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name
+        $dependsOn = @($fks |
+            Where-Object { $_.RefSchema -eq 'dbo' } |
+            ForEach-Object { $_.RefTable } |
+            Where-Object { $_ -ne $table.Name } |
+            Select-Object -Unique)
+
+        $metadata[$table.Name] = @{
+            Schema          = $table.Schema
+            Columns         = (Get-SqlServerColumns -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name)
+            PrimaryKeys     = @(Get-SqlServerPrimaryKeys -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name)
+            ForeignKeys     = @($fks)
+            Indexes         = @(Get-SqlServerIndexes -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name)
+            DependsOn       = $dependsOn
+            SelfForeignKeys = @($fks | Where-Object { $_.RefSchema -eq 'dbo' -and $_.RefTable -eq $table.Name })
+        }
+    }
+
+    return $metadata
+}
+
+function Get-DependencyOrder {
+    <#
+    .SYNOPSIS
+        Ordena as tabelas para que toda dependencia criada antes de quem a referencia.
+    .DESCRIPTION
+        Depth-first sobre DependsOn. Empates resolvem em ordem alfabetica, garantindo
+        saida estavel. Tabelas com ciclo (auto-referencia) nao travam o gerador.
+    #>
+    param([hashtable]$Metadata)
+
+    $visited = @{}
+    $visiting = @{}
+    $ordered = New-Object System.Collections.Generic.List[string]
+
+    function Visit {
+        param([string]$Name)
+
+        if ($visited.ContainsKey($Name) -or $visiting.ContainsKey($Name)) { return }
+        if (-not $Metadata.ContainsKey($Name)) { return }
+
+        $visiting[$Name] = $true
+        foreach ($dependency in ($Metadata[$Name].DependsOn | Sort-Object)) {
+            Visit -Name $dependency
+        }
+        $visiting.Remove($Name)
+        $visited[$Name] = $true
+        $ordered.Add($Name)
+    }
+
+    foreach ($name in ($Metadata.Keys | Sort-Object)) {
+        Visit -Name $name
+    }
+
+    return $ordered
 }
 
 function Export-DdlScript {
@@ -531,36 +701,42 @@ function Export-DdlScript {
     )
 
     Write-Log "Extraindo DDL do SQL Server ($Server/$Database)..." "INFO"
-    $tables = Get-SqlServerTables -Server $Server -Database $Database
-    Write-Log "Tabelas encontradas: $($tables.Count)" "INFO"
+    $metadata = Get-SchemaMetadata -Server $Server -Database $Database
+    Write-Log "Tabelas encontradas: $($metadata.Count)" "INFO"
+
+    # O Postgres exige que a tabela referenciada exista antes do ALTER TABLE ... FOREIGN KEY,
+    # entao todo CREATE TABLE sai primeiro e as FKs ficam todas no final.
+    $order = Get-DependencyOrder -Metadata $metadata
 
     $script = @()
     $script += "-- DDL gerado automaticamente em $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
     $script += "-- Origem: SQL Server $Server/$Database"
+    $script += "-- Fase 1/2: tabelas e indices (ordem topologica)"
     $script += ""
 
-    foreach ($table in $tables) {
-        Write-Log "  Processando tabela: $($table.Schema).$($table.Name)" "INFO"
-
-        $columns = Get-SqlServerColumns -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name
-        $pks = Get-SqlServerPrimaryKeys -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name
-        $fks = Get-SqlServerForeignKeys -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name
-        $indexes = Get-SqlServerIndexes -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name
-
-        $script += New-PostgresCreateTable -Schema $table.Schema -Table $table.Name -Columns $columns -PrimaryKeys $pks
+    foreach ($name in $order) {
+        $meta = $metadata[$name]
+        $script += New-PostgresCreateTable -Schema $meta.Schema -Table $name -Columns $meta.Columns -PrimaryKeys $meta.PrimaryKeys
         $script += ""
 
-        if ($indexes.Count -gt 0) {
-            $script += New-PostgresIndexes -Schema $table.Schema -Table $table.Name -Indexes $indexes
-            $script += ""
-        }
-
-        if ($fks.Count -gt 0) {
-            $script += New-PostgresForeignKeys -Schema $table.Schema -Table $table.Name -ForeignKeys $fks
+        if ($meta.Indexes.Count -gt 0) {
+            $script += New-PostgresIndexes -Schema $meta.Schema -Table $name -Indexes $meta.Indexes
             $script += ""
         }
     }
 
+    $script += "-- Fase 2/2: chaves estrangeiras (todas as tabelas ja existem)"
+    $script += ""
+
+    foreach ($name in $order) {
+        $meta = $metadata[$name]
+        if ($meta.ForeignKeys.Count -gt 0) {
+            $script += New-PostgresForeignKeys -Schema $meta.Schema -Table $name -ForeignKeys $meta.ForeignKeys
+            $script += ""
+        }
+    }
+
+    if (Test-Path $OutputPath) { Remove-Item $OutputPath -Force -ErrorAction SilentlyContinue }
     $script | Out-File -FilePath $OutputPath -Encoding UTF8
     Write-Log "DDL exportado para: $OutputPath" "SUCCESS"
 }
@@ -573,19 +749,22 @@ function Export-DmlScript {
     )
 
     Write-Log "Extraindo dados do SQL Server ($Server/$Database)..." "INFO"
-    $tables = Get-SqlServerTables -Server $Server -Database $Database
-    Write-Log "Tabelas encontradas: $($tables.Count)" "INFO"
+    $metadata = Get-SchemaMetadata -Server $Server -Database $Database
+    Write-Log "Tabelas encontradas: $($metadata.Count)" "INFO"
+
+    # Mesma ordem do DDL: sem isso o INSERT falha em chave estrangeira.
+    $order = Get-DependencyOrder -Metadata $metadata
 
     $script = @()
     $script += "-- DML gerado automaticamente em $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
     $script += "-- Origem: SQL Server $Server/$Database"
     $script += ""
 
-    foreach ($table in $tables) {
-        Write-Log "  Exportando dados: $($table.Schema).$($table.Name)" "INFO"
+    foreach ($name in $order) {
+        $meta = $metadata[$name]
+        Write-Log "  Exportando dados: $name" "INFO"
 
-        $columns = Get-SqlServerColumns -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name
-        $data = Get-SqlServerTableData -Server $Server -Database $Database -Schema $table.Schema -Table $table.Name
+        $data = Get-SqlServerTableData -Server $Server -Database $Database -Schema $meta.Schema -Table $name
 
         if ($data.Count -eq 0) {
             Write-Log "    Tabela vazia, pulando..." "WARN"
@@ -593,7 +772,8 @@ function Export-DmlScript {
         }
 
         Write-Log "    $($data.Count) registros exportados" "INFO"
-        $script += New-PostgresInsertStatements -Schema $table.Schema -Table $table.Name -Columns $columns -Data $data
+        $keyColumn = if ($meta.PrimaryKeys.Count -gt 0) { $meta.PrimaryKeys[0] } else { 'Id' }
+        $script += New-PostgresInsertStatements -Schema $meta.Schema -Table $name -Columns $meta.Columns -Data $data -SelfForeignKeys $meta.SelfForeignKeys -KeyColumn $keyColumn
         $script += ""
     }
 
@@ -612,18 +792,19 @@ function Clear-NeonDatabase {
 
     Write-Log "Limpando banco $Database (removendo todas as tabelas)..." "WARN"
 
-    $dropScript = @"
-DO `$$`$
+    $dropScript = @'
+DO $$
 DECLARE
     r RECORD;
 BEGIN
     FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP
         EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE';
     END LOOP;
-END `$$`$;
-"@
+END $$;
+'@
 
     $dropFile = Join-Path $tempDir "drop_all.sql"
+    if (Test-Path $dropFile) { Remove-Item $dropFile -Force -ErrorAction SilentlyContinue }
     $dropScript | Out-File -FilePath $dropFile -Encoding UTF8
 
     Invoke-Psql -DbHost $DbHost -Port $Port -Database $Database -Username $Username -Password $Password -SqlFile $dropFile
