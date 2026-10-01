@@ -54,6 +54,7 @@ export class CategoriasComponent implements OnInit {
     { id: 'despesa', label: 'Despesa' },
     { id: 'servicos', label: 'Serviços' }
   ];
+  tabsPermitidas = computed(() => this.tabs.filter(t => this.auth.temPermissao(this.modulosPorAba[t.id])));
   tabAtiva = signal('receita');
   items = signal<Categoria[]>([]);
   loading = signal(true);
@@ -74,7 +75,11 @@ export class CategoriasComponent implements OnInit {
   private dragSub: DragSub | null = null;
   cardAlvoId = signal<string | null>(null);
 
-  ngOnInit() { this.carregar(); }
+  ngOnInit() {
+    const primeiraPermitida = this.tabsPermitidas()[0];
+    if (primeiraPermitida) this.tabAtiva.set(primeiraPermitida.id);
+    this.carregar();
+  }
 
   private get repo() {
     if (this.tabAtiva() === 'receita') return this.repoReceita;
@@ -83,6 +88,7 @@ export class CategoriasComponent implements OnInit {
   }
 
   trocarAba(tab: string) {
+    if (!this.auth.temPermissao(this.modulosPorAba[tab] ?? 'categorias-receita')) return;
     this.tabAtiva.set(tab);
     this.fecharDrawerSubs();
     this.carregar();

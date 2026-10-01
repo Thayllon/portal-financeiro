@@ -14,7 +14,7 @@
       }
       </header>
 
-      <app-tabs [tabs]="tabs" [active]="tabAtiva()" (change)="trocarAba($event)" />
+      <app-tabs [tabs]="tabsPermitidas()" [active]="tabAtiva()" (change)="trocarAba($event)" />
 
       @if (loading()) {
         <div class="grid">
