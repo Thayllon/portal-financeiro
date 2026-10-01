@@ -1,6 +1,9 @@
 using PortalFinanceiro.API.Configurations;
 using PortalFinanceiro.API.Middlewares;
+using PortalFinanceiro.API.Seeders;
+using PortalFinanceiro.Infrastructure.Extensions;
 using PortalFinanceiro.Infrastructure.IoC;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +14,8 @@ builder.Services.AddAppAuth(builder.Configuration);
 builder.Services.AddAppSwagger();
 builder.Services.AddAppControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.Configure<SeedOptions>(builder.Configuration.GetSection(SeedOptions.SectionName));
+builder.Services.AddSingleton<DatabaseSeeder>();
 
 var app = builder.Build();
 
@@ -29,11 +34,13 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 
+await InvokeSeedAsync(app);
+
 try
 {
     Log.Information("=== Portal Financeiro API iniciando ===");
     Log.Information("Ambiente: {Ambiente}", app.Environment.EnvironmentName);
-    app.Run();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
@@ -42,6 +49,19 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+static async Task InvokeSeedAsync(WebApplication app)
+{
+    try
+    {
+        await app.Services.GetRequiredService<DatabaseSeeder>().SeedAsync();
+    }
+    catch (Exception ex)
+    {
+        Log.Fatal(ex, "Erro ao executar seed do banco de dados");
+        throw;
+    }
 }
 
 public static partial class ProgramExtensions
