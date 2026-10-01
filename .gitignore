@@ -40,8 +40,11 @@ appsettings.Production.json
 portal-financeiro-prod-restore.sql
 *-prod-restore.sql
 
-# Config do script de sincronizacao (contem senhas do Neon)
+# Config do script de sincronizacao (contem senhas do Neon).
+# Hoje as credenciais ficam no .env, que ja e ignorado acima; estas entradas
+# cobrem o formato antigo em JSON e os arquivos temporarios do script.
 sincronizar-banco-config.json
+sincronizar-banco*.env
 
 # Runtime logs
 api*.log

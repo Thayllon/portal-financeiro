@@ -10,6 +10,7 @@ public interface ISqlDialect
     string YearOf(string column);
     string MonthOf(string column);
     string Like(string column, string paramName);
+    string FirstRow(string selectList, string fromClause, string whereClause, string orderBy);
 }
 
 public static class SqlDialect
