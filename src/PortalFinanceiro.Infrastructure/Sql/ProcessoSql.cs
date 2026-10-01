@@ -19,16 +19,20 @@ internal static class ProcessoSql
         CASE WHEN {T}.IdParceria IS NOT NULL THEN 'Parceria' ELSE 'Contrato' END AS VinculoTipo,
         COALESCE(par.Nome, con.Nome) AS VinculoNome,
         COALESCE(cli.Nome, parCli.Nome, conCli.Nome) AS Cliente,
-        COALESCE(faseAtual.Nome, '') AS FaseAtual,
+        ({FaseAtualSubquery()}) AS FaseAtual,
         (SELECT COUNT(*) FROM {TE} WHERE IdProcesso = {T}.Id) AS TotalEtapas,
         (SELECT COUNT(*) FROM {TE} WHERE IdProcesso = {T}.Id AND Concluida = {SqlDialect.Current.BooleanTrue}) AS EtapasConcluidas,
         (SELECT COUNT(*) FROM {TI} WHERE IdProcessoEtapa IN (SELECT Id FROM {TE} WHERE IdProcesso = {T}.Id)) AS TotalItens,
         (SELECT COUNT(*) FROM {TI} WHERE Concluida = {SqlDialect.Current.BooleanTrue} AND IdProcessoEtapa IN (SELECT Id FROM {TE} WHERE IdProcesso = {T}.Id)) AS ItensConcluidos";
-    static string FaseAtualJoin => $@"OUTER APPLY (SELECT TOP 1 Nome FROM {TE} WHERE IdProcesso = {T}.Id AND Concluida = {SqlDialect.Current.BooleanFalse} ORDER BY Ordem) AS faseAtual";
+    static string FaseAtualSubquery() => SqlDialect.Current.FirstRow(
+        $"{TE}.Nome",
+        TE,
+        $"{TE}.IdProcesso = {T}.Id AND {TE}.Concluida = {SqlDialect.Current.BooleanFalse}",
+        $"{TE}.Ordem");
 
     public static string ObterPorId => $"SELECT {C} FROM {T} WHERE Id = @Id";
-    public static string ObterProjecaoPorId => $"SELECT {CComNomes} FROM {T} {Joins} {FaseAtualJoin} WHERE {T}.Id = @Id";
-    public static string ListarPorUsuario => $"SELECT {CComNomes} FROM {T} {Joins} {FaseAtualJoin} WHERE {T}.IdUsuario = @IdUsuario AND (@Ativo IS NULL OR {T}.Ativo = @Ativo) ORDER BY {T}.DataCadastro DESC";
+    public static string ObterProjecaoPorId => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.Id = @Id";
+    public static string ListarPorUsuario => $"SELECT {CComNomes} FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario AND (@Ativo IS NULL OR {T}.Ativo = @Ativo) ORDER BY {T}.DataCadastro DESC";
     public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Nome, @Descricao, @IdParceria, @IdContrato, @IdModeloProcesso, @IdCliente, @Ativo, @DataEncerramento, @DataCadastro, @DataAlteracao, @CriadoPor, @AlteradoPor)";
     public static string Atualizar => $"UPDATE {T} SET Nome = @Nome, Descricao = @Descricao, Ativo = @Ativo, DataEncerramento = @DataEncerramento, DataAlteracao = @DataAlteracao, AlteradoPor = @AlteradoPor WHERE Id = @Id";
     public static string ExcluirProcesso => $"DELETE FROM {T} WHERE Id = @Id";
