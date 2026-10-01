@@ -40,6 +40,9 @@ appsettings.Production.json
 portal-financeiro-prod-restore.sql
 *-prod-restore.sql
 
+# Config do script de sincronizacao (contem senhas do Neon)
+sincronizar-banco-config.json
+
 # Runtime logs
 api*.log
 api*.err

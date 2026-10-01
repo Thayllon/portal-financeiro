@@ -60,24 +60,6 @@ CREATE TABLE Parceria (
 
 CREATE INDEX IX_Parceria_Usuario ON Parceria(IdUsuario);
 
-CREATE TABLE Contrato (
-    Id UUID PRIMARY KEY,
-    IdUsuario UUID NOT NULL,
-    Nome VARCHAR(150) NOT NULL,
-    IdCliente UUID NOT NULL,
-    Valor NUMERIC(18,2) NOT NULL,
-    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    EhRecorrente BOOLEAN NOT NULL DEFAULT FALSE,
-    IdRegra UUID NULL,
-    DataCadastro TIMESTAMP NOT NULL,
-    DataAlteracao TIMESTAMP NOT NULL,
-    CONSTRAINT FK_Contrato_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
-    CONSTRAINT FK_Contrato_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id),
-    CONSTRAINT FK_Contrato_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id)
-);
-
-CREATE INDEX IX_Contrato_Usuario ON Contrato(IdUsuario);
-
 CREATE TABLE PermissaoUsuario (
     Id UUID PRIMARY KEY,
     UsuarioId UUID NOT NULL,
@@ -160,6 +142,25 @@ CREATE TABLE RegraDespesa (
     CONSTRAINT FK_RegraDespesa_Categoria FOREIGN KEY (IdCategoria) REFERENCES CategoriaDespesa(Id),
     CONSTRAINT FK_RegraDespesa_Conta FOREIGN KEY (IdConta) REFERENCES ContaBancaria(Id)
 );
+
+-- Contrato fica depois das regras porque referencia RegraReceita (FK IdRegra).
+CREATE TABLE Contrato (
+    Id UUID PRIMARY KEY,
+    IdUsuario UUID NOT NULL,
+    Nome VARCHAR(150) NOT NULL,
+    IdCliente UUID NOT NULL,
+    Valor NUMERIC(18,2) NOT NULL,
+    Ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    EhRecorrente BOOLEAN NOT NULL DEFAULT FALSE,
+    IdRegra UUID NULL,
+    DataCadastro TIMESTAMP NOT NULL,
+    DataAlteracao TIMESTAMP NOT NULL,
+    CONSTRAINT FK_Contrato_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
+    CONSTRAINT FK_Contrato_Cliente FOREIGN KEY (IdCliente) REFERENCES Pessoa(Id),
+    CONSTRAINT FK_Contrato_Regra FOREIGN KEY (IdRegra) REFERENCES RegraReceita(Id)
+);
+
+CREATE INDEX IX_Contrato_Usuario ON Contrato(IdUsuario);
 
 CREATE TABLE Receita (
     Id UUID PRIMARY KEY,
