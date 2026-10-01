@@ -2,17 +2,15 @@ using PortalFinanceiro.Core.Domain.Results;
 
 namespace PortalFinanceiro.Core.Domain.Entities;
 
-public class ProcessoEtapa
+public class ModeloItem
 {
     public Guid Id { get; private set; }
-    public Guid IdProcesso { get; private set; }
+    public Guid IdModeloEtapa { get; private set; }
     public string Nome { get; private set; } = string.Empty;
     public string? Descricao { get; private set; }
+    public bool Obrigatorio { get; private set; }
+    public bool ExigeAnexo { get; private set; }
     public int Ordem { get; private set; }
-    public bool Concluida { get; private set; }
-    public DateTime? DataPrevista { get; private set; }
-    public DateTime? DataInicio { get; private set; }
-    public DateTime? DataConclusao { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
     public Guid? CriadoPor { get; private set; }
@@ -21,63 +19,42 @@ public class ProcessoEtapa
     public void DefinirCriador(Guid ator) { CriadoPor ??= ator; }
     public void DefinirEditor(Guid ator) { AlteradoPor = ator; DataAlteracao = DateTime.UtcNow; }
 
-    public ProcessoEtapa() { }
+    public ModeloItem() { }
 
-    public static Result<ProcessoEtapa> Criar(Guid idProcesso, string nome, string? descricao, int ordem, DateTime? dataPrevista)
+    public static Result<ModeloItem> Criar(Guid idModeloEtapa, string nome, string? descricao, bool obrigatorio, bool exigeAnexo, int ordem)
     {
-        if (idProcesso == Guid.Empty)
-            return Erro.Validacao("PROCESSO_OBRIGATORIO", "Processo é obrigatório.");
+        if (idModeloEtapa == Guid.Empty)
+            return Erro.Validacao("ETAPA_OBRIGATORIA", "Fase do modelo é obrigatória.");
         if (string.IsNullOrWhiteSpace(nome))
             return Erro.Validacao("NOME_OBRIGATORIO", "Nome é obrigatório.");
         if (ordem < 1)
             return Erro.Validacao("ORDEM_INVALIDA", "Ordem deve ser maior que zero.");
 
-        return new ProcessoEtapa
+        return new ModeloItem
         {
             Id = Guid.NewGuid(),
-            IdProcesso = idProcesso,
+            IdModeloEtapa = idModeloEtapa,
             Nome = nome,
             Descricao = descricao,
+            Obrigatorio = obrigatorio,
+            ExigeAnexo = exigeAnexo,
             Ordem = ordem,
-            Concluida = false,
-            DataPrevista = dataPrevista,
-            DataConclusao = null,
             DataCadastro = DateTime.UtcNow,
             DataAlteracao = DateTime.UtcNow
         };
     }
 
-    public Result<Unit> Atualizar(string nome, string? descricao, DateTime? dataPrevista)
+    public Result<Unit> Atualizar(string nome, string? descricao, bool obrigatorio, bool exigeAnexo)
     {
         if (string.IsNullOrWhiteSpace(nome))
             return Erro.Validacao("NOME_OBRIGATORIO", "Nome é obrigatório.");
 
         Nome = nome;
         Descricao = descricao;
-        DataPrevista = dataPrevista;
+        Obrigatorio = obrigatorio;
+        ExigeAnexo = exigeAnexo;
         DataAlteracao = DateTime.UtcNow;
         return Resultado.Sucesso();
-    }
-
-    public void MarcarConcluida()
-    {
-        DataInicio ??= DateTime.UtcNow;
-        Concluida = true;
-        DataConclusao = DateTime.UtcNow;
-        DataAlteracao = DateTime.UtcNow;
-    }
-
-    public void Iniciar()
-    {
-        DataInicio ??= DateTime.UtcNow;
-        DataAlteracao = DateTime.UtcNow;
-    }
-
-    public void Estornar()
-    {
-        Concluida = false;
-        DataConclusao = null;
-        DataAlteracao = DateTime.UtcNow;
     }
 
     public void MoverPara(int novaOrdem)

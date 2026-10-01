@@ -3,7 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ProcessoRepository } from '../../core/repositories/processo.repository';
+import { ModeloProcessoRepository } from '../../core/repositories/modelo-processo.repository';
+import { PessoaRepository } from '../../core/repositories/pessoa.repository';
 import { Processo, ProcessoRequest } from '../../core/models/processo.model';
+import { ModeloProcesso } from '../../core/models/modelo-processo.model';
+import { Pessoa } from '../../core/models/pessoa.model';
+import { TipoPessoa } from '../../core/models/enums';
 import { AuthService } from '../../core/services/auth.service';
 import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
@@ -14,6 +19,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge.compo
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
+import { diasEmAberto } from '../../shared/utils/processo.utils';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
@@ -25,6 +31,8 @@ import { LucideDynamicIcon } from '@lucide/angular';
 })
 export class ProcessosComponent implements OnInit {
   private repo = inject(ProcessoRepository);
+  private modelosRepo = inject(ModeloProcessoRepository);
+  private pessoasRepo = inject(PessoaRepository);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private router = inject(Router);
@@ -33,6 +41,8 @@ export class ProcessosComponent implements OnInit {
   podeEscrever = computed(() => this.auth.temPermissao('processos', NivelPermissao.Escrita));
 
   processos = signal<Processo[]>([]);
+  modelos = signal<ModeloProcesso[]>([]);
+  clientes = signal<Pessoa[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
   editando = signal<Processo | null>(null);
@@ -47,9 +57,22 @@ export class ProcessosComponent implements OnInit {
     { value: 'encerradas', label: 'Encerradas' }
   ];
 
+  modeloOptions = computed<SelectOption[]>(() => [
+    { value: '', label: 'Sem modelo (etapas manuais)' },
+    ...this.modelos().map(m => ({ value: m.id, label: `${m.nome} (${m.totalEtapas} fases, ${m.totalItens} itens)` }))
+  ]);
+
+  clienteOptions = computed<SelectOption[]>(() => [
+    { value: '', label: 'Sem cliente' },
+    ...this.clientes().map(c => ({ value: c.id, label: c.nome }))
+  ]);
+
   paginacao = useListPagination(this.processos, { initialPageSize: 10 });
 
-  ngOnInit() { this.carregar(); }
+  ngOnInit() {
+    this.carregar();
+    this.carregarOpcoes();
+  }
 
   async carregar() {
     this.loading.set(true);
@@ -58,6 +81,25 @@ export class ProcessosComponent implements OnInit {
       this.processos.set(data);
     } catch { this.notify.error('Erro ao carregar processos'); }
     finally { this.loading.set(false); }
+  }
+
+  async carregarOpcoes() {
+    try {
+      const [modelos, pessoas] = await Promise.all([
+        firstValueFrom(this.modelosRepo.listar(true)),
+        firstValueFrom(this.pessoasRepo.listar())
+      ]);
+      this.modelos.set(modelos);
+      this.clientes.set(pessoas.filter(p => p.tipo === TipoPessoa.Cliente && p.ativo));
+    } catch { /* selects opcionais: falhar silenciosamente */ }
+  }
+
+  dias(p: Processo): number {
+    return diasEmAberto(p.dataCadastro, p.dataEncerramento);
+  }
+
+  irParaModelos() {
+    this.router.navigate(['/processos/modelos']);
   }
 
   mudarSituacao(valor: string | number | null) {
@@ -69,6 +111,18 @@ export class ProcessosComponent implements OnInit {
     this.form = { nome: '', descricao: '' };
     this.editando.set(null);
     this.modalVisible.set(true);
+  }
+
+  selecionarModelo(valor: string | number | null) {
+    const id = String(valor ?? '');
+    if (id) this.form.idModeloProcesso = id;
+    else delete this.form.idModeloProcesso;
+  }
+
+  selecionarCliente(valor: string | number | null) {
+    const id = String(valor ?? '');
+    if (id) this.form.idCliente = id;
+    else delete this.form.idCliente;
   }
 
   editar(item: Processo) {
@@ -90,7 +144,12 @@ export class ProcessosComponent implements OnInit {
     if (!this.form.nome?.trim()) { this.notify.error('Informe o nome'); return; }
     this.salvando.set(true);
     try {
-      const payload: ProcessoRequest = { nome: this.form.nome.trim(), descricao: this.form.descricao?.trim() || undefined };
+      const payload: ProcessoRequest = {
+        nome: this.form.nome.trim(),
+        descricao: this.form.descricao?.trim() || undefined,
+        ...(this.form.idModeloProcesso ? { idModeloProcesso: this.form.idModeloProcesso } : {}),
+        ...(this.form.idCliente ? { idCliente: this.form.idCliente } : {})
+      };
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, payload));
         this.notify.success('Processo atualizado');

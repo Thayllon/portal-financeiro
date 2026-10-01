@@ -25,6 +25,7 @@ incrementais idempotentes para bancos jÃ¡ criados:
 | `018_CheckEnums.sql` | Incremental idempotente: `CHECK constraints` dos enums (tipo/nÃ­vel/status) |
 | `019_PermissaoCategoriasGranulares.sql` | Incremental: divide `categorias` em 3 mÃ³dulos granulares preservando nÃ­veis |
 | `020_AuditoriaAtor.sql` | Incremental idempotente: adicionar `CriadoPor`/`AlteradoPor` nas tabelas de domÃ­nio |
+| `021_MotorProcessos.sql` | Motor de processos: cria `ModeloProcesso`/`ModeloEtapa`/`ModeloItem` (templates), `ProcessoEtapaItem` (sub-itens) e `ProcessoAnexo` (estrutura p/ Plano 2); `Processo` ganha `IdModeloProcesso`/`IdCliente`/`DataEncerramento`, `ProcessoEtapa` ganha `DataInicio`; limpa processos sem modelo e semeia "Regularização de Imóvel" (4 fases, 8 itens) por usuário |
 ### Operacionais Postgres (sÃ³ em `scripts/postgres/` â€” uso manual, NÃƒO via DbUp)
 
 | Script | ConteÃºdo |
@@ -81,8 +82,11 @@ dotnet run --project tools/DbSetup
 | `Pessoa` | Clientes/parceiros por usuÃ¡rio (`Tipo`: 1=Cliente, 2=Parceiro) |
 | `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuÃ¡rio |
 | `Contrato` | Contratos (nome + cliente + valor, sem parceiro) por usuÃ¡rio |
-| `Processo` | Processos (nome + descriÃ§Ã£o + vÃ­nculo **opcional** parceria/contrato, no mÃ¡ximo um via CHECK) por usuÃ¡rio |
-| `ProcessoEtapa` | Etapas do processo (nome + descriÃ§Ã£o + ordem + conclusÃ£o + prevista) |
+| `Processo` | Processos (nome + descrição + vínculo **opcional** parceria/contrato, no máximo um via CHECK; `IdModeloProcesso?`, `IdCliente?` direto em `Pessoa`, `DataEncerramento?`) por usuário |
+| `ProcessoEtapa` | Fases do processo (nome + descrição + ordem + conclusão + prevista + `DataInicio?` p/ tempo por fase) |
+| `ProcessoEtapaItem` | Sub-itens da fase (nome + descrição + `Obrigatorio`/`ExigeAnexo` + ordem + conclusão + `DataInicio`/`DataConclusao` p/ tempo por item) |
+| `ProcessoAnexo` | Anexos do item (estrutura p/ Plano 2: `DriveFileId`/`Url`) |
+| `ModeloProcesso` / `ModeloEtapa` / `ModeloItem` | Templates reutilizáveis por usuário (fases + itens com `Obrigatorio`/`ExigeAnexo`) — instanciados ao criar processo |
 | `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) â€” **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
 | `Receita` | Receitas (avulsas e recorrentes) â€” `IdParceria`/`IdContrato` opcionais e mutuamente exclusivos para vÃ­nculo |
@@ -93,9 +97,9 @@ dotnet run --project tools/DbSetup
 
 ### ExclusÃ£o de usuÃ¡rio
 
-- `Usuario` Ã© referenciado por 13 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `Processo`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
+- `Usuario` é referenciado por 14 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `Processo`, `ModeloProcesso`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
 - `DELETE /api/usuarios/{id}` sem flag conta vÃ­nculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` â†’ 422 orientando desativar
-- ExclusÃ£o em cascata (`DELETE /{id}?cascata=true&confirmacao=sim`): exige `confirmacao=sim` e executa `UsuarioSql.ExcluirEmCascata` numa Ãºnica conexÃ£o (transaÃ§Ã£o implÃ­cita) na ordem segura pelas FKs: `ReceitaServico`/`DespesaServico` â†’ `ProcessoEtapa` â†’ `Receita`/`Despesa` â†’ `Processo` â†’ `Contrato`/`Parceria` â†’ `RegraReceita`/`RegraDespesa` â†’ `ContaBancaria`/`Pessoa` â†’ `CategoriaReceita`/`Despesa`/`Servico` â†’ `CategoriaHistorico` â†’ `PermissaoUsuario` â†’ `Usuario`
+- Exclusão em cascata (`DELETE /{id}?cascata=true&confirmacao=sim`): exige `confirmacao=sim` e executa `UsuarioSql.ExcluirEmCascata` numa única conexão (transação implícita) na ordem segura pelas FKs: `ReceitaServico`/`DespesaServico` → `ProcessoAnexo` → `ProcessoEtapaItem` → `ProcessoEtapa` → `Receita`/`Despesa` → `Processo` → `ModeloItem` → `ModeloEtapa` → `ModeloProcesso` → `Contrato`/`Parceria` → `RegraReceita`/`RegraDespesa` → `ContaBancaria`/`Pessoa` → `CategoriaReceita`/`Despesa`/`Servico` → `CategoriaHistorico` → `PermissaoUsuario` → `Usuario`
 - Auto-exclusÃ£o Ã© bloqueada (`AUTO_EXCLUSAO` â†’ 422) no backend alÃ©m do frontend
 | `RegraReceita` / `RegraDespesa` | RecorrÃªncias mensais (fixas/variÃ¡veis) |
 

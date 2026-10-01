@@ -1,0 +1,260 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <button class="back-btn" (click)="voltar()" title="Voltar para processos">
+        <svg lucideIcon="arrow-left" [size]="16" />
+      </button>
+      <span class="page__badge">
+        <svg lucideIcon="file-badge" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">{{ selecionado() ? 'Modelo — ' + selecionado()!.nome : 'Modelos de processo' }}</h1>
+    </div>
+    @if (podeEscrever() && !selecionado()) {
+      <button class="add-btn" (click)="abrirModalModelo(null)">
+        <svg lucideIcon="plus" [size]="16" />
+        Novo modelo
+      </button>
+    }
+    @if (podeEscrever() && selecionado()) {
+      <button class="add-btn" (click)="abrirModalEtapa(null)">
+        <svg lucideIcon="plus" [size]="16" />
+        Nova fase
+      </button>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 30%"></div>
+          <div class="skeleton-line" style="width: 20%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+        </div>
+      }
+    </div>
+  } @else if (!selecionado()) {
+    @if (modelos().length === 0) {
+      <div class="table-card">
+        <div class="empty-state">
+          <svg lucideIcon="file-badge" [size]="36" class="empty-icon" />
+          <h3>Nenhum modelo cadastrado</h3>
+          @if (podeEscrever()) {
+            <p>Crie o primeiro modelo para reaproveitar fases e itens em novos processos.</p>
+          } @else {
+            <p>Você tem acesso somente a leitura nesta tela.</p>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="table-card">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Fases</th>
+              <th>Itens</th>
+              @if (podeEscrever()) {
+                <th class="th-actions">Ações</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of modelos(); track m.id) {
+              <tr>
+                <td class="cell-name" data-label="Nome">{{ m.nome }}</td>
+                <td data-label="Fases">{{ m.totalEtapas }}</td>
+                <td data-label="Itens">{{ m.totalItens }}</td>
+                <td class="cell-actions">
+                  <button class="action-btn" title="Editar modelo" (click)="selecionar(m)">
+                    <svg lucideIcon="pencil" [size]="16" />
+                  </button>
+                  @if (podeEscrever()) {
+                    <button class="action-btn" title="Duplicar modelo" (click)="duplicar(m)">
+                      <svg lucideIcon="copy" [size]="16" />
+                    </button>
+                    <button class="action-btn action-btn--danger" title="Excluir modelo" (click)="excluirModelo(m)">
+                      <svg lucideIcon="trash-2" [size]="16" />
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else {
+    @let modelo = selecionado()!;
+    <div class="cards">
+      <div class="table-card card">
+        <span class="card__label">Fases</span>
+        <strong class="card__value">{{ modelo.totalEtapas }}</strong>
+      </div>
+      <div class="table-card card">
+        <span class="card__label">Itens</span>
+        <strong class="card__value">{{ modelo.totalItens }}</strong>
+      </div>
+      @if (podeEscrever()) {
+        <div class="table-card card card--action" (click)="abrirModalModelo(modelo)" title="Editar nome e descrição">
+          <span class="card__label">Modelo</span>
+          <strong class="card__value card__value--link">{{ modelo.descricao || 'Sem descrição — clique para editar' }}</strong>
+        </div>
+      }
+    </div>
+
+    @if (modelo.etapas.length === 0) {
+      <div class="table-card">
+        <div class="empty-state">
+          <svg lucideIcon="inbox" [size]="36" class="empty-icon" />
+          <h3>Nenhuma fase cadastrada</h3>
+          @if (podeEscrever()) {
+            <p>Cadastre a primeira fase para compor o modelo.</p>
+          }
+        </div>
+      </div>
+    }
+
+    @for (etapa of modelo.etapas; track etapa.id) {
+      <section class="table-card fase">
+        <header class="fase__header" (click)="alternarEtapa(etapa.id)">
+          <span class="fase__ordem">{{ etapa.ordem }}</span>
+          <div class="fase__titulos">
+            <strong>{{ etapa.nome }}</strong>
+            @if (etapa.descricao) {
+              <span class="fase__descricao">{{ etapa.descricao }}</span>
+            }
+          </div>
+          <span class="fase__count">{{ etapa.itens.length }} {{ etapa.itens.length === 1 ? 'item' : 'itens' }}</span>
+          <svg lucideIcon="chevron-down" [size]="18" class="fase__chevron" [class.fase__chevron--aberta]="etapasAbertas().has(etapa.id)" />
+        </header>
+
+        @if (etapasAbertas().has(etapa.id)) {
+          <div class="fase__body">
+            @if (podeEscrever()) {
+              <div class="fase__toolbar">
+                <button class="ghost-btn" (click)="abrirModalItem(etapa, null)">
+                  <svg lucideIcon="plus" [size]="14" />
+                  Novo item
+                </button>
+                <span class="spacer"></span>
+                <button class="action-btn" title="Subir fase" (click)="moverEtapa(etapa, -1)">
+                  <svg lucideIcon="chevron-up" [size]="16" />
+                </button>
+                <button class="action-btn" title="Descer fase" (click)="moverEtapa(etapa, 1)">
+                  <svg lucideIcon="chevron-down" [size]="16" />
+                </button>
+                <button class="action-btn" title="Editar fase" (click)="abrirModalEtapa(etapa)">
+                  <svg lucideIcon="pencil" [size]="16" />
+                </button>
+                <button class="action-btn action-btn--danger" title="Excluir fase" (click)="excluirEtapa(etapa)">
+                  <svg lucideIcon="trash-2" [size]="16" />
+                </button>
+              </div>
+            }
+            @if (etapa.itens.length === 0) {
+              <p class="fase__vazia">Nenhum item nesta fase.</p>
+            } @else {
+              <ul class="itens">
+                @for (item of etapa.itens; track item.id) {
+                  <li class="item">
+                    <div class="item__info">
+                      <span class="item__ordem">{{ etapa.ordem }}.{{ item.ordem }}</span>
+                      <div>
+                        <strong>{{ item.nome }}</strong>
+                        @if (item.descricao) {
+                          <span class="item__descricao">{{ item.descricao }}</span>
+                        }
+                      </div>
+                    </div>
+                    <div class="item__flags">
+                      @if (item.obrigatorio) {
+                        <app-status-badge type="pendente" label="Obrigatório" />
+                      }
+                      @if (item.exigeAnexo) {
+                        <app-status-badge type="ativo" label="Exige anexo" />
+                      }
+                      @if (podeEscrever()) {
+                        <button class="action-btn" title="Subir item" (click)="moverItem(item, -1)">
+                          <svg lucideIcon="chevron-up" [size]="16" />
+                        </button>
+                        <button class="action-btn" title="Descer item" (click)="moverItem(item, 1)">
+                          <svg lucideIcon="chevron-down" [size]="16" />
+                        </button>
+                        <button class="action-btn" title="Editar item" (click)="abrirModalItem(etapa, item)">
+                          <svg lucideIcon="pencil" [size]="16" />
+                        </button>
+                        <button class="action-btn action-btn--danger" title="Excluir item" (click)="excluirItem(etapa, item)">
+                          <svg lucideIcon="trash-2" [size]="16" />
+                        </button>
+                      }
+                    </div>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</div>
+
+<app-modal
+  [visible]="modalAlvo() === 'modelo'"
+  [title]="selecionado() ? 'Editar modelo' : 'Novo modelo'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input type="text" [(ngModel)]="formModelo.nome" placeholder="Ex: Regularização de imóvel" class="input" />
+  </div>
+  <div class="field">
+    <label>Descrição</label>
+    <input type="text" [(ngModel)]="formModelo.descricao" placeholder="Ex: Fluxo padrão de regularização" class="input" />
+  </div>
+</app-modal>
+
+<app-modal
+  [visible]="modalAlvo() === 'etapa'"
+  [title]="editandoEtapa() ? 'Editar fase' : 'Nova fase'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input type="text" [(ngModel)]="formEtapa.nome" placeholder="Ex: Documental" class="input" />
+  </div>
+  <div class="field">
+    <label>Descrição</label>
+    <input type="text" [(ngModel)]="formEtapa.descricao" placeholder="Ex: Documentação inicial do processo" class="input" />
+  </div>
+</app-modal>
+
+<app-modal
+  [visible]="modalAlvo() === 'item'"
+  [title]="editandoItem() ? 'Editar item' : 'Novo item'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input type="text" [(ngModel)]="formItem.nome" placeholder="Ex: Orçamento" class="input" />
+  </div>
+  <div class="field">
+    <label>Descrição</label>
+    <input type="text" [(ngModel)]="formItem.descricao" placeholder="Ex: Anexar o orçamento enviado ao cliente" class="input" />
+  </div>
+  <label class="check">
+    <input type="checkbox" [(ngModel)]="formItem.obrigatorio" />
+    Item obrigatório para concluir a fase
+  </label>
+  <label class="check">
+    <input type="checkbox" [(ngModel)]="formItem.exigeAnexo" />
+    Exige anexo para concluir
+  </label>
+</app-modal>

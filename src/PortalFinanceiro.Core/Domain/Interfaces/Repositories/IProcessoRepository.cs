@@ -22,4 +22,12 @@ public interface IProcessoRepository
     Task InserirEtapaAsync(ProcessoEtapa entity);
     Task AtualizarEtapaAsync(ProcessoEtapa entity);
     Task ExcluirEtapaAsync(Guid id);
+    Task<ProcessoEtapaItem?> ObterItemPorIdAsync(Guid id);
+    Task<IEnumerable<ProcessoEtapaItem>> ListarItensAsync(Guid idProcessoEtapa);
+    Task<int> ProximaOrdemItemAsync(Guid idProcessoEtapa);
+    Task<int> ContarItensObrigatoriosPendentesAsync(Guid idProcessoEtapa);
+    Task<int> ContarAnexosPorItemAsync(Guid idProcessoEtapaItem);
+    Task InserirItemAsync(ProcessoEtapaItem entity);
+    Task AtualizarItemAsync(ProcessoEtapaItem entity);
+    Task ExcluirItemAsync(Guid id);
 }

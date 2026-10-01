@@ -58,7 +58,7 @@ src/app/
 │   ├── parceiros/       # wrapper fino → PessoaListagemComponent
 │   ├── parcerias/       # + parceria-detalhe/
 │   ├── contratos/       # + contrato-detalhe/
-│   ├── processos/       # + processo-detalhe/
+│   ├── processos/       # + processo-detalhe/ + modelos/
 │   ├── categorias-receita/
 │   ├── usuarios/
 │   └── login/
@@ -118,7 +118,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 
 | Rota | Feature | Descrição |
 |------|---------|-----------|
-| `/login` | login | Autenticação |
+| `/login` | login | Autenticação (e-mail pré-preenchido `admin@portal.com` somente em build de desenvolvimento) |
 | `/dashboard` | dashboard | Cabeçalho com subtítulo + toggle Mensal/Anual + navegação de período + filtro Todas as contas (vale p/ mensal e anual). Conceito principal **caixa (realizado)** contado pela `DataRealizacao`. Resumo mensal: 4 KPIs (Recebido, Pago, Saldo do mês, Acumulado no ano) + card único com colapso conjunto: fechado mostra "Recebido x Pago \| Outros indicadores"; aberto mostra dois cards internos com cabeçalho próprio (gráfico com filtro de série Recebido/Ambos/Pago + seta de recolher; 6 indicadores em tiles compactos estilo StatusInvest com tooltip); gráfico alterna por nº de contas (1 = evolução mensal; 2+ = por conta do mês) com barras finas e espaçadas (`categoryPercentage`/`barPercentage`); na ordem: KPIs, gráfico + indicadores, Distribuição por categoria e subcategoria (toggle Receitas/Despesas no cabeçalho da seção, visível só com ela aberta, com donuts de Categorias e Subcategorias lado a lado), Contas bancárias (Recebido/Pago/Saldo de caixa e % do total de recebido). Ver glossário em [Indicadores do dashboard mensal](#indicadores-do-dashboard-mensal). Visão anual: 4 KPIs na mesma fileira do mensal (Recebido, Pago e Saldo do ano em caixa com variação vs ano anterior e sparkline dos 12 meses; Média mensal de caixa usa a mesma estrutura, sem spark), gráfico de 12 meses em largura total com barras de Recebido e Pago mais linha de Saldo acumulado no mesmo eixo, Distribuição por categoria e subcategoria com donuts lado a lado e toggle Receitas/Despesas acima de Por conta, Por conta com o mesmo layout mensal (avatar do banco, Recebido/Pago/Saldo de caixa, % do total e linha Total). |
 | `/receitas` | receitas | Lançamentos de receita (avulsas e recorrentes). Clicar na descrição abre o detalhe; `?editar=<id>` na URL abre o modal de edição direto |
 | `/receitas/:id` | lancamento-detalhe | Detalhe da receita: valor, status, conta, categoria, parceiro/cliente, vínculo parceria/contrato, serviços e recorrência. Editar (com permissão de escrita) leva à listagem abrindo o modal. `LancamentoDetalheComponent` parametrizado por `data: { tipo }` — mesmo componente da despesa |
@@ -132,8 +132,9 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/parcerias/:id` | parceria-detalhe | Detalhe da parceria: resumo (partes, recebido, pago, faltas) + entradas (receitas) + saídas (despesas) |
 | `/contratos` | contratos | Cadastro de contratos (nome + cliente + valor, sem parceiro) com falta receber; status Ativo/Encerado via toggle na linha + filtro de situação; encerrar exige falta receber zerada |
 | `/contratos/:id` | contrato-detalhe | Detalhe do contrato: cliente + recebido/falta receber + entradas (receitas) |
-| `/processos` | processos | Processos com etapas do mundo real (nome + descrição, progresso x/y • %; sem vínculo obrigatório) |
-| `/processos/:id` | processo-detalhe | Detalhe do processo: progresso + etapas (concluir/estornar, reordenar) |
+| `/processos` | processos | Processos com fases e itens (nome + cliente + fase atual + progresso x/y • % por itens + dias em aberto); criar com modelo (instancia fases/itens) e cliente opcionais; botão Modelos leva ao editor |
+| `/processos/modelos` | modelos | Editor de modelos de processo: lista (fases/itens, duplicar, excluir) + editor com fases em accordion (criar/editar/excluir/reordenar) e itens (obrigatório/exige-anexo, reordenar) |
+| `/processos/:id` | processo-detalhe | Detalhe do processo: barra de progresso por itens + dias em aberto + cliente/modelo; fases em accordion com tempo gasto (`DataInicio`→`DataConclusao`), itens em checklist (concluir/estornar, editar, reordenar, excluir); concluir fase valida obrigatórios (422 com opção de forçar); botão Anexar desabilitado ("Em breve", Plano 2 — Drive) |
 | `/usuarios` | usuarios | Usuários e permissões (admin). Admin possui acesso total (bypass) a parcerias, contratos e demais telas; todos os botões e toggles são editáveis e os níveis ficam registrados, valendo caso o perfil seja alterado. Banner "Acesso total" explica a regra. Excluir usuário com dados abre `ConfirmDialog` em modo texto: mostra a mensagem de erro da API + o total de registros vinculados (via `GET /usuarios/{id}/vinculos`) e só confirma se o usuário digitar `SIM` (qualquer caixa); envia `DELETE ?cascata=true&confirmacao=sim` |
 | `/testes` | testes | QA técnico (admin, fora do menu, só URL direta): semáforo develop → main, regras R1–R6 com cenários, saúde do banco, débitos e botão Atualizar. Consome `GET /api/diagnostico` |
 

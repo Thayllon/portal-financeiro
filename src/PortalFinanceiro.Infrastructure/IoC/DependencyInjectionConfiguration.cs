@@ -51,6 +51,7 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IParceriaRepository, ParceriaRepository>();
         services.AddScoped<IContratoRepository, ContratoRepository>();
         services.AddScoped<IProcessoRepository, ProcessoRepository>();
+        services.AddScoped<IModeloProcessoRepository, ModeloProcessoRepository>();
         services.AddScoped<IReceitaServicoRepository, ReceitaServicoRepository>();
         services.AddScoped<IDespesaServicoRepository, DespesaServicoRepository>();
 
@@ -70,6 +71,7 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IParceriaAppService, ParceriaAppService>();
         services.AddScoped<IContratoAppService, ContratoAppService>();
         services.AddScoped<IProcessoAppService, ProcessoAppService>();
+        services.AddScoped<IModeloProcessoAppService, ModeloProcessoAppService>();
         services.AddScoped<IDiagnosticoAppService, DiagnosticoAppService>();
 
         return services;
