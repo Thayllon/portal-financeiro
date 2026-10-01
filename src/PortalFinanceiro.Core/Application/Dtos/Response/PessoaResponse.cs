@@ -8,4 +8,6 @@ public class PessoaResponse
     public string Tipo { get; set; } = string.Empty;
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
 }

@@ -33,7 +33,7 @@ public class CategoriasServicosController : BaseController
     }
 
     [HttpPost]
-    [RequerPermissaoEscrita("categorias")]
+    [RequerPermissaoEscrita("categorias-servico")]
     public async Task<IActionResult> Criar([FromBody] CategoriaRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
@@ -41,7 +41,7 @@ public class CategoriasServicosController : BaseController
     }
 
     [HttpPut("{id}")]
-    [RequerPermissaoEscrita("categorias")]
+    [RequerPermissaoEscrita("categorias-servico")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] CategoriaRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), User.IsInRole("Admin"), request);
@@ -49,7 +49,7 @@ public class CategoriasServicosController : BaseController
     }
 
     [HttpDelete("{id}")]
-    [RequerPermissaoEscrita("categorias")]
+    [RequerPermissaoEscrita("categorias-servico")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario(), User.IsInRole("Admin"));

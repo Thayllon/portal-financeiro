@@ -138,7 +138,7 @@ Regras completas no [AGENTS.md](../AGENTS.md). Resumo:
 | `/testes` | testes | QA técnico (admin, fora do menu, só URL direta): semáforo develop → main, regras R1–R6 com cenários, saúde do banco, débitos e botão Atualizar. Consome `GET /api/diagnostico` |
 
 ### Regressão de permissões (perfil restrito)
-Script: `scripts/test-perfil-restrito.ps1` (exige a API no ar; não cria dados; restaura os níveis ao final). Cobre `receitas`, `despesas`, `parcerias` e `contratos` nos níveis 0/1/2: reflete no login, leitura de lista liberada (só exige auth) e escrita bloqueada com 403 nos níveis 0/1.
+Script removido do repositório (era `scripts/test-perfil-restrito.ps1` — não-DDL). Cobria `receitas`, `despesas`, `parcerias` e `contratos` nos níveis 0/1/2: refletia no login, leitura de lista liberada (só exige auth) e escrita bloqueada com 403 nos níveis 0/1. Rodar manualmente (script avulso, não versionado) se necessário.
 
 Checklist manual (sair/entrar do usuário teste a cada troca — permissões congelam no login, `auth.service.ts`):
 | Nível | Menu | URL direta | Botão incluir |

@@ -219,7 +219,7 @@ public class UsuarioAppServiceTests
         var porModulo = permissoes.Inseridas.ToDictionary(p => p.Modulo, p => p.Nivel);
         porModulo["home"].Should().Be(NivelPermissao.Leitura);
         porModulo["dashboard"].Should().Be(NivelPermissao.Nenhum);
-        porModulo.Should().ContainKeys("dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos");
+        porModulo.Should().ContainKeys("dashboard", "receitas", "despesas", "contas", "categorias-receita", "categorias-despesa", "categorias-servico", "clientes", "parceiros", "parcerias", "contratos", "processos");
         porModulo
             .Where(p => p.Key != "home")
             .Select(p => p.Value)

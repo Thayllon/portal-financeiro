@@ -4,16 +4,20 @@ using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
 public class ContaBancariaAppService : IContaBancariaAppService
 {
     private readonly IContaBancariaRepository _repository;
+    private readonly ILogger<ContaBancariaAppService> _logger;
 
-    public ContaBancariaAppService(IContaBancariaRepository repository)
+    public ContaBancariaAppService(IContaBancariaRepository repository, ILogger<ContaBancariaAppService>? logger = null)
     {
         _repository = repository;
+        _logger = logger ?? NullLogger<ContaBancariaAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<ContaBancariaResponse>>> ListarAsync(Guid idUsuario)
@@ -40,11 +44,13 @@ public class ContaBancariaAppService : IContaBancariaAppService
             return result.Erro!;
 
         var conta = result.Dado!;
+        conta.DefinirCriador(idUsuario);
         var contas = await _repository.ListarPorUsuarioAsync(idUsuario);
         if (!contas.Any())
             conta.DefinirComoPadrao();
 
         await _repository.InserirAsync(conta);
+        _logger.Auditar(idUsuario, "Criar", "ContaBancaria", conta.Id);
         return Mapear(conta);
     }
 
@@ -60,7 +66,9 @@ public class ContaBancariaAppService : IContaBancariaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        conta.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(conta);
+        _logger.Auditar(idUsuario, "Atualizar", "ContaBancaria", conta.Id);
         return Mapear(conta);
     }
 
@@ -84,7 +92,9 @@ public class ContaBancariaAppService : IContaBancariaAppService
         }
 
         conta.Desativar();
+        conta.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(conta);
+        _logger.Auditar(idUsuario, "Excluir", "ContaBancaria", conta.Id);
         return Resultado.Sucesso();
     }
 
@@ -98,7 +108,9 @@ public class ContaBancariaAppService : IContaBancariaAppService
 
         await _repository.LimparPadraoAsync(idUsuario);
         conta.DefinirComoPadrao();
+        conta.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(conta);
+        _logger.Auditar(idUsuario, "DefinirPadrao", "ContaBancaria", conta.Id);
         return Resultado.Sucesso();
     }
 
@@ -110,6 +122,8 @@ public class ContaBancariaAppService : IContaBancariaAppService
         Tipo = c.Tipo.ToString(),
         EhPadrao = c.EhPadrao,
         Ativo = c.Ativo,
-        DataCadastro = c.DataCadastro
+        DataCadastro = c.DataCadastro,
+        CriadoPor = c.CriadoPor,
+        AlteradoPor = c.AlteradoPor
     };
 }

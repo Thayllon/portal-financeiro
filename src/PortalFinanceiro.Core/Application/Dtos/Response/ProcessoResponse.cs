@@ -9,6 +9,8 @@ public class ProcessoEtapaResponse
     public bool Concluida { get; set; }
     public DateTime? DataPrevista { get; set; }
     public DateTime? DataConclusao { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
 }
 
 public class ProcessoResponse
@@ -23,6 +25,8 @@ public class ProcessoResponse
     public string Cliente { get; set; } = string.Empty;
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
     public int TotalEtapas { get; set; }
     public int EtapasConcluidas { get; set; }
     public int PercentualConcluido { get; set; }

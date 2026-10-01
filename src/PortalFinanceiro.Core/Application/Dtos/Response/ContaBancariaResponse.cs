@@ -11,4 +11,6 @@ public class ContaBancariaResponse
     public bool EhPadrao { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
 }

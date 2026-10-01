@@ -30,5 +30,7 @@ public class ReceitaProjecao
     public Guid? IdRegra { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
     public bool EhRecorrente => IdRegra.HasValue;
 }

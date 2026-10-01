@@ -14,6 +14,8 @@ public class ParceriaProjecao
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
     public DateTime DataAlteracao { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
     public decimal TotalRecebido { get; set; }
     public decimal TotalPago { get; set; }
 }

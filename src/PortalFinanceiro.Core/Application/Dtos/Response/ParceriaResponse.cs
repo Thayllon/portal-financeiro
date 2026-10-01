@@ -14,6 +14,8 @@ public class ParceriaResponse
     public decimal MinhaParte { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
     public decimal TotalRecebido { get; set; }
     public decimal TotalPago { get; set; }
     public decimal FaltaReceber { get; set; }

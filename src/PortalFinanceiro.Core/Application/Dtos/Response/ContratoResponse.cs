@@ -11,6 +11,8 @@ public class ContratoResponse
     public bool EhRecorrente { get; set; }
     public Guid? IdRegra { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
     public decimal TotalRecebido { get; set; }
     public decimal FaltaReceber { get; set; }
 }

@@ -8,6 +8,8 @@ using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -17,13 +19,15 @@ public class DespesaAppService : IDespesaAppService
     private readonly IRegraDespesaRepository _regraRepository;
     private readonly IDespesaServicoRepository _despesaServicoRepository;
     private readonly IParceriaRepository? _parceriaRepository;
+    private readonly ILogger<DespesaAppService> _logger;
 
-    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IDespesaServicoRepository despesaServicoRepository, IParceriaRepository? parceriaRepository = null)
+    public DespesaAppService(IDespesaRepository repository, IRegraDespesaRepository regraRepository, IDespesaServicoRepository despesaServicoRepository, IParceriaRepository? parceriaRepository = null, ILogger<DespesaAppService>? logger = null)
     {
         _repository = repository;
         _regraRepository = regraRepository;
         _despesaServicoRepository = despesaServicoRepository;
         _parceriaRepository = parceriaRepository;
+        _logger = logger ?? NullLogger<DespesaAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, StatusMensal? status = null, Guid? idCategoria = null, string? busca = null)
@@ -96,7 +100,9 @@ public class DespesaAppService : IDespesaAppService
                 return result.Erro!;
 
             var despesa = result.Dado!;
+            despesa.DefinirCriador(idUsuario);
             await _repository.InserirAsync(despesa);
+            _logger.Auditar(idUsuario, "Criar", "Despesa", despesa.Id);
 
             if (request.Servicos != null && request.Servicos.Any())
             {
@@ -113,6 +119,7 @@ public class DespesaAppService : IDespesaAppService
             return regraResult.Erro!;
 
         var regra = regraResult.Dado!;
+        regra.DefinirCriador(idUsuario);
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
         var despesas = new List<Despesa>();
@@ -122,6 +129,7 @@ public class DespesaAppService : IDespesaAppService
             if (!criada.EhSucesso)
                 return criada.Erro!;
 
+            criada.Dado!.DefinirCriador(idUsuario);
             despesas.Add(criada.Dado!);
         }
 
@@ -131,6 +139,7 @@ public class DespesaAppService : IDespesaAppService
         using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         await _regraRepository.InserirAsync(regra);
         await _repository.InserirEmMassaAsync(despesas);
+        _logger.Auditar(idUsuario, "CriarRecorrente", "Despesa", regra.Id);
 
         if (request.Servicos != null && request.Servicos.Any())
         {
@@ -167,7 +176,9 @@ public class DespesaAppService : IDespesaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        despesa.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(despesa);
+        _logger.Auditar(idUsuario, "Atualizar", "Despesa", despesa.Id);
 
         if (request.Servicos != null)
         {
@@ -195,7 +206,9 @@ public class DespesaAppService : IDespesaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        despesa.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(despesa);
+        _logger.Auditar(idUsuario, "Pagar", "Despesa", despesa.Id);
 
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         return Mapear(projecao!);
@@ -213,7 +226,9 @@ public class DespesaAppService : IDespesaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        despesa.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(despesa);
+        _logger.Auditar(idUsuario, "Estornar", "Despesa", despesa.Id);
 
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         return Mapear(projecao!);
@@ -231,7 +246,9 @@ public class DespesaAppService : IDespesaAppService
             return Erro.Negocio("DESPESA_JA_PAGA", "Não é possível excluir uma despesa já paga. Estorne primeiro.");
 
         despesa.Desativar();
+        despesa.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(despesa);
+        _logger.Auditar(idUsuario, "Excluir", "Despesa", despesa.Id);
 
         if (despesa.IdRegra.HasValue)
         {
@@ -242,6 +259,7 @@ public class DespesaAppService : IDespesaAppService
                 if (regra is not null)
                 {
                     regra.Desativar();
+                    regra.DefinirEditor(idUsuario);
                     await _regraRepository.AtualizarAsync(regra);
                 }
             }
@@ -273,6 +291,8 @@ public class DespesaAppService : IDespesaAppService
         EhRecorrente = p.EhRecorrente,
         IdReceitaOrigem = p.IdReceitaOrigem,
         Ativo = p.Ativo,
-        DataCadastro = p.DataCadastro
+        DataCadastro = p.DataCadastro,
+        CriadoPor = p.CriadoPor,
+        AlteradoPor = p.AlteradoPor
     };
 }

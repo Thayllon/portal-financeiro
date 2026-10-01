@@ -3,8 +3,8 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class ContratoSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}Contrato";
-    static string C => "Id, IdUsuario, Nome, IdCliente, Valor, Ativo, EhRecorrente, IdRegra, DataCadastro, DataAlteracao";
-    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Nome, {T}.IdCliente, {T}.Valor, {T}.Ativo, {T}.EhRecorrente, {T}.IdRegra, {T}.DataCadastro, {T}.DataAlteracao,
+    static string C => "Id, IdUsuario, Nome, IdCliente, Valor, Ativo, EhRecorrente, IdRegra, DataCadastro, DataAlteracao, CriadoPor, AlteradoPor";
+    static string CComNomes => $@"{T}.Id, {T}.IdUsuario, {T}.Nome, {T}.IdCliente, {T}.Valor, {T}.Ativo, {T}.EhRecorrente, {T}.IdRegra, {T}.DataCadastro, {T}.DataAlteracao, {T}.CriadoPor, {T}.AlteradoPor,
         cli.Nome AS Cliente";
     static string Joins => $@"
         LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa cli ON {T}.IdCliente = cli.Id";
@@ -15,8 +15,8 @@ internal static class ContratoSql
     public static string ListarPorUsuarioComTotais => $@"SELECT {CComNomes},
         (SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdContrato = {T}.Id AND Ativo = {SqlDialect.Current.BooleanTrue} AND Status = @StatusRealizado) AS TotalRecebido
         FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario AND (@Ativo IS NULL OR {T}.Ativo = @Ativo) AND (@EhRecorrente IS NULL OR {T}.EhRecorrente = @EhRecorrente) ORDER BY {T}.DataCadastro DESC";
-    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Nome, @IdCliente, @Valor, @Ativo, @EhRecorrente, @IdRegra, @DataCadastro, @DataAlteracao)";
-    public static string Atualizar => $"UPDATE {T} SET Nome = @Nome, IdCliente = @IdCliente, Valor = @Valor, Ativo = @Ativo, EhRecorrente = @EhRecorrente, IdRegra = @IdRegra, DataAlteracao = @DataAlteracao WHERE Id = @Id";
+    public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Nome, @IdCliente, @Valor, @Ativo, @EhRecorrente, @IdRegra, @DataCadastro, @DataAlteracao, @CriadoPor, @AlteradoPor)";
+    public static string Atualizar => $"UPDATE {T} SET Nome = @Nome, IdCliente = @IdCliente, Valor = @Valor, Ativo = @Ativo, EhRecorrente = @EhRecorrente, IdRegra = @IdRegra, DataAlteracao = @DataAlteracao, AlteradoPor = @AlteradoPor WHERE Id = @Id";
     public static string Excluir => $"DELETE FROM {T} WHERE Id = @Id";
     public static string SomarReceitas => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdContrato = @IdContrato AND Ativo = {SqlDialect.Current.BooleanTrue} AND Status = @Status";
 }

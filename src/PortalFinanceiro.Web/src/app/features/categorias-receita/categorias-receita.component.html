@@ -67,7 +67,7 @@
                   <span class="cat-card__count">{{ subcategoriasDe(c.id).length }} subcategoria{{ subcategoriasDe(c.id).length === 1 ? '' : 's' }}</span>
                 </div>
                 <div class="cat-card__actions">
-                  @if (podeEscrever()) {
+                  @if (podeEscrever() && podeEditarItem(c)) {
                     <button class="action-btn" title="Adicionar subcategoria" (click)="abrirDrawerSubs(c)">
                       <svg lucideIcon="plus" [size]="16" />
                     </button>
@@ -89,7 +89,7 @@
                 <div class="cat-card__subs">
                   @for (sub of subsVisiveisDe(c.id); track sub.id) {
                     <div class="sub-chip">
-                      @if (podeEscrever()) {
+                      @if (podeEscrever() && podeEditarItem(c)) {
                         <span
                           class="drag-handle"
                           title="Arrastar para mover"
@@ -142,7 +142,7 @@
       (visibleChange)="fecharDrawerSubs()"
     >
 @if (categoriaAlvo()) {
-        @if (podeEscrever()) {
+        @if (podeEscrever() && podeEditarItem(categoriaAlvo())) {
           <div class="field">
             <label>Nome da categoria</label>
             <div class="drawer-row">
@@ -212,7 +212,7 @@
                 </button>
               } @else {
                 <span class="drawer-sub-item__name">{{ sub.nome }}</span>
-                @if (podeEscrever()) {
+                @if (podeEscrever() && podeEditarItem(categoriaAlvo())) {
                   <app-custom-select
                     class="mover-select"
                     placeholder="Mover para..."

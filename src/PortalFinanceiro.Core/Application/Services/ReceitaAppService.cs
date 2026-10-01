@@ -8,6 +8,8 @@ using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -18,14 +20,16 @@ public class ReceitaAppService : IReceitaAppService
     private readonly IReceitaServicoRepository _receitaServicoRepository;
     private readonly IParceriaRepository? _parceriaRepository;
     private readonly IContratoRepository? _contratoRepository;
+    private readonly ILogger<ReceitaAppService> _logger;
 
-    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IReceitaServicoRepository receitaServicoRepository, IParceriaRepository? parceriaRepository = null, IContratoRepository? contratoRepository = null)
+    public ReceitaAppService(IReceitaRepository repository, IRegraReceitaRepository regraRepository, IReceitaServicoRepository receitaServicoRepository, IParceriaRepository? parceriaRepository = null, IContratoRepository? contratoRepository = null, ILogger<ReceitaAppService>? logger = null)
     {
         _repository = repository;
         _regraRepository = regraRepository;
         _receitaServicoRepository = receitaServicoRepository;
         _parceriaRepository = parceriaRepository;
         _contratoRepository = contratoRepository;
+        _logger = logger ?? NullLogger<ReceitaAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, StatusMensal? status = null, Guid? idCategoria = null, string? busca = null)
@@ -130,7 +134,9 @@ public class ReceitaAppService : IReceitaAppService
                 return result.Erro!;
 
             var receita = result.Dado!;
+            receita.DefinirCriador(idUsuario);
             await _repository.InserirAsync(receita);
+            _logger.Auditar(idUsuario, "Criar", "Receita", receita.Id);
 
             if (request.Servicos != null && request.Servicos.Any())
             {
@@ -147,6 +153,7 @@ public class ReceitaAppService : IReceitaAppService
             return regraResult.Erro!;
 
         var regra = regraResult.Dado!;
+        regra.DefinirCriador(idUsuario);
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
         var receitas = new List<Receita>();
@@ -157,6 +164,7 @@ public class ReceitaAppService : IReceitaAppService
             if (!criada.EhSucesso)
                 return criada.Erro!;
 
+            criada.Dado!.DefinirCriador(idUsuario);
             receitas.Add(criada.Dado!);
         }
 
@@ -166,6 +174,7 @@ public class ReceitaAppService : IReceitaAppService
         using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
         await _regraRepository.InserirAsync(regra);
         await _repository.InserirEmMassaAsync(receitas);
+        _logger.Auditar(idUsuario, "CriarRecorrente", "Receita", regra.Id);
 
         if (request.Servicos != null && request.Servicos.Any())
         {
@@ -219,8 +228,9 @@ public class ReceitaAppService : IReceitaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        receita.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(receita);
-
+        _logger.Auditar(idUsuario, "Atualizar", "Receita", receita.Id);
         if (request.Servicos != null)
         {
             await _receitaServicoRepository.ExcluirPorReceitaAsync(id);
@@ -247,7 +257,9 @@ public class ReceitaAppService : IReceitaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        receita.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(receita);
+        _logger.Auditar(idUsuario, "Receber", "Receita", receita.Id);
 
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         return Mapear(projecao!);
@@ -265,7 +277,9 @@ public class ReceitaAppService : IReceitaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        receita.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(receita);
+        _logger.Auditar(idUsuario, "Estornar", "Receita", receita.Id);
 
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         return Mapear(projecao!);
@@ -283,7 +297,9 @@ public class ReceitaAppService : IReceitaAppService
             return Erro.Negocio("RECEITA_JA_RECEBIDA", "Não é possível excluir uma receita já recebida. Estorne primeiro.");
 
         receita.Desativar();
+        receita.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(receita);
+        _logger.Auditar(idUsuario, "Excluir", "Receita", receita.Id);
 
         if (receita.IdRegra.HasValue)
         {
@@ -294,6 +310,7 @@ public class ReceitaAppService : IReceitaAppService
                 if (regra is not null)
                 {
                     regra.Desativar();
+                    regra.DefinirEditor(idUsuario);
                     await _regraRepository.AtualizarAsync(regra);
                 }
             }
@@ -329,6 +346,8 @@ public class ReceitaAppService : IReceitaAppService
         IdRegra = p.IdRegra,
         EhRecorrente = p.EhRecorrente,
         Ativo = p.Ativo,
-        DataCadastro = p.DataCadastro
+        DataCadastro = p.DataCadastro,
+        CriadoPor = p.CriadoPor,
+        AlteradoPor = p.AlteradoPor
     };
 }

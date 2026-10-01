@@ -9,4 +9,6 @@ public class CategoriaResponse
     public bool Ativo { get; set; }
     public bool PodeEditar { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
 }

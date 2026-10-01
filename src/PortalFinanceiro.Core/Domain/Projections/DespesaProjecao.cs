@@ -26,5 +26,7 @@ public class DespesaProjecao
     public string Cliente { get; set; } = string.Empty;
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
     public bool EhRecorrente => IdRegra.HasValue;
 }

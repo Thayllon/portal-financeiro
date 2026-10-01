@@ -27,6 +27,8 @@ public class DespesaResponse
     public List<DespesaServicoResponse> Servicos { get; set; } = new();
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
 }
 
 public class DespesaServicoResponse

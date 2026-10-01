@@ -30,7 +30,8 @@ public class RequestLoggingMiddleware
         var userLog = usuario is null ? "-" : usuario;
 
         _logger.Log(level,
-            "HTTP {Metodo} {Rota} -> {Status} em {Ms}ms | Usuario: {Usuario}",
-            metodo, rota, status, sw.ElapsedMilliseconds, userLog);
+            "HTTP {Metodo} {Rota} -> {Status} em {Ms}ms | Usuario: {Usuario} | CorrelationId: {CorrelationId}",
+            metodo, rota, status, sw.ElapsedMilliseconds, userLog,
+            context.Response.Headers[CorrelationIdMiddleware.HeaderName].ToString());
     }
 }

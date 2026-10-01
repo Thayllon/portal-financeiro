@@ -6,7 +6,7 @@ internal static class LancamentoSql
 
     static string ColunasNomes(string t, string tabelaCategoria, string extras)
         => $@"{t}.Id, {t}.IdUsuario, {t}.Descricao, {t}.Valor, {t}.Data, {t}.IdConta, {t}.IdCategoria, {t}.IdSubcategoria,
-        {t}.Status, {t}.DataRealizacao, {t}.IdRegra, {t}.Ativo, {t}.DataCadastro, {t}.DataAlteracao,
+        {t}.Status, {t}.DataRealizacao, {t}.IdRegra, {t}.Ativo, {t}.DataCadastro, {t}.DataAlteracao, {t}.CriadoPor, {t}.AlteradoPor,
         {extras},
         cb.Nome AS Conta,
         cat.Nome AS Categoria,

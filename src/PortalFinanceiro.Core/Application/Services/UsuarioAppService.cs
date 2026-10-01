@@ -50,7 +50,7 @@ public class UsuarioAppService : IUsuarioAppService
             await _permissaoRepository.InserirAsync(permissao);
         }
 
-        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos", "processos" };
+        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias-receita", "categorias-despesa", "categorias-servico", "clientes", "parceiros", "parcerias", "contratos", "processos" };
         foreach (var modulo in modulos)
         {
             var permissao = PermissaoUsuario.Criar(result.Dado!.Id, modulo, NivelPermissao.Nenhum);

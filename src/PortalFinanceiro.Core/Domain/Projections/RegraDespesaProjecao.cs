@@ -15,4 +15,6 @@ public class RegraDespesaProjecao
     public DateTime DataInicio { get; set; }
     public DateTime DataFim { get; set; }
     public bool Ativo { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
 }

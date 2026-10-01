@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { Categoria, CategoriaRequest } from '../../core/models/categoria.model';
 import { AuthService } from '../../core/services/auth.service';
-import { NivelPermissao } from '../../core/models/permissao.model';
+import { NivelPermissao, ModuloPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -39,7 +39,15 @@ export class CategoriasComponent implements OnInit {
   private repoServico = inject(CategoriaServicoRepository);
   private auth = inject(AuthService);
 
-  podeEscrever = computed(() => this.auth.temPermissao('categorias', NivelPermissao.Escrita));
+  private modulosPorAba: Record<string, ModuloPermissao> = {
+    receita: 'categorias-receita',
+    despesa: 'categorias-despesa',
+    servicos: 'categorias-servico'
+  };
+
+  podeEscrever = computed(() => this.auth.temPermissao(this.modulosPorAba[this.tabAtiva()] ?? 'categorias-receita', NivelPermissao.Escrita));
+
+  podeEditarItem = (item: Categoria) => item.podeEditar || this.auth.isAdmin();
 
   tabs: Tab[] = [
     { id: 'receita', label: 'Receita' },

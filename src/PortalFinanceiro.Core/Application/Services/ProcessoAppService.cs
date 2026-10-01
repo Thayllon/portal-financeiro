@@ -5,6 +5,8 @@ using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -13,15 +15,18 @@ public class ProcessoAppService : IProcessoAppService
     private readonly IProcessoRepository _repository;
     private readonly IParceriaRepository _parceriaRepository;
     private readonly IContratoRepository _contratoRepository;
+    private readonly ILogger<ProcessoAppService> _logger;
 
     public ProcessoAppService(
         IProcessoRepository repository,
         IParceriaRepository parceriaRepository,
-        IContratoRepository contratoRepository)
+        IContratoRepository contratoRepository,
+        ILogger<ProcessoAppService>? logger = null)
     {
         _repository = repository;
         _parceriaRepository = parceriaRepository;
         _contratoRepository = contratoRepository;
+        _logger = logger ?? NullLogger<ProcessoAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<ProcessoResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null)
@@ -57,7 +62,9 @@ public class ProcessoAppService : IProcessoAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        result.Dado!.DefinirCriador(idUsuario);
         await _repository.InserirAsync(result.Dado!);
+        _logger.Auditar(idUsuario, "Criar", "Processo", result.Dado!.Id);
         var projecao = await _repository.ObterProjecaoPorIdAsync(result.Dado!.Id);
         return Mapear(projecao!, null);
     }
@@ -74,7 +81,9 @@ public class ProcessoAppService : IProcessoAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        processo.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(processo);
+        _logger.Auditar(idUsuario, "Atualizar", "Processo", processo.Id);
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         var etapas = await _repository.ListarEtapasAsync(id);
         return Mapear(projecao!, etapas);
@@ -95,7 +104,9 @@ public class ProcessoAppService : IProcessoAppService
             return Erro.Negocio("PROCESSO_COM_ETAPAS_PENDENTES", "Só é possível encerrar processo com todas as etapas concluídas.");
 
         processo.Desativar();
+        processo.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(processo);
+        _logger.Auditar(idUsuario, "Encerrar", "Processo", processo.Id);
         return Resultado.Sucesso();
     }
 
@@ -110,7 +121,9 @@ public class ProcessoAppService : IProcessoAppService
             return Erro.Negocio("PROCESSO_JA_ATIVO", "Este processo já está ativo.");
 
         processo.Reativar();
+        processo.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(processo);
+        _logger.Auditar(idUsuario, "Reativar", "Processo", processo.Id);
         return Resultado.Sucesso();
     }
 
@@ -126,6 +139,7 @@ public class ProcessoAppService : IProcessoAppService
         foreach (var etapa in etapas)
             await _repository.ExcluirEtapaAsync(etapa.Id);
         await _repository.ExcluirProcessoAsync(id);
+        _logger.Auditar(idUsuario, "Excluir", "Processo", id);
         return Resultado.Sucesso();
     }
 
@@ -142,7 +156,9 @@ public class ProcessoAppService : IProcessoAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        result.Dado!.DefinirCriador(idUsuario);
         await _repository.InserirEtapaAsync(result.Dado!);
+        _logger.Auditar(idUsuario, "Criar", "ProcessoEtapa", result.Dado!.Id);
         return MapearEtapa(result.Dado!);
     }
 
@@ -156,6 +172,7 @@ public class ProcessoAppService : IProcessoAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        etapa.Dado!.DefinirEditor(idUsuario);
         await _repository.AtualizarEtapaAsync(etapa.Dado!);
         return MapearEtapa(etapa.Dado!);
     }
@@ -167,6 +184,7 @@ public class ProcessoAppService : IProcessoAppService
             return etapa.Erro!;
 
         etapa.Dado!.MarcarConcluida();
+        etapa.Dado!.DefinirEditor(idUsuario);
         await _repository.AtualizarEtapaAsync(etapa.Dado!);
         return MapearEtapa(etapa.Dado!);
     }
@@ -178,6 +196,7 @@ public class ProcessoAppService : IProcessoAppService
             return etapa.Erro!;
 
         etapa.Dado!.Estornar();
+        etapa.Dado!.DefinirEditor(idUsuario);
         await _repository.AtualizarEtapaAsync(etapa.Dado!);
         return MapearEtapa(etapa.Dado!);
     }
@@ -206,6 +225,8 @@ public class ProcessoAppService : IProcessoAppService
         var ordemAtual = atual.Ordem;
         atual.MoverPara(vizinha.Ordem);
         vizinha.MoverPara(ordemAtual);
+        atual.DefinirEditor(idUsuario);
+        vizinha.DefinirEditor(idUsuario);
         await _repository.AtualizarEtapaAsync(atual);
         await _repository.AtualizarEtapaAsync(vizinha);
         return Resultado.Sucesso();
@@ -273,6 +294,8 @@ public class ProcessoAppService : IProcessoAppService
             Cliente = p.Cliente,
             Ativo = p.Ativo,
             DataCadastro = p.DataCadastro,
+            CriadoPor = p.CriadoPor,
+            AlteradoPor = p.AlteradoPor,
             TotalEtapas = p.TotalEtapas,
             EtapasConcluidas = p.EtapasConcluidas,
             PercentualConcluido = p.TotalEtapas == 0 ? 0 : (int)Math.Round(p.EtapasConcluidas * 100m / p.TotalEtapas),
@@ -289,6 +312,8 @@ public class ProcessoAppService : IProcessoAppService
             Ordem = e.Ordem,
             Concluida = e.Concluida,
             DataPrevista = e.DataPrevista,
-            DataConclusao = e.DataConclusao
+            DataConclusao = e.DataConclusao,
+            CriadoPor = e.CriadoPor,
+            AlteradoPor = e.AlteradoPor
         };
 }

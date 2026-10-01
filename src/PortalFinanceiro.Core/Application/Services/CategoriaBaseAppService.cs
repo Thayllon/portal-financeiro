@@ -4,6 +4,8 @@ using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Enums;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -12,15 +14,18 @@ public abstract class CategoriaBaseAppService<T> where T : class
     protected readonly ICategoriaRepository<T> Repository;
     protected readonly ICategoriaHistoricoRepository HistoricoRepository;
     protected readonly ETipoCategoria TipoCategoria;
+    protected readonly ILogger Logger;
 
     protected CategoriaBaseAppService(
         ICategoriaRepository<T> repository,
         ICategoriaHistoricoRepository historicoRepository,
-        ETipoCategoria tipoCategoria)
+        ETipoCategoria tipoCategoria,
+        ILogger? logger = null)
     {
         Repository = repository;
         HistoricoRepository = historicoRepository;
         TipoCategoria = tipoCategoria;
+        Logger = logger ?? NullLogger.Instance;
     }
 
     public async Task<Result<IEnumerable<CategoriaResponse>>> ListarAsync(Guid idUsuario, bool isAdmin)
@@ -48,7 +53,9 @@ public abstract class CategoriaBaseAppService<T> where T : class
             return result.Erro!;
 
         var categoria = result.Dado!;
+        DefinirCriadorEntidade(categoria, idUsuario);
         await Repository.InserirAsync(categoria);
+        Logger.Auditar(idUsuario, "Criar", TipoCategoria.ToString(), ObterId(categoria));
         await RegistrarHistoricoAsync(categoria, EAcaoCategoriaHistorico.Criado, nomeNovo: ObterNome(categoria), categoriaPaiIdNova: ObterCategoriaPaiId(categoria));
 
         return Mapear(categoria, idUsuario, false);
@@ -73,7 +80,9 @@ public abstract class CategoriaBaseAppService<T> where T : class
         if (!result.EhSucesso)
             return result.Erro!;
 
+        DefinirEditorEntidade(categoria, idUsuario);
         await Repository.AtualizarAsync(categoria);
+        Logger.Auditar(idUsuario, "Atualizar", TipoCategoria.ToString(), ObterId(categoria));
         await RegistrarHistoricoAsync(categoria, EAcaoCategoriaHistorico.Editado, nomeAntigo, ObterNome(categoria), paiAntigo, ObterCategoriaPaiId(categoria));
 
         return Mapear(categoria, idUsuario, isAdmin);
@@ -101,12 +110,15 @@ public abstract class CategoriaBaseAppService<T> where T : class
         }
 
         DesativarEntidade(categoria);
+        DefinirEditorEntidade(categoria, idUsuario);
         await Repository.ExcluirAsync(ObterId(categoria));
+        Logger.Auditar(idUsuario, "Excluir", TipoCategoria.ToString(), ObterId(categoria));
         await RegistrarHistoricoAsync(categoria, EAcaoCategoriaHistorico.Excluido, nomeAntigo: ObterNome(categoria), categoriaPaiIdAntiga: ObterCategoriaPaiId(categoria));
 
         foreach (var sub in subcategorias)
         {
             DesativarEntidade(sub);
+            DefinirEditorEntidade(sub, idUsuario);
             await Repository.ExcluirAsync(ObterId(sub));
             await RegistrarHistoricoAsync(sub, EAcaoCategoriaHistorico.Excluido, nomeAntigo: ObterNome(sub), categoriaPaiIdAntiga: ObterCategoriaPaiId(sub));
         }
@@ -125,6 +137,8 @@ public abstract class CategoriaBaseAppService<T> where T : class
         => ObterIdUsuario(categoria) == idUsuario || isAdmin;
 
     protected abstract Guid ObterIdUsuario(T categoria);
+    protected abstract void DefinirCriadorEntidade(T categoria, Guid ator);
+    protected abstract void DefinirEditorEntidade(T categoria, Guid ator);
 
     protected async Task RegistrarHistoricoAsync(
         T categoria,
@@ -138,7 +152,7 @@ public abstract class CategoriaBaseAppService<T> where T : class
         await HistoricoRepository.InserirAsync(historico);
     }
 
-    protected static CategoriaResponse Mapear(T c, Guid idUsuario, bool isAdmin, Func<T, Guid> obterId, Func<T, Guid> obterIdUsuario, Func<T, string> obterNome, Func<T, Guid?> obterCategoriaPaiId, Func<T, bool> obterAtivo, Func<T, DateTime> obterDataCadastro)
+    protected static CategoriaResponse Mapear(T c, Guid idUsuario, bool isAdmin, Func<T, Guid> obterId, Func<T, Guid> obterIdUsuario, Func<T, string> obterNome, Func<T, Guid?> obterCategoriaPaiId, Func<T, bool> obterAtivo, Func<T, DateTime> obterDataCadastro, Func<T, Guid?> obterCriadoPor, Func<T, Guid?> obterAlteradoPor)
         => new()
         {
             Id = obterId(c),
@@ -147,7 +161,9 @@ public abstract class CategoriaBaseAppService<T> where T : class
             CategoriaPaiId = obterCategoriaPaiId(c),
             Ativo = obterAtivo(c),
             PodeEditar = obterIdUsuario(c) == idUsuario || isAdmin,
-            DataCadastro = obterDataCadastro(c)
+            DataCadastro = obterDataCadastro(c),
+            CriadoPor = obterCriadoPor(c),
+            AlteradoPor = obterAlteradoPor(c)
         };
 
     protected abstract CategoriaResponse Mapear(T c, Guid idUsuario, bool isAdmin);

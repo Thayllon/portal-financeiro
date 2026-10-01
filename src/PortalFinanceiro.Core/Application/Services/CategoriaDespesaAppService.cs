@@ -5,6 +5,7 @@ using PortalFinanceiro.Core.Domain.Entities;
 using PortalFinanceiro.Core.Domain.Enums;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Results;
+using Microsoft.Extensions.Logging;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -15,8 +16,9 @@ public class CategoriaDespesaAppService : CategoriaBaseAppService<CategoriaDespe
     public CategoriaDespesaAppService(
         ICategoriaDespesaRepository repository,
         IDespesaRepository despesaRepository,
-        ICategoriaHistoricoRepository historicoRepository)
-        : base(repository, historicoRepository, ETipoCategoria.Despesa)
+        ICategoriaHistoricoRepository historicoRepository,
+        ILogger<CategoriaDespesaAppService>? logger = null)
+        : base(repository, historicoRepository, ETipoCategoria.Despesa, logger)
     {
         _despesaRepository = despesaRepository;
     }
@@ -40,7 +42,9 @@ public class CategoriaDespesaAppService : CategoriaBaseAppService<CategoriaDespe
     protected override Guid ObterId(CategoriaDespesa categoria) => categoria.Id;
     protected override void DesativarEntidade(CategoriaDespesa categoria) => categoria.Desativar();
     protected override Guid ObterIdUsuario(CategoriaDespesa categoria) => categoria.IdUsuario;
+    protected override void DefinirCriadorEntidade(CategoriaDespesa categoria, Guid ator) => categoria.DefinirCriador(ator);
+    protected override void DefinirEditorEntidade(CategoriaDespesa categoria, Guid ator) => categoria.DefinirEditor(ator);
 
     protected override CategoriaResponse Mapear(CategoriaDespesa c, Guid idUsuario, bool isAdmin)
-        => CategoriaBaseAppService<CategoriaDespesa>.Mapear(c, idUsuario, isAdmin, x => x.Id, x => x.IdUsuario, x => x.Nome, x => x.CategoriaPaiId, x => x.Ativo, x => x.DataCadastro);
+        => CategoriaBaseAppService<CategoriaDespesa>.Mapear(c, idUsuario, isAdmin, x => x.Id, x => x.IdUsuario, x => x.Nome, x => x.CategoriaPaiId, x => x.Ativo, x => x.DataCadastro, x => x.CriadoPor, x => x.AlteradoPor);
 }

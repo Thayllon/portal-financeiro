@@ -19,3 +19,21 @@ export const permissionGuard = (modulo: ModuloPermissao, nivelMinimo = NivelPerm
     return router.parseUrl('/');
   };
 };
+
+/// Exige leitura em pelo menos um dos módulos informados.
+export const permissionGuardAny = (modulos: ModuloPermissao[], nivelMinimo = NivelPermissao.Leitura): CanActivateFn => {
+  return () => {
+    const authService = inject(AuthService);
+    const router = inject(Router);
+
+    if (!authService.isAuthenticated()) {
+      return router.parseUrl('/login');
+    }
+
+    if (modulos.some(m => authService.temPermissao(m, nivelMinimo))) {
+      return true;
+    }
+
+    return router.parseUrl('/');
+  };
+};

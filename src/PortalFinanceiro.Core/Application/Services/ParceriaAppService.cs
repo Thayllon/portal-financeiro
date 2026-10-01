@@ -9,17 +9,22 @@ using PortalFinanceiro.Core.Domain.Results;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 public class ParceriaAppService : IParceriaAppService
 {
     private readonly IParceriaRepository _repository;
     private readonly IPessoaRepository _pessoaRepository;
     private readonly IProcessoRepository? _processoRepository;
+    private readonly ILogger<ParceriaAppService> _logger;
 
-    public ParceriaAppService(IParceriaRepository repository, IPessoaRepository pessoaRepository, IProcessoRepository? processoRepository = null)
+    public ParceriaAppService(IParceriaRepository repository, IPessoaRepository pessoaRepository, IProcessoRepository? processoRepository = null, ILogger<ParceriaAppService>? logger = null)
     {
         _repository = repository;
         _pessoaRepository = pessoaRepository;
         _processoRepository = processoRepository;
+        _logger = logger ?? NullLogger<ParceriaAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<ParceriaResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null)
@@ -51,7 +56,9 @@ public class ParceriaAppService : IParceriaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        result.Dado!.DefinirCriador(idUsuario);
         await _repository.InserirAsync(result.Dado!);
+        _logger.Auditar(idUsuario, "Criar", "Parceria", result.Dado!.Id);
         var projecao = await _repository.ObterProjecaoPorIdAsync(result.Dado!.Id);
         return await MapearComResumoAsync(projecao!);
     }
@@ -72,7 +79,9 @@ public class ParceriaAppService : IParceriaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        parceria.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(parceria);
+        _logger.Auditar(idUsuario, "Atualizar", "Parceria", parceria.Id);
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         return await MapearComResumoAsync(projecao!);
     }
@@ -94,7 +103,9 @@ public class ParceriaAppService : IParceriaAppService
             return Erro.Negocio("PARCERIA_COM_PENDENCIAS", "Só é possível encerrar parceria sem valores a receber e a pagar.");
 
         parceria.Desativar();
+        parceria.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(parceria);
+        _logger.Auditar(idUsuario, "Encerrar", "Parceria", parceria.Id);
         return Resultado.Sucesso();
     }
 
@@ -109,7 +120,9 @@ public class ParceriaAppService : IParceriaAppService
             return Erro.Negocio("PARCERIA_JA_ATIVA", "Esta parceria já está ativa.");
 
         parceria.Reativar();
+        parceria.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(parceria);
+        _logger.Auditar(idUsuario, "Reativar", "Parceria", parceria.Id);
         return Resultado.Sucesso();
     }
 
@@ -135,6 +148,7 @@ public class ParceriaAppService : IParceriaAppService
         }
 
         await _repository.ExcluirAsync(id);
+        _logger.Auditar(idUsuario, "Excluir", "Parceria", id);
         return Resultado.Sucesso();
     }
 
@@ -178,6 +192,8 @@ public class ParceriaAppService : IParceriaAppService
             MinhaParte = p.Valor - valorParceiro,
             Ativo = p.Ativo,
             DataCadastro = p.DataCadastro,
+            CriadoPor = p.CriadoPor,
+            AlteradoPor = p.AlteradoPor,
             TotalRecebido = totalRecebido.Value,
             TotalPago = totalPago.Value,
             FaltaReceber = p.Valor - totalRecebido.Value,

@@ -31,6 +31,8 @@ public class ReceitaResponse
     public bool EhRecorrente { get; set; }
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
 }
 
 public class ReceitaServicoResponse

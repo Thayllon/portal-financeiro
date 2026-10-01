@@ -14,6 +14,8 @@ public class ProcessoProjecao
     public bool Ativo { get; set; }
     public DateTime DataCadastro { get; set; }
     public DateTime DataAlteracao { get; set; }
+    public Guid? CriadoPor { get; set; }
+    public Guid? AlteradoPor { get; set; }
     public int TotalEtapas { get; set; }
     public int EtapasConcluidas { get; set; }
 }

@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
-import { permissionGuard } from './core/guards/permission.guard';
+import { permissionGuard, permissionGuardAny } from './core/guards/permission.guard';
 import { qaGuard } from './core/guards/qa.guard';
 import { LayoutComponent } from './core/layout/layout.component';
 
@@ -25,7 +25,7 @@ export const routes: Routes = [
       { path: 'processos', loadComponent: () => import('./features/processos/processos.component').then(m => m.ProcessosComponent), canActivate: [permissionGuard('processos')] },
       { path: 'processos/:id', loadComponent: () => import('./features/processos/processo-detalhe/processo-detalhe.component').then(m => m.ProcessoDetalheComponent), canActivate: [permissionGuard('processos')] },
       { path: 'contas', loadComponent: () => import('./features/contas/contas.component').then(m => m.ContasComponent), canActivate: [permissionGuard('contas')] },
-      { path: 'categorias', loadComponent: () => import('./features/categorias-receita/categorias-receita.component').then(m => m.CategoriasComponent), canActivate: [permissionGuard('categorias')] },
+      { path: 'categorias', loadComponent: () => import('./features/categorias-receita/categorias-receita.component').then(m => m.CategoriasComponent), canActivate: [permissionGuardAny(['categorias-receita', 'categorias-despesa', 'categorias-servico'])] },
       { path: 'clientes', loadComponent: () => import('./features/clientes/clientes.component').then(m => m.ClientesComponent), canActivate: [permissionGuard('clientes')] },
       { path: 'parceiros', loadComponent: () => import('./features/parceiros/parceiros.component').then(m => m.ParceirosComponent), canActivate: [permissionGuard('parceiros')] },
       { path: 'usuarios', loadComponent: () => import('./features/usuarios/usuarios.component').then(m => m.UsuariosComponent), canActivate: [adminGuard] },

@@ -40,8 +40,8 @@ portal-financeiro/
 │   ├── sqlserver/                     # Migrations DbUp (SQL Server)
 │   │   ├── 001_CriarTabelas.sql       #   schema unificado completo (banco novo)
 │   │   ├── 003..006_*.sql             #   incrementais idempotentes (bancos já criados)
-│   │   └── 099_SeedBase.sql           #   admin + categorias base
-│   └── postgres/                      # Mesmo conjunto + operacionais 100/101/102 (uso manual)
+│   │   └── 015..020_*.sql             #   processos, granularização e auditoria
+│   └── postgres/                      # Mesmo conjunto + operacionais 100/103/104/105 (uso manual)
 ├── tools/
 │   └── DbSetup/                       # Ferramenta para rodar migrations (+ Dockerfile)
 ├── doc/                               # Documentação (este índice + arquivos por área)
@@ -63,6 +63,7 @@ portal-financeiro/
 | **Regra recorrente** | Comportamento "repete" — gera parcelas mensais automáticas |
 | **Avulsa** | Lançamento manual, sem recorrência |
 | **Auditoria de categorias** | `CategoriaHistorico` registra criado/editado/excluído de categorias |
+| **Auditoria de ator** | `CriadoPor`/`AlteradoPor` nas tabelas + log estruturado (`Auditoria`/`AuditoriaNegada` + `X-Correlation-Id`) |
 
 ### Fluxo
 
@@ -72,16 +73,11 @@ portal-financeiro/
 4. Marca recebido/pago conforme vai pagando
 5. Dashboard mostra resumo por conta e categoria
 
-## Login padrão (ambiente dev)
+## Login (ambiente dev)
 
-| Campo | Valor |
-|-------|-------|
-| Email | `admin@portal.com` |
-| Senha | `senhasenha` |
-
-> O usuário admin e as categorias base são criados pelo seed (`099_SeedBase.sql`).
-> Em banco já existente sem o seed, a API cria o admin automaticamente na primeira
-> inicialização.
+> O repositório **não faz seed de dados nem de admin**. O primeiro usuário é criado
+> pelo fluxo de cadastro/login inicial da aplicação (ou manualmente no banco
+> usando a mesma hash do `PasswordService`).
 
 ## Fluxo de desenvolvimento
 

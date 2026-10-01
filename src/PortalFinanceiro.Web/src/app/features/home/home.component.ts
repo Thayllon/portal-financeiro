@@ -2,10 +2,14 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { ModuleCardComponent, ModuleCardItem } from '../../shared/components/module-card/module-card.component';
 
+interface ModuleCardItemComModulos extends Omit<ModuleCardItem, 'modulo'> {
+  modulo?: import('../../core/models/permissao.model').ModuloPermissao | import('../../core/models/permissao.model').ModuloPermissao[];
+}
+
 interface Secao {
   titulo: string;
   subtitulo?: string;
-  cards: ModuleCardItem[];
+  cards: ModuleCardItemComModulos[];
 }
 
 @Component({
@@ -83,7 +87,7 @@ export class HomeComponent {
           description: 'Organize receitas e despesas por categorias e subcategorias.',
           icon: 'tags',
           route: '/categorias',
-          modulo: 'categorias'
+          modulo: ['categorias-receita', 'categorias-despesa', 'categorias-servico']
         },
         {
           title: 'Clientes',
@@ -132,6 +136,7 @@ export class HomeComponent {
           if (card.modulo === 'usuarios') return isAdmin;
           if (card.modulo === 'qa') return isAdmin && this.auth.temQA();
           if (!card.modulo) return true;
+          if (Array.isArray(card.modulo)) return card.modulo.some(m => this.auth.temPermissao(m));
           return this.auth.temPermissao(card.modulo);
         })
       }))

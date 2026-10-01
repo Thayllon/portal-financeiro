@@ -11,6 +11,9 @@ using PortalFinanceiro.Core.Domain.Services;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
 public class ContratoAppService : IContratoAppService
 {
     private readonly IContratoRepository _repository;
@@ -20,6 +23,7 @@ public class ContratoAppService : IContratoAppService
     private readonly IReceitaRepository? _receitaRepository;
     private readonly ICategoriaReceitaRepository? _categoriaRepository;
     private readonly IContaBancariaRepository? _contaRepository;
+    private readonly ILogger<ContratoAppService> _logger;
 
     public ContratoAppService(
         IContratoRepository repository,
@@ -28,7 +32,8 @@ public class ContratoAppService : IContratoAppService
         IReceitaRepository? receitaRepository = null,
         ICategoriaReceitaRepository? categoriaRepository = null,
         IContaBancariaRepository? contaRepository = null,
-        IProcessoRepository? processoRepository = null)
+        IProcessoRepository? processoRepository = null,
+        ILogger<ContratoAppService>? logger = null)
     {
         _repository = repository;
         _pessoaRepository = pessoaRepository;
@@ -37,6 +42,7 @@ public class ContratoAppService : IContratoAppService
         _categoriaRepository = categoriaRepository;
         _contaRepository = contaRepository;
         _processoRepository = processoRepository;
+        _logger = logger ?? NullLogger<ContratoAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<ContratoResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null, bool? ehRecorrente = null)
@@ -70,7 +76,9 @@ public class ContratoAppService : IContratoAppService
             if (!result.EhSucesso)
                 return result.Erro!;
 
+            result.Dado!.DefinirCriador(idUsuario);
             await _repository.InserirAsync(result.Dado!);
+            _logger.Auditar(idUsuario, "Criar", "Contrato", result.Dado!.Id);
             var projecao = await _repository.ObterProjecaoPorIdAsync(result.Dado!.Id);
             return await MapearComResumoAsync(projecao!);
         }
@@ -87,6 +95,7 @@ public class ContratoAppService : IContratoAppService
             return contratoResult.Erro!;
 
         var contrato = contratoResult.Dado!;
+        contrato.DefinirCriador(idUsuario);
         var dataInicio = (request.DataInicio ?? DateTime.UtcNow).Date;
         var dataFim = request.DataFim!.Value.Date;
 
@@ -97,6 +106,7 @@ public class ContratoAppService : IContratoAppService
             return regraResult.Erro!;
 
         var regra = regraResult.Dado!;
+        regra.DefinirCriador(idUsuario);
         contrato.VincularRegra(regra.Id);
 
         var meses = LancamentoHelper.GerarMeses(regra.DataInicio, regra.DataFim);
@@ -111,6 +121,7 @@ public class ContratoAppService : IContratoAppService
             if (!criada.EhSucesso)
                 return criada.Erro!;
 
+            criada.Dado!.DefinirCriador(idUsuario);
             receitas.Add(criada.Dado!);
         }
 
@@ -122,6 +133,7 @@ public class ContratoAppService : IContratoAppService
         await _regraRepository.InserirAsync(regra);
         await _receitaRepository.InserirEmMassaAsync(receitas);
         scope.Complete();
+        _logger.Auditar(idUsuario, "CriarRecorrente", "Contrato", contrato.Id);
 
         var proj = await _repository.ObterProjecaoPorIdAsync(contrato.Id);
         return await MapearComResumoAsync(proj!);
@@ -143,7 +155,9 @@ public class ContratoAppService : IContratoAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        contrato.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(contrato);
+        _logger.Auditar(idUsuario, "Atualizar", "Contrato", contrato.Id);
         var projecao = await _repository.ObterProjecaoPorIdAsync(id);
         return await MapearComResumoAsync(projecao!);
     }
@@ -163,7 +177,9 @@ public class ContratoAppService : IContratoAppService
             return Erro.Negocio("CONTRATO_COM_PENDENCIAS", "Só é possível encerrar contrato sem valores a receber.");
 
         contrato.Desativar();
+        contrato.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(contrato);
+        _logger.Auditar(idUsuario, "Encerrar", "Contrato", contrato.Id);
         return Resultado.Sucesso();
     }
 
@@ -178,7 +194,9 @@ public class ContratoAppService : IContratoAppService
             return Erro.Negocio("CONTRATO_JA_ATIVO", "Este contrato já está ativo.");
 
         contrato.Reativar();
+        contrato.DefinirEditor(idUsuario);
         await _repository.AtualizarAsync(contrato);
+        _logger.Auditar(idUsuario, "Reativar", "Contrato", contrato.Id);
         return Resultado.Sucesso();
     }
 
@@ -211,12 +229,14 @@ public class ContratoAppService : IContratoAppService
             if (regra is not null)
             {
                 regra.Desativar();
+                regra.DefinirEditor(idUsuario);
                 await _regraRepository.AtualizarAsync(regra);
                 var agora = DateTime.UtcNow;
                 var parcelas = await _receitaRepository.ListarPorRegraAsync(regra.Id);
                 foreach (var parcela in parcelas.Where(p => p.Status == StatusMensal.Pendente && p.Data >= agora))
                 {
                     parcela.Desativar();
+                    parcela.DefinirEditor(idUsuario);
                     await _receitaRepository.AtualizarAsync(parcela);
                 }
             }
@@ -296,6 +316,8 @@ public class ContratoAppService : IContratoAppService
             EhRecorrente = c.EhRecorrente,
             IdRegra = c.IdRegra,
             DataCadastro = c.DataCadastro,
+            CriadoPor = c.CriadoPor,
+            AlteradoPor = c.AlteradoPor,
             TotalRecebido = totalRecebido.Value,
             FaltaReceber = c.Valor - totalRecebido.Value
         };

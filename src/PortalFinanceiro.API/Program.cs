@@ -14,6 +14,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseCors("AllowAngular");
@@ -27,8 +28,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-
-app.SeedDatabase();
 
 try
 {
@@ -58,38 +57,5 @@ public static partial class ProgramExtensions
             .CreateLogger();
 
         builder.Host.UseSerilog();
-    }
-
-    public static void SeedDatabase(this WebApplication app)
-    {
-        using var scope = app.Services.CreateScope();
-        var usuarioRepository = scope.ServiceProvider.GetRequiredService<PortalFinanceiro.Core.Domain.Interfaces.Repositories.IUsuarioRepository>();
-        var permissaoRepository = scope.ServiceProvider.GetRequiredService<PortalFinanceiro.Core.Domain.Interfaces.Repositories.IPermissaoUsuarioRepository>();
-        var passwordService = scope.ServiceProvider.GetRequiredService<PortalFinanceiro.Core.Domain.Interfaces.Services.IPasswordService>();
-
-        var usuarios = usuarioRepository.ListarAsync().GetAwaiter().GetResult();
-        if (!usuarios.Any())
-        {
-            var senhaHash = passwordService.Hash("senhasenha");
-            var usuarioResult = PortalFinanceiro.Core.Domain.Entities.Usuario.Criar("Admin", "admin@portal.com", senhaHash, isAdmin: true);
-
-            if (usuarioResult.EhSucesso)
-                usuarioRepository.InserirAsync(usuarioResult.Dado!).GetAwaiter().GetResult();
-        }
-
-        var admin = usuarioRepository.ObterPorEmailAsync("admin@portal.com").GetAwaiter().GetResult();
-        if (admin is null)
-            return;
-
-        var modulos = new[] { "dashboard", "receitas", "despesas", "contas", "categorias", "clientes", "parceiros", "parcerias", "contratos" };
-        foreach (var modulo in modulos)
-        {
-            var existente = permissaoRepository.ObterPorUsuarioEModuloAsync(admin.Id, modulo).GetAwaiter().GetResult();
-            if (existente is null)
-            {
-                var permissao = PortalFinanceiro.Core.Domain.Entities.PermissaoUsuario.Criar(admin.Id, modulo, PortalFinanceiro.Core.Domain.Entities.NivelPermissao.Escrita);
-                permissaoRepository.InserirAsync(permissao).GetAwaiter().GetResult();
-            }
-        }
     }
 }

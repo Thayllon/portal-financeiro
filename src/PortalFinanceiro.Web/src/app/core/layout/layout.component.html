@@ -63,7 +63,7 @@
             }
           </a>
           }
-          @if (authService.temPermissao('contas') || authService.temPermissao('categorias') || authService.temPermissao('clientes') || authService.temPermissao('parceiros') || authService.isAdmin()) {
+          @if (authService.temPermissao('contas') || authService.temPermissao('categorias-receita') || authService.temPermissao('categorias-despesa') || authService.temPermissao('categorias-servico') || authService.temPermissao('clientes') || authService.temPermissao('parceiros') || authService.isAdmin()) {
           <div class="nav-group">
             <button type="button" class="nav-group__toggle" [class.open]="configuracoesOpen() && !sidebarCollapsed()" (click)="toggleConfiguracoes()" [title]="sidebarCollapsed() ? 'Cadastros' : ''">
               <svg lucideIcon="monitor-cog" [size]="18" />
@@ -82,7 +82,7 @@
                   <span>Contas Bancárias</span>
                 </a>
                 }
-                @if (authService.temPermissao('categorias')) {
+                @if (authService.temPermissao('categorias-receita') || authService.temPermissao('categorias-despesa') || authService.temPermissao('categorias-servico')) {
                 <a routerLink="/categorias" routerLinkActive="active">
                   <svg lucideIcon="tags" [size]="18" />
                   <span>Categorias</span>

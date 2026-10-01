@@ -7,6 +7,8 @@ using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -14,11 +16,13 @@ public class RegraDespesaAppService : IRegraDespesaAppService
 {
     private readonly IRegraDespesaRepository _regraRepository;
     private readonly IDespesaRepository _despesaRepository;
+    private readonly ILogger<RegraDespesaAppService> _logger;
 
-    public RegraDespesaAppService(IRegraDespesaRepository regraRepository, IDespesaRepository despesaRepository)
+    public RegraDespesaAppService(IRegraDespesaRepository regraRepository, IDespesaRepository despesaRepository, ILogger<RegraDespesaAppService>? logger = null)
     {
         _regraRepository = regraRepository;
         _despesaRepository = despesaRepository;
+        _logger = logger ?? NullLogger<RegraDespesaAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<RegraDespesaResponse>>> ListarAsync(Guid idUsuario)
@@ -50,7 +54,9 @@ public class RegraDespesaAppService : IRegraDespesaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        regra.DefinirEditor(idUsuario);
         await _regraRepository.AtualizarAsync(regra);
+        _logger.Auditar(idUsuario, "Atualizar", "RegraDespesa", regra.Id);
 
         var agora = DateTime.UtcNow;
         var parcelas = await _despesaRepository.ListarPorRegraAsync(regra.Id);
@@ -62,6 +68,7 @@ public class RegraDespesaAppService : IRegraDespesaAppService
             if (!atualizar.EhSucesso)
                 return atualizar.Erro!;
 
+            parcela.DefinirEditor(idUsuario);
             await _despesaRepository.AtualizarAsync(parcela);
         }
 
@@ -78,13 +85,16 @@ public class RegraDespesaAppService : IRegraDespesaAppService
             return Erro.Permissao("REGRA_DESPESA_ACESSO_NEGADO", "Regra de despesa de outro usuário.");
 
         regra.Desativar();
+        regra.DefinirEditor(idUsuario);
         await _regraRepository.AtualizarAsync(regra);
+        _logger.Auditar(idUsuario, "Excluir", "RegraDespesa", regra.Id);
 
         var agora = DateTime.UtcNow;
         var parcelas = await _despesaRepository.ListarPorRegraAsync(regra.Id);
         foreach (var parcela in parcelas.Where(p => p.Status == StatusMensal.Pendente && p.Data >= agora))
         {
             parcela.Desativar();
+            parcela.DefinirEditor(idUsuario);
             await _despesaRepository.AtualizarAsync(parcela);
         }
 
@@ -104,6 +114,8 @@ public class RegraDespesaAppService : IRegraDespesaAppService
         Conta = p.Conta,
         DataInicio = p.DataInicio,
         DataFim = p.DataFim,
-        Ativo = p.Ativo
+        Ativo = p.Ativo,
+        CriadoPor = p.CriadoPor,
+        AlteradoPor = p.AlteradoPor
     };
 }

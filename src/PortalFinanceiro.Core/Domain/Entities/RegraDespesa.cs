@@ -17,6 +17,11 @@ public class RegraDespesa
     public bool Ativo { get; private set; }
     public DateTime DataCadastro { get; private set; }
     public DateTime DataAlteracao { get; private set; }
+    public Guid? CriadoPor { get; private set; }
+    public Guid? AlteradoPor { get; private set; }
+
+    public void DefinirCriador(Guid ator) { CriadoPor ??= ator; }
+    public void DefinirEditor(Guid ator) { AlteradoPor = ator; DataAlteracao = DateTime.UtcNow; }
 
     public RegraDespesa() { }
 

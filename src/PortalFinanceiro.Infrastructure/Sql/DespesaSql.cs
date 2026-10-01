@@ -3,10 +3,10 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class DespesaSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}Despesa";
-    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, IdReceitaOrigem, IdParceria, IdCliente, Ativo, DataCadastro, DataAlteracao";
+    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, Status, DataRealizacao, IdRegra, IdReceitaOrigem, IdParceria, IdCliente, Ativo, DataCadastro, DataAlteracao, CriadoPor, AlteradoPor";
     static string Extras => $"{T}.IdReceitaOrigem, {T}.IdParceria, {T}.IdCliente";
     static string JoinsExtras => string.Empty;
-    static string SetAtualizar => "Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao, IdParceria = @IdParceria, IdCliente = @IdCliente";
+    static string SetAtualizar => "Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao, IdParceria = @IdParceria, IdCliente = @IdCliente, AlteradoPor = @AlteradoPor";
 
     public static string ObterPorId => LancamentoSql.ObterPorId(T, "CategoriaDespesa", Extras, JoinsExtras);
     public static string ListarPorMes => LancamentoSql.ListarPorMes(T, "CategoriaDespesa", Extras, JoinsExtras);

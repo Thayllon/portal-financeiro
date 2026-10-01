@@ -7,6 +7,8 @@ using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
 using PortalFinanceiro.Core.Domain.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PortalFinanceiro.Core.Application.Services;
 
@@ -14,11 +16,13 @@ public class RegraReceitaAppService : IRegraReceitaAppService
 {
     private readonly IRegraReceitaRepository _regraRepository;
     private readonly IReceitaRepository _receitaRepository;
+    private readonly ILogger<RegraReceitaAppService> _logger;
 
-    public RegraReceitaAppService(IRegraReceitaRepository regraRepository, IReceitaRepository receitaRepository)
+    public RegraReceitaAppService(IRegraReceitaRepository regraRepository, IReceitaRepository receitaRepository, ILogger<RegraReceitaAppService>? logger = null)
     {
         _regraRepository = regraRepository;
         _receitaRepository = receitaRepository;
+        _logger = logger ?? NullLogger<RegraReceitaAppService>.Instance;
     }
 
     public async Task<Result<IEnumerable<RegraReceitaResponse>>> ListarAsync(Guid idUsuario)
@@ -50,7 +54,9 @@ public class RegraReceitaAppService : IRegraReceitaAppService
         if (!result.EhSucesso)
             return result.Erro!;
 
+        regra.DefinirEditor(idUsuario);
         await _regraRepository.AtualizarAsync(regra);
+        _logger.Auditar(idUsuario, "Atualizar", "RegraReceita", regra.Id);
 
         var agora = DateTime.UtcNow;
         var parcelas = await _receitaRepository.ListarPorRegraAsync(regra.Id);
@@ -62,6 +68,7 @@ public class RegraReceitaAppService : IRegraReceitaAppService
             if (!atualizar.EhSucesso)
                 return atualizar.Erro!;
 
+            parcela.DefinirEditor(idUsuario);
             await _receitaRepository.AtualizarAsync(parcela);
         }
 
@@ -78,13 +85,16 @@ public class RegraReceitaAppService : IRegraReceitaAppService
             return Erro.Permissao("REGRA_RECEITA_ACESSO_NEGADO", "Regra de receita de outro usuário.");
 
         regra.Desativar();
+        regra.DefinirEditor(idUsuario);
         await _regraRepository.AtualizarAsync(regra);
+        _logger.Auditar(idUsuario, "Excluir", "RegraReceita", regra.Id);
 
         var agora = DateTime.UtcNow;
         var parcelas = await _receitaRepository.ListarPorRegraAsync(regra.Id);
         foreach (var parcela in parcelas.Where(p => p.Status == StatusMensal.Pendente && p.Data >= agora))
         {
             parcela.Desativar();
+            parcela.DefinirEditor(idUsuario);
             await _receitaRepository.AtualizarAsync(parcela);
         }
 
@@ -104,6 +114,8 @@ public class RegraReceitaAppService : IRegraReceitaAppService
         Conta = p.Conta,
         DataInicio = p.DataInicio,
         DataFim = p.DataFim,
-        Ativo = p.Ativo
+        Ativo = p.Ativo,
+        CriadoPor = p.CriadoPor,
+        AlteradoPor = p.AlteradoPor
     };
 }

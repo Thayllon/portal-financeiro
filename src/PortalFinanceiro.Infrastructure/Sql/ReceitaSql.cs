@@ -3,10 +3,10 @@ namespace PortalFinanceiro.Infrastructure.Sql;
 internal static class ReceitaSql
 {
     static string T => $"{SqlDialect.Current.SchemaPrefix}Receita";
-    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, IdParceiro, IdCliente, IdParceria, IdContrato, Status, DataRealizacao, IdRegra, Ativo, DataCadastro, DataAlteracao";
+    static string C => "Id, IdUsuario, Descricao, Valor, Data, IdConta, IdCategoria, IdSubcategoria, IdParceiro, IdCliente, IdParceria, IdContrato, Status, DataRealizacao, IdRegra, Ativo, DataCadastro, DataAlteracao, CriadoPor, AlteradoPor";
     static string Extras => $"{T}.IdParceiro, {T}.IdCliente, {T}.IdParceria, {T}.IdContrato, par.Nome AS Parceiro, ct.Nome AS Contrato";
     static string JoinsExtras => $"LEFT JOIN {SqlDialect.Current.SchemaPrefix}Pessoa par ON {T}.IdParceiro = par.Id LEFT JOIN {SqlDialect.Current.SchemaPrefix}Contrato ct ON {T}.IdContrato = ct.Id";
-    static string SetAtualizar => "Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, IdParceiro = @IdParceiro, IdCliente = @IdCliente, IdParceria = @IdParceria, IdContrato = @IdContrato, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao";
+    static string SetAtualizar => "Descricao = @Descricao, Valor = @Valor, Data = @Data, IdConta = @IdConta, IdCategoria = @IdCategoria, IdSubcategoria = @IdSubcategoria, IdParceiro = @IdParceiro, IdCliente = @IdCliente, IdParceria = @IdParceria, IdContrato = @IdContrato, Status = @Status, DataRealizacao = @DataRealizacao, Ativo = @Ativo, DataAlteracao = @DataAlteracao, AlteradoPor = @AlteradoPor";
 
     public static string ObterPorId => LancamentoSql.ObterPorId(T, "CategoriaReceita", Extras, JoinsExtras);
     public static string ListarPorMes => LancamentoSql.ListarPorMes(T, "CategoriaReceita", Extras, JoinsExtras);
