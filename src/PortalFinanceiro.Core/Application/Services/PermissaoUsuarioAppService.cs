@@ -33,7 +33,7 @@ public class PermissaoUsuarioAppService : IPermissaoUsuarioAppService
         foreach (var req in permissoes)
         {
             var existente = existentes.FirstOrDefault(e => e.Modulo == req.Modulo);
-            var nivel = (NivelPermissao)req.Nivel;
+            var nivel = req.Nivel;
 
             if (existente is not null)
             {

@@ -1,3 +1,5 @@
+import { TipoConta } from './enums';
+
 export interface Dashboard {
   mes: number;
   ano: number;
@@ -73,7 +75,7 @@ export interface MensalResumoAnual {
 export interface ResumoPorContaAnual {
   nomeConta: string;
   banco: string;
-  tipo: string;
+  tipo: TipoConta;
   totalReceitas: number;
   totalRecebido: number;
   totalDespesas: number;
@@ -85,7 +87,7 @@ export interface ResumoPorContaAnual {
 export interface ResumoPorConta {
   nomeConta: string;
   banco: string;
-  tipo: string;
+  tipo: TipoConta;
   totalReceitas: number;
   totalDespesas: number;
   saldo: number;

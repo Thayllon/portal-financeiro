@@ -8,6 +8,7 @@ import { Despesa } from '../../../core/models/despesa.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { NivelPermissao } from '../../../core/models/permissao.model';
+import { StatusLancamento } from '../../../core/models/enums';
 import { ValorMascaradoPipe } from '../../../shared/pipes/valor-mascarado.pipe';
 import { PrivacidadeToggleComponent } from '../../../shared/components/privacidade-toggle.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge.component';
@@ -50,6 +51,8 @@ export class LancamentoDetalheComponent implements OnInit {
   });
 
   podeEscrever = computed(() => this.auth.temPermissao(this.ehReceita() ? 'receitas' : 'despesas', NivelPermissao.Escrita));
+
+  readonly statusRealizado = StatusLancamento.Realizado;
 
   receita = computed(() => this.ehReceita() ? this.item() as Receita | null : null);
   idContrato = computed(() => this.receita()?.idContrato);

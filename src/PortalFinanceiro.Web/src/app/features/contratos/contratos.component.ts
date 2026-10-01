@@ -13,6 +13,7 @@ import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { AuthService } from '../../core/services/auth.service';
 import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
+import { TipoPessoa } from '../../core/models/enums';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
@@ -105,7 +106,7 @@ export class ContratosComponent implements OnInit {
   async carregarClientes() {
     try {
       const todas = await firstValueFrom(this.pessoaRepo.listar());
-      this.clientes.set(todas.filter(p => p.tipo === 'Cliente'));
+      this.clientes.set(todas.filter(p => p.tipo === TipoPessoa.Cliente));
     } catch {}
   }
 

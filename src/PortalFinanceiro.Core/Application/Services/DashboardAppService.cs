@@ -215,7 +215,7 @@ public class DashboardAppService : IDashboardAppService
                     {
                         NomeConta = rec.NomeConta,
                         Banco = rec.Banco,
-                        Tipo = rec.Tipo
+                        Tipo = rec.Tipo.ToString()
                     };
                 }
                 todasContas[key].TotalReceitas = rec.Total;
@@ -230,7 +230,7 @@ public class DashboardAppService : IDashboardAppService
                     {
                         NomeConta = desp.NomeConta,
                         Banco = desp.Banco,
-                        Tipo = desp.Tipo
+                        Tipo = desp.Tipo.ToString()
                     };
                 }
                 todasContas[key].TotalDespesas = desp.Total;

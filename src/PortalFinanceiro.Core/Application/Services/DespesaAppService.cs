@@ -3,6 +3,7 @@ using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
+using PortalFinanceiro.Core.Domain.Enums;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
@@ -25,9 +26,9 @@ public class DespesaAppService : IDespesaAppService
         _parceriaRepository = parceriaRepository;
     }
 
-    public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
+    public async Task<Result<IEnumerable<DespesaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, StatusMensal? status = null, Guid? idCategoria = null, string? busca = null)
     {
-        var despesas = await _repository.ListarAsync(idUsuario, mes, ano, idConta, status, idCategoria, busca);
+        var despesas = await _repository.ListarAsync(idUsuario, mes, ano, idConta, (int?)status, idCategoria, busca);
         var responses = new List<DespesaResponse>();
         foreach (var p in despesas)
         {
@@ -226,7 +227,7 @@ public class DespesaAppService : IDespesaAppService
         if (despesa.IdUsuario != idUsuario)
             return Erro.Permissao("DESPESA_ACESSO_NEGADO", "Despesa de outro usuário.");
 
-        if (despesa.Status == Domain.Enums.StatusMensal.Realizado)
+        if (despesa.Status == StatusMensal.Realizado)
             return Erro.Negocio("DESPESA_JA_PAGA", "Não é possível excluir uma despesa já paga. Estorne primeiro.");
 
         despesa.Desativar();
@@ -261,7 +262,7 @@ public class DespesaAppService : IDespesaAppService
         Categoria = p.Categoria,
         IdSubcategoria = p.IdSubcategoria,
         Subcategoria = p.Subcategoria,
-        Status = (int)p.Status,
+        Status = p.Status,
         IdParceria = p.IdParceria,
         Parceria = p.Parceria,
         ParceriaValor = p.ParceriaValor,

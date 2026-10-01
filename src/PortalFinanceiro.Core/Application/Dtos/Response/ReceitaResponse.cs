@@ -1,5 +1,7 @@
 namespace PortalFinanceiro.Core.Application.Dtos.Response;
 
+using PortalFinanceiro.Core.Domain.Enums;
+
 public class ReceitaResponse
 {
     public Guid Id { get; set; }
@@ -23,7 +25,7 @@ public class ReceitaResponse
     public Guid? IdContrato { get; set; }
     public string Contrato { get; set; } = string.Empty;
     public List<ReceitaServicoResponse> Servicos { get; set; } = new();
-    public int Status { get; set; }
+    public StatusMensal Status { get; set; }
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }
     public bool EhRecorrente { get; set; }

@@ -1,3 +1,5 @@
+import { StatusLancamento } from './enums';
+
 export interface Despesa {
   id: string;
   descricao: string;
@@ -15,7 +17,7 @@ export interface Despesa {
   idCliente?: string;
   cliente: string;
   servicos?: DespesaServico[];
-  status: number;
+  status: StatusLancamento;
   dataRealizacao?: string;
   idRegra?: string;
   ehRecorrente: boolean;

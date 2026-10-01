@@ -12,8 +12,7 @@ import { ListPaginationComponent } from '../../shared/components/list-pagination
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
-
-export type TipoPessoaListagem = 'Cliente' | 'Parceiro';
+import { TipoPessoa } from '../../core/models/enums';
 
 @Component({
   selector: 'app-pessoa-listagem',
@@ -23,20 +22,20 @@ export type TipoPessoaListagem = 'Cliente' | 'Parceiro';
   styleUrl: './pessoa-listagem.component.scss'
 })
 export class PessoaListagemComponent implements OnInit {
-  tipo = input<TipoPessoaListagem>('Cliente');
+  tipo = input<TipoPessoa>(TipoPessoa.Cliente);
 
   private repo = inject(PessoaRepository);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private auth = inject(AuthService);
 
-  modulo = computed(() => this.tipo() === 'Cliente' ? 'clientes' : 'parceiros');
+  modulo = computed(() => this.tipo() === TipoPessoa.Cliente ? 'clientes' : 'parceiros');
   podeEscrever = computed(() => this.auth.temPermissao(this.modulo(), NivelPermissao.Escrita));
 
-  rotulo = computed(() => this.tipo() === 'Cliente' ? 'Cliente' : 'Parceiro');
-  rotuloPlural = computed(() => this.tipo() === 'Cliente' ? 'clientes' : 'parceiros');
-  icone = computed(() => this.tipo() === 'Cliente' ? 'users' : 'handshake');
-  placeholderNome = computed(() => this.tipo() === 'Cliente' ? 'Ex: João da Silva' : 'Ex: Empresa XYZ');
+  rotulo = computed(() => this.tipo() === TipoPessoa.Cliente ? 'Cliente' : 'Parceiro');
+  rotuloPlural = computed(() => this.tipo() === TipoPessoa.Cliente ? 'clientes' : 'parceiros');
+  icone = computed(() => this.tipo() === TipoPessoa.Cliente ? 'users' : 'handshake');
+  placeholderNome = computed(() => this.tipo() === TipoPessoa.Cliente ? 'Ex: João da Silva' : 'Ex: Empresa XYZ');
 
   itens = signal<Pessoa[]>([]);
   loading = signal(true);
@@ -44,7 +43,7 @@ export class PessoaListagemComponent implements OnInit {
   editando = signal<Pessoa | null>(null);
   salvando = signal(false);
 
-  form: PessoaRequest = { nome: '', telefone: '', tipo: 'Cliente' };
+  form: PessoaRequest = { nome: '', telefone: '', tipo: TipoPessoa.Cliente };
 
   paginacao = useListPagination(this.itens, { initialPageSize: 10 });
 

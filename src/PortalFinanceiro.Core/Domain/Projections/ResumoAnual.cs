@@ -1,5 +1,7 @@
 namespace PortalFinanceiro.Core.Domain.Projections;
 
+using PortalFinanceiro.Core.Domain.Enums;
+
 public class ResumoAnualItem
 {
     public int Mes { get; set; }
@@ -12,7 +14,7 @@ public class ResumoAnualContaItem
 {
     public string NomeConta { get; set; } = string.Empty;
     public string Banco { get; set; } = string.Empty;
-    public string Tipo { get; set; } = string.Empty;
+    public TipoConta Tipo { get; set; }
     public decimal Total { get; set; }
     public decimal TotalRealizado { get; set; }
 }
@@ -22,7 +24,7 @@ public class ResumoRealizadoContaItem
     public Guid? IdConta { get; set; }
     public string NomeConta { get; set; } = string.Empty;
     public string Banco { get; set; } = string.Empty;
-    public string Tipo { get; set; } = string.Empty;
+    public TipoConta Tipo { get; set; }
     public decimal TotalRealizado { get; set; }
 }
 

@@ -14,6 +14,7 @@ import { ListPaginationComponent } from '../../shared/components/list-pagination
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
 import { mensagemErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { TipoConta } from '../../core/models/enums';
 
 @Component({
   selector: 'app-contas',
@@ -36,7 +37,9 @@ export class ContasComponent implements OnInit {
   editando = signal<ContaBancaria | null>(null);
   salvando = signal(false);
 
-  form: ContaBancariaRequest = { nome: '', banco: '', tipo: 'Pf' };
+  readonly TipoConta = TipoConta;
+
+  form: ContaBancariaRequest = { nome: '', banco: '', tipo: TipoConta.Pf };
   formEhPadrao = false;
 
   contasPaginacao = useListPagination(this.contas, { initialPageSize: 10 });
@@ -46,8 +49,8 @@ export class ContasComponent implements OnInit {
   }
 
   tipoOptions: SelectOption[] = [
-    { value: 'Pf', label: 'Pessoa Física' },
-    { value: 'Pj', label: 'Pessoa Jurídica' },
+    { value: TipoConta.Pf, label: 'Pessoa Física' },
+    { value: TipoConta.Pj, label: 'Pessoa Jurídica' },
   ];
 
   ngOnInit() { this.carregar(); }
@@ -67,7 +70,7 @@ export class ContasComponent implements OnInit {
       this.formEhPadrao = !!item.ehPadrao;
       this.editando.set(item);
     } else {
-      this.form = { nome: '', banco: '', tipo: 'Pf' };
+      this.form = { nome: '', banco: '', tipo: TipoConta.Pf };
       this.formEhPadrao = this.contas().length === 0;
       this.editando.set(null);
     }

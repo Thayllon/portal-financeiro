@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ContratoRepository } from '../../../core/repositories/contrato.repository';
 import { Contrato } from '../../../core/models/contrato.model';
 import { Receita } from '../../../core/models/receita.model';
-import { STATUS_REALIZADO } from '../../../core/models/status.model';
+import { StatusLancamento } from '../../../core/models/enums';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ValorMascaradoPipe } from '../../../shared/pipes/valor-mascarado.pipe';
 import { PrivacidadeToggleComponent } from '../../../shared/components/privacidade-toggle.component';
@@ -34,10 +34,10 @@ export class ContratoDetalheComponent implements OnInit {
 
   receitasPaginacao = useListPagination(this.receitas, { initialPageSize: 10 });
 
-  readonly statusRealizado = STATUS_REALIZADO;
+  readonly statusRealizado = StatusLancamento.Realizado;
 
-  entradasRecebidas = computed(() => this.receitas().filter(r => r.status === STATUS_REALIZADO).reduce((s, r) => s + r.valor, 0));
-  entradasPendentes = computed(() => this.receitas().filter(r => r.status !== STATUS_REALIZADO).reduce((s, r) => s + r.valor, 0));
+  entradasRecebidas = computed(() => this.receitas().filter(r => r.status === StatusLancamento.Realizado).reduce((s, r) => s + r.valor, 0));
+  entradasPendentes = computed(() => this.receitas().filter(r => r.status !== StatusLancamento.Realizado).reduce((s, r) => s + r.valor, 0));
 
   async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');

@@ -3,6 +3,7 @@ using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Dtos.Response;
 using PortalFinanceiro.Core.Application.Interfaces;
 using PortalFinanceiro.Core.Domain.Entities;
+using PortalFinanceiro.Core.Domain.Enums;
 using PortalFinanceiro.Core.Domain.Interfaces.Repositories;
 using PortalFinanceiro.Core.Domain.Projections;
 using PortalFinanceiro.Core.Domain.Results;
@@ -27,9 +28,9 @@ public class ReceitaAppService : IReceitaAppService
         _contratoRepository = contratoRepository;
     }
 
-    public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, int? status = null, Guid? idCategoria = null, string? busca = null)
+    public async Task<Result<IEnumerable<ReceitaResponse>>> ListarAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null, StatusMensal? status = null, Guid? idCategoria = null, string? busca = null)
     {
-        var receitas = await _repository.ListarAsync(idUsuario, mes, ano, idConta, status, idCategoria, busca);
+        var receitas = await _repository.ListarAsync(idUsuario, mes, ano, idConta, (int?)status, idCategoria, busca);
         var responses = new List<ReceitaResponse>();
         foreach (var p in receitas)
         {
@@ -278,7 +279,7 @@ public class ReceitaAppService : IReceitaAppService
         if (receita.IdUsuario != idUsuario)
             return Erro.Permissao("RECEITA_ACESSO_NEGADO", "Receita de outro usuário.");
 
-        if (receita.Status == Domain.Enums.StatusMensal.Realizado)
+        if (receita.Status == StatusMensal.Realizado)
             return Erro.Negocio("RECEITA_JA_RECEBIDA", "Não é possível excluir uma receita já recebida. Estorne primeiro.");
 
         receita.Desativar();
@@ -323,7 +324,7 @@ public class ReceitaAppService : IReceitaAppService
         ParceriaPercentual = p.ParceriaPercentual,
         IdContrato = p.IdContrato,
         Contrato = p.Contrato,
-        Status = (int)p.Status,
+        Status = p.Status,
         DataRealizacao = p.DataRealizacao,
         IdRegra = p.IdRegra,
         EhRecorrente = p.EhRecorrente,

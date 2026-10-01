@@ -1,3 +1,5 @@
+import { StatusLancamento } from './enums';
+
 export interface ReceitaServico {
   id: string;
   categoriaServicoId: string;
@@ -6,8 +8,7 @@ export interface ReceitaServico {
   subcategoriaServico: string;
 }
 
-export interface Receita {
-  id: string;
+export interface Receita {  id: string;
   descricao: string;
   valor: number;
   data: string;
@@ -28,7 +29,7 @@ export interface Receita {
   idContrato?: string;
   contrato: string;
   servicos: ReceitaServico[];
-  status: number;
+  status: StatusLancamento;
   dataRealizacao?: string;
   idRegra?: string;
   ehRecorrente: boolean;

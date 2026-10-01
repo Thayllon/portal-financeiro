@@ -12,7 +12,7 @@ import { ContratoRepository } from '../../core/repositories/contrato.repository'
 import { AuthService } from '../../core/services/auth.service';
 import { ReceitaRequest } from '../../core/models/receita.model';
 import { DespesaRequest } from '../../core/models/despesa.model';
-import { STATUS_PENDENTE, STATUS_REALIZADO } from '../../core/models/status.model';
+import { StatusLancamento, TipoPessoa } from '../../core/models/enums';
 import { NivelPermissao } from '../../core/models/permissao.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
@@ -65,7 +65,7 @@ interface LancamentoItem {
   idCliente?: string;
   cliente: string;
   servicos?: ServicoItem[];
-  status: number;
+  status: StatusLancamento;
   ehRecorrente: boolean;
   ativo: boolean;
   dataCadastro: string;
@@ -135,8 +135,8 @@ export class LancamentoListagemComponent implements OnInit {
   private _buscaTimer: ReturnType<typeof setTimeout> | null = null;
 
   statusOptions = computed<SelectOption[]>(() => [
-    { value: '1', label: 'Pendentes' },
-    { value: '2', label: this.ehReceita() ? 'Recebidas' : 'Pagas' },
+    { value: StatusLancamento.Pendente, label: 'Pendentes' },
+    { value: StatusLancamento.Realizado, label: this.ehReceita() ? 'Recebidas' : 'Pagas' },
   ]);
 
   ordenacao = signal<{ coluna: 'valor' | 'data'; direcao: 'asc' | 'desc' } | null>(null);
@@ -159,7 +159,7 @@ export class LancamentoListagemComponent implements OnInit {
     }
   }
 
-  readonly statusRealizado = STATUS_REALIZADO;
+  readonly statusRealizado = StatusLancamento.Realizado;
 
   podeEscrever = computed(() => this.auth.temPermissao(this.ehReceita() ? 'receitas' : 'despesas', NivelPermissao.Escrita));
 
@@ -214,7 +214,7 @@ export class LancamentoListagemComponent implements OnInit {
         mes: this.mes(),
         ano: this.ano(),
         ...(this.filtroConta ? { idConta: this.filtroConta } : {}),
-        ...(this.filtroStatus ? { status: Number(this.filtroStatus) } : {}),
+        ...(this.filtroStatus ? { status: this.filtroStatus as StatusLancamento } : {}),
         ...(this.filtroCategoria ? { idCategoria: this.filtroCategoria } : {}),
         ...(this.busca ? { busca: this.busca } : {})
       };
@@ -242,7 +242,7 @@ export class LancamentoListagemComponent implements OnInit {
   async carregarParceiros() {
     try {
       const todas = await firstValueFrom(this.pessoaRepo.listar());
-      this.parceiros.set(todas.filter(p => p.tipo === 'Parceiro'));
+      this.parceiros.set(todas.filter(p => p.tipo === TipoPessoa.Parceiro));
     } catch {}
   }
 
@@ -257,7 +257,7 @@ export class LancamentoListagemComponent implements OnInit {
   async carregarClientes() {
     try {
       const todas = await firstValueFrom(this.pessoaRepo.listar());
-      this.clientes.set(todas.filter(p => p.tipo === 'Cliente'));
+      this.clientes.set(todas.filter(p => p.tipo === TipoPessoa.Cliente));
     } catch {}
   }
 
@@ -384,7 +384,7 @@ export class LancamentoListagemComponent implements OnInit {
         subcategoriaServicoId: s.subcategoriaServicoId,
         subcategoriaServico: s.subcategoriaServico
       })) ?? [],
-      status: STATUS_PENDENTE,
+      status: StatusLancamento.Pendente,
       ehRecorrente: false,
       ativo: true,
       dataCadastro: new Date().toISOString(),
@@ -492,11 +492,11 @@ export class LancamentoListagemComponent implements OnInit {
     }
     return l.subcategoria ? `${l.categoria} → ${l.subcategoria}` : l.categoria;
   }
-  totalRealizado = computed(() => this.items().filter(l => l.status === STATUS_REALIZADO).reduce((s, l) => s + l.valor, 0));
+  totalRealizado = computed(() => this.items().filter(l => l.status === StatusLancamento.Realizado).reduce((s, l) => s + l.valor, 0));
   totalPendente = computed(() => this.total() - this.totalRealizado());
   totalParceria = computed(() => this.items().filter(l => !!l.idParceria).reduce((s, l) => s + l.valor, 0));
   repasseParceiro = computed(() => this.items()
-    .filter(l => !!l.idParceria && l.status === STATUS_REALIZADO)
+    .filter(l => !!l.idParceria && l.status === StatusLancamento.Realizado)
     .reduce((s, l) => s + l.valor * (l.parceriaPercentual ?? 0) / 100, 0));
   receitaLiquida = computed(() => this.totalRealizado() - this.repasseParceiro());
 }

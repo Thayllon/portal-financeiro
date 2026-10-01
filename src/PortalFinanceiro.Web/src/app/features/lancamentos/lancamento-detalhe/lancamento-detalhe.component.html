@@ -37,7 +37,7 @@
       </div>
       <div class="table-card card">
         <span class="card__label">Status</span>
-        <app-status-badge [type]="l.status === 2 ? 'realizado' : 'pendente'" [label]="l.status === 2 ? config().statusRealizadoLabel : 'Pendente'" />
+        <app-status-badge [type]="l.status === statusRealizado ? 'realizado' : 'pendente'" [label]="l.status === statusRealizado ? config().statusRealizadoLabel : 'Pendente'" />
         <span class="card__hint">Data {{ l.data | date:'dd/MM/yyyy' }}</span>
       </div>
     </div>

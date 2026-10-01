@@ -5,12 +5,13 @@ import { BaseHttpRepository } from './base-http.repository';
 import { Receita, ReceitaRequest } from '../models/receita.model';
 import { Despesa, DespesaRequest } from '../models/despesa.model';
 import { StatusRequest } from '../models/status.model';
+import { StatusLancamento } from '../models/enums';
 
 export interface LancamentoFiltros {
   mes: number;
   ano: number;
   idConta?: string;
-  status?: number;
+  status?: StatusLancamento;
   idCategoria?: string;
   busca?: string;
 }

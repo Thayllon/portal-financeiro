@@ -4,6 +4,7 @@ using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
+using PortalFinanceiro.Core.Domain.Enums;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
@@ -19,7 +20,7 @@ public class ReceitasController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar([FromQuery] int mes, [FromQuery] int ano, [FromQuery] Guid? idConta = null, [FromQuery] int? status = null, [FromQuery] Guid? idCategoria = null, [FromQuery] string? busca = null)
+    public async Task<IActionResult> Listar([FromQuery] int mes, [FromQuery] int ano, [FromQuery] Guid? idConta = null, [FromQuery] StatusMensal? status = null, [FromQuery] Guid? idCategoria = null, [FromQuery] string? busca = null)
     {
         var result = await _service.ListarAsync(ObterIdUsuario(), mes, ano, idConta, status, idCategoria, busca);
         return ApiResponse(result);

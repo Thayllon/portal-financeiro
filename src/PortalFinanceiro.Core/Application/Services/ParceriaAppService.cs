@@ -87,8 +87,8 @@ public class ParceriaAppService : IParceriaAppService
         if (!parceria.Ativo)
             return Erro.Negocio("PARCERIA_JA_ENCERRADA", "Esta parceria já está encerrada.");
 
-        var totalRecebido = await _repository.SomarReceitasPorStatusAsync(id, 2);
-        var totalPago = await _repository.SomarDespesasPorStatusAsync(id, 2);
+        var totalRecebido = await _repository.SomarReceitasPorStatusAsync(id, (int)StatusMensal.Realizado);
+        var totalPago = await _repository.SomarDespesasPorStatusAsync(id, (int)StatusMensal.Realizado);
         var valorParceiro = Math.Round(parceria.Valor * parceria.PercentualParceiro / 100, 2);
         if (parceria.Valor - totalRecebido > 0 || valorParceiro - totalPago > 0)
             return Erro.Negocio("PARCERIA_COM_PENDENCIAS", "Só é possível encerrar parceria sem valores a receber e a pagar.");
@@ -121,8 +121,8 @@ public class ParceriaAppService : IParceriaAppService
         if (parceria.IdUsuario != idUsuario)
             return Erro.Permissao("PARCERIA_ACESSO_NEGADO", "Parceria de outro usuário.");
 
-        var totalReceitas = await _repository.SomarReceitasPorStatusAsync(id, 1) + await _repository.SomarReceitasPorStatusAsync(id, 2);
-        var totalDespesas = await _repository.SomarDespesasPorStatusAsync(id, 1) + await _repository.SomarDespesasPorStatusAsync(id, 2);
+        var totalReceitas = await _repository.SomarReceitasPorStatusAsync(id, (int)StatusMensal.Pendente) + await _repository.SomarReceitasPorStatusAsync(id, (int)StatusMensal.Realizado);
+        var totalDespesas = await _repository.SomarDespesasPorStatusAsync(id, (int)StatusMensal.Pendente) + await _repository.SomarDespesasPorStatusAsync(id, (int)StatusMensal.Realizado);
         if (totalReceitas > 0 || totalDespesas > 0)
             return Erro.Negocio("PARCERIA_COM_VINCULOS", "Não é possível excluir parceria com receitas ou despesas vinculadas.");
 

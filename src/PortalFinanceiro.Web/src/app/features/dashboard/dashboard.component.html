@@ -478,7 +478,7 @@
                           <span class="conta-text">{{ c.nomeConta }}<span class="cell-meta">{{ c.banco }}</span></span>
                         </span>
                       </td>
-                      <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
+                      <td data-label="Tipo"><app-status-badge [type]="c.tipo === TipoConta.Pf ? 'ativo' : 'inativo'" [label]="c.tipo === TipoConta.Pf ? 'PF' : 'PJ'" /></td>
                       <td class="cell-value" data-label="Recebido">{{ c.totalRecebido | valorMascarado }}</td>
                       <td class="cell-value" data-label="Pago">{{ c.totalPago | valorMascarado }}</td>
                       <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo de caixa">{{ c.saldo | valorMascarado }}</td>
@@ -968,7 +968,7 @@
                             <span class="conta-text">{{ c.nomeConta }}<span class="cell-meta">{{ c.banco }}</span></span>
                           </span>
                         </td>
-                        <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
+                        <td data-label="Tipo"><app-status-badge [type]="c.tipo === TipoConta.Pf ? 'ativo' : 'inativo'" [label]="c.tipo === TipoConta.Pf ? 'PF' : 'PJ'" /></td>
                         <td class="cell-value" data-label="Recebido">{{ c.totalRecebido | valorMascarado }}</td>
                         <td class="cell-value" data-label="Pago">{{ c.totalPago | valorMascarado }}</td>
                         <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo de caixa">{{ c.saldo | valorMascarado }}</td>

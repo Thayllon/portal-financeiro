@@ -8,6 +8,7 @@ import { CurrencyInputDirective } from '../directives/currency-input.directive';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
 import { Pessoa } from '../../core/models/pessoa.model';
+import { TipoPessoa } from '../../core/models/enums';
 import { Parceria } from '../../core/models/parceria.model';
 import { Contrato } from '../../core/models/contrato.model';
 import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
@@ -675,7 +676,7 @@ export class LancamentoModalComponent {
         }
         this.clearError('servicos');
       } else {
-        const criada = await firstValueFrom(this.pessoaRepo.criar({ nome, telefone: this.quickTelefone().trim(), tipo: 'Cliente' }));
+        const criada = await firstValueFrom(this.pessoaRepo.criar({ nome, telefone: this.quickTelefone().trim(), tipo: TipoPessoa.Cliente }));
         this.clienteCriado.emit(criada);
         let descricaoSet = false;
         this.form.update(f => {

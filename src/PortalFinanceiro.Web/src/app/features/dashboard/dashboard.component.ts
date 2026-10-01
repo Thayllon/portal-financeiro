@@ -20,6 +20,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, Chart, ChartType, registerables, Plugin } from 'chart.js';
 import { PALETA_DONUT, COR_BORDA_DONUT } from '../../shared/constants/chart-palette.constants';
+import { TipoConta } from '../../core/models/enums';
 
 Chart.register(...registerables);
 
@@ -56,7 +57,7 @@ function varianteAvatarBanco(banco: string): number {
 interface LinhaTabelaContas {
   nomeConta: string;
   banco: string;
-  tipo: string;
+  tipo: TipoConta;
   totalRecebido: number;
   totalPago: number;
   saldo: number;
@@ -168,6 +169,7 @@ export class DashboardComponent implements OnInit {
   readonly MESES = MESES;
   readonly iniciaisBanco = iniciaisBanco;
   readonly varianteAvatarBanco = varianteAvatarBanco;
+  readonly TipoConta = TipoConta;
 
   contasTabela = computed(() => montarTabelaContas((this.data()?.resumoPorConta ?? []).map(c => ({
     nomeConta: c.nomeConta,

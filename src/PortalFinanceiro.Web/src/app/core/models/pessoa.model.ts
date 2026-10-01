@@ -1,8 +1,10 @@
+import { TipoPessoa } from './enums';
+
 export interface Pessoa {
   id: string;
   nome: string;
   telefone: string | null;
-  tipo: string;
+  tipo: TipoPessoa;
   ativo: boolean;
   dataCadastro: string;
 }
@@ -10,5 +12,5 @@ export interface Pessoa {
 export interface PessoaRequest {
   nome: string;
   telefone: string;
-  tipo: string;
+  tipo: TipoPessoa;
 }

@@ -6,7 +6,7 @@ import { ParceriaRepository } from '../../../core/repositories/parceria.reposito
 import { Parceria } from '../../../core/models/parceria.model';
 import { Receita } from '../../../core/models/receita.model';
 import { Despesa } from '../../../core/models/despesa.model';
-import { STATUS_REALIZADO } from '../../../core/models/status.model';
+import { StatusLancamento } from '../../../core/models/enums';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ValorMascaradoPipe } from '../../../shared/pipes/valor-mascarado.pipe';
 import { PrivacidadeToggleComponent } from '../../../shared/components/privacidade-toggle.component';
@@ -38,7 +38,7 @@ export class ParceriaDetalheComponent implements OnInit {
   receitasPaginacao = useListPagination(this.receitas, { initialPageSize: 10 });
   despesasPaginacao = useListPagination(this.despesas, { initialPageSize: 10 });
 
-  readonly statusRealizado = STATUS_REALIZADO;
+  readonly statusRealizado = StatusLancamento.Realizado;
 
   entradasRecebidas = computed(() => this.parceria()?.totalRecebido ?? 0);
   entradasPendentes = computed(() => this.parceria()?.faltaReceber ?? 0);

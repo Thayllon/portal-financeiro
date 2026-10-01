@@ -1,5 +1,7 @@
 namespace PortalFinanceiro.Core.Application.Dtos.Response;
 
+using PortalFinanceiro.Core.Domain.Enums;
+
 public class DespesaResponse
 {
     public Guid Id { get; set; }
@@ -12,7 +14,7 @@ public class DespesaResponse
     public string Categoria { get; set; } = string.Empty;
     public Guid? IdSubcategoria { get; set; }
     public string Subcategoria { get; set; } = string.Empty;
-    public int Status { get; set; }
+    public StatusMensal Status { get; set; }
     public DateTime? DataRealizacao { get; set; }
     public Guid? IdRegra { get; set; }
     public bool EhRecorrente { get; set; }

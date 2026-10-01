@@ -13,6 +13,7 @@ import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
 import { CustomSelectComponent, SelectOption } from '../../shared/components/custom-select.component';
 import { CurrencyInputDirective } from '../../shared/directives/currency-input.directive';
+import { TipoPessoa } from '../../core/models/enums';
 import { ValorMascaradoPipe } from '../../shared/pipes/valor-mascarado.pipe';
 import { PrivacidadeToggleComponent } from '../../shared/components/privacidade-toggle.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
@@ -78,8 +79,8 @@ export class ParceriasComponent implements OnInit {
   async carregarPessoas() {
     try {
       const todas = await firstValueFrom(this.pessoaRepo.listar());
-      this.parceiros.set(todas.filter(p => p.tipo === 'Parceiro'));
-      this.clientes.set(todas.filter(p => p.tipo === 'Cliente'));
+      this.parceiros.set(todas.filter(p => p.tipo === TipoPessoa.Parceiro));
+      this.clientes.set(todas.filter(p => p.tipo === TipoPessoa.Cliente));
     } catch {}
   }
 
