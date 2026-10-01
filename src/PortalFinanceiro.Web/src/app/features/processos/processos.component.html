@@ -1,0 +1,122 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <span class="page__badge">
+        <svg lucideIcon="route" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">Processos</h1>
+    </div>
+    @if (podeEscrever()) {
+      <button class="add-btn" (click)="abrirModal()">
+        <svg lucideIcon="plus" [size]="16" />
+        Novo processo
+      </button>
+    }
+  </header>
+
+  <div class="toolbar">
+    <div class="filtros">
+      <app-custom-select placeholder="Todas" [options]="situacaoOptions" (valueChange)="mudarSituacao($event)" />
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 25%"></div>
+          <div class="skeleton-line" style="width: 25%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+          <div class="skeleton-line" style="width: 10%"></div>
+        </div>
+      }
+    </div>
+  } @else if (paginacao.paginatedItems().length === 0) {
+    <div class="table-card">
+      <div class="empty-state">
+        <svg lucideIcon="route" [size]="36" class="empty-icon" />
+        <h3>Nenhum processo cadastrado</h3>
+        @if (podeEscrever()) {
+          <p>Cadastre o primeiro processo e acompanhe as etapas do mundo real.</p>
+        } @else {
+          <p>Você tem acesso somente a leitura nesta tela.</p>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Progresso</th>
+            <th>Status</th>
+            @if (podeEscrever()) {
+              <th class="th-actions">Ações</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of paginacao.paginatedItems(); track p.id) {
+            <tr>
+              <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
+              <td data-label="Progresso">{{ p.etapasConcluidas }}/{{ p.totalEtapas }} • {{ p.percentualConcluido }}%</td>
+              <td data-label="Status"><app-status-badge [type]="p.ativo ? 'ativo' : 'inativo'" [label]="p.ativo ? 'Ativo' : 'Encerrado'" /></td>
+              <td class="cell-actions">
+                <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(p)">
+                  <svg lucideIcon="clipboard-list" [size]="16" />
+                </button>
+                @if (podeEscrever()) {
+                  @if (p.ativo) {
+                    <button class="action-btn" title="Encerrar" (click)="alternarSituacao(p)">
+                      <svg lucideIcon="archive" [size]="16" />
+                    </button>
+                  } @else {
+                    <button class="action-btn" title="Reativar" (click)="alternarSituacao(p)">
+                      <svg lucideIcon="archive-restore" [size]="16" />
+                    </button>
+                  }
+                  <button class="action-btn" title="Editar" (click)="editar(p)">
+                    <svg lucideIcon="pencil" [size]="16" />
+                  </button>
+                  <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(p)">
+                    <svg lucideIcon="trash-2" [size]="16" />
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <app-list-pagination [pagination]="paginacao" />
+    </div>
+  }
+</div>
+
+<app-modal
+  [visible]="modalVisible()"
+  [title]="editando() ? 'Editar processo' : 'Novo processo'"
+  [saving]="salvando()"
+  (visibleChange)="fecharModal()"
+  (save)="salvar()"
+>
+  <div class="field">
+    <label>Nome<span class="required">*</span></label>
+    <input
+      type="text"
+      [(ngModel)]="form.nome"
+      placeholder="Ex: Regularizar casa — Cliente Silva"
+      class="input"
+    />
+  </div>
+  <div class="field">
+    <label>Descrição</label>
+    <input
+      type="text"
+      [(ngModel)]="form.descricao"
+      placeholder="Ex: Casa no centro, matrícula 123"
+      class="input"
+    />
+  </div>
+</app-modal>

@@ -5,7 +5,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { UsuarioRepository } from '../../core/repositories/usuario.repository';
 import { PermissaoRepository } from '../../core/repositories/permissao.repository';
 import { Usuario, UsuarioRequest } from '../../core/models/usuario.model';
-import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_QA } from '../../core/models/permissao.model';
+import { Permissao, ModuloPermissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_OUTROS_INDICADORES, MODULO_QA } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -14,7 +14,7 @@ import { CustomSelectComponent, SelectOption } from '../../shared/components/cus
 import { StatusBadgeComponent } from '../../shared/components/status-badge.component';
 import { ListPaginationComponent } from '../../shared/components/list-pagination.component';
 import { useListPagination } from '../../shared/composables/use-list-pagination.composable';
-import { mensagemErro } from '../../shared/utils/api-error.util';
+import { mensagemErro, codigoErro } from '../../shared/utils/api-error.util';
 import { LucideDynamicIcon } from '@lucide/angular';
 
 @Component({
@@ -38,25 +38,27 @@ export class UsuariosComponent implements OnInit {
   editando = signal<Usuario | null>(null);  salvando = signal(false);
   fluxoAdicional = signal(false);
   fluxoAdicionalDespesa = signal(false);
+  outrosIndicadores = signal(false);
   qaLiberado = signal(false);
   buscaPermissao = signal('');
   dadosAberto = signal(false);
   permissoesAberto = signal(false);
   especiaisAberto = signal(false);
 
-  permLevels = signal<Record<string, 'none' | 'read' | 'write'>>({});
+  permLevels = signal<Record<ModuloPermissao, 'none' | 'read' | 'write'>>({} as Record<ModuloPermissao, 'none' | 'read' | 'write'>);
 
-  modulosPermissao = [
+  modulosPermissao: { id: ModuloPermissao; nome: string; descricao: string; icone: string }[] = [
     { id: 'home', nome: 'Home', descricao: 'Página inicial do portal, sempre disponível.', icone: 'home' },
     { id: 'dashboard', nome: 'Dashboard', descricao: 'Acesso aos painéis e indicadores do sistema.', icone: 'chart-line' },
     { id: 'receitas', nome: 'Receitas', descricao: 'Gestão de receitas e lançamentos financeiros.', icone: 'trending-up' },
     { id: 'despesas', nome: 'Despesas', descricao: 'Gestão de despesas e pagamentos.', icone: 'trending-down' },
+    { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'user-round-group' },
+    { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'briefcase-business' },
+    { id: 'processos', nome: 'Processos', descricao: 'Etapas do mundo real vinculadas a parcerias e contratos.', icone: 'route' },
     { id: 'contas', nome: 'Contas bancárias', descricao: 'Cadastro e gerenciamento de contas.', icone: 'wallet' },
     { id: 'categorias', nome: 'Categorias', descricao: 'Cadastro e organização de categorias.', icone: 'tag' },
     { id: 'clientes', nome: 'Clientes', descricao: 'Cadastro e gerenciamento de clientes.', icone: 'users' },
     { id: 'parceiros', nome: 'Parceiros', descricao: 'Cadastro e gerenciamento de parceiros.', icone: 'handshake' },
-    { id: 'parcerias', nome: 'Parcerias', descricao: 'Gestão de parcerias com parceiros e clientes.', icone: 'handshake' },
-    { id: 'contratos', nome: 'Contratos', descricao: 'Gestão de contratos com clientes e receitas vinculadas.', icone: 'briefcase-business' },
     { id: 'usuarios', nome: 'Usuários', descricao: 'Gerenciamento de usuários e permissões.', icone: 'users' },
   ];
 
@@ -116,7 +118,7 @@ export class UsuariosComponent implements OnInit {
     this.modalVisible.set(false);
     this.drawerVisible.set(true);
     this.buscaPermissao.set('');
-    const niveis: Record<string, 'none' | 'read' | 'write'> = {};
+    const niveis = {} as Record<ModuloPermissao, 'none' | 'read' | 'write'>;
     this.modulosPermissao.forEach(m => {
       niveis[m.id] = item.isAdmin ? 'write' : 'none';
     });
@@ -138,6 +140,8 @@ export class UsuariosComponent implements OnInit {
       this.fluxoAdicional.set(!!fluxoPerm && fluxoPerm.nivel >= NivelPermissao.Leitura);
       const fluxoDespesaPerm = permissoes.find(p => p.modulo === MODULO_FLUXO_ADICIONAL_DESPESA);
       this.fluxoAdicionalDespesa.set(!!fluxoDespesaPerm && fluxoDespesaPerm.nivel >= NivelPermissao.Leitura);
+      const outrosPerm = permissoes.find(p => p.modulo === MODULO_OUTROS_INDICADORES);
+      this.outrosIndicadores.set(!!outrosPerm && outrosPerm.nivel >= NivelPermissao.Leitura);
       const qaPerm = permissoes.find(p => p.modulo === MODULO_QA);
       this.qaLiberado.set(!!qaPerm && qaPerm.nivel >= NivelPermissao.Leitura);
     } catch {}
@@ -167,13 +171,19 @@ export class UsuariosComponent implements OnInit {
     this.fluxoAdicionalDespesa.set(ligado);
   }
 
+  alternarOutrosIndicadores(event: Event) {
+    const ligado = (event.target as HTMLInputElement).checked;
+    this.outrosIndicadores.set(ligado);
+  }
+
   alternarQa(event: Event) {
     const ligado = (event.target as HTMLInputElement).checked;
     this.qaLiberado.set(ligado);
   }
 
-  alternarPermissao(moduloId: string, nivel: 'none' | 'read' | 'write') {
+  alternarPermissao(moduloId: ModuloPermissao, nivel: 'none' | 'read' | 'write') {
     if (moduloId === 'home') return;
+    if (moduloId === 'dashboard' && nivel === 'write') return;
     this.permLevels.update(atual => ({ ...atual, [moduloId]: nivel }));
   }
 
@@ -193,6 +203,33 @@ export class UsuariosComponent implements OnInit {
     try {
       await firstValueFrom(this.repo.excluir(u.id));
       this.notify.success('Usuário excluído');
+      if (doDrawer) this.fecharDrawer();
+      await this.carregar();
+    } catch (e) {
+      if (codigoErro(e) === 'USUARIO_COM_VINCULOS') {
+        await this.excluirComCascata(u, doDrawer, mensagemErro(e, 'Erro ao excluir usuário'));
+        return;
+      }
+      this.notify.error(mensagemErro(e, 'Erro ao excluir usuário'));
+    }
+  }
+
+  private async excluirComCascata(u: Usuario, doDrawer: boolean, motivo: string) {
+    let total: number;
+    try {
+      total = (await firstValueFrom(this.repo.vinculos(u.id))).total ?? 0;
+    } catch { total = 0; }
+    const impacto = total > 0
+      ? ` Todos os ${total} registro(s) serão excluídos junto com o usuário.`
+      : ' Todos os registros vinculados serão excluídos junto com o usuário.';
+    const ok = await this.confirmService.confirmComTexto(
+      'Excluir usuário com vínculos',
+      `${motivo}${impacto} Digite SIM para confirmar.`
+    );
+    if (!ok) return;
+    try {
+      await firstValueFrom(this.repo.excluir(u.id, true, 'sim'));
+      this.notify.success('Usuário e vínculos excluídos');
       if (doDrawer) this.fecharDrawer();
       await this.carregar();
     } catch (e) { this.notify.error(mensagemErro(e, 'Erro ao excluir usuário')); }
@@ -226,7 +263,7 @@ export class UsuariosComponent implements OnInit {
         usuarioId = novo.id;
         this.notify.success('Usuário criado');
       }
-      const permissoes: Permissao[] = Object.entries(this.permLevels()).map(([modulo, nivel]) => ({
+      const permissoes: Permissao[] = (Object.entries(this.permLevels()) as [ModuloPermissao, 'none' | 'read' | 'write'][]).map(([modulo, nivel]) => ({
         modulo,
         nivel: nivel === 'write' ? NivelPermissao.Escrita : nivel === 'read' ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
       }));
@@ -237,6 +274,10 @@ export class UsuariosComponent implements OnInit {
       permissoes.push({
         modulo: MODULO_FLUXO_ADICIONAL_DESPESA,
         nivel: this.fluxoAdicionalDespesa() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
+      });
+      permissoes.push({
+        modulo: MODULO_OUTROS_INDICADORES,
+        nivel: this.outrosIndicadores() ? NivelPermissao.Leitura : NivelPermissao.Nenhum,
       });
       permissoes.push({
         modulo: MODULO_QA,

@@ -22,4 +22,8 @@ internal static class ReceitaSql
     public static string ResumoAnualPorMes => LancamentoSql.ResumoAnualPorMes(T);
     public static string ResumoAnualPorConta => LancamentoSql.ResumoAnualPorConta(T);
     public static string ResumoAnualPorCategoria => LancamentoSql.ResumoAnualPorCategoria(T, "CategoriaReceita");
+    public static string ResumoAnualRealizadoPorMes => LancamentoSql.ResumoAnualRealizadoPorMes(T);
+    public static string ResumoAnualRealizadoPorConta => LancamentoSql.ResumoAnualRealizadoPorConta(T);
+    public static string ResumoMensalRealizado => LancamentoSql.ResumoMensalRealizado(T);
+    public static string ResumoMensalRealizadoPorConta => LancamentoSql.ResumoMensalRealizadoPorConta(T);
 }

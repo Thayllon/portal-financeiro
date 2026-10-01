@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AuthRepository } from '../repositories/auth.repository';
 import { User } from '../models/user.model';
 import { LoginResponse } from '../models/login-response.model';
-import { Permissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_QA } from '../models/permissao.model';
+import { Permissao, ModuloPermissao, NivelPermissao, MODULO_FLUXO_ADICIONAL, MODULO_FLUXO_ADICIONAL_DESPESA, MODULO_OUTROS_INDICADORES, MODULO_QA } from '../models/permissao.model';
 import { tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -36,7 +36,7 @@ export class AuthService {
     );
   }
 
-  temPermissao(modulo: string, nivelMinimo: number = NivelPermissao.Leitura): boolean {
+  temPermissao(modulo: ModuloPermissao, nivelMinimo: number = NivelPermissao.Leitura): boolean {
     const u = this.userSignal();
     if (!u) return false;
     if (u.isAdmin) return true;
@@ -64,6 +64,14 @@ export class AuthService {
     const u = this.userSignal();
     if (!u) return false;
     const p = u.permissoes.find(x => x.modulo === MODULO_QA);
+    return !!p && p.nivel >= NivelPermissao.Leitura;
+  }
+
+  temOutrosIndicadores(): boolean {
+    const u = this.userSignal();
+    if (!u) return false;
+    if (u.isAdmin) return true;
+    const p = u.permissoes.find(x => x.modulo === MODULO_OUTROS_INDICADORES);
     return !!p && p.nivel >= NivelPermissao.Leitura;
   }
 

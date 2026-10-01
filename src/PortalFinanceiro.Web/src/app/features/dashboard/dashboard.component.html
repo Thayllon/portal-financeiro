@@ -55,8 +55,8 @@
                 <span class="card-icon card-icon--green">
                   <svg lucideIcon="trending-up" [size]="22"></svg>
                 </span>
-                <span class="card-label">Receitas</span>
-                <span class="ind-tile__help" data-tip="Quanto faturou/recebeu no mês: valores realizados + previstos das regras vigentes" tabindex="0" role="img" aria-label="Quanto faturou/recebeu no mês: valores realizados + previstos das regras vigentes"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="card-label">Recebido</span>
+                <span class="ind-tile__help" data-tip="Dinheiro que de fato entrou no mês (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato entrou no mês (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value green">{{ kpiMensal()?.receitas | valorMascarado }}</div>
@@ -79,8 +79,8 @@
                 <span class="card-icon card-icon--red">
                   <svg lucideIcon="trending-down" [size]="22"></svg>
                 </span>
-                <span class="card-label">Despesas</span>
-                <span class="ind-tile__help" data-tip="Quanto consumiu no mês: valores realizados + previstos das regras vigentes" tabindex="0" role="img" aria-label="Quanto consumiu no mês: valores realizados + previstos das regras vigentes"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="card-label">Pago</span>
+                <span class="ind-tile__help" data-tip="Dinheiro que de fato saiu no mês (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato saiu no mês (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value red">{{ kpiMensal()?.despesas | valorMascarado }}</div>
@@ -103,8 +103,8 @@
                 <span class="card-icon card-icon--info">
                   <svg lucideIcon="wallet" [size]="22"></svg>
                 </span>
-                <span class="card-label">Lucro líquido</span>
-                <span class="ind-tile__help" data-tip="Resultado econômico do mês: receitas menos despesas" tabindex="0" role="img" aria-label="Resultado econômico do mês: receitas menos despesas"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="card-label">Saldo do mês</span>
+                <span class="ind-tile__help" data-tip="Resultado de caixa do mês: recebido menos pago (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Resultado de caixa do mês: recebido menos pago (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value">{{ kpiMensal()?.saldo | valorMascarado }}</div>
@@ -125,25 +125,16 @@
             <div class="card">
               <div class="card-header">
                 <span class="card-icon card-icon--purple">
-                  <svg lucideIcon="arrow-down-up" [size]="22"></svg>
+                  <svg lucideIcon="calendar-range" [size]="22"></svg>
                 </span>
-                <span class="card-label">Fluxo de caixa</span>
-                <span class="ind-tile__help" data-tip="Movimentação efetiva de dinheiro: recebido menos pago (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Movimentação efetiva de dinheiro: recebido menos pago (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="card-label">Acumulado no ano</span>
+                <span class="ind-tile__help" data-tip="Saldo realizado de janeiro até o mês selecionado: recebido menos pago (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Saldo realizado de janeiro até o mês selecionado: recebido menos pago (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
-                <div class="card-value" [class.green]="(kpiMensal()?.fluxo ?? 0) >= 0" [class.red]="(kpiMensal()?.fluxo ?? 0) < 0">{{ kpiMensal()?.fluxo | valorMascarado }}</div>
-                @if (kpiMensal()?.varFluxo !== null && kpiMensal()?.varFluxo !== undefined) {
-                  <span class="pill" [class.pill--green]="(kpiMensal()!.varFluxo!) >= 0" [class.pill--red]="(kpiMensal()!.varFluxo!) < 0">
-                    @if ((kpiMensal()!.varFluxo!) >= 0) { ↑ } @else { ↓ }
-                    {{ kpiMensal()!.varFluxo }}%
-                  </span>
-                } @else {
-                  <span class="pill pill--muted">—</span>
-                }
+                <div class="card-value" [class.green]="(ytdAcumulado()?.saldo ?? 0) >= 0" [class.red]="(ytdAcumulado()?.saldo ?? 0) < 0">{{ ytdAcumulado()?.saldo | valorMascarado }}</div>
               </div>
               <div class="kpi-foot">
-                <span class="card-sub">em relação a {{ rotuloMesAnterior() }}</span>
-                <span class="spark"><canvas baseChart [data]="sparkFluxoExibicao()" [options]="sparkOptions" type="line"></canvas></span>
+                <span class="card-sub">{{ rotuloYtd() }} · recebido {{ ytdAcumulado()?.recebido | valorMascarado }} · pago {{ ytdAcumulado()?.pago | valorMascarado }}</span>
               </div>
             </div>
           </div>
@@ -155,7 +146,7 @@
                   <svg lucideIcon="bar-chart-3" [size]="22"></svg>
                 </span>
                 <div class="chart-card__titles">
-                  <h2 class="chart-card__title">Receitas x Despesas</h2>
+                  <h2 class="chart-card__title">Recebido x Pago</h2>
                   @if (modoPorConta()) {
                     <p class="chart-card__subtitle">Visão do mês de {{ MESES[mes() - 1] }} de {{ ano() }}</p>
                   } @else {
@@ -184,7 +175,7 @@
                         <svg lucideIcon="bar-chart-3" [size]="22"></svg>
                       </span>
                       <div class="chart-card__titles">
-                        <h2 class="chart-card__title">Receitas x Despesas</h2>
+                        <h2 class="chart-card__title">Recebido x Pago</h2>
                         @if (modoPorConta()) {
                           <p class="chart-card__subtitle">Visão do mês de {{ MESES[mes() - 1] }} de {{ ano() }}</p>
                         } @else {
@@ -192,9 +183,9 @@
                         }
                       </div>
                       <div class="view-toggle view-toggle--sm">
-                        <button class="toggle-btn" [class.active]="filtroSerie() === 'receitas'" (click)="trocarFiltroSerie('receitas', $event)">Receitas</button>
+                        <button class="toggle-btn" [class.active]="filtroSerie() === 'receitas'" (click)="trocarFiltroSerie('receitas', $event)">Recebido</button>
                         <button class="toggle-btn" [class.active]="filtroSerie() === 'ambos'" (click)="trocarFiltroSerie('ambos', $event)">Ambos</button>
-                        <button class="toggle-btn" [class.active]="filtroSerie() === 'despesas'" (click)="trocarFiltroSerie('despesas', $event)">Despesas</button>
+                        <button class="toggle-btn" [class.active]="filtroSerie() === 'despesas'" (click)="trocarFiltroSerie('despesas', $event)">Pago</button>
                       </div>
                     </div>
                     <div class="chart-container">
@@ -229,6 +220,7 @@
                       </button>
                     </div>
                     <div class="indicadores-grid">
+              @if (verContratos()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--primary">
@@ -246,6 +238,25 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="banknote-arrow-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Recebido</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato entrou no mês (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato entrou no mês (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value green">{{ data()?.totalRecebido | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (taxaRecebidaMensal() !== null && taxaRecebidaMensal() !== undefined) {
+                    {{ taxaRecebidaMensal()!.toLocaleString('pt-BR') }}% das receitas
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              }
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--green">
@@ -280,6 +291,7 @@
                   }
                 </div>
               </div>
+              @if (verParcerias()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--warning">
@@ -307,13 +319,32 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--red">
+                    <svg lucideIcon="banknote-arrow-down" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Pago</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato saiu no mês (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato saiu no mês (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value red">{{ data()?.totalPago | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (taxaPagaMensal() !== null && taxaPagaMensal() !== undefined) {
+                    {{ taxaPagaMensal()!.toLocaleString('pt-BR') }}% das despesas
+                  } @else {
+                    —
+                  }
+                </div>
+              </div>
+              }
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--green">
                     <svg lucideIcon="chart-line" [size]="22"></svg>
                   </span>
                   <span class="card-label">Margem líquida</span>
-                  <span class="ind-tile__help" data-tip="Lucro líquido dividido pela receita" tabindex="0" role="img" aria-label="Lucro líquido dividido pela receita"><svg lucideIcon="info" [size]="14" /></span>
+                  <span class="ind-tile__help" data-tip="Saldo de caixa do mês dividido pelo recebido" tabindex="0" role="img" aria-label="Saldo de caixa do mês dividido pelo recebido"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="card-value">
                   @if (kpiMensal()?.margem !== null && kpiMensal()?.margem !== undefined) {
@@ -326,24 +357,16 @@
               </div>
               <div class="card ind-tile">
                 <div class="card-header">
-                  <span class="card-icon card-icon--primary">
-                    <svg lucideIcon="coins" [size]="22"></svg>
+                  <span class="card-icon card-icon--info">
+                    <svg lucideIcon="calendar-clock" [size]="22"></svg>
                   </span>
-                  <span class="card-label">Ponto de equilíbrio</span>
-                  <span class="ind-tile__help" data-tip="Receita necessária para cobrir as despesas do mês" tabindex="0" role="img" aria-label="Receita necessária para cobrir as despesas do mês"><svg lucideIcon="info" [size]="14" /></span>
+                  <span class="card-label">Previsão do mês</span>
+                  <span class="ind-tile__help" data-tip="Valores previstos pelas regras vigentes ainda não lançados no mês" tabindex="0" role="img" aria-label="Valores previstos pelas regras vigentes ainda não lançados no mês"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="kpi-main">
-                  <div class="card-value">{{ kpiMensal()?.pontoEquilibrio | valorMascarado }}</div>
-                  @if (kpiMensal()?.distanciaPonto !== null && kpiMensal()?.distanciaPonto !== undefined) {
-                    <span class="pill" [class.pill--green]="(kpiMensal()!.distanciaPonto!) >= 0" [class.pill--red]="(kpiMensal()!.distanciaPonto!) < 0">
-                      @if ((kpiMensal()!.distanciaPonto!) >= 0) { ↑ } @else { ↓ }
-                      {{ kpiMensal()!.distanciaPonto }}%
-                    </span>
-                  } @else {
-                    <span class="pill pill--muted">—</span>
-                  }
+                  <div class="card-value" [class.green]="(previsaoMensal()?.saldo ?? 0) >= 0" [class.red]="(previsaoMensal()?.saldo ?? 0) < 0">{{ previsaoMensal()?.saldo | valorMascarado }}</div>
                 </div>
-                <div class="card-sub">Receita atual: {{ kpiMensal()?.receitas | valorMascarado }}</div>
+                <div class="card-sub">Receitas previstas {{ previsaoMensal()?.receitas | valorMascarado }} · Despesas previstas {{ previsaoMensal()?.despesas | valorMascarado }}</div>
               </div>
             </div>
                   </div>
@@ -445,7 +468,7 @@
             @if (contasTabela().linhas.length) {
             <div class="table-card">
               <table class="table">
-                <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Lucro líquido</th><th>% do total (receitas)</th></tr></thead>
+                <thead><tr><th>Conta</th><th>Tipo</th><th>Recebido</th><th>Pago</th><th>Saldo de caixa</th><th>% do total (recebido)</th></tr></thead>
                 <tbody>
                   @for (c of contasTabela().linhas; track c.nomeConta) {
                     <tr>
@@ -456,10 +479,10 @@
                         </span>
                       </td>
                       <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                      <td class="cell-value" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
-                      <td class="cell-value" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
-                      <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Lucro líquido">{{ c.saldo | valorMascarado }}</td>
-                      <td data-label="% do total (receitas)">
+                      <td class="cell-value" data-label="Recebido">{{ c.totalRecebido | valorMascarado }}</td>
+                      <td class="cell-value" data-label="Pago">{{ c.totalPago | valorMascarado }}</td>
+                      <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo de caixa">{{ c.saldo | valorMascarado }}</td>
+                      <td data-label="% do total (recebido)">
                         <span class="pct-cell">
                           <span class="pct-bar"><span class="pct-bar__fill" [style.width.%]="c.percentual"></span></span>
                           <span class="pct-value">{{ c.percentual.toLocaleString('pt-BR') }}%</span>
@@ -470,10 +493,10 @@
                   <tr class="row-total">
                     <td class="cell-name" data-label="Conta">Total</td>
                     <td data-label="Tipo">—</td>
-                    <td class="cell-value" data-label="Receitas">{{ contasTabela().totalReceitas | valorMascarado }}</td>
-                    <td class="cell-value" data-label="Despesas">{{ contasTabela().totalDespesas | valorMascarado }}</td>
-                    <td class="cell-value" [class.green]="contasTabela().totalLucro >= 0" [class.red]="contasTabela().totalLucro < 0" data-label="Lucro líquido">{{ contasTabela().totalLucro | valorMascarado }}</td>
-                    <td data-label="% do total (receitas)">
+                    <td class="cell-value" data-label="Recebido">{{ contasTabela().totalRecebido | valorMascarado }}</td>
+                    <td class="cell-value" data-label="Pago">{{ contasTabela().totalPago | valorMascarado }}</td>
+                    <td class="cell-value" [class.green]="contasTabela().totalLucro >= 0" [class.red]="contasTabela().totalLucro < 0" data-label="Saldo de caixa">{{ contasTabela().totalLucro | valorMascarado }}</td>
+                    <td data-label="% do total (recebido)">
                       <span class="pct-cell">
                         <span class="pct-bar"><span class="pct-bar__fill pct-bar__fill--total" [style.width.%]="100"></span></span>
                         <span class="pct-value">100%</span>
@@ -500,11 +523,11 @@
                 <span class="card-icon card-icon--green">
                   <svg lucideIcon="trending-up" [size]="22"></svg>
                 </span>
-                <span class="card-label">Receitas</span>
-                <span class="ind-tile__help" data-tip="Quanto faturou/recebeu no ano" tabindex="0" role="img" aria-label="Quanto faturou/recebeu no ano"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="card-label">Recebido</span>
+                <span class="ind-tile__help" data-tip="Dinheiro que de fato entrou no ano (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato entrou no ano (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
-                <div class="card-value green">{{ dataAnual()?.totalReceitas | valorMascarado }}</div>
+                <div class="card-value green">{{ dataAnual()?.totalRecebido | valorMascarado }}</div>
                 @if (dataAnual()?.variacaoReceitasPercentual !== null && dataAnual()?.variacaoReceitasPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoReceitasPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoReceitasPercentual!) < 0">
                     @if ((dataAnual()!.variacaoReceitasPercentual!) >= 0) { ↑ } @else { ↓ }
@@ -514,11 +537,6 @@
                   <span class="pill pill--muted">—</span>
                 }
               </div>
-              @if (dataAnual()?.variacaoReceitasPercentual === null || dataAnual()?.variacaoReceitasPercentual === undefined) {
-                <div class="card-sub">
-                  <span class="pill pill--green">{{ dataAnual()?.totalRecebido | valorMascarado }} recebido</span>
-                </div>
-              }
               <div class="kpi-foot">
                 <span class="card-sub">em relação a {{ ano() - 1 }}</span>
                 <span class="spark"><canvas baseChart [data]="sparkReceitasAnualExibicao()" [options]="sparkOptions" type="line"></canvas></span>
@@ -529,11 +547,11 @@
                 <span class="card-icon card-icon--red">
                   <svg lucideIcon="trending-down" [size]="22"></svg>
                 </span>
-                <span class="card-label">Despesas</span>
-                <span class="ind-tile__help" data-tip="Quanto consumiu no ano" tabindex="0" role="img" aria-label="Quanto consumiu no ano"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="card-label">Pago</span>
+                <span class="ind-tile__help" data-tip="Dinheiro que de fato saiu no ano (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato saiu no ano (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
-                <div class="card-value red">{{ dataAnual()?.totalDespesas | valorMascarado }}</div>
+                <div class="card-value red">{{ dataAnual()?.totalPago | valorMascarado }}</div>
                 @if (dataAnual()?.variacaoDespesasPercentual !== null && dataAnual()?.variacaoDespesasPercentual !== undefined) {
                   <span class="pill pill--red">
                     @if ((dataAnual()!.variacaoDespesasPercentual!) >= 0) { ↑ } @else { ↓ }
@@ -543,11 +561,6 @@
                   <span class="pill pill--muted">—</span>
                 }
               </div>
-              @if (dataAnual()?.variacaoDespesasPercentual === null || dataAnual()?.variacaoDespesasPercentual === undefined) {
-                <div class="card-sub">
-                  <span class="pill pill--green">{{ dataAnual()?.totalPago | valorMascarado }} pago</span>
-                </div>
-              }
               <div class="kpi-foot">
                 <span class="card-sub">em relação a {{ ano() - 1 }}</span>
                 <span class="spark"><canvas baseChart [data]="sparkDespesasAnualExibicao()" [options]="sparkOptions" type="line"></canvas></span>
@@ -558,12 +571,12 @@
                 <span class="card-icon card-icon--primary">
                   <svg lucideIcon="wallet" [size]="22"></svg>
                 </span>
-                <span class="card-label">Saldo do ano</span>
-                <span class="ind-tile__help" data-tip="Resultado econômico do ano: receitas menos despesas" tabindex="0" role="img" aria-label="Resultado econômico do ano: receitas menos despesas"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="card-label">Saldo do ano (caixa)</span>
+                <span class="ind-tile__help" data-tip="Caixa do ano: recebido menos pago (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Caixa do ano: recebido menos pago (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
-                <div class="card-value" [class.green]="(dataAnual()?.saldo ?? 0) >= 0" [class.red]="(dataAnual()?.saldo ?? 0) < 0">
-                  {{ dataAnual()?.saldo | valorMascarado }}
+                <div class="card-value" [class.green]="(dataAnual()?.saldoRealizado ?? 0) >= 0" [class.red]="(dataAnual()?.saldoRealizado ?? 0) < 0">
+                  {{ dataAnual()?.saldoRealizado | valorMascarado }}
                 </div>
                 @if (dataAnual()?.variacaoSaldoPercentual !== null && dataAnual()?.variacaoSaldoPercentual !== undefined) {
                   <span class="pill" [class.pill--green]="(dataAnual()!.variacaoSaldoPercentual!) >= 0" [class.pill--red]="(dataAnual()!.variacaoSaldoPercentual!) < 0">
@@ -585,7 +598,7 @@
                   <svg lucideIcon="chart-line" [size]="22"></svg>
                 </span>
                 <span class="card-label">Média mensal (saldo)</span>
-                <span class="ind-tile__help" data-tip="Média do saldo nos meses considerados do ano" tabindex="0" role="img" aria-label="Média do saldo nos meses considerados do ano"><svg lucideIcon="info" [size]="14" /></span>
+                <span class="ind-tile__help" data-tip="Média do saldo de caixa nos meses com movimento no ano" tabindex="0" role="img" aria-label="Média do saldo de caixa nos meses com movimento no ano"><svg lucideIcon="info" [size]="14" /></span>
               </div>
               <div class="kpi-main">
                 <div class="card-value">{{ dataAnual()?.mediaMensalSaldo | valorMascarado }}</div>
@@ -597,7 +610,7 @@
           </div>
 
           <div class="charts-row charts-row--unico">
-            <app-collapsible-section title="Receitas, Despesas e Saldo por mês" icon="bar-chart-3" iconVariant="primary">
+            <app-collapsible-section title="Recebido, Pago e Saldo acumulado por mês" icon="bar-chart-3" iconVariant="primary">
               <div class="chart-container">
                 <canvas baseChart
                   [data]="barChartAnualData"
@@ -655,6 +668,7 @@
                   }
                 </div>
               </div>
+              @if (verContratos()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--primary">
@@ -672,6 +686,26 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--green">
+                    <svg lucideIcon="banknote-arrow-up" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Recebido no ano</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato entrou no ano (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato entrou no ano (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value green">{{ dataAnual()?.totalRecebido | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (kpiAnualExtra()?.taxaRecebida !== null && kpiAnualExtra()?.taxaRecebida !== undefined) {
+                    {{ kpiAnualExtra()!.taxaRecebida!.toLocaleString('pt-BR') }}% das receitas
+                  } @else {
+                    Sem base no ano
+                  }
+                </div>
+              </div>
+              }
+              @if (verParcerias()) {
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--warning">
@@ -689,13 +723,32 @@
                   }
                 </div>
               </div>
+              } @else {
+              <div class="card ind-tile">
+                <div class="card-header">
+                  <span class="card-icon card-icon--red">
+                    <svg lucideIcon="banknote-arrow-down" [size]="22"></svg>
+                  </span>
+                  <span class="card-label">Pago no ano</span>
+                  <span class="ind-tile__help" data-tip="Dinheiro que de fato saiu no ano (só realizado, sem previsão)" tabindex="0" role="img" aria-label="Dinheiro que de fato saiu no ano (só realizado, sem previsão)"><svg lucideIcon="info" [size]="14" /></span>
+                </div>
+                <div class="card-value red">{{ dataAnual()?.totalPago | valorMascarado }}</div>
+                <div class="card-sub">
+                  @if (kpiAnualExtra()?.taxaPaga !== null && kpiAnualExtra()?.taxaPaga !== undefined) {
+                    {{ kpiAnualExtra()!.taxaPaga!.toLocaleString('pt-BR') }}% das despesas
+                  } @else {
+                    Sem base no ano
+                  }
+                </div>
+              </div>
+              }
               <div class="card ind-tile">
                 <div class="card-header">
                   <span class="card-icon card-icon--green">
                     <svg lucideIcon="chart-line" [size]="22"></svg>
                   </span>
                   <span class="card-label">Margem líquida anual</span>
-                  <span class="ind-tile__help" data-tip="Lucro líquido do ano dividido pela receita do ano" tabindex="0" role="img" aria-label="Lucro líquido do ano dividido pela receita do ano"><svg lucideIcon="info" [size]="14" /></span>
+                  <span class="ind-tile__help" data-tip="Saldo de caixa do ano dividido pelo recebido no ano" tabindex="0" role="img" aria-label="Saldo de caixa do ano dividido pelo recebido no ano"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="card-value">
                   @if (kpiAnualExtra()?.margem !== null && kpiAnualExtra()?.margem !== undefined) {
@@ -712,7 +765,7 @@
                     <svg lucideIcon="coins" [size]="22"></svg>
                   </span>
                   <span class="card-label">Ponto de equilíbrio</span>
-                  <span class="ind-tile__help" data-tip="Receita necessária no ano para cobrir as despesas do ano" tabindex="0" role="img" aria-label="Receita necessária no ano para cobrir as despesas do ano"><svg lucideIcon="info" [size]="14" /></span>
+                  <span class="ind-tile__help" data-tip="Total pago no ano; distância % = (recebido − pago) ÷ pago" tabindex="0" role="img" aria-label="Total pago no ano; distância % = (recebido − pago) ÷ pago"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="kpi-main">
                   <div class="card-value">{{ kpiAnualExtra()?.pontoEquilibrio | valorMascarado }}</div>
@@ -725,7 +778,7 @@
                     <span class="pill pill--muted">—</span>
                   }
                 </div>
-                <div class="card-sub">Receita atual: {{ dataAnual()?.totalReceitas | valorMascarado }}</div>
+                <div class="card-sub">Recebido no ano: {{ dataAnual()?.totalRecebido | valorMascarado }}</div>
               </div>
               <div class="card ind-tile">
                 <div class="card-header">
@@ -733,7 +786,7 @@
                     <svg lucideIcon="trending-up" [size]="22"></svg>
                   </span>
                   <span class="card-label">Melhor / pior mês</span>
-                  <span class="ind-tile__help" data-tip="Meses com maior e menor saldo (receitas menos despesas) no ano" tabindex="0" role="img" aria-label="Meses com maior e menor saldo (receitas menos despesas) no ano"><svg lucideIcon="info" [size]="14" /></span>
+                  <span class="ind-tile__help" data-tip="Meses com maior e menor saldo de caixa (recebido menos pago) no ano" tabindex="0" role="img" aria-label="Meses com maior e menor saldo de caixa (recebido menos pago) no ano"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 @if (melhorPiorMesAnual()) {
                   <div class="card-value">{{ MESES[melhorPiorMesAnual()!.melhor.mes - 1] }}</div>
@@ -772,7 +825,7 @@
                     <svg lucideIcon="wallet" [size]="22"></svg>
                   </span>
                   <span class="card-label">Médias mensais</span>
-                  <span class="ind-tile__help" data-tip="Média por mês considerado no ano: receitas e despesas" tabindex="0" role="img" aria-label="Média por mês considerado no ano: receitas e despesas"><svg lucideIcon="info" [size]="14" /></span>
+                  <span class="ind-tile__help" data-tip="Média do recebido e do pago nos meses com movimento no ano" tabindex="0" role="img" aria-label="Média do recebido e do pago nos meses com movimento no ano"><svg lucideIcon="info" [size]="14" /></span>
                 </div>
                 <div class="card-value">{{ kpiAnualExtra()?.mediaReceitas | valorMascarado }}</div>
                 <div class="card-sub">Despesas: {{ kpiAnualExtra()?.mediaDespesas | valorMascarado }} · {{ dataAnual()?.mesesConsiderados }} meses</div>
@@ -905,7 +958,7 @@
               @if (contasTabelaAnual().linhas.length) {
               <div class="table-card">
                 <table class="table">
-                  <thead><tr><th>Conta</th><th>Tipo</th><th>Receitas</th><th>Despesas</th><th>Lucro líquido</th><th>% do total (receitas)</th></tr></thead>
+                  <thead><tr><th>Conta</th><th>Tipo</th><th>Recebido</th><th>Pago</th><th>Saldo de caixa</th><th>% do total (recebido)</th></tr></thead>
                   <tbody>
                     @for (c of contasTabelaAnual().linhas; track c.nomeConta) {
                       <tr>
@@ -916,10 +969,10 @@
                           </span>
                         </td>
                         <td data-label="Tipo"><app-status-badge [type]="c.tipo === 'Pf' ? 'ativo' : 'inativo'" [label]="c.tipo === 'Pf' ? 'PF' : 'PJ'" /></td>
-                        <td class="cell-value" data-label="Receitas">{{ c.totalReceitas | valorMascarado }}</td>
-                        <td class="cell-value" data-label="Despesas">{{ c.totalDespesas | valorMascarado }}</td>
-                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Lucro líquido">{{ c.saldo | valorMascarado }}</td>
-                        <td data-label="% do total (receitas)">
+                        <td class="cell-value" data-label="Recebido">{{ c.totalRecebido | valorMascarado }}</td>
+                        <td class="cell-value" data-label="Pago">{{ c.totalPago | valorMascarado }}</td>
+                        <td class="cell-value" [class.green]="c.saldo >= 0" [class.red]="c.saldo < 0" data-label="Saldo de caixa">{{ c.saldo | valorMascarado }}</td>
+                        <td data-label="% do total (recebido)">
                           <span class="pct-cell">
                             <span class="pct-bar"><span class="pct-bar__fill" [style.width.%]="c.percentual"></span></span>
                             <span class="pct-value">{{ c.percentual.toLocaleString('pt-BR') }}%</span>
@@ -930,10 +983,10 @@
                     <tr class="row-total">
                       <td class="cell-name" data-label="Conta">Total</td>
                       <td data-label="Tipo">—</td>
-                      <td class="cell-value" data-label="Receitas">{{ contasTabelaAnual().totalReceitas | valorMascarado }}</td>
-                      <td class="cell-value" data-label="Despesas">{{ contasTabelaAnual().totalDespesas | valorMascarado }}</td>
-                      <td class="cell-value" [class.green]="contasTabelaAnual().totalLucro >= 0" [class.red]="contasTabelaAnual().totalLucro < 0" data-label="Lucro líquido">{{ contasTabelaAnual().totalLucro | valorMascarado }}</td>
-                      <td data-label="% do total (receitas)">
+                      <td class="cell-value" data-label="Recebido">{{ contasTabelaAnual().totalRecebido | valorMascarado }}</td>
+                      <td class="cell-value" data-label="Pago">{{ contasTabelaAnual().totalPago | valorMascarado }}</td>
+                      <td class="cell-value" [class.green]="contasTabelaAnual().totalLucro >= 0" [class.red]="contasTabelaAnual().totalLucro < 0" data-label="Saldo de caixa">{{ contasTabelaAnual().totalLucro | valorMascarado }}</td>
+                      <td data-label="% do total (recebido)">
                         <span class="pct-cell">
                           <span class="pct-bar"><span class="pct-bar__fill pct-bar__fill--total" [style.width.%]="100"></span></span>
                           <span class="pct-value">100%</span>

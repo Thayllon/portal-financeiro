@@ -7,21 +7,18 @@
       <h1 class="page__title">Parcerias</h1>
       <app-privacidade-toggle />
     </div>
-    <button class="add-btn" (click)="abrirModal()">
-      <svg lucideIcon="plus" [size]="16" />
-      Nova parceria
-    </button>
+    @if (podeEscrever()) {
+      <button class="add-btn" (click)="abrirModal()">
+        <svg lucideIcon="plus" [size]="16" />
+        Nova parceria
+      </button>
+    }
   </header>
 
   <div class="toolbar">
-    <app-month-nav [mes]="mes()" [ano]="ano()" (prev)="navegarMes(-1)" (next)="navegarMes(1)" />
     <div class="filtros">
       <app-custom-select placeholder="Todas" [options]="situacaoOptions" (valueChange)="mudarSituacao($event)" />
     </div>
-  </div>
-
-  <div class="totals">
-    <span>Pago no mês: <strong style="color: var(--color-success)">{{ (resumoMensal()?.totalPago ?? 0) | valorMascarado }}</strong></span>
   </div>
 
   @if (loading()) {
@@ -41,7 +38,11 @@
       <div class="empty-state">
         <svg lucideIcon="handshake" [size]="36" class="empty-icon" />
         <h3>Nenhuma parceria cadastrada</h3>
-        <p>Cadastre sua primeira parceria vinculando parceiro, cliente e valor.</p>
+        @if (podeEscrever()) {
+          <p>Cadastre sua primeira parceria vinculando parceiro, cliente e valor.</p>
+        } @else {
+          <p>Você tem acesso somente a leitura nesta tela.</p>
+        }
       </div>
     </div>
   } @else {
@@ -56,7 +57,9 @@
             <th>Falta receber</th>
             <th>Falta pagar</th>
             <th>Status</th>
-            <th class="th-actions">Ações</th>
+            @if (podeEscrever()) {
+              <th class="th-actions">Ações</th>
+            }
           </tr>
         </thead>
         <tbody>
@@ -73,21 +76,23 @@
                 <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(p)">
                   <svg lucideIcon="clipboard-list" [size]="16" />
                 </button>
-                @if (p.ativo) {
-                  <button class="action-btn" title="Encerrar" (click)="alternarSituacao(p)">
-                    <svg lucideIcon="archive" [size]="16" />
+                @if (podeEscrever()) {
+                  @if (p.ativo) {
+                    <button class="action-btn" title="Encerrar" (click)="alternarSituacao(p)">
+                      <svg lucideIcon="archive" [size]="16" />
+                    </button>
+                  } @else {
+                    <button class="action-btn" title="Reativar" (click)="alternarSituacao(p)">
+                      <svg lucideIcon="archive-restore" [size]="16" />
+                    </button>
+                  }
+                  <button class="action-btn" title="Editar" (click)="editar(p)">
+                    <svg lucideIcon="pencil" [size]="16" />
                   </button>
-                } @else {
-                  <button class="action-btn" title="Reativar" (click)="alternarSituacao(p)">
-                    <svg lucideIcon="archive-restore" [size]="16" />
+                  <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(p)">
+                    <svg lucideIcon="trash-2" [size]="16" />
                   </button>
                 }
-                <button class="action-btn" title="Editar" (click)="editar(p)">
-                  <svg lucideIcon="pencil" [size]="16" />
-                </button>
-                <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(p)">
-                  <svg lucideIcon="trash-2" [size]="16" />
-                </button>
               </td>
             </tr>
           }

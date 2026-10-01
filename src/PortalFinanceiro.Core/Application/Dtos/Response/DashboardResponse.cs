@@ -56,6 +56,7 @@ public class MensalResumoAnual
     public decimal Saldo { get; set; }
     public decimal SaldoRealizado { get; set; }
     public decimal SaldoAcumulado { get; set; }
+    public decimal SaldoRealizadoAcumulado { get; set; }
 }
 
 public class ResumoPorContaAnual
@@ -81,6 +82,8 @@ public class ResumoPorConta
     public decimal Saldo { get; set; }
     public decimal TotalReceitasPrevisto { get; set; }
     public decimal TotalDespesasPrevisto { get; set; }
+    public decimal TotalRecebido { get; set; }
+    public decimal TotalPago { get; set; }
 }
 
 public class PrevisaoMensal

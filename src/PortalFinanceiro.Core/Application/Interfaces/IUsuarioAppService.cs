@@ -11,5 +11,6 @@ public interface IUsuarioAppService
     Task<Result<UsuarioResponse>> AtualizarAsync(Guid id, UsuarioRequest request);
     Task<Result<Unit>> AlterarAtivoAsync(Guid id, bool ativo);
     Task<Result<Unit>> ResetarSenhaAsync(Guid id);
-    Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuarioLogado);
+    Task<Result<Unit>> ExcluirAsync(Guid id, Guid idUsuarioLogado, bool cascata = false, string? confirmacao = null);
+    Task<Result<UsuarioVinculosResponse>> ContarVinculosAsync(Guid id);
 }

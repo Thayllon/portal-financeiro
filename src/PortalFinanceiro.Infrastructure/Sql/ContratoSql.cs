@@ -17,5 +17,6 @@ internal static class ContratoSql
         FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario AND (@Ativo IS NULL OR {T}.Ativo = @Ativo) AND (@EhRecorrente IS NULL OR {T}.EhRecorrente = @EhRecorrente) ORDER BY {T}.DataCadastro DESC";
     public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Nome, @IdCliente, @Valor, @Ativo, @EhRecorrente, @IdRegra, @DataCadastro, @DataAlteracao)";
     public static string Atualizar => $"UPDATE {T} SET Nome = @Nome, IdCliente = @IdCliente, Valor = @Valor, Ativo = @Ativo, EhRecorrente = @EhRecorrente, IdRegra = @IdRegra, DataAlteracao = @DataAlteracao WHERE Id = @Id";
+    public static string Excluir => $"DELETE FROM {T} WHERE Id = @Id";
     public static string SomarReceitas => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdContrato = @IdContrato AND Ativo = {SqlDialect.Current.BooleanTrue} AND Status = @Status";
 }

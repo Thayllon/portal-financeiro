@@ -143,6 +143,30 @@
   color: var(--text-muted);
 }
 
+.collapse-section__add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+
+  &:hover {
+    color: var(--color-primary);
+    background: var(--color-primary-muted);
+  }
+}
+
+.header-filter {
+  width: 11rem;
+}
+
 .grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;

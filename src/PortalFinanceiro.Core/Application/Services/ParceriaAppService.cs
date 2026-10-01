@@ -13,11 +13,13 @@ public class ParceriaAppService : IParceriaAppService
 {
     private readonly IParceriaRepository _repository;
     private readonly IPessoaRepository _pessoaRepository;
+    private readonly IProcessoRepository? _processoRepository;
 
-    public ParceriaAppService(IParceriaRepository repository, IPessoaRepository pessoaRepository)
+    public ParceriaAppService(IParceriaRepository repository, IPessoaRepository pessoaRepository, IProcessoRepository? processoRepository = null)
     {
         _repository = repository;
         _pessoaRepository = pessoaRepository;
+        _processoRepository = processoRepository;
     }
 
     public async Task<Result<IEnumerable<ParceriaResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null)
@@ -124,15 +126,16 @@ public class ParceriaAppService : IParceriaAppService
         if (totalReceitas > 0 || totalDespesas > 0)
             return Erro.Negocio("PARCERIA_COM_VINCULOS", "Não é possível excluir parceria com receitas ou despesas vinculadas.");
 
-        parceria.Desativar();
-        await _repository.AtualizarAsync(parceria);
-        return Resultado.Sucesso();
-    }
+        if (_processoRepository is not null)
+        {
+            if (await _processoRepository.ContarAtivosPorParceriaAsync(id) > 0)
+                return Erro.Negocio("PARCERIA_COM_PROCESSOS", "Não é possível excluir parceria com processos ativos vinculados.");
+            if (await _processoRepository.ContarPorParceriaAsync(id) > 0)
+                return Erro.Negocio("PARCERIA_COM_PROCESSOS", "Não é possível excluir parceria com processos vinculados. Exclua os processos primeiro.");
+        }
 
-    public async Task<Result<ResumoParceriaAnual>> ResumoMensalAsync(Guid idUsuario, int ano, int mes)
-    {
-        var resumo = await _repository.ResumoMensalAsync(idUsuario, ano, mes);
-        return resumo;
+        await _repository.ExcluirAsync(id);
+        return Resultado.Sucesso();
     }
 
     private async Task<Result<Unit>> ValidarPessoasAsync(Guid idUsuario, Guid idParceiro, Guid idCliente)

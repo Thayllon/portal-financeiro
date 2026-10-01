@@ -15,6 +15,7 @@ public class ContratoAppService : IContratoAppService
 {
     private readonly IContratoRepository _repository;
     private readonly IPessoaRepository _pessoaRepository;
+    private readonly IProcessoRepository? _processoRepository;
     private readonly IRegraReceitaRepository? _regraRepository;
     private readonly IReceitaRepository? _receitaRepository;
     private readonly ICategoriaReceitaRepository? _categoriaRepository;
@@ -26,7 +27,8 @@ public class ContratoAppService : IContratoAppService
         IRegraReceitaRepository? regraRepository = null,
         IReceitaRepository? receitaRepository = null,
         ICategoriaReceitaRepository? categoriaRepository = null,
-        IContaBancariaRepository? contaRepository = null)
+        IContaBancariaRepository? contaRepository = null,
+        IProcessoRepository? processoRepository = null)
     {
         _repository = repository;
         _pessoaRepository = pessoaRepository;
@@ -34,6 +36,7 @@ public class ContratoAppService : IContratoAppService
         _receitaRepository = receitaRepository;
         _categoriaRepository = categoriaRepository;
         _contaRepository = contaRepository;
+        _processoRepository = processoRepository;
     }
 
     public async Task<Result<IEnumerable<ContratoResponse>>> ListarAsync(Guid idUsuario, bool? ativo = null, bool? ehRecorrente = null)
@@ -187,12 +190,40 @@ public class ContratoAppService : IContratoAppService
         if (contrato.IdUsuario != idUsuario)
             return Erro.Permissao("CONTRATO_ACESSO_NEGADO", "Contrato de outro usuário.");
 
-        var totalReceitas = await _repository.SomarReceitasPorStatusAsync(id, 1) + await _repository.SomarReceitasPorStatusAsync(id, 2);
+        var totalReceitas = await _repository.SomarReceitasPorStatusAsync(id, (int)StatusMensal.Pendente) + await _repository.SomarReceitasPorStatusAsync(id, (int)StatusMensal.Realizado);
         if (totalReceitas > 0)
             return Erro.Negocio("CONTRATO_COM_VINCULOS", "Não é possível excluir contrato com receitas vinculadas.");
 
-        contrato.Desativar();
-        await _repository.AtualizarAsync(contrato);
+        if (_processoRepository is not null)
+        {
+            if (await _processoRepository.ContarAtivosPorContratoAsync(id) > 0)
+                return Erro.Negocio("CONTRATO_COM_PROCESSOS", "Não é possível excluir contrato com processos ativos vinculados.");
+            if (await _processoRepository.ContarPorContratoAsync(id) > 0)
+                return Erro.Negocio("CONTRATO_COM_PROCESSOS", "Não é possível excluir contrato com processos vinculados. Exclua os processos primeiro.");
+        }
+
+        using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+        if (contrato.IdRegra.HasValue)
+        {
+            if (_regraRepository is null || _receitaRepository is null)
+                return Erro.Infraestrutura("Repositórios de recorrência não configurados.");
+            var regra = await _regraRepository.ObterPorIdAsync(contrato.IdRegra.Value);
+            if (regra is not null)
+            {
+                regra.Desativar();
+                await _regraRepository.AtualizarAsync(regra);
+                var agora = DateTime.UtcNow;
+                var parcelas = await _receitaRepository.ListarPorRegraAsync(regra.Id);
+                foreach (var parcela in parcelas.Where(p => p.Status == StatusMensal.Pendente && p.Data >= agora))
+                {
+                    parcela.Desativar();
+                    await _receitaRepository.AtualizarAsync(parcela);
+                }
+            }
+        }
+
+        await _repository.ExcluirAsync(id);
+        scope.Complete();
         return Resultado.Sucesso();
     }
 

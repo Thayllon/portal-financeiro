@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -34,6 +35,7 @@ public class ContratosController : BaseController
     }
 
     [HttpPost]
+    [RequerPermissaoEscrita("contratos")]
     public async Task<IActionResult> Criar([FromBody] ContratoRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
@@ -41,6 +43,7 @@ public class ContratosController : BaseController
     }
 
     [HttpPut("{id}")]
+    [RequerPermissaoEscrita("contratos")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] ContratoRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
@@ -48,6 +51,7 @@ public class ContratosController : BaseController
     }
 
     [HttpPut("{id}/encerrar")]
+    [RequerPermissaoEscrita("contratos")]
     public async Task<IActionResult> Encerrar(Guid id)
     {
         var result = await _service.EncerrarAsync(id, ObterIdUsuario());
@@ -55,6 +59,7 @@ public class ContratosController : BaseController
     }
 
     [HttpPut("{id}/reativar")]
+    [RequerPermissaoEscrita("contratos")]
     public async Task<IActionResult> Reativar(Guid id)
     {
         var result = await _service.ReativarAsync(id, ObterIdUsuario());
@@ -62,6 +67,7 @@ public class ContratosController : BaseController
     }
 
     [HttpDelete("{id}")]
+    [RequerPermissaoEscrita("contratos")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario());

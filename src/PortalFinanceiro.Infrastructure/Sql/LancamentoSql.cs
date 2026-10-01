@@ -82,6 +82,51 @@ internal static class LancamentoSql
           AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
         GROUP BY {SqlDialect.Current.MonthOf($"{t}.Data")}";
 
+    static string DataRealizacao(string t) => $"COALESCE({t}.DataRealizacao, {t}.Data)";
+
+    public static string ResumoAnualRealizadoPorMes(string t)
+        => $@"
+        SELECT {SqlDialect.Current.MonthOf(DataRealizacao(t))} AS Mes,
+               SUM({t}.Valor) AS TotalRealizado
+        FROM {t}
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {t}.Status = 2
+          AND {SqlDialect.Current.YearOf(DataRealizacao(t))} = @Ano
+          AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
+        GROUP BY {SqlDialect.Current.MonthOf(DataRealizacao(t))}";
+
+    public static string ResumoAnualRealizadoPorConta(string t)
+        => $@"
+        SELECT cb.Id AS IdConta, cb.Nome AS NomeConta, cb.Banco, cb.Tipo,
+               SUM({t}.Valor) AS TotalRealizado
+        FROM {t}
+        LEFT JOIN {S}ContaBancaria cb ON {t}.IdConta = cb.Id
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {t}.Status = 2
+          AND {SqlDialect.Current.YearOf(DataRealizacao(t))} = @Ano
+          AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
+        GROUP BY cb.Id, cb.Nome, cb.Banco, cb.Tipo
+        HAVING SUM({t}.Valor) > 0";
+
+    public static string ResumoMensalRealizado(string t)
+        => $@"
+        SELECT COALESCE(SUM({t}.Valor), 0)
+        FROM {t}
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {t}.Status = 2
+          AND {SqlDialect.Current.YearOf(DataRealizacao(t))} = @Ano
+          AND {SqlDialect.Current.MonthOf(DataRealizacao(t))} = @Mes
+          AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)";
+
+    public static string ResumoMensalRealizadoPorConta(string t)
+        => $@"
+        SELECT cb.Id AS IdConta, cb.Nome AS NomeConta, cb.Banco, cb.Tipo,
+               SUM({t}.Valor) AS TotalRealizado
+        FROM {t}
+        LEFT JOIN {S}ContaBancaria cb ON {t}.IdConta = cb.Id
+        WHERE {t}.IdUsuario = @IdUsuario AND {t}.Ativo = {SqlDialect.Current.BooleanTrue} AND {t}.Status = 2
+          AND {SqlDialect.Current.YearOf(DataRealizacao(t))} = @Ano
+          AND {SqlDialect.Current.MonthOf(DataRealizacao(t))} = @Mes
+          AND (@IdConta IS NULL OR {t}.IdConta = @IdConta)
+        GROUP BY cb.Id, cb.Nome, cb.Banco, cb.Tipo";
+
     public static string ResumoAnualPorConta(string t)
         => $@"
         SELECT cb.Nome AS NomeConta, cb.Banco, cb.Tipo,

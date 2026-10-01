@@ -20,6 +20,7 @@ internal static class ParceriaSql
         FROM {T} {Joins} WHERE {T}.IdUsuario = @IdUsuario AND (@Ativo IS NULL OR {T}.Ativo = @Ativo) ORDER BY {T}.DataCadastro DESC";
     public static string Inserir => $"INSERT INTO {T} ({C}) VALUES (@Id, @IdUsuario, @Nome, @IdParceiro, @IdCliente, @Valor, @PercentualParceiro, @Ativo, @DataCadastro, @DataAlteracao)";
     public static string Atualizar => $"UPDATE {T} SET Nome = @Nome, IdParceiro = @IdParceiro, IdCliente = @IdCliente, Valor = @Valor, PercentualParceiro = @PercentualParceiro, Ativo = @Ativo, DataAlteracao = @DataAlteracao WHERE Id = @Id";
+    public static string Excluir => $"DELETE FROM {T} WHERE Id = @Id";
     public static string SomarReceitas => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdParceria = @IdParceria AND Ativo = {SqlDialect.Current.BooleanTrue} AND Status = @Status";
     public static string SomarDespesas => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdParceria = @IdParceria AND Ativo = {SqlDialect.Current.BooleanTrue} AND Status = @Status";
     public static string SomarReceitasAnual => $"SELECT COALESCE(SUM(Valor),0) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdUsuario = @IdUsuario AND Ativo = {SqlDialect.Current.BooleanTrue} AND IdParceria IS NOT NULL AND {SqlDialect.Current.YearOf("Data")} = @Ano AND (@IdConta IS NULL OR IdConta = @IdConta) AND Status = @Status";

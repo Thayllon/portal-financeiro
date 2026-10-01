@@ -17,6 +17,15 @@ public class ResumoAnualContaItem
     public decimal TotalRealizado { get; set; }
 }
 
+public class ResumoRealizadoContaItem
+{
+    public Guid? IdConta { get; set; }
+    public string NomeConta { get; set; } = string.Empty;
+    public string Banco { get; set; } = string.Empty;
+    public string Tipo { get; set; } = string.Empty;
+    public decimal TotalRealizado { get; set; }
+}
+
 public class ResumoAnualCategoriaItem
 {
     public string Categoria { get; set; } = string.Empty;

@@ -16,6 +16,7 @@ public class UsuarioAppServiceTests
         public Usuario? Usuario { get; set; }
         public int Vinculos { get; set; }
         public List<Guid> Excluidos { get; } = new();
+        public List<Guid> CascataExcluidos { get; } = new();
 
         public Task<Usuario?> ObterPorIdAsync(Guid id)
             => Task.FromResult(Usuario?.Id == id ? Usuario : null);
@@ -36,6 +37,12 @@ public class UsuarioAppServiceTests
         }
 
         public Task<int> ContarVinculosAsync(Guid id) => Task.FromResult(Vinculos);
+
+        public Task ExcluirEmCascataAsync(Guid idUsuario)
+        {
+            CascataExcluidos.Add(idUsuario);
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class PermissaoRepositoryFake : IPermissaoUsuarioRepository
@@ -132,6 +139,68 @@ public class UsuarioAppServiceTests
         result.EhSucesso.Should().BeTrue();
         permissoes.ExcluidosPorUsuario.Should().ContainSingle().Which.Should().Be(alvo.Id);
         usuarios.Excluidos.Should().ContainSingle().Which.Should().Be(alvo.Id);
+    }
+
+    [Fact]
+    public async Task Excluir_ComVinculosCascataSemConfirmacao_RetornaValidacao()
+    {
+        var (service, usuarios, permissoes, alvo) = CriarCenario(vinculos: 7);
+
+        var result = await service.ExcluirAsync(alvo.Id, Guid.NewGuid(), cascata: true);
+
+        result.EhSucesso.Should().BeFalse();
+        result.Erro!.Codigo.Should().Be("CONFIRMACAO_INVALIDA");
+        usuarios.Excluidos.Should().BeEmpty();
+        usuarios.CascataExcluidos.Should().BeEmpty();
+        permissoes.ExcluidosPorUsuario.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Excluir_ComVinculosCascataConfirmacaoErrada_RetornaValidacao()
+    {
+        var (service, usuarios, _, alvo) = CriarCenario(vinculos: 7);
+
+        var result = await service.ExcluirAsync(alvo.Id, Guid.NewGuid(), cascata: true, confirmacao: "não");
+
+        result.EhSucesso.Should().BeFalse();
+        result.Erro!.Codigo.Should().Be("CONFIRMACAO_INVALIDA");
+        usuarios.CascataExcluidos.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Excluir_ComVinculosCascataConfirmada_ExcluiEmCascata()
+    {
+        var (service, usuarios, permissoes, alvo) = CriarCenario(vinculos: 7);
+
+        var result = await service.ExcluirAsync(alvo.Id, Guid.NewGuid(), cascata: true, confirmacao: "SIM");
+
+        result.EhSucesso.Should().BeTrue();
+        usuarios.CascataExcluidos.Should().ContainSingle().Which.Should().Be(alvo.Id);
+        usuarios.Excluidos.Should().BeEmpty();
+        permissoes.ExcluidosPorUsuario.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Excluir_ProprioUsuarioComCascata_RetornaAutoExclusao()
+    {
+        var (service, usuarios, _, alvo) = CriarCenario(vinculos: 7);
+
+        var result = await service.ExcluirAsync(alvo.Id, alvo.Id, cascata: true, confirmacao: "sim");
+
+        result.EhSucesso.Should().BeFalse();
+        result.Erro!.Codigo.Should().Be("AUTO_EXCLUSAO");
+        usuarios.CascataExcluidos.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ContarVinculos_RetornaTotal()
+    {
+        var (service, _, _, alvo) = CriarCenario(vinculos: 12);
+
+        var result = await service.ContarVinculosAsync(alvo.Id);
+
+        result.EhSucesso.Should().BeTrue();
+        result.Dado!.Total.Should().Be(12);
     }
 
     [Fact]

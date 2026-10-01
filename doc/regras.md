@@ -12,12 +12,15 @@ em dois lugares: `test/` (xUnit, suite completa) e `IDiagnosticoAppService`
 
 Contrato avulso, sem parceria e sem recorrência. Pode ter N receitas
 vinculadas para compor o valor. Encerrar exige falta receber zerada;
-excluir com receitas vinculadas é bloqueado.
+excluir com receitas vinculadas é bloqueado. Excluir sem vínculos é
+física (DELETE, some da lista); com processos vinculados (ativos ou
+encerrados) é bloqueado; recorrente desativa a regra e as parcelas
+futuras pendentes antes de apagar.
 
 | Aspecto | Detalhe |
 |---|---|
-| Vive em | `Core/Domain/Entities/Contrato.cs:20` (`Criar`), `Core/Application/Services/ContratoAppService.cs:144` (`EncerrarAsync`), `:178` (`ExcluirAsync`) |
-| Erros | `NOME_OBRIGATORIO`, `CLIENTE_OBRIGATORIO`, `VALOR_INVALIDO` (400); `CONTRATO_COM_PENDENCIAS`, `CONTRATO_COM_VINCULOS` (422); `CONTRATO_ACESSO_NEGADO` (403) |
+| Vive em | `Core/Domain/Entities/Contrato.cs:20` (`Criar`), `Core/Application/Services/ContratoAppService.cs:151` (`EncerrarAsync`), `:185` (`ExcluirAsync`) |
+| Erros | `NOME_OBRIGATORIO`, `CLIENTE_OBRIGATORIO`, `VALOR_INVALIDO` (400); `CONTRATO_COM_PENDENCIAS`, `CONTRATO_COM_VINCULOS`, `CONTRATO_COM_PROCESSOS` (422); `CONTRATO_ACESSO_NEGADO` (403) |
 | Cenários | `C1.1` criar sem nome → 400 `NOME_OBRIGATORIO`; `C1.2` criar com valor zero → 400 `VALOR_INVALIDO`; `C1.3` encerrar com falta receber > 0 → 422 `CONTRATO_COM_PENDENCIAS` (lógica de serviço, cobertura parcial no diagnóstico) |
 
 ## R2 — Contrato recorrente
@@ -67,16 +70,15 @@ Excluir com lançamentos vinculados é bloqueado.
 | Erros | `Erro.Permissao` (403); `CATEGORIA_COM_VINCULOS` (422, verificar código vigente) |
 | Cenários | `C5.1` criar sem nome → 400 `NOME_OBRIGATORIO`; `C5.2` posse/auditoria (lógica de serviço, cobertura parcial no diagnóstico) |
 
-## R6 — Dashboard previsto (informativa)
+## R6 — Dashboard em caixa (realizado)
 
-Do mês corrente em diante, valores incorporam previsão (regras vigentes
-descontando o materializado por `IdRegra`); meses passados mostram só o
-realizado. Detalhe em `doc/front.md` (Indicadores do dashboard mensal).
+Os KPIs/cards principais do dashboard (mensal e anual) usam **caixa**:
+recebido/pago/saldo realizados contados pela `DataRealizacao` (`COALESCE(DataRealizacao, Data)` para realizado sem data de pagamento). A competência (por `Data`) segue apenas na distribuição por categoria, nos recorrentes e no denominador da taxa de realização. O gráfico anual plota o saldo **acumulado** de caixa. Detalhe em `doc/front.md` (Indicadores do dashboard mensal).
 
 | Aspecto | Detalhe |
 |---|---|
-| Vive em | `Core/Application/Services/DashboardAppService.cs`, `Core/Domain/Services/LancamentoHelper.cs`, `doc/front.md:126` |
-| Cenários | `C6.1` previsão jan–mar/2026 gera 3 meses; `C6.2` dia 31 em fev/2026 vence dia 28 (matemática da previsão; agregação do dashboard com cobertura parcial) |
+| Vive em | `Core/Application/Services/DashboardAppService.cs`, `Infrastructure/Sql/LancamentoSql.cs` (`ResumoAnualRealizadoPorMes`/`ResumoMensalRealizado`), `doc/front.md` |
+| Cenários | `C6.1` previsão jan–mar/2026 gera 3 meses; `C6.2` dia 31 em fev/2026 vence dia 28 (matemática da previsão; agregação do dashboard com cobertura parcial); `C6.3` receita de ago recebida em set conta como recebido de **setembro** (por `DataRealizacao`) |
 
 ## Acesso à tela /testes (módulo `qa`)
 

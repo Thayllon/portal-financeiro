@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PortalFinanceiro.API.Authorization;
 using PortalFinanceiro.API.Controllers;
 using PortalFinanceiro.Core.Application.Dtos.Request;
 using PortalFinanceiro.Core.Application.Interfaces;
@@ -32,6 +33,7 @@ public class ContasBancariasController : BaseController
     }
 
     [HttpPost]
+    [RequerPermissaoEscrita("contas")]
     public async Task<IActionResult> Criar([FromBody] ContaBancariaRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
@@ -39,6 +41,7 @@ public class ContasBancariasController : BaseController
     }
 
     [HttpPut("{id}")]
+    [RequerPermissaoEscrita("contas")]
     public async Task<IActionResult> Atualizar(Guid id, [FromBody] ContaBancariaRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
@@ -46,6 +49,7 @@ public class ContasBancariasController : BaseController
     }
 
     [HttpPut("{id}/padrao")]
+    [RequerPermissaoEscrita("contas")]
     public async Task<IActionResult> DefinirPadrao(Guid id)
     {
         var result = await _service.DefinirPadraoAsync(id, ObterIdUsuario());
@@ -53,6 +57,7 @@ public class ContasBancariasController : BaseController
     }
 
     [HttpDelete("{id}")]
+    [RequerPermissaoEscrita("contas")]
     public async Task<IActionResult> Excluir(Guid id)
     {
         var result = await _service.ExcluirAsync(id, ObterIdUsuario());

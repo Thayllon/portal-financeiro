@@ -1,8 +1,10 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
 import { ContaBancaria, ContaBancariaRequest } from '../../core/models/conta-bancaria.model';
+import { AuthService } from '../../core/services/auth.service';
+import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -24,6 +26,9 @@ export class ContasComponent implements OnInit {
   private repo = inject(ContaBancariaRepository);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
+  private auth = inject(AuthService);
+
+  podeEscrever = computed(() => this.auth.temPermissao('contas', NivelPermissao.Escrita));
 
   contas = signal<ContaBancaria[]>([]);
   loading = signal(true);

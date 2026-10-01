@@ -230,16 +230,12 @@
                 <div class="perm-module__info">
                   <span class="perm-module__nome">{{ m.nome }}</span>
                 </div>
-                <div class="perm-module__actions" [class.perm-module__actions--center]="m.id === 'dashboard'">
-                  @if (m.id === 'home') {
-                    <span class="perm-btn perm-btn--opt-read perm-btn--read" title="Leitura fixa para todos os usuários">
-                      <svg lucideIcon="lock" [size]="14" />
-                      Leitura
-                    </span>
-                  } @else {
+                <div class="perm-module__actions">
                   <button
                     class="perm-btn perm-btn--opt-none"
                     [class.perm-btn--none]="permLevels()[m.id] === 'none'"
+                    [disabled]="m.id === 'home'"
+                    [title]="m.id === 'home' ? 'Home é visível para todos os usuários' : ''"
                     (click)="alternarPermissao(m.id, 'none')"
                   >
                     <svg lucideIcon="eye-off" [size]="14" />
@@ -247,23 +243,24 @@
                   </button>
                   <button
                     class="perm-btn perm-btn--opt-read"
-                    [class.perm-btn--read]="permLevels()[m.id] === 'read'"
+                    [class.perm-btn--read]="permLevels()[m.id] === 'read' || m.id === 'home'"
+                    [disabled]="m.id === 'home'"
+                    [title]="m.id === 'home' ? 'Leitura fixa para todos os usuários' : ''"
                     (click)="alternarPermissao(m.id, 'read')"
                   >
-                    <svg lucideIcon="eye" [size]="14" />
+                    <svg [lucideIcon]="m.id === 'home' ? 'lock' : 'eye'" [size]="14" />
                     Leitura
                   </button>
-                  @if (m.id !== 'dashboard') {
-                    <button
-                      class="perm-btn perm-btn--opt-write"
-                      [class.perm-btn--write]="permLevels()[m.id] === 'write'"
-                      (click)="alternarPermissao(m.id, 'write')"
-                    >
-                      <svg lucideIcon="pencil" [size]="14" />
-                      Escrita
-                    </button>
-                  }
-                  }
+                  <button
+                    class="perm-btn perm-btn--opt-write"
+                    [class.perm-btn--write]="permLevels()[m.id] === 'write'"
+                    [disabled]="m.id === 'home' || m.id === 'dashboard'"
+                    [title]="m.id === 'home' ? 'Home não possui ações de escrita' : m.id === 'dashboard' ? 'Dashboard não possui ações de escrita' : ''"
+                    (click)="alternarPermissao(m.id, 'write')"
+                  >
+                    <svg lucideIcon="pencil" [size]="14" />
+                    Escrita
+                  </button>
                 </div>
               </div>
               }
@@ -286,7 +283,7 @@
                 <svg lucideIcon="lock" [size]="16" />
                 <div>
                   <strong>Acesso total</strong>
-                  <span>Administradores já possuem acesso aos fluxos adicionais. Testes e QA exige liberação explícita abaixo.</span>
+                  <span>Administradores já possuem acesso aos fluxos adicionais e aos outros indicadores. Testes e QA exige liberação explícita abaixo.</span>
                 </div>
               </div>
             }
@@ -304,6 +301,14 @@
                 <span class="perm-item__label">Fluxo de despesa adicional</span>
                 <label class="switch">
                   <input type="checkbox" [checked]="fluxoAdicionalDespesa()" (change)="alternarFluxoAdicionalDespesa($event)" />
+                  <span class="switch__slider"></span>
+                </label>
+              </div>
+              <div class="perm-item">
+                <svg lucideIcon="layout-dashboard" [size]="16" class="perm-item__icon" />
+                <span class="perm-item__label">Outros indicadores (fluxo adicional)</span>
+                <label class="switch">
+                  <input type="checkbox" [checked]="outrosIndicadores()" (change)="alternarOutrosIndicadores($event)" />
                   <span class="switch__slider"></span>
                 </label>
               </div>

@@ -10,6 +10,8 @@ import { Contrato, ContratoRequest } from '../../core/models/contrato.model';
 import { Pessoa } from '../../core/models/pessoa.model';
 import { Categoria } from '../../core/models/categoria.model';
 import { ContaBancaria } from '../../core/models/conta-bancaria.model';
+import { AuthService } from '../../core/services/auth.service';
+import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
 import { ModalComponent } from '../../shared/components/modal.component';
@@ -38,6 +40,9 @@ export class ContratosComponent implements OnInit {
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private router = inject(Router);
+  private auth = inject(AuthService);
+
+  podeEscrever = computed(() => this.auth.temPermissao('contratos', NivelPermissao.Escrita));
 
   contratos = signal<Contrato[]>([]);
   clientes = signal<Pessoa[]>([]);

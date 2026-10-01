@@ -8,22 +8,9 @@
       <app-privacidade-toggle />
     </div>
     <div class="header-actions">
-      <button class="add-btn add-btn--ghost" (click)="abrirModalRecorrente()">
-        <svg lucideIcon="repeat" [size]="16" />
-        Novo recorrente
-      </button>
-      <button class="add-btn" (click)="abrirModal()">
-        <svg lucideIcon="plus" [size]="16" />
-        Novo contrato
-      </button>
+      <app-custom-select class="header-filter" placeholder="Todas" [options]="situacaoOptions" (valueChange)="mudarSituacao($event)" />
     </div>
   </header>
-
-  <div class="toolbar">
-    <div class="filtros">
-      <app-custom-select placeholder="Todas" [options]="situacaoOptions" (valueChange)="mudarSituacao($event)" />
-    </div>
-  </div>
 
   @if (loading()) {
     <div class="table-card">
@@ -44,6 +31,11 @@
           <svg lucideIcon="briefcase-business" [size]="16" />
           <span>Contrato</span>
           <span class="collapse-section__count">({{ contratosNormais().length }})</span>
+          @if (podeEscrever()) {
+            <button class="collapse-section__add" title="Novo contrato" (click)="$event.stopPropagation(); abrirModal()">
+              <svg lucideIcon="plus" [size]="14" />
+            </button>
+          }
         </div>
         <svg [lucideIcon]="contratoAberto() ? 'chevron-up' : 'chevron-down'" [size]="16" class="collapse-section__chevron" />
       </header>
@@ -66,7 +58,9 @@
                   <th>Valor</th>
                   <th>Falta receber</th>
                   <th>Status</th>
-                  <th class="th-actions">Ações</th>
+                  @if (podeEscrever()) {
+                    <th class="th-actions">Ações</th>
+                  }
                 </tr>
               </thead>
               <tbody>
@@ -81,21 +75,23 @@
                       <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(c)">
                         <svg lucideIcon="clipboard-list" [size]="16" />
                       </button>
-                      @if (c.ativo) {
-                        <button class="action-btn" title="Encerrar" (click)="alternarSituacao(c)">
-                          <svg lucideIcon="archive" [size]="16" />
+                      @if (podeEscrever()) {
+                        @if (c.ativo) {
+                          <button class="action-btn" title="Encerrar" (click)="alternarSituacao(c)">
+                            <svg lucideIcon="archive" [size]="16" />
+                          </button>
+                        } @else {
+                          <button class="action-btn" title="Reativar" (click)="alternarSituacao(c)">
+                            <svg lucideIcon="archive-restore" [size]="16" />
+                          </button>
+                        }
+                        <button class="action-btn" title="Editar" (click)="editar(c)">
+                          <svg lucideIcon="pencil" [size]="16" />
                         </button>
-                      } @else {
-                        <button class="action-btn" title="Reativar" (click)="alternarSituacao(c)">
-                          <svg lucideIcon="archive-restore" [size]="16" />
+                        <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
+                          <svg lucideIcon="trash-2" [size]="16" />
                         </button>
                       }
-                      <button class="action-btn" title="Editar" (click)="editar(c)">
-                        <svg lucideIcon="pencil" [size]="16" />
-                      </button>
-                      <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
-                        <svg lucideIcon="trash-2" [size]="16" />
-                      </button>
                     </td>
                   </tr>
                 }
@@ -113,6 +109,11 @@
           <svg lucideIcon="repeat" [size]="16" />
           <span>Contrato recorrente</span>
           <span class="collapse-section__count">({{ contratosRecorrentes().length }})</span>
+          @if (podeEscrever()) {
+            <button class="collapse-section__add" title="Novo contrato recorrente" (click)="$event.stopPropagation(); abrirModalRecorrente()">
+              <svg lucideIcon="plus" [size]="14" />
+            </button>
+          }
         </div>
         <svg [lucideIcon]="recorrenteAberto() ? 'chevron-up' : 'chevron-down'" [size]="16" class="collapse-section__chevron" />
       </header>
@@ -135,7 +136,9 @@
                   <th>Valor mensal</th>
                   <th>Falta receber</th>
                   <th>Status</th>
-                  <th class="th-actions">Ações</th>
+                  @if (podeEscrever()) {
+                    <th class="th-actions">Ações</th>
+                  }
                 </tr>
               </thead>
               <tbody>
@@ -150,21 +153,23 @@
                       <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(c)">
                         <svg lucideIcon="clipboard-list" [size]="16" />
                       </button>
-                      @if (c.ativo) {
-                        <button class="action-btn" title="Encerrar" (click)="alternarSituacao(c)">
-                          <svg lucideIcon="archive" [size]="16" />
+                      @if (podeEscrever()) {
+                        @if (c.ativo) {
+                          <button class="action-btn" title="Encerrar" (click)="alternarSituacao(c)">
+                            <svg lucideIcon="archive" [size]="16" />
+                          </button>
+                        } @else {
+                          <button class="action-btn" title="Reativar" (click)="alternarSituacao(c)">
+                            <svg lucideIcon="archive-restore" [size]="16" />
+                          </button>
+                        }
+                        <button class="action-btn" title="Editar" (click)="editar(c)">
+                          <svg lucideIcon="pencil" [size]="16" />
                         </button>
-                      } @else {
-                        <button class="action-btn" title="Reativar" (click)="alternarSituacao(c)">
-                          <svg lucideIcon="archive-restore" [size]="16" />
+                        <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
+                          <svg lucideIcon="trash-2" [size]="16" />
                         </button>
                       }
-                      <button class="action-btn" title="Editar" (click)="editar(c)">
-                        <svg lucideIcon="pencil" [size]="16" />
-                      </button>
-                      <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
-                        <svg lucideIcon="trash-2" [size]="16" />
-                      </button>
                     </td>
                   </tr>
                 }

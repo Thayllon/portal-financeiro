@@ -65,4 +65,16 @@ public class DespesaRepository : SqlBaseRepository, IDespesaRepository
 
     public async Task<IEnumerable<ResumoAnualCategoriaItem>> ResumoAnualPorCategoriaAsync(Guid idUsuario, int ano, Guid? idConta = null)
         => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualCategoriaItem>(conn, DespesaSql.ResumoAnualPorCategoria, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
+
+    public async Task<IEnumerable<ResumoAnualItem>> ResumoAnualRealizadoPorMesAsync(Guid idUsuario, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoAnualItem>(conn, DespesaSql.ResumoAnualRealizadoPorMes, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
+
+    public async Task<IEnumerable<ResumoRealizadoContaItem>> ResumoAnualRealizadoPorContaAsync(Guid idUsuario, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoRealizadoContaItem>(conn, DespesaSql.ResumoAnualRealizadoPorConta, new { IdUsuario = idUsuario, Ano = ano, IdConta = idConta }));
+
+    public async Task<decimal> ResumoMensalRealizadoAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<decimal>(conn, DespesaSql.ResumoMensalRealizado, new { IdUsuario = idUsuario, Mes = mes, Ano = ano, IdConta = idConta }));
+
+    public async Task<IEnumerable<ResumoRealizadoContaItem>> ResumoMensalRealizadoPorContaAsync(Guid idUsuario, int mes, int ano, Guid? idConta = null)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ResumoRealizadoContaItem>(conn, DespesaSql.ResumoMensalRealizadoPorConta, new { IdUsuario = idUsuario, Mes = mes, Ano = ano, IdConta = idConta }));
 }

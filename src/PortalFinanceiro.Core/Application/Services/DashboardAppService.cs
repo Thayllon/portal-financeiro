@@ -43,13 +43,16 @@ public class DashboardAppService : IDashboardAppService
             var despesas = await _despesaRepository.ListarAsync(idUsuario, mes, ano, idConta);
 
         var totalReceitas = receitas.Sum(r => r.Valor);
-        var totalRecebido = receitas.Where(r => r.Status == StatusMensal.Realizado).Sum(r => r.Valor);
+        var totalRecebido = await _receitaRepository.ResumoMensalRealizadoAsync(idUsuario, mes, ano, idConta);
         var totalDespesas = despesas.Sum(d => d.Valor);
-        var totalPago = despesas.Where(d => d.Status == StatusMensal.Realizado).Sum(d => d.Valor);
+        var totalPago = await _despesaRepository.ResumoMensalRealizadoAsync(idUsuario, mes, ano, idConta);
 
         var regrasReceita = (await _regraReceitaRepository.ListarPorUsuarioAsync(idUsuario)).Where(r => idConta == null || r.IdConta == idConta).ToList();
         var regrasDespesa = (await _regraDespesaRepository.ListarPorUsuarioAsync(idUsuario)).Where(d => idConta == null || d.IdConta == idConta).ToList();
         var contas = (await _contaBancariaRepository.ListarPorUsuarioAsync(idUsuario)).Where(c => c.Ativo && (idConta == null || c.Id == idConta)).ToList();
+
+        var recebidoPorConta = (await _receitaRepository.ResumoMensalRealizadoPorContaAsync(idUsuario, mes, ano, idConta)).ToList();
+        var pagoPorConta = (await _despesaRepository.ResumoMensalRealizadoPorContaAsync(idUsuario, mes, ano, idConta)).ToList();
 
         var inicioMesAtual = new DateTime(ano, mes, 1);
         var inicioMesSeguinteAtual = inicioMesAtual.AddMonths(1);
@@ -75,7 +78,9 @@ public class DashboardAppService : IDashboardAppService
                 TotalDespesas = totalDesp,
                 Saldo = totalRec - totalDesp,
                 TotalReceitasPrevisto = recPrevisto,
-                TotalDespesasPrevisto = despPrevisto
+                TotalDespesasPrevisto = despPrevisto,
+                TotalRecebido = recebidoPorConta.FirstOrDefault(c => c.IdConta == conta.Id)?.TotalRealizado ?? 0,
+                TotalPago = pagoPorConta.FirstOrDefault(c => c.IdConta == conta.Id)?.TotalRealizado ?? 0
             });
         }
 
@@ -154,9 +159,13 @@ public class DashboardAppService : IDashboardAppService
         {
             var receitasPorMes = (await _receitaRepository.ResumoAnualPorMesAsync(idUsuario, ano, idConta)).ToList();
             var despesasPorMes = (await _despesaRepository.ResumoAnualPorMesAsync(idUsuario, ano, idConta)).ToList();
+            var receitasRealizadoPorMes = (await _receitaRepository.ResumoAnualRealizadoPorMesAsync(idUsuario, ano, idConta)).ToList();
+            var despesasRealizadoPorMes = (await _despesaRepository.ResumoAnualRealizadoPorMesAsync(idUsuario, ano, idConta)).ToList();
 
             var receitasPorConta = (await _receitaRepository.ResumoAnualPorContaAsync(idUsuario, ano, idConta)).ToList();
             var despesasPorConta = (await _despesaRepository.ResumoAnualPorContaAsync(idUsuario, ano, idConta)).ToList();
+            var receitasRealizadoPorConta = (await _receitaRepository.ResumoAnualRealizadoPorContaAsync(idUsuario, ano, idConta)).ToList();
+            var despesasRealizadoPorConta = (await _despesaRepository.ResumoAnualRealizadoPorContaAsync(idUsuario, ano, idConta)).ToList();
 
             var receitasPorCategoria = (await _receitaRepository.ResumoAnualPorCategoriaAsync(idUsuario, ano, idConta)).ToList();
             var despesasPorCategoria = (await _despesaRepository.ResumoAnualPorCategoriaAsync(idUsuario, ano, idConta)).ToList();
@@ -165,17 +174,22 @@ public class DashboardAppService : IDashboardAppService
 
             var resumoPorMes = new List<MensalResumoAnual>();
             var saldoAcumulado = 0m;
+            var saldoRealizadoAcumulado = 0m;
             for (int m = 1; m <= 12; m++)
             {
                 var rec = receitasPorMes.FirstOrDefault(r => r.Mes == m);
                 var desp = despesasPorMes.FirstOrDefault(d => d.Mes == m);
+                var recReal = receitasRealizadoPorMes.FirstOrDefault(r => r.Mes == m);
+                var despReal = despesasRealizadoPorMes.FirstOrDefault(d => d.Mes == m);
 
                 var totalRec = rec?.Total ?? 0;
-                var totalRecebido = rec?.TotalRealizado ?? 0;
+                var totalRecebido = recReal?.TotalRealizado ?? 0;
                 var totalDesp = desp?.Total ?? 0;
-                var totalPago = desp?.TotalRealizado ?? 0;
+                var totalPago = despReal?.TotalRealizado ?? 0;
                 var saldo = totalRec - totalDesp;
+                var saldoRealizado = totalRecebido - totalPago;
                 saldoAcumulado += saldo;
+                saldoRealizadoAcumulado += saldoRealizado;
 
                 resumoPorMes.Add(new MensalResumoAnual
                 {
@@ -185,8 +199,9 @@ public class DashboardAppService : IDashboardAppService
                     TotalDespesas = totalDesp,
                     TotalPago = totalPago,
                     Saldo = saldo,
-                    SaldoRealizado = totalRecebido - totalPago,
-                    SaldoAcumulado = saldoAcumulado
+                    SaldoRealizado = saldoRealizado,
+                    SaldoAcumulado = saldoAcumulado,
+                    SaldoRealizadoAcumulado = saldoRealizadoAcumulado
                 });
             }
 
@@ -221,6 +236,18 @@ public class DashboardAppService : IDashboardAppService
                 todasContas[key].TotalDespesas = desp.Total;
                 todasContas[key].TotalPago = desp.TotalRealizado;
             }
+            foreach (var rec in receitasRealizadoPorConta)
+            {
+                var key = rec.NomeConta;
+                if (todasContas.ContainsKey(key))
+                    todasContas[key].TotalRecebido = rec.TotalRealizado;
+            }
+            foreach (var desp in despesasRealizadoPorConta)
+            {
+                var key = desp.NomeConta;
+                if (todasContas.ContainsKey(key))
+                    todasContas[key].TotalPago = desp.TotalRealizado;
+            }
 
             foreach (var conta in todasContas.Values)
             {
@@ -233,16 +260,16 @@ public class DashboardAppService : IDashboardAppService
             var totalDespesasAno = resumoPorMes.Sum(m => m.TotalDespesas);
             var totalPagoAno = resumoPorMes.Sum(m => m.TotalPago);
             var saldoAno = totalReceitasAno - totalDespesasAno;
+            var saldoRealizadoAno = totalRecebidoAno - totalPagoAno;
             var totalReceitasRecorrentesAno = receitasPorMes.Sum(r => r.TotalRecorrente);
             var totalDespesasRecorrentesAno = despesasPorMes.Sum(d => d.TotalRecorrente);
 
             var anoAnterior = ano - 1;
-            var recAnterior = (await _receitaRepository.ResumoAnualPorMesAsync(idUsuario, anoAnterior, idConta)).Sum(r => r.Total);
-            var despAnterior = (await _despesaRepository.ResumoAnualPorMesAsync(idUsuario, anoAnterior, idConta)).Sum(d => d.Total);
+            var recAnterior = (await _receitaRepository.ResumoAnualRealizadoPorMesAsync(idUsuario, anoAnterior, idConta)).Sum(r => r.TotalRealizado);
+            var despAnterior = (await _despesaRepository.ResumoAnualRealizadoPorMesAsync(idUsuario, anoAnterior, idConta)).Sum(d => d.TotalRealizado);
 
-            var hoje = DateTime.Today;
-            var mesesConsiderados = ano < hoje.Year ? 12 : ano == hoje.Year ? hoje.Month : 0;
-            var mediaMensalSaldo = mesesConsiderados > 0 ? Math.Round(saldoAno / mesesConsiderados, 2) : 0;
+            var mesesConsiderados = resumoPorMes.Count(m => m.TotalRecebido > 0 || m.TotalPago > 0);
+            var mediaMensalSaldo = mesesConsiderados > 0 ? Math.Round(saldoRealizadoAno / mesesConsiderados, 2) : 0;
 
             var previsaoRestante = await MontarPrevisaoRestanteAnoAsync(idUsuario, ano);
 
@@ -254,10 +281,10 @@ public class DashboardAppService : IDashboardAppService
                 TotalDespesas = totalDespesasAno,
                 TotalPago = totalPagoAno,
                 Saldo = saldoAno,
-                SaldoRealizado = totalRecebidoAno - totalPagoAno,
-                VariacaoReceitasPercentual = CalcularVariacao(totalReceitasAno, recAnterior),
-                VariacaoDespesasPercentual = CalcularVariacao(totalDespesasAno, despAnterior),
-                VariacaoSaldoPercentual = CalcularVariacao(saldoAno, recAnterior - despAnterior),
+                SaldoRealizado = saldoRealizadoAno,
+                VariacaoReceitasPercentual = CalcularVariacao(totalRecebidoAno, recAnterior),
+                VariacaoDespesasPercentual = CalcularVariacao(totalPagoAno, despAnterior),
+                VariacaoSaldoPercentual = CalcularVariacao(saldoRealizadoAno, recAnterior - despAnterior),
                 MediaMensalSaldo = mediaMensalSaldo,
                 MesesConsiderados = mesesConsiderados,
                 TotalReceitasRecorrentes = totalReceitasRecorrentesAno,

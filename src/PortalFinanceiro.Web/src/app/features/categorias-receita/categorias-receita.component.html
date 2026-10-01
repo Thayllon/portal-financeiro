@@ -6,10 +6,12 @@
           </span>
           <h1 class="page__title">Categorias</h1>
         </div>
+        @if (podeEscrever()) {
         <button class="add-btn" (click)="abrirModal()">
           <svg lucideIcon="plus" [size]="16" />
           Nova categoria
         </button>
+      }
       </header>
 
       <app-tabs [tabs]="tabs" [active]="tabAtiva()" (change)="trocarAba($event)" />
@@ -30,11 +32,15 @@
             <svg lucideIcon="folder" [size]="40" />
           </span>
           <h3>Nenhuma categoria</h3>
-          <p>Cadastre sua primeira categoria {{ tabAtiva() }}.</p>
-          <button class="add-btn" (click)="abrirModal()">
-            <svg lucideIcon="plus" [size]="16" />
-            Nova categoria
-          </button>
+          @if (podeEscrever()) {
+            <p>Cadastre sua primeira categoria {{ tabAtiva() }}.</p>
+            <button class="add-btn" (click)="abrirModal()">
+              <svg lucideIcon="plus" [size]="16" />
+              Nova categoria
+            </button>
+          } @else {
+            <p>Você tem acesso somente a leitura nesta tela.</p>
+          }
         </div>
       } @else {
         <div class="cat-grid">
@@ -61,15 +67,21 @@
                   <span class="cat-card__count">{{ subcategoriasDe(c.id).length }} subcategoria{{ subcategoriasDe(c.id).length === 1 ? '' : 's' }}</span>
                 </div>
                 <div class="cat-card__actions">
-                  <button class="action-btn" title="Adicionar subcategoria" (click)="abrirDrawerSubs(c)">
-                    <svg lucideIcon="plus" [size]="16" />
-                  </button>
-                  <button class="action-btn" title="Gerenciar categoria e subcategorias" (click)="abrirDrawerSubs(c)">
-                    <svg lucideIcon="pencil" [size]="16" />
-                  </button>
-                  <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
-                    <svg lucideIcon="trash-2" [size]="16" />
-                  </button>
+                  @if (podeEscrever()) {
+                    <button class="action-btn" title="Adicionar subcategoria" (click)="abrirDrawerSubs(c)">
+                      <svg lucideIcon="plus" [size]="16" />
+                    </button>
+                    <button class="action-btn" title="Gerenciar categoria e subcategorias" (click)="abrirDrawerSubs(c)">
+                      <svg lucideIcon="pencil" [size]="16" />
+                    </button>
+                    <button class="action-btn action-btn--danger" title="Excluir" (click)="excluir(c)">
+                      <svg lucideIcon="trash-2" [size]="16" />
+                    </button>
+                  } @else {
+                    <button class="action-btn" title="Ver subcategorias" (click)="abrirDrawerSubs(c)">
+                      <svg lucideIcon="chevron-right" [size]="16" />
+                    </button>
+                  }
                 </div>
               </header>
 
@@ -77,15 +89,17 @@
                 <div class="cat-card__subs">
                   @for (sub of subsVisiveisDe(c.id); track sub.id) {
                     <div class="sub-chip">
-                      <span
-                        class="drag-handle"
-                        title="Arrastar para mover"
-                        draggable="true"
-                        (dragstart)="iniciarArrasto($event, sub)"
-                        (dragend)="finalizarArrasto()"
-                      >
-                        <svg lucideIcon="move" [size]="13" />
-                      </span>
+                      @if (podeEscrever()) {
+                        <span
+                          class="drag-handle"
+                          title="Arrastar para mover"
+                          draggable="true"
+                          (dragstart)="iniciarArrasto($event, sub)"
+                          (dragend)="finalizarArrasto()"
+                        >
+                          <svg lucideIcon="move" [size]="13" />
+                        </span>
+                      }
                       <span class="sub-chip__name">{{ sub.nome }}</span>
                     </div>
                   }
@@ -97,7 +111,7 @@
                 </div>
               } @else {
                 <p class="cat-card__empty">
-                  Sem subcategorias — clique em <svg lucideIcon="plus" [size]="12" /> para adicionar.
+                  Sem subcategorias.
                 </p>
               }
             </article>
@@ -127,35 +141,37 @@
       [showFooter]="false"
       (visibleChange)="fecharDrawerSubs()"
     >
-      @if (categoriaAlvo()) {
-        <div class="field">
-          <label>Nome da categoria</label>
-          <div class="drawer-row">
-            <input
-              class="input"
-              [(ngModel)]="nomeCategoriaDrawer"
-              placeholder="Nome da categoria"
-              (keyup.enter)="salvarNomeCategoriaDrawer()"
-            />
-            <button class="drawer-action" title="Salvar nome" (click)="salvarNomeCategoriaDrawer()" [disabled]="salvando()">
-              <svg lucideIcon="check" [size]="16" />
-            </button>
+@if (categoriaAlvo()) {
+        @if (podeEscrever()) {
+          <div class="field">
+            <label>Nome da categoria</label>
+            <div class="drawer-row">
+              <input
+                class="input"
+                [(ngModel)]="nomeCategoriaDrawer"
+                placeholder="Nome da categoria"
+                (keyup.enter)="salvarNomeCategoriaDrawer()"
+              />
+              <button class="drawer-action" title="Salvar nome" (click)="salvarNomeCategoriaDrawer()" [disabled]="salvando()">
+                <svg lucideIcon="check" [size]="16" />
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="field">
-          <label>Nova subcategoria</label>
-          <div class="drawer-row">
-            <input
-              class="input"
-              [(ngModel)]="novaSubDrawer"
-              placeholder="Ex: Academia"
-              (keyup.enter)="criarSubDrawer()"
-            />
-            <button class="drawer-action" title="Adicionar subcategoria" (click)="criarSubDrawer()" [disabled]="salvando()">
-              <svg lucideIcon="plus" [size]="16" />
-            </button>
+          <div class="field">
+            <label>Nova subcategoria</label>
+            <div class="drawer-row">
+              <input
+                class="input"
+                [(ngModel)]="novaSubDrawer"
+                placeholder="Ex: Academia"
+                (keyup.enter)="criarSubDrawer()"
+              />
+              <button class="drawer-action" title="Adicionar subcategoria" (click)="criarSubDrawer()" [disabled]="salvando()">
+                <svg lucideIcon="plus" [size]="16" />
+              </button>
+            </div>
           </div>
-        </div>
+        }
         <div class="drawer-search">
           <svg lucideIcon="search" [size]="16" class="drawer-search__icon" />
           <input
@@ -166,19 +182,21 @@
             (input)="buscaSub.set($any($event.target).value)"
           />
         </div>
-        <p class="drawer-count">{{ subcategoriasDe(categoriaAlvo()!.id).length }} subcategoria(s) — arraste pelo ícone ou use “Mover para...”</p>
+        <p class="drawer-count">{{ subcategoriasDe(categoriaAlvo()!.id).length }} subcategoria(s)</p>
         <div class="drawer-sub-list">
           @for (sub of subsFiltradasDrawer(); track sub.id) {
             <div class="drawer-sub-item">
-              <span
-                class="drag-handle"
-                title="Arrastar para mover"
-                draggable="true"
-                (dragstart)="iniciarArrasto($event, sub)"
-                (dragend)="finalizarArrasto()"
-              >
-                <svg lucideIcon="move" [size]="14" />
-              </span>
+              @if (podeEscrever()) {
+                <span
+                  class="drag-handle"
+                  title="Arrastar para mover"
+                  draggable="true"
+                  (dragstart)="iniciarArrasto($event, sub)"
+                  (dragend)="finalizarArrasto()"
+                >
+                  <svg lucideIcon="move" [size]="14" />
+                </span>
+              }
               @if (subEmEdicaoId() === sub.id) {
                 <input
                   class="input"
@@ -194,24 +212,26 @@
                 </button>
               } @else {
                 <span class="drawer-sub-item__name">{{ sub.nome }}</span>
-                <app-custom-select
-                  class="mover-select"
-                  placeholder="Mover para..."
-                  [options]="opcoesDestino(sub)"
-                  [value]="destinoDe(sub)"
-                  (valueChange)="aoTrocarDestino(sub, $event)"
-                />
-                <button class="action-btn action-btn--tiny" title="Renomear" (click)="iniciarEdicaoSub(sub)">
-                  <svg lucideIcon="pencil" [size]="12" />
-                </button>
-                <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
-                  <svg lucideIcon="trash-2" [size]="12" />
-                </button>
+                @if (podeEscrever()) {
+                  <app-custom-select
+                    class="mover-select"
+                    placeholder="Mover para..."
+                    [options]="opcoesDestino(sub)"
+                    [value]="destinoDe(sub)"
+                    (valueChange)="aoTrocarDestino(sub, $event)"
+                  />
+                  <button class="action-btn action-btn--tiny" title="Renomear" (click)="iniciarEdicaoSub(sub)">
+                    <svg lucideIcon="pencil" [size]="12" />
+                  </button>
+                  <button class="action-btn action-btn--tiny action-btn--danger" title="Excluir" (click)="excluir(sub)">
+                    <svg lucideIcon="trash-2" [size]="12" />
+                  </button>
+                }
               }
             </div>
           } @empty {
             <p class="drawer-empty">Nenhuma subcategoria encontrada.</p>
           }
-        </div>
+</div>
       }
     </app-side-drawer>
