@@ -7,10 +7,16 @@
       <h1 class="page__title">Processos</h1>
     </div>
     @if (podeEscrever()) {
-      <button class="add-btn" (click)="abrirModal()">
-        <svg lucideIcon="plus" [size]="16" />
-        Novo processo
-      </button>
+      <div class="header-actions">
+        <button class="ghost-btn" (click)="irParaModelos()">
+          <svg lucideIcon="file-badge" [size]="16" />
+          Modelos
+        </button>
+        <button class="add-btn" (click)="abrirModal()">
+          <svg lucideIcon="plus" [size]="16" />
+          Novo processo
+        </button>
+      </div>
     }
   </header>
 
@@ -50,7 +56,10 @@
         <thead>
           <tr>
             <th>Nome</th>
+            <th>Cliente</th>
+            <th>Fase atual</th>
             <th>Progresso</th>
+            <th>Dias</th>
             <th>Status</th>
             @if (podeEscrever()) {
               <th class="th-actions">Ações</th>
@@ -61,7 +70,10 @@
           @for (p of paginacao.paginatedItems(); track p.id) {
             <tr>
               <td class="cell-name" data-label="Nome">{{ p.nome }}</td>
-              <td data-label="Progresso">{{ p.etapasConcluidas }}/{{ p.totalEtapas }} • {{ p.percentualConcluido }}%</td>
+              <td data-label="Cliente">{{ p.cliente || '—' }}</td>
+              <td data-label="Fase atual">{{ p.ativo ? (p.faseAtual || '—') : 'Concluído' }}</td>
+              <td data-label="Progresso">{{ p.itensConcluidos }}/{{ p.totalItens }} • {{ p.percentualConcluido }}%</td>
+              <td data-label="Dias">{{ dias(p) }}</td>
               <td data-label="Status"><app-status-badge [type]="p.ativo ? 'ativo' : 'inativo'" [label]="p.ativo ? 'Ativo' : 'Encerrado'" /></td>
               <td class="cell-actions">
                 <button class="action-btn" title="Ver detalhes" (click)="verDetalhes(p)">
@@ -119,4 +131,25 @@
       class="input"
     />
   </div>
+  @if (!editando()) {
+    <div class="field">
+      <label>Modelo</label>
+      <app-custom-select
+        placeholder="Sem modelo (etapas manuais)"
+        [options]="modeloOptions()"
+        [value]="form.idModeloProcesso ?? ''"
+        (valueChange)="selecionarModelo($event)"
+      />
+      <span class="field-hint">Instancia fases e itens prontos a partir do modelo</span>
+    </div>
+    <div class="field">
+      <label>Cliente</label>
+      <app-custom-select
+        placeholder="Sem cliente"
+        [options]="clienteOptions()"
+        [value]="form.idCliente ?? ''"
+        (valueChange)="selecionarCliente($event)"
+      />
+    </div>
+  }
 </app-modal>

@@ -61,4 +61,28 @@ public class ProcessoRepository : SqlBaseRepository, IProcessoRepository
 
     public async Task ExcluirEtapaAsync(Guid id)
         => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ProcessoSql.ExcluirEtapa, new { Id = id }));
+
+    public async Task<ProcessoEtapaItem?> ObterItemPorIdAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<ProcessoEtapaItem>(conn, ProcessoSql.ObterItemPorId, new { Id = id }));
+
+    public async Task<IEnumerable<ProcessoEtapaItem>> ListarItensAsync(Guid idProcessoEtapa)
+        => await ExecuteWithConnectionAsync(conn => QueryAsync<ProcessoEtapaItem>(conn, ProcessoSql.ListarItens, new { IdProcessoEtapa = idProcessoEtapa }));
+
+    public async Task<int> ProximaOrdemItemAsync(Guid idProcessoEtapa)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ProcessoSql.ProximaOrdemItem, new { IdProcessoEtapa = idProcessoEtapa }));
+
+    public async Task<int> ContarItensObrigatoriosPendentesAsync(Guid idProcessoEtapa)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ProcessoSql.ContarItensObrigatoriosPendentes, new { IdProcessoEtapa = idProcessoEtapa }));
+
+    public async Task<int> ContarAnexosPorItemAsync(Guid idProcessoEtapaItem)
+        => await ExecuteWithConnectionAsync(conn => QueryFirstOrDefaultAsync<int>(conn, ProcessoSql.ContarAnexosPorItem, new { IdProcessoEtapaItem = idProcessoEtapaItem }));
+
+    public async Task InserirItemAsync(ProcessoEtapaItem entity)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ProcessoSql.InserirItem, entity));
+
+    public async Task AtualizarItemAsync(ProcessoEtapaItem entity)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ProcessoSql.AtualizarItem, entity));
+
+    public async Task ExcluirItemAsync(Guid id)
+        => await ExecuteWithConnectionAsync(conn => ExecuteAsync(conn, ProcessoSql.ExcluirItem, new { Id = id }));
 }

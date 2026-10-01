@@ -5,6 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  email = 'admin@portal.com';
+  email = environment.production ? '' : 'admin@portal.com';
   senha = '';
   loading = signal(false);
   erro = signal('');

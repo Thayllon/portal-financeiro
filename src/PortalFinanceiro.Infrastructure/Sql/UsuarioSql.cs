@@ -24,6 +24,7 @@ internal static class UsuarioSql
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Receita WHERE IdUsuario = @Id) + "
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Despesa WHERE IdUsuario = @Id) + "
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}CategoriaHistorico WHERE IdUsuario = @Id) + "
+        + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}ModeloProcesso WHERE IdUsuario = @Id) + "
         + $"(SELECT COUNT(*) FROM {SqlDialect.Current.SchemaPrefix}Processo WHERE IdUsuario = @Id)";
 
     public static IEnumerable<string> ExcluirEmCascata()
@@ -31,10 +32,15 @@ internal static class UsuarioSql
         var p = SqlDialect.Current.SchemaPrefix;
         yield return $"DELETE FROM {p}ReceitaServico WHERE ReceitaId IN (SELECT Id FROM {p}Receita WHERE IdUsuario = @Id)";
         yield return $"DELETE FROM {p}DespesaServico WHERE DespesaId IN (SELECT Id FROM {p}Despesa WHERE IdUsuario = @Id)";
+        yield return $"DELETE FROM {p}ProcessoAnexo WHERE IdProcessoEtapaItem IN (SELECT Id FROM {p}ProcessoEtapaItem WHERE IdProcessoEtapa IN (SELECT Id FROM {p}ProcessoEtapa WHERE IdProcesso IN (SELECT Id FROM {p}Processo WHERE IdUsuario = @Id)))";
+        yield return $"DELETE FROM {p}ProcessoEtapaItem WHERE IdProcessoEtapa IN (SELECT Id FROM {p}ProcessoEtapa WHERE IdProcesso IN (SELECT Id FROM {p}Processo WHERE IdUsuario = @Id))";
         yield return $"DELETE FROM {p}ProcessoEtapa WHERE IdProcesso IN (SELECT Id FROM {p}Processo WHERE IdUsuario = @Id)";
         yield return $"DELETE FROM {p}Receita WHERE IdUsuario = @Id";
         yield return $"DELETE FROM {p}Despesa WHERE IdUsuario = @Id";
         yield return $"DELETE FROM {p}Processo WHERE IdUsuario = @Id";
+        yield return $"DELETE FROM {p}ModeloItem WHERE IdModeloEtapa IN (SELECT Id FROM {p}ModeloEtapa WHERE IdModeloProcesso IN (SELECT Id FROM {p}ModeloProcesso WHERE IdUsuario = @Id))";
+        yield return $"DELETE FROM {p}ModeloEtapa WHERE IdModeloProcesso IN (SELECT Id FROM {p}ModeloProcesso WHERE IdUsuario = @Id)";
+        yield return $"DELETE FROM {p}ModeloProcesso WHERE IdUsuario = @Id";
         yield return $"DELETE FROM {p}Contrato WHERE IdUsuario = @Id";
         yield return $"DELETE FROM {p}Parceria WHERE IdUsuario = @Id";
         yield return $"DELETE FROM {p}RegraReceita WHERE IdUsuario = @Id";

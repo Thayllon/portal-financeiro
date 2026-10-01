@@ -6,4 +6,6 @@ public class ProcessoRequest
     public string? Descricao { get; set; }
     public Guid? IdParceria { get; set; }
     public Guid? IdContrato { get; set; }
+    public Guid? IdModeloProcesso { get; set; }
+    public Guid? IdCliente { get; set; }
 }

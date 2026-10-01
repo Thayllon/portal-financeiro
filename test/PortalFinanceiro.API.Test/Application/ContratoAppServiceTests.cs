@@ -57,6 +57,14 @@ public class ContratoAppServiceTests
         public Task InserirEtapaAsync(ProcessoEtapa entity) => throw new NotImplementedException();
         public Task AtualizarEtapaAsync(ProcessoEtapa entity) => throw new NotImplementedException();
         public Task ExcluirEtapaAsync(Guid id) => throw new NotImplementedException();
+        public Task<ProcessoEtapaItem?> ObterItemPorIdAsync(Guid id) => throw new NotImplementedException();
+        public Task<IEnumerable<ProcessoEtapaItem>> ListarItensAsync(Guid idProcessoEtapa) => throw new NotImplementedException();
+        public Task<int> ProximaOrdemItemAsync(Guid idProcessoEtapa) => throw new NotImplementedException();
+        public Task<int> ContarItensObrigatoriosPendentesAsync(Guid idProcessoEtapa) => throw new NotImplementedException();
+        public Task<int> ContarAnexosPorItemAsync(Guid idProcessoEtapaItem) => throw new NotImplementedException();
+        public Task InserirItemAsync(ProcessoEtapaItem entity) => throw new NotImplementedException();
+        public Task AtualizarItemAsync(ProcessoEtapaItem entity) => throw new NotImplementedException();
+        public Task ExcluirItemAsync(Guid id) => throw new NotImplementedException();
     }
 
     private sealed class PessoaRepositoryFake : IPessoaRepository

@@ -23,6 +23,7 @@ export const routes: Routes = [
       { path: 'contratos', loadComponent: () => import('./features/contratos/contratos.component').then(m => m.ContratosComponent), canActivate: [permissionGuard('contratos')] },
       { path: 'contratos/:id', loadComponent: () => import('./features/contratos/contrato-detalhe/contrato-detalhe.component').then(m => m.ContratoDetalheComponent), canActivate: [permissionGuard('contratos')] },
       { path: 'processos', loadComponent: () => import('./features/processos/processos.component').then(m => m.ProcessosComponent), canActivate: [permissionGuard('processos')] },
+      { path: 'processos/modelos', loadComponent: () => import('./features/processos/modelos/modelos.component').then(m => m.ModelosComponent), canActivate: [permissionGuard('processos')] },
       { path: 'processos/:id', loadComponent: () => import('./features/processos/processo-detalhe/processo-detalhe.component').then(m => m.ProcessoDetalheComponent), canActivate: [permissionGuard('processos')] },
       { path: 'contas', loadComponent: () => import('./features/contas/contas.component').then(m => m.ContasComponent), canActivate: [permissionGuard('contas')] },
       { path: 'categorias', loadComponent: () => import('./features/categorias-receita/categorias-receita.component').then(m => m.CategoriasComponent), canActivate: [permissionGuardAny(['categorias-receita', 'categorias-despesa', 'categorias-servico'])] },

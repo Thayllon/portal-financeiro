@@ -7,13 +7,13 @@ using PortalFinanceiro.Core.Application.Interfaces;
 
 namespace PortalFinanceiro.API.Controllers.v1;
 
-[Route("api/processos")]
+[Route("api/modelos-processos")]
 [Authorize]
-public class ProcessosController : BaseController
+public class ModelosProcessoController : BaseController
 {
-    private readonly IProcessoAppService _service;
+    private readonly IModeloProcessoAppService _service;
 
-    public ProcessosController(IProcessoAppService service)
+    public ModelosProcessoController(IModeloProcessoAppService service)
     {
         _service = service;
     }
@@ -34,7 +34,7 @@ public class ProcessosController : BaseController
 
     [HttpPost]
     [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> Criar([FromBody] ProcessoRequest request)
+    public async Task<IActionResult> Criar([FromBody] ModeloProcessoRequest request)
     {
         var result = await _service.AdicionarAsync(ObterIdUsuario(), request);
         return ApiResponse(result, 201);
@@ -42,25 +42,9 @@ public class ProcessosController : BaseController
 
     [HttpPut("{id}")]
     [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> Atualizar(Guid id, [FromBody] ProcessoRequest request)
+    public async Task<IActionResult> Atualizar(Guid id, [FromBody] ModeloProcessoRequest request)
     {
         var result = await _service.AtualizarAsync(id, ObterIdUsuario(), request);
-        return ApiResponse(result);
-    }
-
-    [HttpPut("{id}/encerrar")]
-    [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> Encerrar(Guid id)
-    {
-        var result = await _service.EncerrarAsync(id, ObterIdUsuario());
-        return ApiResponse(result);
-    }
-
-    [HttpPut("{id}/reativar")]
-    [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> Reativar(Guid id)
-    {
-        var result = await _service.ReativarAsync(id, ObterIdUsuario());
         return ApiResponse(result);
     }
 
@@ -72,9 +56,17 @@ public class ProcessosController : BaseController
         return ApiResponse(result);
     }
 
+    [HttpPost("{id}/duplicar")]
+    [RequerPermissaoEscrita("processos")]
+    public async Task<IActionResult> Duplicar(Guid id)
+    {
+        var result = await _service.DuplicarAsync(id, ObterIdUsuario());
+        return ApiResponse(result, 201);
+    }
+
     [HttpPost("{id}/etapas")]
     [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> CriarEtapa(Guid id, [FromBody] ProcessoEtapaRequest request)
+    public async Task<IActionResult> CriarEtapa(Guid id, [FromBody] ModeloEtapaRequest request)
     {
         var result = await _service.AdicionarEtapaAsync(id, ObterIdUsuario(), request);
         return ApiResponse(result, 201);
@@ -82,25 +74,9 @@ public class ProcessosController : BaseController
 
     [HttpPut("{id}/etapas/{etapaId}")]
     [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> AtualizarEtapa(Guid id, Guid etapaId, [FromBody] ProcessoEtapaRequest request)
+    public async Task<IActionResult> AtualizarEtapa(Guid id, Guid etapaId, [FromBody] ModeloEtapaRequest request)
     {
         var result = await _service.AtualizarEtapaAsync(id, etapaId, ObterIdUsuario(), request);
-        return ApiResponse(result);
-    }
-
-    [HttpPut("{id}/etapas/{etapaId}/concluir")]
-    [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> ConcluirEtapa(Guid id, Guid etapaId, [FromQuery] bool forcar = false)
-    {
-        var result = await _service.ConcluirEtapaAsync(id, etapaId, ObterIdUsuario(), forcar);
-        return ApiResponse(result);
-    }
-
-    [HttpPut("{id}/etapas/{etapaId}/estornar")]
-    [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> EstornarEtapa(Guid id, Guid etapaId)
-    {
-        var result = await _service.EstornarEtapaAsync(id, etapaId, ObterIdUsuario());
         return ApiResponse(result);
     }
 
@@ -122,7 +98,7 @@ public class ProcessosController : BaseController
 
     [HttpPost("{id}/etapas/{etapaId}/itens")]
     [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> CriarItem(Guid id, Guid etapaId, [FromBody] ProcessoEtapaItemRequest request)
+    public async Task<IActionResult> CriarItem(Guid id, Guid etapaId, [FromBody] ModeloItemRequest request)
     {
         var result = await _service.AdicionarItemAsync(id, etapaId, ObterIdUsuario(), request);
         return ApiResponse(result, 201);
@@ -130,25 +106,9 @@ public class ProcessosController : BaseController
 
     [HttpPut("{id}/itens/{itemId}")]
     [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> AtualizarItem(Guid id, Guid itemId, [FromBody] ProcessoEtapaItemRequest request)
+    public async Task<IActionResult> AtualizarItem(Guid id, Guid itemId, [FromBody] ModeloItemRequest request)
     {
         var result = await _service.AtualizarItemAsync(id, itemId, ObterIdUsuario(), request);
-        return ApiResponse(result);
-    }
-
-    [HttpPut("{id}/itens/{itemId}/concluir")]
-    [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> ConcluirItem(Guid id, Guid itemId)
-    {
-        var result = await _service.ConcluirItemAsync(id, itemId, ObterIdUsuario());
-        return ApiResponse(result);
-    }
-
-    [HttpPut("{id}/itens/{itemId}/estornar")]
-    [RequerPermissaoEscrita("processos")]
-    public async Task<IActionResult> EstornarItem(Guid id, Guid itemId)
-    {
-        var result = await _service.EstornarItemAsync(id, itemId, ObterIdUsuario());
         return ApiResponse(result);
     }
 
