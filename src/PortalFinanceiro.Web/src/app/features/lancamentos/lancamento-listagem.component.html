@@ -97,7 +97,7 @@
         <tbody>
           @for (l of pagination.paginatedItems(); track l.id) {
             <tr>
-              <td class="cell-name" data-label="Descrição">{{ l.descricao }}</td>
+              <td class="cell-name" data-label="Descrição"><button type="button" class="link-detalhe" (click)="verDetalhe(l)">{{ l.descricao }}</button></td>
               <td class="cell-value" data-label="Valor">{{ l.valor | valorMascarado }}</td>
               <td class="cell-meta" data-label="Data">{{ l.data | date:'dd/MM' }}</td>
               @if (hasParceiro()) {

@@ -191,18 +191,26 @@ public class ReceitaAppService : IReceitaAppService
 
         if (request.IdParceria.HasValue && _parceriaRepository is not null)
         {
-            var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
-            if (parceria is null || parceria.IdUsuario != receita.IdUsuario || !parceria.Ativo)
-                return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
+            var parceriaResult = await VinculoHelper.ValidarAtualizacaoAsync(
+                request.IdParceria, receita.IdParceria, receita.IdUsuario,
+                _parceriaRepository.ObterPorIdAsync,
+                p => p.IdUsuario, p => p.Ativo,
+                "PARCERIA_INVALIDA", "Parceria não encontrada.");
+            if (!parceriaResult.EhSucesso)
+                return parceriaResult.Erro!;
         }
 
         if (request.IdContrato.HasValue)
         {
             if (_contratoRepository is null)
                 return Erro.Infraestrutura("Repositório de contratos não configurado.");
-            var contrato = await _contratoRepository.ObterPorIdAsync(request.IdContrato.Value);
-            if (contrato is null || contrato.IdUsuario != receita.IdUsuario || !contrato.Ativo)
-                return Erro.Validacao("CONTRATO_INVALIDO", "Contrato não encontrado.");
+            var contratoResult = await VinculoHelper.ValidarAtualizacaoAsync(
+                request.IdContrato, receita.IdContrato, receita.IdUsuario,
+                _contratoRepository.ObterPorIdAsync,
+                c => c.IdUsuario, c => c.Ativo,
+                "CONTRATO_INVALIDO", "Contrato não encontrado.");
+            if (!contratoResult.EhSucesso)
+                return contratoResult.Erro!;
         }
 
         var result = receita.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria,

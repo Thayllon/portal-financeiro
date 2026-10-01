@@ -153,9 +153,13 @@ public class DespesaAppService : IDespesaAppService
 
         if (request.IdParceria.HasValue && _parceriaRepository is not null)
         {
-            var parceria = await _parceriaRepository.ObterPorIdAsync(request.IdParceria.Value);
-            if (parceria is null || parceria.IdUsuario != despesa.IdUsuario || !parceria.Ativo)
-                return Erro.Validacao("PARCERIA_INVALIDA", "Parceria não encontrada.");
+            var parceriaResult = await VinculoHelper.ValidarAtualizacaoAsync(
+                request.IdParceria, despesa.IdParceria, despesa.IdUsuario,
+                _parceriaRepository.ObterPorIdAsync,
+                p => p.IdUsuario, p => p.Ativo,
+                "PARCERIA_INVALIDA", "Parceria não encontrada.");
+            if (!parceriaResult.EhSucesso)
+                return parceriaResult.Erro!;
         }
 
         var result = despesa.Atualizar(request.Descricao, request.Valor, request.Data, request.IdConta, request.IdCategoria, request.IdSubcategoria, idParceria: request.IdParceria, idCliente: request.IdCliente);

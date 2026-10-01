@@ -1,7 +1,8 @@
-import { Component, inject, signal, input, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, input, computed, OnInit, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom, Observable } from 'rxjs';
 import { ReceitaRepository, DespesaRepository, LancamentoFiltros } from '../../core/repositories/lancamento.repository';
 import { CategoriaReceitaRepository, CategoriaDespesaRepository, CategoriaServicoRepository } from '../../core/repositories/categoria.repository';
 import { ContaBancariaRepository } from '../../core/repositories/conta-bancaria.repository';
@@ -92,6 +93,8 @@ export class LancamentoListagemComponent implements OnInit {
   private contratoRepo = inject(ContratoRepository);
   private catServicoRepo = inject(CategoriaServicoRepository);
   private auth = inject(AuthService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   private ehReceita = computed(() => this.tipo() === 'receita');
 
@@ -189,6 +192,19 @@ export class LancamentoListagemComponent implements OnInit {
     if (this.hasParceiro()) cargas.push(this.carregarParceiros(), this.carregarContratos());
     await Promise.all(cargas);
     await this.carregar();
+    await this.abrirEdicaoViaParametro();
+  }
+
+  private async abrirEdicaoViaParametro() {
+    const id = this.route.snapshot.queryParamMap.get('editar');
+    if (!id) return;
+    try {
+      const item = this.ehReceita()
+        ? await firstValueFrom(this.receitaRepo.obter(id))
+        : await firstValueFrom(this.despesaRepo.obter(id));
+      await this.abrirModal(item);
+      this.router.navigate([], { replaceUrl: true });
+    } catch {}
   }
 
   async carregar() {
@@ -262,10 +278,11 @@ export class LancamentoListagemComponent implements OnInit {
     this.carregar();
   }
 
-  abrirModal(item?: LancamentoItem) {
+  async abrirModal(item?: LancamentoItem) {
     if (item) {
       this.fluxoContratoEscolhido.set(this.inferirFluxoContrato(item));
       this.editando.set(item);
+      await this.mesclarVinculosEncerrados(item);
       this.modalVisible.set(true);
       return;
     }
@@ -278,6 +295,28 @@ export class LancamentoListagemComponent implements OnInit {
     this.fluxoContratoEscolhido.set(false);
     this.editando.set(null);
     this.modalVisible.set(true);
+  }
+
+  private async mesclarVinculosEncerrados(item: LancamentoItem) {
+    const cargas: Promise<void>[] = [];
+    if (item.idParceria && !this.parcerias().some(p => p.id === item.idParceria)) {
+      cargas.push(this.mesclarVinculoAtual(this.parcerias, item.idParceria, id => this.parceriaRepo.obter(id)));
+    }
+    if (item.idContrato && !this.contratos().some(c => c.id === item.idContrato)) {
+      cargas.push(this.mesclarVinculoAtual(this.contratos, item.idContrato, id => this.contratoRepo.obter(id)));
+    }
+    await Promise.all(cargas);
+  }
+
+  private async mesclarVinculoAtual<T extends { id: string }>(
+    lista: WritableSignal<T[]>,
+    idVinculo: string,
+    obter: (id: string) => Observable<T>
+  ) {
+    try {
+      const vinculo = await firstValueFrom(obter(idVinculo));
+      if (vinculo) lista.update(items => [...items, vinculo]);
+    } catch {}
   }
 
   escolherFluxo(contrato: boolean) {
@@ -295,6 +334,10 @@ export class LancamentoListagemComponent implements OnInit {
     this.modalVisible.set(false);
     this.editando.set(null);
     this.fluxoContratoEscolhido.set(null);
+  }
+
+  verDetalhe(item: LancamentoItem) {
+    this.router.navigate([this.ehReceita() ? '/receitas' : '/despesas', item.id]);
   }
 
   private inferirFluxoContrato(item: LancamentoItem): boolean {

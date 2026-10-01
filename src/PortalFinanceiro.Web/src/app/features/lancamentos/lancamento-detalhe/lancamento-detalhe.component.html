@@ -1,0 +1,108 @@
+<div class="page">
+  <header class="page__header">
+    <div class="page__header-left">
+      <button class="back-btn" (click)="voltar()" [title]="'Voltar para ' + config().rotaLista">
+        <svg lucideIcon="arrow-left" [size]="16" />
+      </button>
+      <span class="page__badge">
+        <svg [lucideIcon]="config().icone" class="page__icon" [size]="22" />
+      </span>
+      <h1 class="page__title">{{ config().titulo }} - {{ item()?.descricao ?? '...' }}</h1>
+      <app-privacidade-toggle />
+    </div>
+    @if (podeEscrever() && item()) {
+      <button class="add-btn" (click)="editar()">
+        <svg lucideIcon="pencil" [size]="16" />
+        Editar
+      </button>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="table-card">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton-line" style="width: 30%"></div>
+          <div class="skeleton-line" style="width: 20%"></div>
+          <div class="skeleton-line" style="width: 15%"></div>
+        </div>
+      }
+    </div>
+  } @else if (item(); as l) {
+    <div class="cards">
+      <div class="table-card card">
+        <span class="card__label">Valor</span>
+        <strong class="card__value">{{ l.valor | valorMascarado }}</strong>
+        <span class="card__hint">Conta {{ l.conta }}</span>
+      </div>
+      <div class="table-card card">
+        <span class="card__label">Status</span>
+        <app-status-badge [type]="l.status === 2 ? 'realizado' : 'pendente'" [label]="l.status === 2 ? config().statusRealizadoLabel : 'Pendente'" />
+        <span class="card__hint">Data {{ l.data | date:'dd/MM/yyyy' }}</span>
+      </div>
+    </div>
+
+    <div class="table-card card detail-card">
+      <div class="detail-row">
+        <span class="detail-label">Categoria</span>
+        <span class="detail-value">{{ l.subcategoria ? l.categoria + ' → ' + l.subcategoria : l.categoria }}</span>
+      </div>
+      @if (ehReceita() && parceiro()) {
+        <div class="detail-row">
+          <span class="detail-label">Parceiro</span>
+          <span class="detail-value">{{ parceiro() }}</span>
+        </div>
+      }
+      @if (l.cliente) {
+        <div class="detail-row">
+          <span class="detail-label">Cliente</span>
+          <span class="detail-value">{{ l.cliente }}</span>
+        </div>
+      }
+      @if (l.idParceria) {
+        <div class="detail-row">
+          <span class="detail-label">Parceria</span>
+          <span class="detail-value">{{ l.parceria }}</span>
+        </div>
+      }
+      @if (idContrato()) {
+        <div class="detail-row">
+          <span class="detail-label">Contrato</span>
+          <span class="detail-value">{{ contrato() }}</span>
+        </div>
+      }
+      @if (l.dataRealizacao) {
+        <div class="detail-row">
+          <span class="detail-label">{{ config().rotuloRealizado }} em</span>
+          <span class="detail-value">{{ l.dataRealizacao | date:'dd/MM/yyyy' }}</span>
+        </div>
+      }
+      <div class="detail-row">
+        <span class="detail-label">Recorrente</span>
+        <span class="detail-value">{{ l.ehRecorrente ? 'Sim' : 'Não' }}</span>
+      </div>
+    </div>
+
+    @if (l.servicos && l.servicos.length > 0) {
+      <h2 class="section-title">
+        <svg lucideIcon="list-checks" [size]="18" />
+        Serviços
+      </h2>
+      <div class="table-card">
+        <table class="table">
+          <thead>
+            <tr><th>Serviço</th><th>Subcategoria</th></tr>
+          </thead>
+          <tbody>
+            @for (s of l.servicos; track s.id) {
+              <tr>
+                <td class="cell-name" data-label="Serviço">{{ s.categoriaServico }}</td>
+                <td class="cell-meta" data-label="Subcategoria">{{ s.subcategoriaServico || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

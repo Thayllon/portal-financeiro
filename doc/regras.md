@@ -40,12 +40,16 @@ conta, dia e data fim. Dia útil limita a 1–5. Receitas usam a subcategoria
 
 Receita aceita no máximo um vínculo: `IdParceria` **ou** `IdContrato`,
 nunca os dois. Vínculo aponta para registro ativo do próprio usuário.
+**Histórico preservado**: ao editar um lançamento antigo mantendo o mesmo
+vínculo já armazenado, o registro encerrado é aceito (validação checa só
+existência + posse); trocar/atribuir vínculo novo continua exigindo ativo.
+Mesma regra vale para despesas vinculadas a parceria.
 
 | Aspecto | Detalhe |
 |---|---|
-| Vive em | `Core/Application/Validations/ReceitaRequestValidator.cs:16`, `Core/Application/Services/ReceitaAppService.cs:104` (`AdicionarAsync`), `:184` (`AtualizarAsync`) |
+| Vive em | `Core/Domain/Services/VinculoHelper.cs` (`ValidarAtualizacaoAsync`), `Core/Application/Validations/ReceitaRequestValidator.cs:16`, `Core/Application/Services/ReceitaAppService.cs:181` (`AtualizarAsync`), `Core/Application/Services/DespesaAppService.cs:146` (`AtualizarAsync`) |
 | Erros | `RECEITA_VINCULO_DUPLO` (400); `PARCERIA_INVALIDA`, `CONTRATO_INVALIDO` (400); `RECEITA_ACESSO_NEGADO` (403) |
-| Cenários | `C3.1` parceria + contrato juntos → 400 `RECEITA_VINCULO_DUPLO`; `C3.2` só parceria → válido; `C3.3` só contrato → válido; `C3.4` sem vínculo → válido |
+| Cenários | `C3.1` parceria + contrato juntos → 400 `RECEITA_VINCULO_DUPLO`; `C3.2` só parceria → válido; `C3.3` só contrato → válido; `C3.4` sem vínculo → válido; `C3.5` editar mantendo parceria/contrato encerrado → válido; `C3.6` editar trocando para vínculo encerrado → 400 (cobertura xUnit em `ReceitaAppServiceTests`/`DespesaAppServiceTests`) |
 
 ## R4 — Parceria: encerrar só sem pendências
 

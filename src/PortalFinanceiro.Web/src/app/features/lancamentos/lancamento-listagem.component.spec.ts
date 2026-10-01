@@ -11,7 +11,7 @@ import { ParceriaRepository } from '../../core/repositories/parceria.repository'
 import { ContratoRepository } from '../../core/repositories/contrato.repository';
 import { NotificationService } from '../../core/services/notification.service';
 import { ConfirmService } from '../../shared/services/confirm.service';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { ModuloPermissao } from '../../core/models/permissao.model';
 
 const STORAGE_KEY = 'portal-financeiro.auth';
@@ -34,6 +34,7 @@ async function criarComponente(tipo: 'receita' | 'despesa') {
       AuthService,
       { provide: AuthRepository, useValue: {} },
       { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
       { provide: ReceitaRepository, useValue: { listar: () => of([]) } },
       { provide: DespesaRepository, useValue: { listar: () => of([]) } },
       { provide: CategoriaReceitaRepository, useValue: { listar: () => of([]) } },

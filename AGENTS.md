@@ -65,7 +65,7 @@ cd src/PortalFinanceiro.Web && npm run lint
 - **Design system** em `src/app/design-system/styles/`
 - **Ícones**: Lucide Angular (`@lucide/angular`)
 - **Componentes compartilhados** em `src/app/shared/components/`
-- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, categorias-receita, usuarios, login, testes)
+- **Features** em `src/app/features/` (home, dashboard, receitas, despesas, lancamentos, contas, pessoas, clientes, parceiros, parcerias, contratos, processos, categorias-receita, usuarios, login, testes)
 
 ### Scripts e Documentação
 
@@ -156,6 +156,7 @@ Toda resposta de erro da API deve seguir o contrato único tipado `{ codigo, men
 - **Leitura com projeção**: usar `*Projecao` (ex.: `ReceitaProjecao`, `DespesaProjecao`) em `Domain/Projections/` para nomes display; entidades com `private set`
 - **Mutações**: re-buscar projeção via `ObterProjecaoPorIdAsync` após persistir entidade
 - **Fluxo recorrente**: usar `TransactionScope` para atomicidade entre regra + parcelas
+- **Vínculo de lançamento (parceria/contrato)**: validar via `VinculoHelper.ValidarAtualizacaoAsync` (`Core/Domain/Services/`) — ao editar mantendo o mesmo vínculo já armazenado, aceitar registro encerrado (só existência + posse); trocar/atribuir vínculo novo exige `Ativo`. Aplicado em `ReceitaAppService.AtualizarAsync` e `DespesaAppService.AtualizarAsync`. `AdicionarAsync` (criar) sempre exige vínculo ativo
 
 ### Frontend (TypeScript)
 
@@ -173,6 +174,8 @@ Toda resposta de erro da API deve seguir o contrato único tipado `{ codigo, men
 - **LancamentoRepository**: usar `LancamentoFiltros` compartilhado (alias `ReceitaFiltros`/`DespesaFiltros`)
 - **Listas**: Usar `useListPagination` + `ListPaginationComponent` em toda listagem de dados
 - **Páginas parametrizadas**: `PessoaListagemComponent` (`features/pessoas`, `tipo` Cliente/Parceiro) e `LancamentoListagemComponent` (`features/lancamentos`, `tipo` receita/despesa) — `clientes`/`parceiros` e `receitas`/`despesas` são wrappers finos; não duplicar páginas
+- **Detalhe de lançamento**: `LancamentoDetalheComponent` (`features/lancamentos/lancamento-detalhe`) parametrizado por `data: { tipo }` na rota (`/receitas/:id` e `/despesas/:id`) — mesmo componente para ambos; não criar `receita-detalhe`/`despesa-detalhe` separados
+- **Editar via detalhe**: o detalhe navega para a listagem com `?editar=<id>`; a listagem lê o query param, busca via `obter(id)` e abre o modal existente — não recarregar as options do modal no detalhe
 - **SQL de lançamentos**: `LancamentoSql` (base parametrizada por tabela) — `ReceitaSql`/`DespesaSql` são wrappers finos
 - **Lint**: ESLint configurado (`eslint.config.mjs`); `npm run lint` deve passar com 0 erros
 - **Interceptor de erro**: `errorInterceptor` registrado em `app.config.ts` para tratar 401 → logout automático
@@ -203,7 +206,7 @@ src/app/
 │   ├── home/
 │   ├── receitas/        # wrapper fino → LancamentoListagemComponent
 │   ├── despesas/        # wrapper fino → LancamentoListagemComponent
-│   ├── lancamentos/     # LancamentoListagemComponent (tipo receita/despesa)
+│   ├── lancamentos/     # LancamentoListagemComponent (tipo receita/despesa) + LancamentoDetalheComponent (rota /:id, tipo via data)
 │   ├── contas/
 │   ├── pessoas/         # PessoaListagemComponent (tipo Cliente/Parceiro)
 │   ├── clientes/        # wrapper fino → PessoaListagemComponent
@@ -249,6 +252,7 @@ src/app/
 - [ ] DAS removido (não há mais auto-cálculo nem auto-geração)
 - [ ] Leitura usa projeção (nomes display via `*Projecao`, não na entidade)
 - [ ] Mutação re-busca projeção antes de mapear resposta
+- [ ] Vínculo encerrado preservado na edição via `VinculoHelper` (troca exige ativo)
 - [ ] `dotnet test` passando (backend)
 - [ ] `npm run lint` com 0 erros (frontend)
 - [ ] Listas usam `useListPagination` + `ListPaginationComponent`

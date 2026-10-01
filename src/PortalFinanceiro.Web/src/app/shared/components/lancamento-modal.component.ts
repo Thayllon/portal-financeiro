@@ -136,12 +136,12 @@ export class LancamentoModalComponent {
 
     effect(() => {
       const p = this.parcerias();
-      this.parceriasOptions.set(p.map(x => ({ value: x.id, label: `${x.nome} (${x.parceiro} - ${x.cliente})` })));
+      this.parceriasOptions.set(p.map(x => ({ value: x.id, label: `${x.nome} (${x.parceiro} - ${x.cliente})${x.ativo ? '' : ' (encerrada)'}` })));
     });
 
     effect(() => {
       const c = this.contratos();
-      this.contratosOptions.set(c.map(x => ({ value: x.id, label: `${x.nome} (${x.cliente})` })));
+      this.contratosOptions.set(c.map(x => ({ value: x.id, label: `${x.nome} (${x.cliente})${x.ativo ? '' : ' (encerrada)'}` })));
     });
 
     effect(() => {
