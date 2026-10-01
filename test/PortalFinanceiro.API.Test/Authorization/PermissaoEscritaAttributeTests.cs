@@ -221,10 +221,10 @@ public class RequerPermissaoEscritaPessoaAttributeTests
             actionContext,
             new List<IFilterMetadata>(),
             new Dictionary<string, object?> { ["request"] = request },
-            controller: null);
+            controller: null!);
 
         Task<ActionExecutedContext> ActionExecutionDelegate()
-            => Task.FromResult(new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), controller: null));
+            => Task.FromResult(new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), controller: null!));
 
         return (executando, ActionExecutionDelegate);
     }
@@ -300,11 +300,11 @@ public class RequerPermissaoEscritaPessoaAttributeTests
             actionContext,
             new List<IFilterMetadata>(),
             new Dictionary<string, object?>(),
-            controller: null);
+            controller: null!);
 
         var atributo = new RequerPermissaoEscritaPessoaAttribute();
         await atributo.OnActionExecutionAsync(executando, () =>
-            Task.FromResult(new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), controller: null)));
+            Task.FromResult(new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), controller: null!)));
 
         var resultado = executando.Result.Should().BeOfType<ObjectResult>().Subject;
         resultado.StatusCode.Should().Be(400);
