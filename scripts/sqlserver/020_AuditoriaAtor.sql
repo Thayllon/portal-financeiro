@@ -11,15 +11,22 @@ INSERT INTO @Tabelas (Nome) VALUES
     (N'Processo'), (N'ProcessoEtapa');
 
 DECLARE @Tabela SYSNAME;
+DECLARE @Sql NVARCHAR(MAX);
 DECLARE cur CURSOR LOCAL FAST_FORWARD FOR SELECT Nome FROM @Tabelas;
 OPEN cur;
 FETCH NEXT FROM cur INTO @Tabela;
 WHILE @@FETCH_STATUS = 0
 BEGIN
     IF COL_LENGTH(@Tabela, 'CriadoPor') IS NULL
-        EXEC(N'ALTER TABLE ' + QUOTENAME(@Tabela) + ' ADD CriadoPor UNIQUEIDENTIFIER NULL');
+    BEGIN
+        SET @Sql = N'ALTER TABLE ' + QUOTENAME(@Tabela) + N' ADD CriadoPor UNIQUEIDENTIFIER NULL';
+        EXEC(@Sql);
+    END;
     IF COL_LENGTH(@Tabela, 'AlteradoPor') IS NULL
-        EXEC(N'ALTER TABLE ' + QUOTENAME(@Tabela) + ' ADD AlteradoPor UNIQUEIDENTIFIER NULL');
+    BEGIN
+        SET @Sql = N'ALTER TABLE ' + QUOTENAME(@Tabela) + N' ADD AlteradoPor UNIQUEIDENTIFIER NULL';
+        EXEC(@Sql);
+    END;
     FETCH NEXT FROM cur INTO @Tabela;
 END;
 CLOSE cur;
