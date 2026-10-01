@@ -1,5 +1,5 @@
 -- Portal Financeiro - Processos e etapas do mundo real (SQL Server, banco local).
--- 015: cria Processo (vínculo obrigatório e exclusivo: Parceria XOR Contrato)
+-- 015: cria Processo (vínculo opcional: no máximo um entre Parceria e Contrato)
 -- e ProcessoEtapa (passos validáveis com ordem, previsão e conclusão).
 -- Não toca Postgres (scripts/postgres/ mantido como está).
 
@@ -18,9 +18,8 @@ BEGIN
         CONSTRAINT FK_Processo_Usuario FOREIGN KEY (IdUsuario) REFERENCES Usuario(Id),
         CONSTRAINT FK_Processo_Parceria FOREIGN KEY (IdParceria) REFERENCES Parceria(Id),
         CONSTRAINT FK_Processo_Contrato FOREIGN KEY (IdContrato) REFERENCES Contrato(Id),
-        CONSTRAINT CK_Processo_Vinculo_Exclusivo CHECK (
-            (IdParceria IS NOT NULL AND IdContrato IS NULL)
-            OR (IdParceria IS NULL AND IdContrato IS NOT NULL)
+        CONSTRAINT CK_Processo_Vinculo_Unico CHECK (
+            NOT (IdParceria IS NOT NULL AND IdContrato IS NOT NULL)
         )
     );
 

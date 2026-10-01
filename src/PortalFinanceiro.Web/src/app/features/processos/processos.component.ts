@@ -3,11 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ProcessoRepository } from '../../core/repositories/processo.repository';
-import { ParceriaRepository } from '../../core/repositories/parceria.repository';
-import { ContratoRepository } from '../../core/repositories/contrato.repository';
 import { Processo, ProcessoRequest } from '../../core/models/processo.model';
-import { Parceria } from '../../core/models/parceria.model';
-import { Contrato } from '../../core/models/contrato.model';
 import { AuthService } from '../../core/services/auth.service';
 import { NivelPermissao } from '../../core/models/permissao.model';
 import { NotificationService } from '../../core/services/notification.service';
@@ -29,8 +25,6 @@ import { LucideDynamicIcon } from '@lucide/angular';
 })
 export class ProcessosComponent implements OnInit {
   private repo = inject(ProcessoRepository);
-  private parceriaRepo = inject(ParceriaRepository);
-  private contratoRepo = inject(ContratoRepository);
   private notify = inject(NotificationService);
   private confirmService = inject(ConfirmService);
   private router = inject(Router);
@@ -39,18 +33,14 @@ export class ProcessosComponent implements OnInit {
   podeEscrever = computed(() => this.auth.temPermissao('processos', NivelPermissao.Escrita));
 
   processos = signal<Processo[]>([]);
-  parcerias = signal<Parceria[]>([]);
-  contratos = signal<Contrato[]>([]);
   loading = signal(true);
   modalVisible = signal(false);
   editando = signal<Processo | null>(null);
   salvando = signal(false);
   filtroSituacao: boolean | undefined = undefined;
 
-  form: ProcessoRequest = { nome: '', descricao: '', idParceria: undefined, idContrato: undefined };
+  form: ProcessoRequest = { nome: '', descricao: '' };
 
-  parceriasOptions = computed<SelectOption[]>(() => this.parcerias().map(p => ({ value: p.id, label: p.nome })));
-  contratosOptions = computed<SelectOption[]>(() => this.contratos().map(c => ({ value: c.id, label: c.nome })));
   situacaoOptions: SelectOption[] = [
     { value: 'todas', label: 'Todas' },
     { value: 'ativas', label: 'Ativas' },
@@ -59,7 +49,7 @@ export class ProcessosComponent implements OnInit {
 
   paginacao = useListPagination(this.processos, { initialPageSize: 10 });
 
-  ngOnInit() { this.carregarVinculos(); this.carregar(); }
+  ngOnInit() { this.carregar(); }
 
   async carregar() {
     this.loading.set(true);
@@ -70,40 +60,19 @@ export class ProcessosComponent implements OnInit {
     finally { this.loading.set(false); }
   }
 
-  async carregarVinculos() {
-    try {
-      const [parcerias, contratos] = await Promise.all([
-        firstValueFrom(this.parceriaRepo.listar(true)),
-        firstValueFrom(this.contratoRepo.listar(true))
-      ]);
-      this.parcerias.set(parcerias);
-      this.contratos.set(contratos);
-    } catch {}
-  }
-
   mudarSituacao(valor: string | number | null) {
     this.filtroSituacao = valor === 'ativas' ? true : valor === 'encerradas' ? false : undefined;
     this.carregar();
   }
 
-  onVinculoChange(tipo: 'parceria' | 'contrato', valor: string) {
-    if (tipo === 'parceria') {
-      this.form.idParceria = valor || undefined;
-      if (valor) this.form.idContrato = undefined;
-    } else {
-      this.form.idContrato = valor || undefined;
-      if (valor) this.form.idParceria = undefined;
-    }
-  }
-
   abrirModal() {
-    this.form = { nome: '', descricao: '', idParceria: undefined, idContrato: undefined };
+    this.form = { nome: '', descricao: '' };
     this.editando.set(null);
     this.modalVisible.set(true);
   }
 
   editar(item: Processo) {
-    this.form = { nome: item.nome, descricao: item.descricao ?? '', idParceria: item.idParceria, idContrato: item.idContrato };
+    this.form = { nome: item.nome, descricao: item.descricao ?? '' };
     this.editando.set(item);
     this.modalVisible.set(true);
   }
@@ -119,14 +88,9 @@ export class ProcessosComponent implements OnInit {
 
   async salvar() {
     if (!this.form.nome?.trim()) { this.notify.error('Informe o nome'); return; }
-    if (!this.editando() && !this.form.idParceria && !this.form.idContrato) { this.notify.error('Vincule o processo a uma parceria ou a um contrato'); return; }
     this.salvando.set(true);
     try {
       const payload: ProcessoRequest = { nome: this.form.nome.trim(), descricao: this.form.descricao?.trim() || undefined };
-      if (!this.editando()) {
-        if (this.form.idParceria) payload.idParceria = this.form.idParceria;
-        if (this.form.idContrato) payload.idContrato = this.form.idContrato;
-      }
       if (this.editando()) {
         await firstValueFrom(this.repo.atualizar(this.editando()!.id, payload));
         this.notify.success('Processo atualizado');

@@ -19,8 +19,9 @@ incrementais idempotentes para bancos já criados:
 | `004_ContaPadrao.sql` | Incremental idempotente: adiciona `ContaBancaria.EhPadrao` se ainda não existir |
 | `005_Contratos.sql` | Incremental idempotente: cria `Contrato`, adiciona `Receita.IdContrato` (FK + índice) e garante o módulo `contratos` em `PermissaoUsuario` |
 | `006_ContratoRecorrente.sql` | Incremental idempotente: adiciona `Contrato.EhRecorrente` + `Contrato.IdRegra` se ainda não existirem |
-| `015_Processos.sql` | Incremental idempotente: cria `Processo` (vínculo exclusivo `IdParceria` XOR `IdContrato` via CHECK) + `ProcessoEtapa` (ordem, conclusão, prevista) e garante o módulo `processos` em `PermissaoUsuario` |
+| `015_Processos.sql` | Incremental idempotente: cria `Processo` (vínculo opcional `IdParceria`/`IdContrato` — no máximo um via CHECK) + `ProcessoEtapa` (ordem, conclusão, prevista) e garante o módulo `processos` em `PermissaoUsuario` |
 | `016_OutrosIndicadores.sql` | Incremental idempotente: garante o módulo especial `outros-indicadores` (Leitura) para admin e quem já usa fluxo adicional |
+| `017_ProcessoVinculoOpcional.sql` | Incremental idempotente: troca o CHECK do `Processo` — de "vínculo obrigatório e exclusivo (XOR)" para "no máximo um" (processo pode ser criado sem vínculo) |
 ### Operacionais Postgres (só em `scripts/postgres/` — uso manual, NÃO via DbUp)
 
 | Script | Conteúdo |
@@ -80,7 +81,7 @@ dotnet run --project tools/DbSetup
 | `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
 | `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuário |
 | `Contrato` | Contratos (nome + cliente + valor, sem parceiro) por usuário |
-| `Processo` | Processos (nome + descrição + vínculo exclusivo parceria/contrato) por usuário |
+| `Processo` | Processos (nome + descrição + vínculo **opcional** parceria/contrato, no máximo um via CHECK) por usuário |
 | `ProcessoEtapa` | Etapas do processo (nome + descrição + ordem + conclusão + prevista) |
 | `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |

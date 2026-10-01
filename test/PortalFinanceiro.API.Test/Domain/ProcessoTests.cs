@@ -32,12 +32,14 @@ public class ProcessoTests
     }
 
     [Fact]
-    public void Criar_SemVinculo_RetornaValidacao()
+    public void Criar_SemVinculo_RetornaSucesso()
     {
         var result = Processo.Criar(_idUsuario, "Regularizar casa", null, null, null);
 
-        result.EhSucesso.Should().BeFalse();
-        result.Erro!.Codigo.Should().Be("VINCULO_OBRIGATORIO");
+        result.EhSucesso.Should().BeTrue();
+        result.Dado!.IdParceria.Should().BeNull();
+        result.Dado.IdContrato.Should().BeNull();
+        result.Dado.Ativo.Should().BeTrue();
     }
 
     [Fact]
@@ -46,7 +48,7 @@ public class ProcessoTests
         var result = Processo.Criar(_idUsuario, "Regularizar casa", null, _idParceria, _idContrato);
 
         result.EhSucesso.Should().BeFalse();
-        result.Erro!.Codigo.Should().Be("VINCULO_OBRIGATORIO");
+        result.Erro!.Codigo.Should().Be("VINCULO_DUPLO");
     }
 
     [Fact]
