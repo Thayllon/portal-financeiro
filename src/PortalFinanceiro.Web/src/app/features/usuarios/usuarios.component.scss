@@ -101,8 +101,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.375rem;
-  height: 2.375rem;
+  width: 2.625rem;
+  height: 2.625rem;
   flex-shrink: 0;
   background: var(--color-error);
   color: var(--content-surface);
@@ -117,13 +117,16 @@
 }
 
 .row-perfil {
-  display: flex;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: start;
   gap: 0.75rem;
+  width: 100%;
 }
 
 .field--compact {
-  flex: 0 0 9.5rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .field--acao {
@@ -143,7 +146,7 @@
 }
 
 .dados-usuario .field--alinhado {
-  width: 22.875rem;
+  width: 100%;
 }
 
 .drawer-section__header {
