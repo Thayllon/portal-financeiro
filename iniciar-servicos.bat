@@ -5,6 +5,13 @@ title Portal Financeiro - Iniciar servicos
 set "ROOT=%~dp0"
 
 echo ============================================
+echo  Subindo o PostgreSQL local (portal_financeiro)
+echo ============================================
+start "Portal-Postgres" cmd /k ""D:\projetos\postgres-replica\pgsql\bin\postgres.exe" -D "D:\projetos\postgres-replica\data" -p 5432"
+timeout /t 6 /nobreak >nul
+
+echo.
+echo ============================================
 echo  Iniciando a API (dotnet run)
 echo ============================================
 start "Portal-API" cmd /k "cd /d "%ROOT%src\PortalFinanceiro.API" && dotnet run --launch-profile http"

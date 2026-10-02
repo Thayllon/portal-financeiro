@@ -15,7 +15,7 @@ public interface ISqlDialect
 
 public static class SqlDialect
 {
-    public static ISqlDialect Current { get; private set; } = new Dialects.SqlServerDialect();
+    public static ISqlDialect Current { get; private set; } = new Dialects.PostgresDialect();
 
     public static void Configure(ISqlDialect dialect)
     {

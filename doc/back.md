@@ -6,7 +6,7 @@
 - **Clean Architecture**: `API` (controllers) → `Core` (domínio + aplicação) → `Infrastructure` (Dapper + IoC)
 - **Dapper** como ORM + **Polly** para retry
 - **JWT Bearer** para autenticação
-- **DbUp** para migrations (via `tools/DbSetup`, ver [banco.md](banco.md))
+- **PostgreSQL** via `Npgsql` (schema/scripts em `scripts/postgres/`, ver [banco.md](banco.md))
 
 ## Projetos
 

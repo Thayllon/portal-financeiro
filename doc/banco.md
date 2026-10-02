@@ -1,113 +1,90 @@
-﻿# Banco de dados â€” Portal Financeiro
+﻿# Banco de dados — Portal Financeiro
 
-## Providers
+## Provider
 
-| Provider | Pasta | Status |
-|----------|-------|--------|
-| SQL Server | `scripts/sqlserver/` | **PadrÃ£o do app** (LocalDB) |
-| PostgreSQL | `scripts/postgres/` | Suportado (`Npgsql` + `PostgresDialect`; provider via `Database__Provider`) |
+O aplicativo roda **somente em PostgreSQL**. O SQL Server local foi descontinuado
+como fonte de dados: o banco `PortalFinanceiro` (LocalDB) permanece apenas como
+**backup** e não é mais lido nem modificado pelo código.
+
+| Banco | Conexão | Papel |
+|-------|---------|-------|
+| PostgreSQL local (dev) | `localhost:5432/portal_financeiro` | Banco real de desenvolvimento (réplica em `D:\projetos\postgres-replica`) |
+| PostgreSQL Neon | `ep-*.neon.tech` | Produção (`neondb`) e réplica com dados (`neondb_bravo`) |
 
 ## Scripts
 
-Ambos os providers tÃªm o **mesmo conjunto "from scratch"** (banco novo) mais
-incrementais idempotentes para bancos jÃ¡ criados:
+Os scripts vivem em `scripts/postgres/` e são aplicados **manualmente** (psql / SQL Editor).
+Não há DbUp nem ferramenta de migração no repositório (removidos junto com a infra SQL Server).
 
-| Script | ConteÃºdo |
+| Script | Conteúdo |
 |--------|----------|
-| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, Ã­ndices, FKs â€” inclui `Pessoa`, `CategoriaServico`, `ReceitaServico`, `DespesaServico` + `Despesa.IdCliente`, `Parceria` com `Nome`/`PercentualParceiro`, `Contrato` + `Receita.IdContrato`, `Processo` + `ProcessoEtapa` e `PermissaoUsuario`) |
-| `003_FluxoAdicionalDespesa.sql` | Incremental idempotente para bancos criados antes do refactor: adiciona `Despesa.IdCliente` e tabela `DespesaServico` se ainda nÃ£o existirem |
-| `004_ContaPadrao.sql` | Incremental idempotente: adiciona `ContaBancaria.EhPadrao` se ainda nÃ£o existir |
-| `005_Contratos.sql` | Incremental idempotente: cria `Contrato`, adiciona `Receita.IdContrato` (FK + Ã­ndice) e garante o mÃ³dulo `contratos` em `PermissaoUsuario` |
-| `006_ContratoRecorrente.sql` | Incremental idempotente: adiciona `Contrato.EhRecorrente` + `Contrato.IdRegra` se ainda nÃ£o existirem |
-| `015_Processos.sql` | Incremental idempotente: cria `Processo` (vÃ­nculo opcional `IdParceria`/`IdContrato` â€” no mÃ¡ximo um via CHECK) + `ProcessoEtapa` (ordem, conclusÃ£o, prevista) e garante o mÃ³dulo `processos` em `PermissaoUsuario` |
-| `016_OutrosIndicadores.sql` | Incremental idempotente: garante o mÃ³dulo especial `outros-indicadores` (Leitura) para admin e quem jÃ¡ usa fluxo adicional |
-| `017_ProcessoVinculoOpcional.sql` | Incremental idempotente: troca o CHECK do `Processo` â€” de "vÃ­nculo obrigatÃ³rio e exclusivo (XOR)" para "no mÃ¡ximo um" (processo pode ser criado sem vÃ­nculo) |
-| `018_CheckEnums.sql` | Incremental idempotente: `CHECK constraints` dos enums (tipo/nÃ­vel/status) |
-| `019_PermissaoCategoriasGranulares.sql` | Incremental: divide `categorias` em 3 mÃ³dulos granulares preservando nÃ­veis |
-| `020_AuditoriaAtor.sql` | Incremental idempotente: adicionar `CriadoPor`/`AlteradoPor` nas tabelas de domÃ­nio |
-| `021_MotorProcessos.sql` | Motor de processos: cria `ModeloProcesso`/`ModeloEtapa`/`ModeloItem` (templates), `ProcessoEtapaItem` (sub-itens) e `ProcessoAnexo` (estrutura p/ Plano 2); `Processo` ganha `IdModeloProcesso`/`IdCliente`/`DataEncerramento`, `ProcessoEtapa` ganha `DataInicio`; limpa processos sem modelo e semeia "Regularização de Imóvel" (4 fases, 8 itens) por usuário |
-### Operacionais Postgres (sÃ³ em `scripts/postgres/` â€” uso manual, NÃƒO via DbUp)
+| `001_CriarTabelas.sql` | Schema unificado completo (todas as tabelas, índices, FKs) — banco novo |
+| `003_FluxoAdicionalDespesa.sql` | Incremental idempotente: `Despesa.IdCliente` + `DespesaServico` |
+| `004_ContaPadrao.sql` | Incremental idempotente: `ContaBancaria.EhPadrao` |
+| `005_Contratos.sql` | Incremental idempotente: `Contrato` + `Receita.IdContrato` + módulo `contratos` |
+| `006_ContratoRecorrente.sql` | Incremental idempotente: `Contrato.EhRecorrente` + `Contrato.IdRegra` |
+| `100_DDL_AtualizarEstrutura.sql` | DDL idempotente p/ Neon desatualizado (cria tabelas/colunas/índices/FKs faltantes) |
+| `103_CheckEnums.sql` | `CHECK constraints` dos enums (tipo/nível/status) |
+| `104_PermissaoCategoriasGranulares.sql` | Divide `categorias` em 3 módulos granulares preservando níveis |
+| `105_AuditoriaAtor.sql` | `CriadoPor`/`AlteradoPor` nas tabelas de domínio |
+| `106_MotorProcessos.sql` | Motor de processos: `ModeloProcesso`/`ModeloEtapa`/`ModeloItem`, `Processo`/`ProcessoEtapa`, `ProcessoEtapaItem` e `ProcessoAnexo`; colunas novas em `Processo`/`ProcessoEtapa`; módulo `processos` e seed do modelo "Regularização de imóvel". Idempotente |
 
-| Script | ConteÃºdo |
-|--------|----------|
-| `100_DDL_AtualizarEstrutura.sql` | **DDL idempotente p/ Neon desatualizado**: sincroniza schema (cria tabelas/colunas/Ã­ndices/FKs faltantes) |
-| `103_CheckEnums.sql` | DDL: `CHECK constraints` dos enums (tipo/nÃ­vel/status) |
-| `104_PermissaoCategoriasGranulares.sql` | DML de permissÃµes: divide `categorias` em los 3 mÃ³dulos granulares preservando nÃ­veis |
-| `105_AuditoriaAtor.sql` | DDL: adicionar `CriadoPor`/`AlteradoPor` (auditoinÃ­cio no futuro, dados antigos ficam com NULL) |
-| `106_MotorProcessos.sql` | **Espelha o `021_MotorProcessos.sql` do SQL Server**: cria `ModeloProcesso`/`ModeloEtapa`/`ModeloItem`, `Processo`/`ProcessoEtapa`, `ProcessoEtapaItem` e `ProcessoAnexo`; adiciona `IdModeloProcesso`/`IdCliente`/`DataEncerramento` em `Processo` e `DataInicio` em `ProcessoEtapa`; auditoria de ator, CHECKs, índices, módulo `processos` e seed do modelo "Regularização de imóvel". Idempotente. **Em banco novo a ordem completa é `001` → `003` → `004` → `005` → `006` → `100` → `103` → `104` → `105` → `106`** |
-### Estrutura Postgres
+**Banco novo — ordem completa:** `001` → `003` → `004` → `005` → `006` → `100` → `103` → `104` → `105` → `106`.
 
-> O repositÃ³rio mantÃ©m **somente DDL + scripts de permissÃµes**. Scripts de dados/remise (seeds DML destrutivos) foram removidos; cargas de dados sÃ£o executadas pontualmente no banco, via SQL Editor/psql, e nÃ£o versionadas.
-
-> **Copiar Local → Prod (Neon):** fluxo descontinuado. Estrutura via `100_DDL_AtualizarEstrutura.sql`
-> (+ `103`/`104`/`105`); dados sÃ£o carga pontual, nÃ£o versionada.
-
-> **"From scratch"** = executar somente em banco novo. Um banco de desenvolvimento jÃ¡
-> migrado **nÃ£o** deve recebÃª-los novamente (DbUp rastreia por nome).
->
-> Os incrementais antigos (`006`â€“`014` no SQL Server, `002`â€“`006` no Postgres e
-> `002_AdicionarNomePercentualParceria`) foram removidos por jÃ¡ estarem absorvidos no `001` â€” com exceÃ§Ã£o do backfill de
-> `parcerias`. A numeraÃ§Ã£o foi **reutilizada**: os atuais
-> `003`/`004`/`005`/`006` sÃ£o scripts novos e idempotentes para bancos jÃ¡ criados (o `003_FluxoAdicionalDespesa` foi
-> **recriado** idempotente pois o `001` from-scratch nÃ£o Ã© reaplicado em bancos existentes e o erro â€œNÃ£o foi possÃ­vel retornar as despesasâ€ ocorria justamente pela falta de `IdCliente`/`DespesaServico`).
-
-### Differs entre providers
-
-- **SQL Server**: `IDENTITY`, `BIT`, tabela em schema `dbo`
-- **PostgreSQL**: `SERIAL`/`IDENTITY`, `BOOLEAN`, UUID via `gen_random_uuid()`
-
-## Ferramenta: DbSetup
-
-`tools/DbSetup` aplica os scripts via DbUp.
-
-```bash
-# Criar banco padrÃ£o (SQL Server LocalDB) + rodar scripts de scripts/sqlserver
-dotnet run --project tools/DbSetup
-```
-
-> O `DbSetup` Ã© **somente SQL Server** (DbUp + `Microsoft.Data.SqlClient`) e roda
-> todos os scripts da pasta em ordem de nome. **NÃ£o** aponte `--scripts=` para
-> `scripts/postgres/` (sintaxe Postgres nÃ£o roda no LocalDB).
-
-- Cria o banco `PortalFinanceiro` no LocalDB caso nÃ£o exista
-- Roda os scripts em ordem de nome (nÃ£o aplica os que jÃ¡ estÃ£o no journal)
+> A sincronização **local → Neon** é feita pelo `sincronizar-banco.ps1` (origem = PostgreSQL
+> local; `neondb` recebe schema via `pg_dump --schema-only`, `neondb_bravo` é recriado com
+> schema + dados). O script opera somente em PostgreSQL e **rejeita qualquer host que pareça
+> SQL Server**; o banco de origem nunca é limpo.
 
 ## Modelo de dados
 
 ### Tabelas principais
 
-| Tabela | DescriÃ§Ã£o |
+| Tabela | Descrição |
 |--------|-----------|
-| `Usuario` | UsuÃ¡rios do sistema (`IsAdmin`) |
+| `Usuario` | Usuários do sistema (`IsAdmin`) |
 | `ContaBancaria` | Contas PF/PJ |
-| `Pessoa` | Clientes/parceiros por usuÃ¡rio (`Tipo`: 1=Cliente, 2=Parceiro) |
-| `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuÃ¡rio |
-| `Contrato` | Contratos (nome + cliente + valor, sem parceiro) por usuÃ¡rio |
+| `Pessoa` | Clientes/parceiros por usuário (`Tipo`: 1=Cliente, 2=Parceiro) |
+| `Parceria` | Parcerias (nome + parceiro + cliente + valor + % do parceiro) por usuário |
+| `Contrato` | Contratos (nome + cliente + valor, sem parceiro) por usuário |
 | `Processo` | Processos (nome + descrição + vínculo **opcional** parceria/contrato, no máximo um via CHECK; `IdModeloProcesso?`, `IdCliente?` direto em `Pessoa`, `DataEncerramento?`) por usuário |
 | `ProcessoEtapa` | Fases do processo (nome + descrição + ordem + conclusão + prevista + `DataInicio?` p/ tempo por fase) |
 | `ProcessoEtapaItem` | Sub-itens da fase (nome + descrição + `Obrigatorio`/`ExigeAnexo` + ordem + conclusão + `DataInicio`/`DataConclusao` p/ tempo por item) |
 | `ProcessoAnexo` | Anexos do item (estrutura p/ Plano 2: `DriveFileId`/`Url`) |
 | `ModeloProcesso` / `ModeloEtapa` / `ModeloItem` | Templates reutilizáveis por usuário (fases + itens com `Obrigatorio`/`ExigeAnexo`) — instanciados ao criar processo |
-| `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) â€” **compartilhadas** |
+| `CategoriaReceita` / `CategoriaDespesa` / `CategoriaServico` | Categorias (pai/sub) — **compartilhadas** |
 | `CategoriaHistorico` | Auditoria de cria/edita/exclui de categorias |
-| `Receita` | Receitas (avulsas e recorrentes) â€” `IdParceria`/`IdContrato` opcionais e mutuamente exclusivos para vÃ­nculo |
-| `Despesa` | Despesas (avulsas e recorrentes) â€” `IdReceitaOrigem` e `IdParceria` opcionais para vÃ­nculos |
-| `PermissaoUsuario` | NÃ­vel por mÃ³dulo por usuÃ¡rio (`dashboard`, `receitas`, `despesas`, `contas`, `categorias`, `clientes`, `parceiros`, `parcerias`, `contratos`, `processos` garantidos via seed; admin com `Escrita` em todos) |
+| `Receita` | Receitas (avulsas e recorrentes) — `IdParceria`/`IdContrato` opcionais e mutuamente exclusivos para vínculo |
+| `Despesa` | Despesas (avulsas e recorrentes) — `IdReceitaOrigem` e `IdParceria` opcionais para vínculos |
+| `PermissaoUsuario` | Nível por módulo por usuário (`dashboard`, `receitas`, `despesas`, `contas`, `categorias`, `clientes`, `parceiros`, `parcerias`, `contratos`, `processos` garantidos via seed; admin com `Escrita` em todos) |
 
-> **Caixa do dashboard** (`DataRealizacao`): o recebido/pago por mÃªs do dashboard usa `COALESCE(DataRealizacao, Data)` quando `Status=2` â€” o dinheiro conta no mÃªs em que efetivamente entrou/saiu, nÃ£o no mÃªs do vencimento. Queries em `LancamentoSql` (`ResumoAnualRealizadoPorMes`, `ResumoMensalRealizado`, `*RealizadoPorConta`).
+> **Caixa do dashboard** (`DataRealizacao`): o recebido/pago por mês do dashboard usa `COALESCE(DataRealizacao, Data)` quando `Status=2` — o dinheiro conta no mês em que efetivamente entrou/saiu, não no mês do vencimento. Queries em `LancamentoSql` (`ResumoAnualRealizadoPorMes`, `ResumoMensalRealizado`, `*RealizadoPorConta`).
 
-### ExclusÃ£o de usuÃ¡rio
+### Exclusão de usuário
 
 - `Usuario` é referenciado por 14 FKs sem `ON DELETE CASCADE` (`ContaBancaria`, `Pessoa`, `Parceria`, `Contrato`, `Processo`, `ModeloProcesso`, `CategoriaReceita/Despesa/Servico`, `RegraReceita/Despesa`, `Receita`, `Despesa`, `CategoriaHistorico`)
-- `DELETE /api/usuarios/{id}` sem flag conta vÃ­nculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` â†’ 422 orientando desativar
+- `DELETE /api/usuarios/{id}` sem flag conta vínculos via `UsuarioRepository.ContarVinculosAsync`; se `> 0` retorna `USUARIO_COM_VINCULOS` → 422 orientando desativar
 - Exclusão em cascata (`DELETE /{id}?cascata=true&confirmacao=sim`): exige `confirmacao=sim` e executa `UsuarioSql.ExcluirEmCascata` numa única conexão (transação implícita) na ordem segura pelas FKs: `ReceitaServico`/`DespesaServico` → `ProcessoAnexo` → `ProcessoEtapaItem` → `ProcessoEtapa` → `Receita`/`Despesa` → `Processo` → `ModeloItem` → `ModeloEtapa` → `ModeloProcesso` → `Contrato`/`Parceria` → `RegraReceita`/`RegraDespesa` → `ContaBancaria`/`Pessoa` → `CategoriaReceita`/`Despesa`/`Servico` → `CategoriaHistorico` → `PermissaoUsuario` → `Usuario`
-- Auto-exclusÃ£o Ã© bloqueada (`AUTO_EXCLUSAO` â†’ 422) no backend alÃ©m do frontend
-| `RegraReceita` / `RegraDespesa` | RecorrÃªncias mensais (fixas/variÃ¡veis) |
+- Auto-exclusão é bloqueada (`AUTO_EXCLUSAO` → 422) no backend além do frontend
+
+> ⚠️ Bug conhecido (pré-existente, falha igual no SQL Server e no Postgres): a cascata quebra
+> quando o usuário criou categorias de serviço referenciadas por `ReceitaServico`/`DespesaServico`
+> de outros usuários (FK `SubcategoriaServicoId`). Além disso, a cascata apaga categorias que são
+> **compartilhadas** — risco de perder categorias usadas pelo time.
 
 ### Categorias compartilhadas
 
-- Leitura para **todos** os usuÃ¡rios (listagem retorna todas as ativas)
-- **Editar/excluir**: apenas o dono (`IdUsuario`) ou usuÃ¡rio `IsAdmin` â†’ senÃ£o HTTP 403 (`Erro.Permissao`)
-- Toda mutaÃ§Ã£o (criar/editar/excluir, incluindo subcategorias) grava `CategoriaHistorico`
-  - `Acao`: 1=Criado, 2=Editado, 3=ExcluÃ­do
-  - `TipoCategoria`: 1=Receita, 2=Despesa, 3=ServiÃ§os
+- Leitura para **todos** os usuários (listagem retorna todas as ativas)
+- **Editar/excluir**: apenas o dono (`IdUsuario`) ou usuário `IsAdmin` → senão HTTP 403 (`Erro.Permissao`)
+- Toda mutação (criar/editar/excluir, incluindo subcategorias) grava `CategoriaHistorico`
+  - `Acao`: 1=Criado, 2=Editado, 3=Excluído
+  - `TipoCategoria`: 1=Receita, 2=Despesa, 3=Serviços
+
+## PostgreSQL local (dev)
+
+Réplica PostgreSQL em `D:\projetos\postgres-replica` (fora do repositório):
+
+- Binários: `pgsql\bin\` · dados: `data\` · porta `5432`
+- Auto-start no logon via `PortalFinanceiroPostgres.vbs` (pasta Startup do Windows)
+- Scripts manuais: `iniciar.bat` / `parar.bat`
+- Usuário `postgres`, senha vazia (auth trust local), banco `portal_financeiro`

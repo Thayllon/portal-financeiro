@@ -8,12 +8,12 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 |--------|------------|
 | Backend | .NET 11 + ASP.NET Core |
 | Frontend | Angular 22 (standalone, Signals) |
-| Banco | SQL Server LocalDB (scripts Postgres também mantidos) |
+| Banco | PostgreSQL (local `localhost:5432/portal_financeiro` e produção Neon/Oracle Cloud) |
 | ORM | Dapper + Polly retry |
 | Auth | JWT Bearer |
-| Migrations | DbUp |
+| Migrations | Scripts SQL em `scripts/postgres/` (aplicados manualmente) |
 | Ícones | Lucide Angular |
-| Deploy | Docker Compose — local (SQL Server) e produção Neon (PostgreSQL) + Render (API) + Vercel (Web) |
+| Deploy | Docker Compose — local e produção (PostgreSQL) + Render (API) + Vercel (Web) |
 
 ## Índice da documentação
 
@@ -22,8 +22,8 @@ Sistema de controle financeiro pessoal que **reflete o extrato real de todas as 
 | [regras.md](regras.md) | **Wiki micro das regras de negócio**: fonte única das 6 regras críticas, cenários `C<regra>.<n>` e débitos técnicos | Antes de mexer em regra; a tela `/testes` executa estes cenários ao vivo |
 | [back.md](back.md) | Backend: arquitetura, projetos, rotas da API, como rodar/buildar, padrões | Mexer na API/Core/Infra; descobrir endpoint |
 | [front.md](front.md) | Frontend: estrutura, features, como rodar/buildar/testar, padrões de UI | Mexer no Angular; criar tela/componente |
-| [banco.md](banco.md) | Banco: scripts por provider, DbSetup, modelo de dados, seed | Mexer em migração/schema; entender tabelas |
-| [deploy-local.md](deploy-local.md) | **Subir TUDO local com Docker em um link** (`http://localhost:8080`) — SQL Server + API + Front | Validar o sistema de ponta a ponta sem instalar nada |
+| [banco.md](banco.md) | Banco: scripts PostgreSQL, modelo de dados, sincronização local→Neon | Mexer em migração/schema; entender tabelas |
+| [deploy-local.md](deploy-local.md) | **Subir TUDO local com Docker em um link** (`http://localhost:8080`) — PostgreSQL + API + Front | Validar o sistema de ponta a ponta sem instalar nada |
 | [infra.md](infra.md) | Deploy **Oracle Cloud Always Free** (R$ 0) — PostgreSQL + API + Front numa VM só | Subir em produção / nuvem |
 | [primeiros-passos.md](primeiros-passos.md) | Como rodar do zero na primeira vez (banco → API → front), sem Docker | Ambiente novo; perder tudo e recomeçar |
 
@@ -37,19 +37,14 @@ portal-financeiro/
 │   ├── PortalFinanceiro.Infrastructure# Dapper repositories, IoC
 │   └── PortalFinanceiro.Web/          # Angular 22 (+ Dockerfile e nginx.conf)
 ├── scripts/
-│   ├── sqlserver/                     # Migrations DbUp (SQL Server)
-│   │   ├── 001_CriarTabelas.sql       #   schema unificado completo (banco novo)
-│   │   ├── 003..006_*.sql             #   incrementais idempotentes (bancos já criados)
-│   │   └── 015..020_*.sql             #   processos, granularização e auditoria
-│   └── postgres/                      # Mesmo conjunto + operacionais 100/103/104/105 (uso manual)
-├── tools/
-│   └── DbSetup/                       # Ferramenta para rodar migrations (+ Dockerfile)
+│   └── postgres/                      # Schema + incrementais idempotentes (001..106; uso manual)
 ├── doc/                               # Documentação (este índice + arquivos por área)
 ├── test/
 ├── Dockerfile                         # Backend .NET 11 (multi-stage, porta 8080)
-├── docker-compose.yml                 # Self-hosted legado (Oracle Cloud): PostgreSQL + API + Web
-├── docker-compose.local.yml           # Local: SQL Server + API + Web (link único)
+├── docker-compose.yml                 # Produção: PostgreSQL + API + Web
+├── docker-compose.local.yml           # Local: PostgreSQL + API + Web (link único)
 ├── .env.example                       # Modelo de variáveis (sem segredos reais)
+├── sincronizar-banco.ps1              # Sync PostgreSQL local → Neon (pg_dump)
 └── .github/workflows/ci.yml           # CI: build + teste (backend e frontend)
 ```
 

@@ -18,21 +18,10 @@ public static class DependencyInjectionConfiguration
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-        var provider = configuration["Database:Provider"] ?? configuration["Database__Provider"] ?? "SqlServer";
-        var isPostgres = provider.Equals("Postgres", StringComparison.OrdinalIgnoreCase)
-                      || provider.Equals("PostgreSQL", StringComparison.OrdinalIgnoreCase)
-                      || provider.Equals("Npgsql", StringComparison.OrdinalIgnoreCase);
 
-        if (isPostgres)
-        {
-            services.AddSingleton<IDatabaseConnectionFactory>(_ => new PostgresConnectionFactory(connectionString));
-            SqlDialect.Configure(new PostgresDialect());
-        }
-        else
-        {
-            services.AddSingleton<IDatabaseConnectionFactory>(_ => new SqlServerConnectionFactory(connectionString));
-            SqlDialect.Configure(new SqlServerDialect());
-        }
+        services.AddSingleton<IDatabaseConnectionFactory>(_ => new PostgresConnectionFactory(connectionString));
+        SqlDialect.Configure(new PostgresDialect());
+
         services.AddSingleton<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, TokenService>();
 
