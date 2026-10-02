@@ -309,24 +309,23 @@ O Cloudflare Tunnel cria um tÃºnel HTTPS **sem expor IP e sem domÃ­nio prÃ�
 
 ## Migrations (banco)
 
-O portal usa **scripts "from scratch"** via DbUp (`tools/DbSetup`). Em produÃ§Ã£o
-(PostgreSQL), o schema deve ser aplicado uma Ãºnica vez:
+O portal usa **scripts SQL em `scripts/postgres/`** aplicados manualmente (sem DbUp).
+Em produção (PostgreSQL), o schema deve ser aplicado uma única vez:
 
-**OpÃ§Ã£o A â€” script no compose:** monte `scripts/postgres` como volume no container
-`api` e aplique na inicializaÃ§Ã£o (recomendado para a doc futura de Postgres).
+**Opção A — script no compose:** monte `scripts/postgres` como volume no container
+`api` e aplique na inicialização.
 
-**OpÃ§Ã£o B â€” uma vez manualmente:**
+**Opção B — uma vez manualmente:**
 
 ```bash
-# Executar do host (na VM) ou via container temporÃ¡rio com os scripts montados
+# Executar do host (na VM) ou via container temporário com os scripts montados
 psql "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}" \
   -f scripts/postgres/001_CriarTabelas.sql
-psql "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DB}" \
-  -f scripts/postgres/100_DDL_AtualizarEstrutura.sql
+# ... aplicar os demais na ordem (003,004,005,006,100,103,104,105,106)
 ```
 
-> Em desenvolvimento (SQL Server), rode `dotnet run --project tools/DbSetup` â€” veja
-> [banco.md](banco.md) e [deploy-local.md](deploy-local.md).
+> Em desenvolvimento (PostgreSQL local), aplique os scripts na réplica local ou use
+> `sincronizar-banco.ps1` — veja [banco.md](banco.md) e [primeiros-passos.md](primeiros-passos.md).
 
 ---
 
@@ -396,7 +395,7 @@ docker compose ps              # verifica saÃºde
 
 ## Ver tambÃ©m
 
-- [deploy-local.md](deploy-local.md) â€” rodar tudo local com Docker (SQL Server)
-- [primeiros-passos.md](primeiros-passos.md) â€” rodar sem Docker (LocalDB)
-- [banco.md](banco.md) â€” scripts e schema por provider
+- [deploy-local.md](deploy-local.md) — rodar tudo local com Docker (PostgreSQL)
+- [primeiros-passos.md](primeiros-passos.md) — rodar sem Docker (PostgreSQL local)
+- [banco.md](banco.md) — scripts e schema do PostgreSQL
 - [README.md](README.md) â€” Ã­ndice da documentaÃ§Ã£o

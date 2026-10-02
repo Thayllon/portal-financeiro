@@ -1,8 +1,8 @@
 # Deploy local — tudo em um link
 
-> Suba **todo o projeto** (SQL Server + API + Frontend) em containers Docker e acesse
-> por **um único link**: `http://localhost:8080`. Nada de instalar .NET, Node ou SQL
-> Server na sua máquina.
+> Suba **todo o projeto** (PostgreSQL + API + Frontend) em containers Docker e acesse
+> por **um único link**: `http://localhost:8080`. Nada de instalar .NET, Node ou
+> PostgreSQL na sua máquina.
 
 É o caminho mais rápido para validar o sistema de ponta a ponta antes de partir para
 o deploy em nuvem ([infra.md](infra.md)).
@@ -25,7 +25,9 @@ Edite o `.env`:
 
 ```dotenv
 # Deploy local
-SA_PASSWORD=TroqueEstaSenha@2026
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=TroqueEstaSenha@2026
+POSTGRES_DB=portal_financeiro
 JWT_SECRET=troque-este-segredo-por-um-texto-longo-e-aleatorio
 ```
 
@@ -41,10 +43,13 @@ O Compose executa na ordem:
 
 | Ordem | Serviço | O que faz |
 |-------|---------|-----------|
-| 1 | `sqlserver` | Sobe o SQL Server 2022 (porta `1433`) |
-| 2 | `migrate` | Aplica `scripts/sqlserver` (schema + seed) e encerra |
-| 3 | `api` | Sobe o backend .NET (porta interna `8080`) |
-| 4 | `web` | Sobe o Angular servido por Nginx, com proxy `/api → api` |
+| 1 | `db` | Sobe o PostgreSQL 17 (porta `5432`) |
+| 2 | `api` | Sobe o backend .NET (porta interna `8080`) |
+| 3 | `web` | Sobe o Angular servido por Nginx, com proxy `/api → api` |
+
+> O `db` inicia vazio: para schema + dados, rode os scripts de `scripts/postgres/`
+> (em banco novo: `001` → `003` → `004` → `005` → `006` → `100` → `103` → `104` → `105` → `106`)
+> ou use `sincronizar-banco.ps1` para sincronizar do PostgreSQL local para o Neon.
 
 ### 3. Acesse
 
@@ -61,7 +66,7 @@ O Compose executa na ordem:
 
 ## Verificação
 
-1. `docker compose -f docker-compose.local.yml ps` — todos os serviços `Up` (migrate fica `Exited (0)`)
+1. `docker compose -f docker-compose.local.yml ps` — todos os serviços `Up`
 2. `http://localhost:8080` abre o login
 3. Login com admin → dashboard carrega sem erros no console do navegador
 4. Logs da API: `docker compose -f docker-compose.local.yml logs -f api`
@@ -100,12 +105,11 @@ Config em `src/PortalFinanceiro.Web/nginx.conf`.
 | Problema | Solução |
 |----------|---------|
 | `port is already allocated` | Porta `8080` em uso — troque `"8080:80"` em `docker-compose.local.yml` |
-| SQL Server não inicia no macOS/ARM | A imagem `mssql/server:2022` exige x86_64; use um Mac Intel/Windows |
 | Primeiro build demora | Normal: baixa imagens e compila .NET + Angular (5–15 min) |
-| `migrate` com erro | `docker compose -f docker-compose.local.yml logs migrate` |
+| `db` sem schema | Aplique `scripts/postgres/001..106` ou rode `sincronizar-banco.ps1` |
 | Quer recriar o banco | `down -v` e `up -d` novamente |
 
 ## Sem Docker? Sem problemas
 
-Se preferir rodar com as ferramentas locais (LocalDB + `dotnet` + `npm`), veja
+Se preferir rodar com as ferramentas locais (PostgreSQL local + `dotnet` + `npm`), veja
 [primeiros-passos.md](primeiros-passos.md).

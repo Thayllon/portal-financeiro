@@ -8,17 +8,17 @@ Sistema de controle financeiro pessoal (PF/PJ) que reflete o extrato real de tod
 |--------|------------|
 | Backend | .NET 11 + ASP.NET Core (Clean Architecture, Dapper + Polly) |
 | Frontend | Angular 22 (standalone, Signals) |
-| Banco | SQL Server LocalDB (scripts Postgres tambÃ©m mantidos) |
+| Banco | PostgreSQL (local `localhost:5432/portal_financeiro` e produção Neon/Oracle Cloud) |
 | Auth | JWT Bearer |
-| Migrations | DbUp |
-| Ãcones | Lucide Angular |
-| Deploy | Docker Compose â€” local (SQL Server) e produÃ§Ã£o Oracle Cloud (PostgreSQL) |
+| Migrations | Scripts SQL em `scripts/postgres/` (aplicados manualmente) |
+| Ícones | Lucide Angular |
+| Deploy | Docker Compose — local e produção (PostgreSQL) |
 
 ## Quick Start
 
 ```bash
-# Banco novo (SQL Server LocalDB) â€” cria DB + schema (DDL)
-dotnet run --project tools/DbSetup
+# Banco PostgreSQL local (replica em D:\projetos\postgres-replica, auto-start no logon)
+# Schema + dados: aplicar scripts/postgres/001..106 em banco novo ou sincronizar via sincronizar-banco.ps1
 
 # Backend (http://localhost:5178)
 dotnet build PortalFinanceiro.API.slnx

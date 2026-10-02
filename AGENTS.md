@@ -15,8 +15,9 @@ Para CADA interação/alteração no projeto:
 ## Comandos
 
 ```bash
-# Setup do banco (SQL Server LocalDB)
-dotnet run --project tools/DbSetup
+# Banco (PostgreSQL local, replica em D:\projetos\postgres-replica)
+#   - Banco novo: aplicar scripts/postgres/001..106 (ordem: 001,003,004,005,006,100,103,104,105,106)
+#   - Sync local -> Neon: .\sincronizar-banco.ps1 (origem local, usa pg_dump; rejeita host SQL Server)
 
 # Build backend
 dotnet build PortalFinanceiro.API.slnx
@@ -69,7 +70,7 @@ cd src/PortalFinanceiro.Web && npm run lint
 
 ### Scripts e Documentação
 
-- **Scripts de banco**: `scripts/sqlserver/` (SQL Server, from scratch) e `scripts/postgres/`
+- **Scripts de banco**: `scripts/postgres/` (PostgreSQL; SQL Server descontinuado, banco local mantido só como backup)
 - **Documentação**: em `doc/` — `README.md` é o índice; arquivos por área (`back.md`, `front.md`, `banco.md`, `infra.md`, `primeiros-passos.md`). **Manter sempre atualizada** — toda mudança que altere API, schema, telas ou conceitos deve atualizar a doc correspondente **na mesma entrega**. Doc desatualizada = feature incompleta.
 
 ## Padrões de Código
@@ -112,8 +113,8 @@ cd src/PortalFinanceiro.Web && npm run lint
 ### Migrações (scripts SQL)
 
 - Não **empilhar** scripts incrementalmente sem revisar os anteriores.
-- Ao criar migração nova, avaliar se scripts antigos ficaram obsoletos ou já foram absorvidos pelo `001_CriarTabelas` (from-scratch) — se sim, **propor** (caso a caso, com aval do usuário) remoção/extração/nova numeração, mantendo DbUp/journal coerente.
-- `001`/`099` refletem o schema final; incrementais só migram banco já criado.
+- Ao criar migração nova, avaliar se scripts antigos ficaram obsoletos ou já foram absorvidos pelo `001_CriarTabelas` (from-scratch) — se sim, **propor** (caso a caso, com aval do usuário) remoção/extração/nova numeração, mantendo a sequência de `scripts/postgres/` coerente.
+- `001` reflete o schema final; incrementais só migram banco já criado.
 
 ### Mapeamento de Erro → HTTP
 

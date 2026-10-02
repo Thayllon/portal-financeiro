@@ -1,32 +1,21 @@
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+  db:
+    image: postgres:17-alpine
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${SA_PASSWORD}"
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-portal}"
+      POSTGRES_DB: "${POSTGRES_DB:-portal_financeiro}"
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - sqlserver-data:/var/opt/mssql
+      - pg-data:/var/lib/postgresql/data
     healthcheck:
-      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${SA_PASSWORD}" -C -Q "SELECT 1" || exit 1
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-portal_financeiro}"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 20s
+      retries: 5
+      start_period: 10s
     restart: unless-stopped
-
-  migrate:
-    build:
-      context: .
-      dockerfile: tools/DbSetup/Dockerfile
-    command:
-      - "Server=sqlserver;Database=PortalFinanceiro;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True"
-      - "--scripts=/app/scripts/sqlserver"
-    depends_on:
-      sqlserver:
-        condition: service_healthy
-    restart: "no"
 
   api:
     build:
@@ -34,11 +23,12 @@ services:
       dockerfile: Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=PortalFinanceiro;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True"
+      Database__Provider: "Postgres"
+      ConnectionStrings__DefaultConnection: "Host=db;Database=${POSTGRES_DB:-portal_financeiro};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-portal}"
       Auth__Secret: "${JWT_SECRET}"
     depends_on:
-      migrate:
-        condition: service_completed_successfully
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   web:
@@ -51,4 +41,4 @@ services:
     restart: unless-stopped
 
 volumes:
-  sqlserver-data:
+  pg-data:
